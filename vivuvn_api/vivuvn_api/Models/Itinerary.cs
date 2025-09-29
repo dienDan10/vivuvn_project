@@ -1,0 +1,32 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace vivuvn_api.Models
+{
+    public class Itinerary
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
+        public User User { get; set; } = null!;
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+        public string? StartLocation { get; set; }
+        public string? Destination { get; set; }
+
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int DaysCount { get; set; }
+
+        public bool DeleteFlag { get; set; }
+
+        public string? TransportationVehicle { get; set; }
+
+        // Navigation
+        public ICollection<ItineraryDay> Days { get; set; } = new List<ItineraryDay>();
+        public Budget? Budget { get; set; }
+        public ICollection<FavoritePlace> FavoritePlaces { get; set; } = new List<FavoritePlace>();
+    }
+}
