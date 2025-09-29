@@ -1,0 +1,142 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vivuvn-ai-service"
+version = "0.1.0"
+description = "AI-powered travel itinerary generator for Vietnam destinations - Standalone service with Pinecone Serverless"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "ViVu Vietnam Team"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: FastAPI",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+dependencies = [
+    "fastapi>=0.117.1",
+    "uvicorn[standard]>=0.35.0",
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.10.1",
+    "langchain>=0.3.27",
+    "langchain-google-genai>=2.0.9",
+    "langgraph>=0.6.5",
+    "google-genai>=1.38.0",
+    "sentence-transformers>=5.1.0",
+    "pinecone[grpc]>=6.0.1",
+    "python-dotenv>=1.1.1",
+    "httpx>=0.28.1",
+    "python-dateutil>=2.9.0.post0",
+    "pytz>=2025.2",
+    "structlog>=24.2.0",
+    "pandas>=2.3.1",
+    "numpy>=2.3.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.5.5",
+    "pytest-asyncio>=0.25.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.14.1",
+    "black>=25.9.0",
+    "isort>=5.13.2",
+    "flake8>=7.0.0",
+    "pre-commit>=3.6.0",
+    "ipython>=8.20.0",
+    "jupyter>=1.0.0",
+]
+extras = [
+    "python-multipart>=0.0.17",
+    "python-jose[cryptography]>=3.4.0",
+    "passlib[bcrypt]>=1.7.4",
+    "langchain-pinecone>=0.4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/vivuvn/vivuvn_ai_service"
+Repository = "https://github.com/vivuvn/vivuvn_ai_service"
+Documentation = "https://github.com/vivuvn/vivuvn_ai_service#readme"
+Issues = "https://github.com/vivuvn/vivuvn_ai_service/issues"
+
+[project.scripts]
+vivuvn-serve = "app.main:main"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["app"]
+
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "pinecone.*",
+    "sentence_transformers.*",
+    "google.genai.*",
+    "langchain.*",
+    "langgraph.*",
+    "structlog.*",
+    "pandas.*",
+    "numpy.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--asyncio-mode=auto",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "pinecone: marks tests that require Pinecone API",
+    "ai: marks tests that require AI services",
+]
