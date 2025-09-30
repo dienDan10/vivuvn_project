@@ -7,6 +7,7 @@ import '../../screens/home_screen.dart';
 import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
 import '../../screens/profile_screen.dart';
+import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
 import '../../screens/search_screen.dart';
 import 'routes.dart';
@@ -21,9 +22,12 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
     routes: <RouteBase>[
       GoRoute(
         path: loginRoute,
-        builder: (final context, final state) {
-          return const LoginScreen();
-        },
+        builder: (final context, final state) => const LoginScreen(),
+      ),
+
+      GoRoute(
+        path: registerRoute,
+        builder: (final context, final state) => const RegisterScreen(),
       ),
 
       // Route with Bottom Navigation

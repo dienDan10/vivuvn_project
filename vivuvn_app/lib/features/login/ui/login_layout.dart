@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import 'widgets/btn_social_login.dart';
+import '../../../core/routes/routes.dart';
+import 'widgets/btn_google_login.dart';
 import 'widgets/login_form.dart';
 
 class LoginLayout extends StatelessWidget {
@@ -24,7 +26,7 @@ class LoginLayout extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 35,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ),
@@ -35,7 +37,7 @@ class LoginLayout extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ),
@@ -48,18 +50,13 @@ class LoginLayout extends StatelessWidget {
                   '- Or sign in with -',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: Theme.of(context).colorScheme.secondary,
                   ),
                 ),
 
                 // Social Login Buttons
                 const SizedBox(height: 30),
-                ButtonSocialLogin(
-                  imagePath: 'assets/images/google.svg',
-                  onPressed: () {
-                    // Handle Google login
-                  },
-                ),
+                const ButtonGoogleLogin(),
                 const SizedBox(height: 80),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -72,7 +69,9 @@ class LoginLayout extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        context.push(registerRoute);
+                      },
                       child: Text(
                         'Sign Up',
                         style: TextStyle(
