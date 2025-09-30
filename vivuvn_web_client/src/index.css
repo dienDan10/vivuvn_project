@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* CSS FOR ADMIN SIDE NAVIGATOR */
+
+.ant-menu .ant-menu-submenu-title {
+  color: #f3f6fc !important;
+  background-color: oklch(21% 0.034 264.665);
+}
+
+/* .ant-menu .ant-menu-submenu-selected .ant-menu-submenu-title {
+  color: #13243e !important;
+  background-color: #f3f6fc !important;
+} */
+
+.ant-menu-item {
+  color: #f3f6fc !important;
+  background-color: oklch(21% 0.034 264.665);
+}
+
+.ant-menu-item:hover {
+  color: #13243e !important;
+  background-color: #f3f6fc !important;
+}
+
+.ant-menu-item-selected {
+  color: #13243e !important;
+  background-color: #f3f6fc !important;
+}
