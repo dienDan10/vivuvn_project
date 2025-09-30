@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_screen.dart';
+import '../../screens/login_screen.dart';
 import '../../screens/profile_screen.dart';
 import '../../screens/route_error_screen.dart';
 import '../../screens/search_screen.dart';
@@ -12,7 +13,7 @@ import 'routes.dart';
 
 final goRouterProvider = Provider<GoRouter>((final ref) {
   return GoRouter(
-    initialLocation: homeRoute,
+    initialLocation: loginRoute,
     errorBuilder: (final context, final state) => RouteErrorScreen(
       error: state.error.toString(),
       path: state.uri.toString(),
@@ -21,7 +22,7 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
       GoRoute(
         path: loginRoute,
         builder: (final context, final state) {
-          return const Scaffold(body: Center(child: Text('Login Page')));
+          return const LoginScreen();
         },
       ),
 
