@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../common/auth/auth_controller.dart';
+import '../../common/auth/auth_state.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_screen.dart';
@@ -10,6 +12,7 @@ import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
 import '../../screens/search_screen.dart';
+import 'go_router_notifier.dart';
 import 'routes.dart';
 
 final goRouterProvider = Provider<GoRouter>((final ref) {
@@ -19,6 +22,38 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
       error: state.error.toString(),
       path: state.uri.toString(),
     ),
+    refreshListenable: GoRouterNotifier(ref),
+    redirect: (final context, final state) {
+      final location = state.fullPath;
+      final authStatus = ref.read(
+        authControllerProvider.select((final state) => state.status),
+      );
+
+      // Show splash screen while checking auth status
+      // if (authStatus == AuthStatus.unknown) {
+      //   return location == '/splash' ? null : '/splash';
+      // }
+
+      // If unauthenticated, redirect to login (except if already on login/signup)
+      if (authStatus == AuthStatus.unauthenticated) {
+        if (location == loginRoute || location == registerRoute) {
+          return null; // Stay on current auth-related screen
+        }
+        return loginRoute;
+      }
+
+      // If authenticated, redirect away from auth screens to home
+      if (authStatus == AuthStatus.authenticated) {
+        if (location == loginRoute ||
+            location == registerRoute ||
+            location == '/splash') {
+          return homeRoute;
+        }
+        return null; // Stay on current authenticated screen
+      }
+
+      return null;
+    },
     routes: <RouteBase>[
       GoRoute(
         path: loginRoute,
@@ -50,16 +85,6 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
             ],
           ),
 
-          // Search Branch
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: searchRoute,
-                builder: (final context, final state) => const SearchScreen(),
-              ),
-            ],
-          ),
-
           // Itinerary Branch
           StatefulShellBranch(
             routes: <RouteBase>[
@@ -71,6 +96,15 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
             ],
           ),
 
+          // Search Branch
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: searchRoute,
+                builder: (final context, final state) => const SearchScreen(),
+              ),
+            ],
+          ),
           // Profile Branch
           StatefulShellBranch(
             routes: <RouteBase>[
