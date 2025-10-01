@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using vivuvn_api.Data;
 using vivuvn_api.DTOs.Request;
@@ -12,33 +11,33 @@ namespace vivuvn_api.Services.Implementations
 {
     public class AuthService(AppDbContext _context, IConfiguration _configuration, ITokenService _tokenService) : IAuthService
     {
-        public async Task<Result<TokenResponseDto>> LoginAsync(LoginRequestDto request)
+        public async Task<TokenResponseDto> LoginAsync(LoginRequestDto request)
         {
             var user = await _context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            if (user == null) return Result.Fail("Email or Password is incorrect");
+            if (user == null) throw new BadHttpRequestException("User not found");
 
             var passwordVerificationResult = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password);
 
-            if (passwordVerificationResult == PasswordVerificationResult.Failed) return Result.Fail("Email or Password is incorrect");
+            if (passwordVerificationResult == PasswordVerificationResult.Failed) throw new BadHttpRequestException("Email or Password incorrect");
 
             // Check if user is locked
-            if (user.IsLock) return Result.Fail("User is locked");
+            if (user.IsLock) throw new BadHttpRequestException("This account is locked");
 
             // Check if email is verified
-            if (!user.IsEmailVerified) return Result.Fail("Email is not verified");
+            if (!user.IsEmailVerified) throw new BadHttpRequestException("Email has not been verified");
 
             return await CreateTokenResponse(user);
         }
 
-        public async Task<Result<User>> RegisterAsync(RegisterRequestDto request)
+        public async Task<User> RegisterAsync(RegisterRequestDto request)
         {
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
-                return Result.Fail("Email is already in use");
+                throw new BadHttpRequestException("Email is already in use");
             }
 
             var user = new User
@@ -59,7 +58,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (travelerRole == null)
             {
-                return Result.Fail("Register failed.");
+                throw new Exception("An unexpected error has occurred");
             }
 
             user.UserRoles = new List<UserRole> { new UserRole { RoleId = travelerRole.Id } };
@@ -73,11 +72,11 @@ namespace vivuvn_api.Services.Implementations
             return user;
         }
 
-        public async Task<Result<TokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request)
+        public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
             var user = await ValidateRefreshTokenAsync(request.RefreshToken);
 
-            if (user == null) return Result.Fail("Invalid refresh token");
+            if (user == null) throw new BadHttpRequestException("Invalid refresh token");
 
             return await CreateTokenResponse(user);
         }

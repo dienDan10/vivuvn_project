@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using sib_api_v3_sdk.Client;
 using vivuvn_api.Data;
 using vivuvn_api.Data.DbInitializer;
+using vivuvn_api.Exceptions;
+using vivuvn_api.Filters;
 using vivuvn_api.Helpers;
 using vivuvn_api.Mappings;
 using vivuvn_api.Services.Implementations;
@@ -12,8 +15,23 @@ using vivuvn_api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Exception Handlers
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+// Add custom validation filter
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true; // Disable default model state validation
+});
+
 // Add services to the container.
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
@@ -79,6 +97,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowClientWebsite");
+app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
