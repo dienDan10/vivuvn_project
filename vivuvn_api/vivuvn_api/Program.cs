@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
+using sib_api_v3_sdk.Client;
 using vivuvn_api.Data;
 using vivuvn_api.Data.DbInitializer;
+using vivuvn_api.Helpers;
 using vivuvn_api.Mappings;
 using vivuvn_api.Services.Implementations;
 using vivuvn_api.Services.Interfaces;
@@ -31,8 +35,33 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add JWT authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"] ?? "default_secret_key")),
+    };
+});
+
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
+
+// configure Brevo API client
+Configuration.Default.ApiKey.Add("api-key", builder.Configuration["BrevoApi:ApiKey"]);
+
+// Configure strongly typed settings objects
+builder.Services.Configure<BrevoSettings>(builder.Configuration.GetSection("BrevoApi"));
 
 // Declare Dependency Injections
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
