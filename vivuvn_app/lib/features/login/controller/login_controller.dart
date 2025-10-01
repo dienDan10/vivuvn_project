@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/auth/auth_controller.dart';
 import '../../../core/data/local/secure_storage/secure_storage_provider.dart';
+import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../core/data/remote/token/token_const.dart';
 import '../data/dto/login_request.dart';
 import '../service/login_service.dart';
@@ -41,9 +42,7 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
       // set authenticated state
       ref.read(authControllerProvider.notifier).setAuthenticated();
     } on DioException catch (e) {
-      final String errorMessage =
-          e.response?.data['errors'][0] ?? 'An error occurred';
-      state = state.copyWith(error: errorMessage);
+      state = state.copyWith(error: DioExceptionHandler.handleException(e));
     } finally {
       state = state.copyWith(isLoading: false);
     }

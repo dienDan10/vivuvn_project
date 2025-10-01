@@ -9,7 +9,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class AuthService(AppDbContext _context, IConfiguration _configuration, ITokenService _tokenService) : IAuthService
+    public class AuthService(AppDbContext _context, ITokenService _tokenService) : IAuthService
     {
         public async Task<TokenResponseDto> LoginAsync(LoginRequestDto request)
         {

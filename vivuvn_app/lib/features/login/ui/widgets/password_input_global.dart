@@ -4,12 +4,14 @@ class PasswordInputGlobal extends StatefulWidget {
   final String hintText;
   final TextInputType keyboardType;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
 
   const PasswordInputGlobal({
     super.key,
     required this.hintText,
     required this.keyboardType,
     required this.controller,
+    this.validator,
   });
 
   @override
@@ -55,6 +57,7 @@ class _PasswordInputGlobalState extends State<PasswordInputGlobal> {
                 : const Icon(Icons.visibility_off),
           ),
         ),
+        validator: widget.validator,
       ),
     );
   }

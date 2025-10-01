@@ -1,6 +1,9 @@
+import 'package:cherry_toast/cherry_toast.dart';
+import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../common/validator/validator.dart';
 import '../../controller/login_controller.dart';
 import 'btn_submit.dart';
 import 'password_input_global.dart';
@@ -54,9 +57,13 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       final next,
     ) {
       if (next != null && next.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next), backgroundColor: Colors.red),
-        );
+        // show toast error message
+        CherryToast.error(
+          title: const Text('Login Failed'),
+          displayCloseButton: true,
+          description: Text(next),
+          toastPosition: Position.top,
+        ).show(context);
       }
     });
   }
@@ -73,6 +80,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             hintText: 'Email',
             keyboardType: TextInputType.emailAddress,
             controller: _emailController,
+            validator: (final value) => Validator.validateEmail(value),
           ),
 
           const SizedBox(height: 24),
@@ -82,6 +90,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             hintText: 'Password',
             keyboardType: TextInputType.text,
             controller: _passwordController,
+            validator: (final value) => Validator.validatePassword(value),
           ),
           const SizedBox(height: 24),
 

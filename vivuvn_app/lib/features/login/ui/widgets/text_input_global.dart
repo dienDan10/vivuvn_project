@@ -5,6 +5,7 @@ class TextInputGlobal extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
 
   const TextInputGlobal({
     super.key,
@@ -12,6 +13,7 @@ class TextInputGlobal extends StatelessWidget {
     required this.keyboardType,
     required this.controller,
     this.obscureText = false,
+    this.validator,
   });
 
   @override
@@ -39,6 +41,7 @@ class TextInputGlobal extends StatelessWidget {
           hintText: hintText,
           contentPadding: const EdgeInsets.all(0),
         ),
+        validator: validator,
       ),
     );
   }
