@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/routes/routes.dart';
+import '../common/auth/auth_controller.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  void _logout(final WidgetRef ref) {
+    ref.read(authControllerProvider.notifier).logout();
+  }
+
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -16,9 +20,9 @@ class HomeScreen extends StatelessWidget {
               const Text('Home Screen'),
               ElevatedButton(
                 onPressed: () {
-                  context.go(loginRoute);
+                  _logout(ref);
                 },
-                child: const Text('Go to Login'),
+                child: const Text('Logout'),
               ),
             ],
           ),
