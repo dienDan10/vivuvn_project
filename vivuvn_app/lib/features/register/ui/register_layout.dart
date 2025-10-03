@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../l10n/app_localizations.dart';
 import 'widgets/register_form.dart';
 
 class RegisterLayout extends StatelessWidget {
@@ -19,30 +18,19 @@ class RegisterLayout extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 50),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/intro/logo1.png',
-                      height: 60,
-                      width: 60,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      AppLocalizations.of(context)!.appTitle,
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'Logo',
+                  style: TextStyle(
+                    fontSize: 35,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
               Container(
-                alignment: Alignment.center,
+                alignment: Alignment.topLeft,
                 child: Text(
-                  AppLocalizations.of(context)!.registerTitle,
+                  'Create your Account',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,
@@ -60,7 +48,7 @@ class RegisterLayout extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    AppLocalizations.of(context)!.registerAlreadyAccount,
+                    'Already have an account? ',
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -71,7 +59,7 @@ class RegisterLayout extends StatelessWidget {
                       context.pop();
                     },
                     child: Text(
-                      AppLocalizations.of(context)!.registerSignIn,
+                      'Sign In',
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).colorScheme.primary,

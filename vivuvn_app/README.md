@@ -14,19 +14,3 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
-
-# Sau khi clone dự án, chạy:
-flutter clean
-flutter pub get
-flutter gen-l10n
-
-# image app
-flutter pub run flutter_launcher_icons
-
-# doi ten app
-dart pub global activate rename
-rename setAppName --value "VivuVN"
-
-
-
-

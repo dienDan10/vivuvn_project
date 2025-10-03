@@ -11,11 +11,14 @@ class ButtonSubmit extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final isLoading =
-    ref.watch(loginControllerProvider.select((final s) => s.isLoading));
+    final isLoading = ref.watch(
+      loginControllerProvider.select((final state) => state.isLoading),
+    );
 
     return InkWell(
       onTap: isLoading ? null : onPressed,
+
+      // Handle button tap
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         decoration: BoxDecoration(
@@ -25,7 +28,7 @@ class ButtonSubmit extends ConsumerWidget {
           borderRadius: BorderRadius.circular(6),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -34,21 +37,21 @@ class ButtonSubmit extends ConsumerWidget {
         child: Center(
           child: isLoading
               ? SizedBox(
-            height: 24,
-            width: 24,
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-          )
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                )
               : Text(
-            text,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+                  text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
       ),
     );

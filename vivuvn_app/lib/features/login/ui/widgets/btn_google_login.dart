@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../l10n/app_localizations.dart';
-
 class ButtonGoogleLogin extends StatelessWidget {
   const ButtonGoogleLogin({super.key});
 
@@ -11,14 +9,13 @@ class ButtonGoogleLogin extends StatelessWidget {
     return InkWell(
       onTap: () {},
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: Theme.of(context).colorScheme.onPrimary,
           borderRadius: BorderRadius.circular(6),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 7,
             ),
           ],
@@ -28,9 +25,9 @@ class ButtonGoogleLogin extends StatelessWidget {
           children: [
             SvgPicture.asset('assets/images/google.svg', width: 25),
             Text(
-              AppLocalizations.of(context)!.loginGoogle,
+              'Continue with Google',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
+                color: Theme.of(context).colorScheme.secondary,
                 fontWeight: FontWeight.w600,
               ),
             ),

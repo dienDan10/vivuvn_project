@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../../../login/ui/widgets/btn_submit.dart';
 import '../../../login/ui/widgets/password_input_global.dart';
 import '../../../login/ui/widgets/text_input_global.dart';
@@ -37,7 +36,7 @@ class _RegisterFormState extends State<RegisterForm> {
         children: [
           // Email field
           TextInputGlobal(
-            hintText: AppLocalizations.of(context)!.registerUsername,
+            hintText: 'Username',
             keyboardType: TextInputType.text,
             controller: _usernameController,
           ),
@@ -55,7 +54,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
           // Password field
           PasswordInputGlobal(
-            hintText: AppLocalizations.of(context)!.registerPassword,
+            hintText: 'Password',
             keyboardType: TextInputType.text,
             controller: _passwordController,
           ),
@@ -63,14 +62,14 @@ class _RegisterFormState extends State<RegisterForm> {
 
           // Confirm Password field
           PasswordInputGlobal(
-            hintText: AppLocalizations.of(context)!.registerConfirmPassword,
+            hintText: 'Confirm Password',
             keyboardType: TextInputType.text,
             controller: _confirmPasswordController,
           ),
           const SizedBox(height: 24),
 
           // Submit button
-          ButtonSubmit(text: AppLocalizations.of(context)!.registerSubmit, onPressed: () {}),
+          ButtonSubmit(text: 'Sign up', onPressed: () {}),
         ],
       ),
     );

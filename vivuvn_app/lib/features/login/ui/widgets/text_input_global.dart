@@ -21,11 +21,12 @@ class TextInputGlobal extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(6),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).shadowColor.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
+            //spreadRadius: 2,
             blurRadius: 10.0,
           ),
         ],

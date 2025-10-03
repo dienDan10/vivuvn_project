@@ -26,11 +26,12 @@ class _PasswordInputGlobalState extends State<PasswordInputGlobal> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(6),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).shadowColor.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
+            //spreadRadius: 2,
             blurRadius: 10.0,
           ),
         ],
@@ -47,13 +48,13 @@ class _PasswordInputGlobalState extends State<PasswordInputGlobal> {
           suffixIcon: GestureDetector(
             onTap: () {
               setState(() {
+                // Toggle password visibility
                 _isPasswordVisible = !_isPasswordVisible;
               });
             },
-            child: Icon(
-              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
+            child: _isPasswordVisible
+                ? const Icon(Icons.visibility)
+                : const Icon(Icons.visibility_off),
           ),
         ),
         validator: widget.validator,
