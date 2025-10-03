@@ -14,18 +14,18 @@ namespace vivuvn_api.Models
         public Province? Province { get; set; }
 
         public string? Description { get; set; }
+        public string? BannerPhoto { get; set; }
 
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public string? Address { get; set; }
 
         public double? Rating { get; set; }
-        public int? RatingCount { get; set; }
+        public int ReviewCount { get; set; }
 
-        public string? GooglePlaceId { get; set; }
-        public string? PlaceUri { get; set; }
-        public string? DirectionsUri { get; set; }
-        public string? ReviewUri { get; set; }
+        public string? MapPlaceId { get; set; }
+        public string? OpenTime { get; set; }
+        public string? CloseTime { get; set; }
         public string? WebsiteUri { get; set; }
 
         public bool DeleteFlag { get; set; }
