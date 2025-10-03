@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../common/validator/validator.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../controller/login_controller.dart';
 import 'btn_submit.dart';
 import 'password_input_global.dart';
@@ -36,66 +37,36 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   }
 
   void _submitForm() async {
-    // remove keyboard
     FocusScope.of(context).unfocus();
-
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     ref
         .read(loginControllerProvider.notifier)
         .updateLoginData(_emailController.text, _passwordController.text);
-
     await ref.read(loginControllerProvider.notifier).login();
-  }
-
-  // Handle Error State
-  void _listener() {
-    ref.listen(loginControllerProvider.select((final state) => state.error), (
-      final previous,
-      final next,
-    ) {
-      if (next != null && next.isNotEmpty) {
-        // show toast error message
-        CherryToast.error(
-          title: const Text('Login Failed'),
-          displayCloseButton: true,
-          description: Text(next),
-          toastPosition: Position.top,
-        ).show(context);
-      }
-    });
   }
 
   @override
   Widget build(final BuildContext context) {
-    _listener();
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          // Email field
           TextInputGlobal(
             hintText: 'Email',
             keyboardType: TextInputType.emailAddress,
             controller: _emailController,
             validator: (final value) => Validator.validateEmail(value),
           ),
-
           const SizedBox(height: 24),
-
-          // Password field
           PasswordInputGlobal(
-            hintText: 'Password',
+            hintText: AppLocalizations.of(context)!.loginPassword,
             keyboardType: TextInputType.text,
             controller: _passwordController,
             validator: (final value) => Validator.validatePassword(value),
           ),
           const SizedBox(height: 24),
-
-          // Submit button
-          ButtonSubmit(text: 'Sign In', onPressed: _submitForm),
+          ButtonSubmit(text: AppLocalizations.of(context)!.loginSubmit, onPressed: _submitForm),
         ],
       ),
     );

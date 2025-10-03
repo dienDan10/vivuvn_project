@@ -1,0 +1,28 @@
+{
+  "@@locale": "en",
+  "appTitle": "VivuVN",
+  "hello": "Hello",
+  "welcome": "Welcome to VivuVN",
+  "introHello": "Hello,\nI am VivuVN",
+  "introSlogan": "No.1 Travel App in Vietnam",
+  "introEditorChoice": "Editor's Choice on Google Play Store",
+  "introTripsPlanned": "Over 8,000,000+ trips planned",
+  "introContinue": "Continue",
+  "introDestinations": "Hà Nội   Đà Nẵng   TP.HCM   Huế   Nha Trang   Phú Quốc   Sapa",
+
+  "loginTitle": "Login to your Account",
+  "loginOr": "- Or sign in with -",
+  "loginNoAccount": "Don't have an account? ",
+  "loginSignUp": "Sign Up",
+  "loginPassword": "Password",
+  "loginSubmit": "Sign In",
+  "loginGoogle": "Continue with Google",
+
+  "registerTitle": "Create your Account",
+  "registerUsername": "Username",
+  "registerPassword": "Password",
+  "registerConfirmPassword": "Confirm Password",
+  "registerSubmit": "Sign Up",
+  "registerAlreadyAccount": "Already have an account? ",
+  "registerSignIn": "Sign In"
+}

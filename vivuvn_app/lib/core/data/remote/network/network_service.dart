@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'network_service_interceptor.dart';
 
 final networkServiceProvider = Provider<Dio>((final ref) {
-  const String baseUrl = 'http://10.0.2.2:5277';
+  const String baseUrl = 'http://192.168.1.5:5026';
 
   final options = BaseOptions(
     baseUrl: baseUrl,

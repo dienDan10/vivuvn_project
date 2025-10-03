@@ -6,6 +6,7 @@ import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
+import '../../screens/intro/intro_screen.dart';
 import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
 import '../../screens/profile_screen.dart';
@@ -15,104 +16,70 @@ import '../../screens/search_screen.dart';
 import 'go_router_notifier.dart';
 import 'routes.dart';
 
-final goRouterProvider = Provider<GoRouter>((final ref) {
+final goRouterProvider = Provider<GoRouter>((ref) {
+  final asyncSeenIntro = ref.watch(seenIntroProvider);
+
+  // Nếu chưa load xong seenIntro -> show tạm Intro
+  final initialLoc = asyncSeenIntro.valueOrNull == true ? homeRoute : introRoute;
+
   return GoRouter(
-    initialLocation: loginRoute,
-    errorBuilder: (final context, final state) => RouteErrorScreen(
+    initialLocation: initialLoc,
+    errorBuilder: (context, state) => RouteErrorScreen(
       error: state.error.toString(),
       path: state.uri.toString(),
     ),
-    refreshListenable: GoRouterNotifier(ref),
-    redirect: (final context, final state) {
+    redirect: (context, state) {
+      // --- Check auth logic ---
       final location = state.fullPath;
       final authStatus = ref.read(
-        authControllerProvider.select((final state) => state.status),
+        authControllerProvider.select((state) => state.status),
       );
 
-      // Show splash screen while checking auth status
-      // if (authStatus == AuthStatus.unknown) {
-      //   return location == '/splash' ? null : '/splash';
-      // }
-
-      // If unauthenticated, redirect to login (except if already on login/signup)
       if (authStatus == AuthStatus.unauthenticated) {
         if (location == loginRoute || location == registerRoute) {
-          return null; // Stay on current auth-related screen
+          return null;
         }
         return loginRoute;
       }
 
-      // If authenticated, redirect away from auth screens to home
       if (authStatus == AuthStatus.authenticated) {
         if (location == loginRoute ||
             location == registerRoute ||
             location == '/splash') {
           return homeRoute;
         }
-        return null; // Stay on current authenticated screen
       }
 
       return null;
     },
     routes: <RouteBase>[
       GoRoute(
-        path: loginRoute,
-        builder: (final context, final state) => const LoginScreen(),
+        path: introRoute,
+        builder: (context, state) => const IntroScreen(),
       ),
-
+      GoRoute(
+        path: loginRoute,
+        builder: (context, state) => const LoginScreen(),
+      ),
       GoRoute(
         path: registerRoute,
-        builder: (final context, final state) => const RegisterScreen(),
+        builder: (context, state) => const RegisterScreen(),
       ),
-
-      // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
-        builder:
-            (
-              final BuildContext context,
-              final GoRouterState state,
-              final StatefulNavigationShell navigationShell,
-            ) => BottomNavigationScreen(navigationShell: navigationShell),
-
-        branches: <StatefulShellBranch>[
-          // Home Branch
+        builder: (context, state, navigationShell) =>
+            BottomNavigationScreen(navigationShell: navigationShell),
+        branches: [
           StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: homeRoute,
-                builder: (final context, final state) => const HomeScreen(),
-              ),
-            ],
+            routes: [GoRoute(path: homeRoute, builder: (_, __) => const HomeScreen())],
           ),
-
-          // Itinerary Branch
           StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: itineraryRoute,
-                builder: (final context, final state) =>
-                    const ItineraryScreen(),
-              ),
-            ],
+            routes: [GoRoute(path: itineraryRoute, builder: (_, __) => const ItineraryScreen())],
           ),
-
-          // Search Branch
           StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: searchRoute,
-                builder: (final context, final state) => const SearchScreen(),
-              ),
-            ],
+            routes: [GoRoute(path: searchRoute, builder: (_, __) => const SearchScreen())],
           ),
-          // Profile Branch
           StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: profileRoute,
-                builder: (final context, final state) => const ProfileScreen(),
-              ),
-            ],
+            routes: [GoRoute(path: profileRoute, builder: (_, __) => const ProfileScreen())],
           ),
         ],
       ),
