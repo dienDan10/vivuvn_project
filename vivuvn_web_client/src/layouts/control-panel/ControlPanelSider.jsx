@@ -2,42 +2,38 @@ import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import {
 	MdAccountCircle,
-	MdChair,
-	MdFastfood,
 	MdOutlineDiscount,
-	MdOutlinePlaylistAddCheckCircle,
 	MdSpaceDashboard,
+	MdHotel,
+	MdFlight,
+	MdDirectionsCar,
 } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { ROLE_ADMIN, ROLE_OPERATOR } from "../../utils/constant";
-import { FaLocationDot, FaTicket } from "react-icons/fa6";
-import { RiMovie2AiFill } from "react-icons/ri";
-import { GiTheater } from "react-icons/gi";
+import {
+	FaLocationDot,
+	FaMapLocationDot,
+	FaRoute,
+	FaTicket,
+} from "react-icons/fa6";
+import { BiTrip } from "react-icons/bi";
 
 function ControlPanelSider({ collapsed }) {
 	const location = useLocation();
 	const { user } = useSelector((state) => state.user);
 	const { pathname } = location;
-
-	const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
-	const isOperator = user?.role !== null && user.role === ROLE_OPERATOR;
+	console.log("User:", user);
+	const isAdmin = user?.roles !== null && user.roles.includes(ROLE_ADMIN);
+	const isOperator = user?.roles !== null && user.roles.includes(ROLE_OPERATOR);
 
 	const calcSelectedKey = () => {
-		if (pathname.includes("revenue")) return "1";
-		if (pathname.includes("managers")) return "managers";
-		if (pathname.includes("employees")) return "employees";
-		if (pathname.includes("customers")) return "customers";
-		if (pathname.includes("provinces")) return "5";
-		if (pathname.includes("theaters")) return "6";
-		if (pathname.includes("screens")) return "7";
-		if (pathname.includes("seats")) return "8";
-		if (pathname.includes("movies")) return "9";
-		if (pathname.includes("showtimes")) return "10";
-		if (pathname.includes("concessions")) return "11";
-		if (pathname.includes("checkin")) return "12";
-		if (pathname.includes("booking")) return "13";
-		if (pathname.includes("promotions")) return "14";
+		if (pathname.includes("dashboard")) return "1";
+		if (pathname.includes("operators")) return "operators";
+		if (pathname.includes("travelers")) return "travelers";
+		if (pathname.includes("destinations")) return "5";
+		if (pathname.includes("itineraries")) return "6";
+		if (pathname.includes("provinces")) return "7";
 	};
 
 	const selectedKey = calcSelectedKey();
@@ -50,7 +46,7 @@ function ControlPanelSider({ collapsed }) {
 			className="h-screen sticky! top-0 left-0 bottom-0 bg-gray-900"
 		>
 			<div className="h-16 text-gray-50 font-bold tracking-wider text-2xl flex items-center justify-center mb-2">
-				{collapsed ? "🍿" : "CINEMAX"}
+				{collapsed ? "✈️" : "VIVUVN"}
 			</div>
 			<Menu
 				className="bg-gray-900! text-white tracking-wide space-y-2"
@@ -60,7 +56,7 @@ function ControlPanelSider({ collapsed }) {
 					(isAdmin || isOperator) && {
 						key: "1",
 						icon: <MdSpaceDashboard />,
-						label: <Link to="revenue">Revenue</Link>,
+						label: <Link to="dashboard">Dashboard</Link>,
 					},
 					isAdmin && {
 						key: "2",
@@ -68,58 +64,29 @@ function ControlPanelSider({ collapsed }) {
 						label: <p>Users</p>,
 						children: [
 							{
-								key: "managers",
-								label: <Link to="managers">Managers</Link>,
+								key: "operators",
+								label: <Link to="operators">Operators</Link>,
 							},
 							{
-								key: "employees",
-								label: <Link to="employees">Employees</Link>,
-							},
-							{
-								key: "customers",
-								label: <Link to="customers">Customers</Link>,
+								key: "travelers",
+								label: <Link to="travelers">Travelers</Link>,
 							},
 						],
 					},
 					isAdmin && {
 						key: "5",
-						icon: <FaLocationDot />,
-						label: <Link to="provinces">Provinces</Link>,
+						icon: <FaMapLocationDot />,
+						label: <Link to="destinations">Destinations</Link>,
 					},
 					isAdmin && {
 						key: "6",
-						icon: <RiMovie2AiFill />,
-						label: <Link to="theaters">Theaters</Link>,
+						icon: <BiTrip />,
+						label: <Link to="itineraries">Itineraries</Link>,
 					},
 					isAdmin && {
-						key: "14",
-						icon: <MdOutlineDiscount />,
-						label: <Link to="promotions">Promotions</Link>,
-					},
-					(isAdmin || isOperator) && {
 						key: "7",
-						icon: <GiTheater />,
-						label: <Link to="screens">Screens</Link>,
-					},
-					(isAdmin || isOperator) && {
-						key: "8",
-						icon: <MdChair />,
-						label: <Link to="seats">Seats</Link>,
-					},
-					isOperator && {
-						key: "9",
-						icon: <RiMovie2AiFill />,
-						label: <Link to="movies">Movies</Link>,
-					},
-					isOperator && {
-						key: "10",
-						icon: <GiTheater />,
-						label: <Link to="showtimes">ShowTimes</Link>,
-					},
-					isOperator && {
-						key: "11",
-						icon: <MdFastfood />,
-						label: <Link to="concessions">Concessions</Link>,
+						icon: <FaLocationDot />,
+						label: <Link to="provinces">Provinces</Link>,
 					},
 				]}
 			/>

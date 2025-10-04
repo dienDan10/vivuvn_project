@@ -53,16 +53,11 @@ function ControlPanelLayout() {
 					</Header>
 
 					<Content className="px-12 py-10">
-						{/* {user?.role === ROLE_ADMIN && isPending && (
-              <div className="flex justify-center items-center">
-                <span>Loading...</span>
-              </div>
-            )}
-            {user?.role === ROLE_ADMIN && !isPending && (
-              <div className="text-center text-2xl font-semibold mb-4 text-blue-900">
-                {theaters.find((t) => t.id === user.theaterId)?.name || "N/A"}
-              </div>
-            )} */}
+						{user?.roles.includes(ROLE_ADMIN) && (
+							<div className="flex justify-center items-center">
+								<span>Loading...</span>
+							</div>
+						)}
 						<RoleBaseRoute>
 							<Outlet />
 						</RoleBaseRoute>

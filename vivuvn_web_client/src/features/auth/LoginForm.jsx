@@ -29,7 +29,7 @@ function LoginForm() {
 			<div className="w-full h-[calc(100vh-4rem)] flex items-center justify-center px-2 md:px-0">
 				<div className="bg-white px-3 py-5 sm:px-10 sm:py-8 rounded-md max-w-[600px] w-full">
 					<div className="text-center mb-6 flex flex-col items-center">
-						<FaCircleUser className="text-6xl text-red-700 mb-2" />
+						<FaCircleUser className="text-6xl text-blue-700 mb-2" />
 						<h1 className="text-2xl font-semibold text-gray-800">Sign In</h1>
 						<p className="text-gray-500">
 							Welcome back! Please sign in to your account.
@@ -70,7 +70,7 @@ function LoginForm() {
 							<button
 								type="button"
 								onClick={() => form.submit()}
-								className="w-full bg-red-700 hover:cursor-pointer font-semibold text-white py-2 px-4 rounded-3xl shadow-sm hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200"
+								className="w-full bg-blue-700 hover:cursor-pointer font-semibold text-white py-2 px-4 rounded-3xl shadow-sm hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200"
 							>
 								Sign In
 							</button>

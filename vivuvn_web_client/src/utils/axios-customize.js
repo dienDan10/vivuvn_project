@@ -1,5 +1,7 @@
 import axios from "axios";
 import tokenManager from "./tokenManager";
+import store from "../store"; // Import Redux store
+import { doLoginAction } from "../redux/userSlice";
 
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -34,7 +36,7 @@ const refreshToken = async () => {
 		}
 
 		const response = await axios.post(
-			`${baseURL}/auth/refresh`,
+			`${baseURL}/v1/auth/refresh-token`,
 			{
 				refreshToken: refreshTokenValue,
 			},
@@ -43,7 +45,7 @@ const refreshToken = async () => {
 			}
 		);
 
-		const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+		const { accessToken, refreshToken: newRefreshToken } = response.data;
 
 		// Update tokens using token manager
 		tokenManager.setTokens(accessToken, newRefreshToken);
@@ -87,22 +89,13 @@ customAxios.interceptors.response.use(
 			!originalRequest._retry
 		) {
 			// Check if the request was for the user profile API or refresh endpoint
-			const isProfileRequest = error.config.url.includes("/user/profile");
-			const isRefreshRequest = error.config.url.includes("/auth/refresh");
-			const isLoginRequest = error.config.url.includes("/auth/login");
-
-			// Don't try to refresh for login or refresh requests
-			if (isLoginRequest || isRefreshRequest) {
-				return Promise.reject(error);
-			}
 
 			if (isRefreshing) {
 				// If we're already refreshing, queue this request
 				return new Promise((resolve, reject) => {
 					failedQueue.push({ resolve, reject });
 				})
-					.then((token) => {
-						originalRequest.headers["Authorization"] = `Bearer ${token}`;
+					.then(() => {
 						return customAxios(originalRequest);
 					})
 					.catch((err) => {
@@ -117,6 +110,9 @@ customAxios.interceptors.response.use(
 				const newToken = await refreshToken();
 				processQueue(null, newToken);
 
+				// Update Redux state to reflect successful authentication
+				store.dispatch(doLoginAction());
+
 				// Retry the original request with new token
 				originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
 				return customAxios(originalRequest);
@@ -124,10 +120,8 @@ customAxios.interceptors.response.use(
 				processQueue(refreshError, null);
 
 				// Only redirect to login if it's not a profile request
-				if (!isProfileRequest) {
-					console.error("Token refresh failed, redirecting to login");
-					window.location.href = "/login";
-				}
+				console.error("Token refresh failed, redirecting to login");
+				window.location.href = "/login";
 
 				return Promise.reject(refreshError);
 			} finally {
