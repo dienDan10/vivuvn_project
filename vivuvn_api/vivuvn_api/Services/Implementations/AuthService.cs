@@ -33,7 +33,7 @@ namespace vivuvn_api.Services.Implementations
             return await CreateTokenResponse(user);
         }
 
-        public async Task<User> RegisterAsync(RegisterRequestDto request)
+        public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
         {
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
@@ -69,7 +69,12 @@ namespace vivuvn_api.Services.Implementations
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            return user;
+            return new RegisterResponseDto
+            {
+                Id = user.Id.ToString(),
+                Email = user.Email,
+                Username = user.Username
+            }; 
         }
 
         public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)

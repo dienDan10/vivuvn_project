@@ -24,6 +24,7 @@
     <Folder Include="Middleware\" />
     <Folder Include="Migrations\" />
     <Folder Include="Images\" />
+    <Folder Include="images\" />
     <Folder Include="Repositories\Interfaces\" />
     <Folder Include="Repositories\Implementations\" />
   </ItemGroup>

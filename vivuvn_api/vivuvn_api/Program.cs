@@ -72,6 +72,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5277); 
+});
+
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
