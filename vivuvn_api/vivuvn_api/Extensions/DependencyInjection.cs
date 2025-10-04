@@ -24,6 +24,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<ILocationService, LocationService>();
+            services.AddScoped<IUserService, UserService>();
             return services;
         }
 

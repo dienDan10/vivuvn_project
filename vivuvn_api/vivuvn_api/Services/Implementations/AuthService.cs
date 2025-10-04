@@ -25,7 +25,7 @@ namespace vivuvn_api.Services.Implementations
             if (passwordVerificationResult == PasswordVerificationResult.Failed) throw new BadHttpRequestException("Email or Password incorrect");
 
             // Check if user is locked
-            if (user.IsLock) throw new BadHttpRequestException("This account is locked");
+            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow) throw new BadHttpRequestException("This account is locked");
 
             // Check if email is verified
             if (!user.IsEmailVerified) throw new BadHttpRequestException("Email has not been verified");

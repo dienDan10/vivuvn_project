@@ -34,7 +34,7 @@ namespace vivuvn_api.Data.DbInitializer
                     Email = "admin@gmail.com",
                     Username = "Admin Desu!",
                     IsEmailVerified = true,
-                    IsLock = false,
+                    LockoutEnd = null,
                     UserRoles = new List<UserRole>
                     {
                         new UserRole { RoleId = _context.Roles.Single(r => r.Name == Constants.Role_Admin).Id }
