@@ -6,9 +6,13 @@ const initialState = {
 	// Keep user structure for easier state management
 	user: {
 		id: null,
-		name: null,
-		email: "admin@example.com",
-		role: ROLE_ADMIN, // Mock data for easier development
+		username: null,
+		email: null,
+		userPhoto: null,
+		phoneNumber: null,
+		googleIdToken: null,
+		isLocked: false,
+		roles: [],
 	},
 };
 
@@ -19,12 +23,29 @@ export const userSlice = createSlice({
 		doLoginAction: (state) => {
 			state.isAuthenticated = true;
 		},
-		// Uncomment and use if profile data is needed in the state
-		// doGetProfileAction: (state, action) => {
-		//   const { id, displayName, email, role } = action.payload;
-		//   state.user = { id, name: displayName, email, role };
-		//   state.isAuthenticated = true;
-		// },
+		doGetProfileAction: (state, action) => {
+			const {
+				id,
+				displayName,
+				email,
+				roles,
+				userPhoto,
+				phoneNumber,
+				googleIdToken,
+				isLocked,
+			} = action.payload;
+			state.user = {
+				id,
+				name: displayName,
+				email,
+				roles,
+				userPhoto,
+				phoneNumber,
+				googleIdToken,
+				isLocked,
+			};
+			state.isAuthenticated = true;
+		},
 		doLogoutAction: (state) => {
 			state.isAuthenticated = false;
 			state.user = initialState.user; // Reset user data

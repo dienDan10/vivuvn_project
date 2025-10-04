@@ -53,11 +53,11 @@ function ControlPanelLayout() {
 					</Header>
 
 					<Content className="px-12 py-10">
-						{/* {user?.role === ROLE_ADMIN && isPending && (
+						{user?.roles.includes(ROLE_ADMIN) && (
 							<div className="flex justify-center items-center">
 								<span>Loading...</span>
 							</div>
-						)} */}
+						)}
 						<RoleBaseRoute>
 							<Outlet />
 						</RoleBaseRoute>

@@ -11,16 +11,21 @@ import {
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { ROLE_ADMIN, ROLE_OPERATOR } from "../../utils/constant";
-import { FaMapLocationDot, FaRoute, FaTicket } from "react-icons/fa6";
+import {
+	FaLocationDot,
+	FaMapLocationDot,
+	FaRoute,
+	FaTicket,
+} from "react-icons/fa6";
 import { BiTrip } from "react-icons/bi";
 
 function ControlPanelSider({ collapsed }) {
 	const location = useLocation();
 	const { user } = useSelector((state) => state.user);
 	const { pathname } = location;
-
-	const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
-	const isOperator = user?.role !== null && user.role === ROLE_OPERATOR;
+	console.log("User:", user);
+	const isAdmin = user?.roles !== null && user.roles.includes(ROLE_ADMIN);
+	const isOperator = user?.roles !== null && user.roles.includes(ROLE_OPERATOR);
 
 	const calcSelectedKey = () => {
 		if (pathname.includes("dashboard")) return "1";
@@ -28,7 +33,7 @@ function ControlPanelSider({ collapsed }) {
 		if (pathname.includes("travelers")) return "travelers";
 		if (pathname.includes("destinations")) return "5";
 		if (pathname.includes("itineraries")) return "6";
-		
+		if (pathname.includes("provinces")) return "7";
 	};
 
 	const selectedKey = calcSelectedKey();
@@ -77,6 +82,11 @@ function ControlPanelSider({ collapsed }) {
 						key: "6",
 						icon: <BiTrip />,
 						label: <Link to="itineraries">Itineraries</Link>,
+					},
+					isAdmin && {
+						key: "7",
+						icon: <FaLocationDot />,
+						label: <Link to="provinces">Provinces</Link>,
 					},
 				]}
 			/>

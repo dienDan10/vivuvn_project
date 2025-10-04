@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import {
 	createBrowserRouter,
 	RouterProvider,
@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearNotification } from "./redux/notificationSlice";
 import ProtectedRoute from "./components/ProtectedRoute";
 import useAuthPersistence from "./hooks/useAuthPersistence";
+import FetchUserProfile from "./features/auth/FetchUserProfile";
 
 const Login = lazy(() => import("./pages/Login"));
 const ControlPanelLayout = lazy(() =>
@@ -50,8 +51,8 @@ const router = createBrowserRouter([
 function App() {
 	const [api, notificationContextHolder] = notification.useNotification();
 	const notificationData = useSelector((state) => state.notification);
+	const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
 	const dispatch = useDispatch();
-	const lastNotificationId = useRef(null);
 	const { type, message, description, id } = notificationData;
 
 	// Initialize authentication state from localStorage
@@ -59,8 +60,7 @@ function App() {
 
 	// Handle notifications
 	useEffect(() => {
-		if (type && message && id != lastNotificationId.current) {
-			lastNotificationId.current = id;
+		if (type && message) {
 			api[type]({
 				message: message,
 				description: description,
@@ -74,6 +74,8 @@ function App() {
 	return (
 		<>
 			{notificationContextHolder}
+			{/* Only fetch user profile when authenticated */}
+			{isAuthenticated && <FetchUserProfile />}
 			{/* Render the router */}
 			<RouterProvider router={router} />
 		</>

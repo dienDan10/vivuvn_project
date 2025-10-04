@@ -24,8 +24,8 @@ function UserMenu() {
 		window.location.href = "/login";
 	};
 
-	const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
-	const isOperator = user?.role !== null && user.role === ROLE_OPERATOR;
+	const isAdmin = user?.roles !== null && user.roles.includes(ROLE_ADMIN);
+	const isOperator = user?.roles !== null && user.roles.includes(ROLE_OPERATOR);
 
 	const items = [
 		{
