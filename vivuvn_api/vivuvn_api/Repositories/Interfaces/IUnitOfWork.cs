@@ -1,9 +1,14 @@
 ﻿namespace vivuvn_api.Repositories.Interfaces
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
-        IUserRepository UserRepository { get; }
+        IUserRepository Users { get; }
 
-        Task SaveAsync();
+        Task SaveChangesAsync();
+
+        // Transaction support
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

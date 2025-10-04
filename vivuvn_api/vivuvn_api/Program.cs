@@ -1,17 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using sib_api_v3_sdk.Client;
-using vivuvn_api.Data;
 using vivuvn_api.Data.DbInitializer;
 using vivuvn_api.Exceptions;
+using vivuvn_api.Extensions;
 using vivuvn_api.Filters;
 using vivuvn_api.Helpers;
 using vivuvn_api.Mappings;
-using vivuvn_api.Services.Implementations;
-using vivuvn_api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,8 +34,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
 // Add DB context
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
+builder.Services.AddDatabaseContext(builder.Configuration);
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -81,13 +77,10 @@ Configuration.Default.ApiKey.Add("api-key", builder.Configuration["BrevoApi:ApiK
 // Configure strongly typed settings objects
 builder.Services.Configure<BrevoSettings>(builder.Configuration.GetSection("BrevoApi"));
 
-// Declare Dependency Injections
-builder.Services.AddScoped<IDbInitializer, DbInitializer>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddScoped<ILocationService, LocationService>();
+// Declare Services and Repositories
+builder.Services.AddServices();
+builder.Services.AddRepositories();
+builder.Services.AddUnitOfWork();
 
 var app = builder.Build();
 
