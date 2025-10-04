@@ -86,6 +86,7 @@ builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 
 var app = builder.Build();

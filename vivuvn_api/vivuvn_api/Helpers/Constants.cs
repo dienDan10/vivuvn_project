@@ -13,6 +13,10 @@
 
         // Token Configuration
         public const int EmailVerificationTokenExpirationMinutes = 5;
+        public static readonly string[] ValidImageExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+
+        // Image Configuration
+        public const int MaxImageSizeBytes = 5 * 1024 * 1024; // 5 MB
 
         // Service Types
 
