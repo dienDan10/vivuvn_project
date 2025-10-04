@@ -17,30 +17,28 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
   RegisterState build() => RegisterState();
 
   Future<bool> register() async {
+    state = state.copyWith(isLoading: true, error: null, emailError: null);
+
+    final req = RegisterRequest(
+      email: state.registerData['email'] ?? '',
+      username: state.registerData['username'] ?? '',
+      password: state.registerData['password'] ?? '',
+    );
+
     try {
-      state = state.copyWith(isLoading: true, error: null, emailError: null);
-
-      final req = RegisterRequest(
-        email: state.registerData['email'] ?? '',
-        username: state.registerData['username'] ?? '',
-        password: state.registerData['password'] ?? '',
-      );
-
       await ref.read(registerServiceProvider).register(req);
-
+      state = state.copyWith(isLoading: false);
       return true;
     } on DioException catch (e) {
       String errorMsg = 'Unknown error';
 
       if (e.response != null && e.response?.data != null) {
         var data = e.response?.data;
-
         if (data is String) {
           try {
             data = jsonDecode(data);
           } catch (_) {}
         }
-
         if (data is Map<String, dynamic>) {
           errorMsg = data['detail'] ?? data['title'] ?? errorMsg;
         } else if (data is String) {
@@ -50,19 +48,26 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
         errorMsg = e.message ?? errorMsg;
       }
 
-      // nếu là lỗi email trùng thì bind vào emailError
       if (errorMsg.contains('Email is already in use')) {
-        state = state.copyWith(emailError: errorMsg, error: null);
+        // Nếu lỗi email trùng, chỉ cập nhật emailError, giữ isLoading = false
+        state = state.copyWith(
+          emailError: errorMsg,
+          isLoading: false,
+          error: null,
+        );
       } else {
-        state = state.copyWith(error: errorMsg, emailError: null);
+        state = state.copyWith(
+          error: errorMsg,
+          emailError: null,
+          isLoading: false,
+        );
       }
 
       return false;
-    } finally {
-      state = state.copyWith(isLoading: false);
     }
   }
 
+  /// Cập nhật cả 3 trường
   void updateRegisterData(
     final String email,
     final String username,
@@ -73,6 +78,21 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
         'email': email,
         'username': username,
         'password': password,
+      },
+    );
+  }
+
+  /// Cập nhật từng trường riêng lẻ
+  void updateRegisterField({
+    final String? email,
+    final String? username,
+    final String? password,
+  }) {
+    state = state.copyWith(
+      registerData: {
+        'email': email ?? state.registerData['email'] ?? '',
+        'username': username ?? state.registerData['username'] ?? '',
+        'password': password ?? state.registerData['password'] ?? '',
       },
     );
   }

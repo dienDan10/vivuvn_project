@@ -2,7 +2,7 @@ class RegisterState {
   final bool isLoading;
   final String? error;
   final Map<String, dynamic> registerData;
-  String? emailError;
+  final String? emailError;
 
   RegisterState({
     this.isLoading = false,

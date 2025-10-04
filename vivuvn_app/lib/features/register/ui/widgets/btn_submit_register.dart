@@ -16,25 +16,19 @@ class ButtonSubmitRegister extends ConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final isLoading = ref.watch(
-      registerControllerProvider.select((final state) => state.isLoading),
+      registerControllerProvider.select((final s) => s.isLoading),
     );
+    final isDisabled = isLoading;
 
     return InkWell(
-      onTap: isLoading ? null : onPressed,
+      onTap: isDisabled ? null : onPressed,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         decoration: BoxDecoration(
-          color: isLoading
+          color: isDisabled
               ? Theme.of(context).colorScheme.secondaryContainer
               : Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(6),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Center(
           child: isLoading
