@@ -19,7 +19,7 @@ class RegisterState {
   }) {
     return RegisterState(
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: error ?? this.error,
       registerData: registerData ?? this.registerData,
       emailError: emailError ?? this.emailError,
     );

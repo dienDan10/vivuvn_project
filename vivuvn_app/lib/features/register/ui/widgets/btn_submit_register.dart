@@ -18,14 +18,13 @@ class ButtonSubmitRegister extends ConsumerWidget {
     final isLoading = ref.watch(
       registerControllerProvider.select((final s) => s.isLoading),
     );
-    final isDisabled = isLoading;
 
     return InkWell(
-      onTap: isDisabled ? null : onPressed,
+      onTap: isLoading ? null : onPressed, // chỉ disable khi đang loading
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         decoration: BoxDecoration(
-          color: isDisabled
+          color: isLoading
               ? Theme.of(context).colorScheme.secondaryContainer
               : Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(6),
@@ -36,8 +35,9 @@ class ButtonSubmitRegister extends ConsumerWidget {
                   height: 24,
                   width: 24,
                   child: CircularProgressIndicator(
+                    strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
                 )
