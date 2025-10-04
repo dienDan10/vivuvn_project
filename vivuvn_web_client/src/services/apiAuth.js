@@ -1,7 +1,7 @@
 import axios from "../utils/axios-customize";
 
 export const register = async ({ username, email, password }) => {
-	const res = await axios.post("/auth/register", {
+	const res = await axios.post("/v1/auth/register", {
 		username,
 		email,
 		password,
@@ -11,7 +11,7 @@ export const register = async ({ username, email, password }) => {
 };
 
 export const login = async ({ email, password }) => {
-	const res = await axios.post("/auth/login", {
+	const res = await axios.post("/v1/auth/login", {
 		email,
 		password,
 	});
@@ -20,7 +20,7 @@ export const login = async ({ email, password }) => {
 };
 
 export const confirmEmail = async ({ userId, token }) => {
-	const res = await axios.post("/auth/confirm-email", {
+	const res = await axios.post("/v1/auth/confirm-email", {
 		userId,
 		token,
 	});
@@ -29,7 +29,7 @@ export const confirmEmail = async ({ userId, token }) => {
 };
 
 export const forgotPassword = async ({ email }) => {
-	const res = await axios.post("/auth/forgot-password", {
+	const res = await axios.post("/v1/auth/forgot-password", {
 		email,
 	});
 
@@ -37,7 +37,7 @@ export const forgotPassword = async ({ email }) => {
 };
 
 export const resetPassword = async ({ userId, resetToken, password }) => {
-	const res = await axios.post("/auth/reset-password", {
+	const res = await axios.post("/v1/auth/reset-password", {
 		userId,
 		resetToken,
 		password,
@@ -47,7 +47,7 @@ export const resetPassword = async ({ userId, resetToken, password }) => {
 };
 
 export const changePassword = async ({ oldPassword, newPassword }) => {
-	const res = await axios.post("/auth/change-password", {
+	const res = await axios.post("/v1/auth/change-password", {
 		oldPassword,
 		newPassword,
 	});
@@ -56,13 +56,8 @@ export const changePassword = async ({ oldPassword, newPassword }) => {
 };
 
 export const refreshToken = async (refreshToken) => {
-	const res = await axios.post("/auth/refresh", {
+	const res = await axios.post("/v1/auth/refresh-token", {
 		refreshToken,
 	});
-	return res;
-};
-
-export const getUserProfile = async () => {
-	const res = await axios.get("/user/profile");
 	return res;
 };
