@@ -1,3 +1,5 @@
+const String splashRoute = '/splash';
+
 const String loginRoute = '/login';
 const String registerRoute = '/register';
 

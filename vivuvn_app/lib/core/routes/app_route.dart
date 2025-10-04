@@ -12,12 +12,13 @@ import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
 import '../../screens/search_screen.dart';
+import '../../screens/splash_screen.dart';
 import 'go_router_notifier.dart';
 import 'routes.dart';
 
 final goRouterProvider = Provider<GoRouter>((final ref) {
   return GoRouter(
-    initialLocation: loginRoute,
+    initialLocation: splashRoute,
     errorBuilder: (final context, final state) => RouteErrorScreen(
       error: state.error.toString(),
       path: state.uri.toString(),
@@ -55,6 +56,11 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
       return null;
     },
     routes: <RouteBase>[
+      GoRoute(
+        path: splashRoute,
+        builder: (final context, final state) => const SplashScreen(),
+      ),
+
       GoRoute(
         path: loginRoute,
         builder: (final context, final state) => const LoginScreen(),

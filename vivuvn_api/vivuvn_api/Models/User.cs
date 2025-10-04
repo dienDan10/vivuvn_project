@@ -28,7 +28,7 @@ namespace vivuvn_api.Models
         public string? EmailVerificationToken { get; set; }
         public DateTime? EmailVerificationTokenExpireDate { get; set; }
 
-        public bool IsLock { get; set; } = false;
+        public DateTime? LockoutEnd { get; set; }
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<Itinerary> Itineraries { get; set; } = new List<Itinerary>();

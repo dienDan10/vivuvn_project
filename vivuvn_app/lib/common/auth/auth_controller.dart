@@ -17,12 +17,24 @@ class AuthController extends AutoDisposeNotifier<AuthState> {
       // Call your API or perform your authentication check here
       final dioInstance = ref.read(networkServiceProvider);
       final tokenService = ref.read(tokenServiceProvider(dioInstance));
+
+      // get refresh token from secure storage
+      final refreshToken = await tokenService.getRefreshToken();
+
+      if (refreshToken.isEmpty) {
+        state = state.copyWith(
+          isLoading: false,
+          status: AuthStatus.unauthenticated,
+        );
+        return;
+      }
+
       final refreshTokenResponse = await tokenService.refreshAccessToken();
 
       // save new token if success
       await tokenService.storeTokens(
-        accessToken: refreshTokenResponse.data.accessToken,
-        refreshToken: refreshTokenResponse.data.refreshToken,
+        accessToken: refreshTokenResponse.accessToken,
+        refreshToken: refreshTokenResponse.refreshToken,
       );
 
       // If successful, update the state accordingly

@@ -48,8 +48,8 @@ class NetworkServiceInterceptor extends Interceptor {
       final RefreshTokenResponse response = await _tokenService
           .refreshAccessToken();
 
-      final newAccessToken = response.data.accessToken;
-      final newRefreshToken = response.data.refreshToken;
+      final newAccessToken = response.accessToken;
+      final newRefreshToken = response.refreshToken;
 
       await _tokenService.storeTokens(
         accessToken: newAccessToken,
