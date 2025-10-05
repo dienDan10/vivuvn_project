@@ -298,16 +298,16 @@ namespace vivuvn_api.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BannerPhoto")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CloseTime")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("DeleteFlag")
                         .HasColumnType("bit");
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DirectionsUri")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GooglePlaceId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("Latitude")
@@ -316,14 +316,11 @@ namespace vivuvn_api.Migrations
                     b.Property<double?>("Longitude")
                         .HasColumnType("float");
 
-                    b.Property<string>("MapPlaceId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OpenTime")
+                    b.Property<string>("PlaceUri")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProvinceId")
@@ -332,8 +329,11 @@ namespace vivuvn_api.Migrations
                     b.Property<double?>("Rating")
                         .HasColumnType("float");
 
-                    b.Property<int>("ReviewCount")
+                    b.Property<int?>("RatingCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("ReviewUri")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WebsiteUri")
                         .HasColumnType("nvarchar(max)");
@@ -421,7 +421,6 @@ namespace vivuvn_api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProvinceCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -487,8 +486,8 @@ namespace vivuvn_api.Migrations
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsLock")
-                        .HasColumnType("bit");
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

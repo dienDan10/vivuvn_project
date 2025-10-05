@@ -1,22 +1,40 @@
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
-using vivuvn_api.Data;
+using Microsoft.IdentityModel.Tokens;
+using sib_api_v3_sdk.Client;
 using vivuvn_api.Data.DbInitializer;
+using vivuvn_api.Exceptions;
+using vivuvn_api.Extensions;
+using vivuvn_api.Filters;
+using vivuvn_api.Helpers;
 using vivuvn_api.Mappings;
-using vivuvn_api.Services.Implementations;
-using vivuvn_api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Exception Handlers
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+// Add custom validation filter
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true; // Disable default model state validation
+});
+
 // Add services to the container.
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
 // Add DB context
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
+builder.Services.AddDatabaseContext(builder.Configuration);
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -31,13 +49,38 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add JWT authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"] ?? "default_secret_key")),
+    };
+});
+
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
-// Declare Dependency Injections
-builder.Services.AddScoped<IDbInitializer, DbInitializer>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+// configure Brevo API client
+Configuration.Default.ApiKey.Add("api-key", builder.Configuration["BrevoApi:ApiKey"]);
+
+// Configure strongly typed settings objects
+builder.Services.Configure<BrevoSettings>(builder.Configuration.GetSection("BrevoApi"));
+
+// Declare Services and Repositories
+builder.Services.AddServices();
+builder.Services.AddRepositories();
+builder.Services.AddUnitOfWork();
 
 var app = builder.Build();
 
@@ -50,6 +93,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowClientWebsite");
+app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 

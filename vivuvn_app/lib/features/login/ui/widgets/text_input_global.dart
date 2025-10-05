@@ -1,0 +1,51 @@
+import 'package:flutter/material.dart';
+
+class TextInputGlobal extends StatelessWidget {
+  final String hintText;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final TextEditingController controller;
+  final String? Function(String?)? validator;
+  final String? errorText;
+
+  const TextInputGlobal({
+    super.key,
+    required this.hintText,
+    required this.keyboardType,
+    required this.controller,
+    this.obscureText = false,
+    this.validator,
+    this.errorText,
+  });
+
+  @override
+  Widget build(final BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onPrimary,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            //spreadRadius: 2,
+            blurRadius: 10.0,
+          ),
+        ],
+      ),
+      child: TextFormField(
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        controller: controller,
+        decoration: InputDecoration(
+          filled: false,
+          border: InputBorder.none,
+          hintText: hintText,
+          contentPadding: const EdgeInsets.all(0),
+          errorText: errorText,
+        ),
+        validator: validator,
+      ),
+    );
+  }
+}
