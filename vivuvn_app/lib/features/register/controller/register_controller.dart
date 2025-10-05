@@ -15,7 +15,7 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
   @override
   RegisterState build() => RegisterState();
 
-  Future<bool> register() async {
+  Future<void> register() async {
     state = state.copyWith(isLoading: true, error: null);
 
     final req = RegisterRequest(
@@ -26,15 +26,12 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
 
     try {
       await ref.read(registerServiceProvider).register(req);
-      state = state.copyWith(isLoading: false);
-      return true;
+      state = state.copyWith(isLoading: false, isSuccess: true);
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
       state = state.copyWith(error: errorMsg, isLoading: false);
-      return false;
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
-      return false;
+      state = state.copyWith(error: 'unknown error', isLoading: false);
     }
   }
 

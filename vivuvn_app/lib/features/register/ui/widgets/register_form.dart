@@ -46,6 +46,8 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   }
 
   Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
     FocusScope.of(context).unfocus();
 
     ref
@@ -55,38 +57,46 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
           _usernameController.text,
           _passwordController.text,
         );
+    await ref.read(registerControllerProvider.notifier).register();
+  }
 
-    if (!_formKey.currentState!.validate()) return;
+  void _errorListener() {
+    ref.listen(
+      registerControllerProvider.select((final state) => state.error),
+      (final previous, final next) {
+        if (next != null && next.isNotEmpty) {
+          // show toast error message
+          CherryToast.error(
+            title: const Text('Register Failed'),
+            displayCloseButton: true,
+            description: Text(next),
+            toastPosition: Position.top,
+          ).show(context);
+        }
+      },
+    );
+  }
 
-    final isSuccess = await ref
-        .read(registerControllerProvider.notifier)
-        .register();
+  void _successListener() {
+    ref.listen(
+      registerControllerProvider.select((final state) => state.isSuccess),
+      (final previous, final next) {
+        if (next == true) {
+          CherryToast.success(
+            title: const Text('Register Successful'),
+            toastPosition: Position.top,
+          ).show(context);
 
-    _formKey.currentState!.validate();
-    final state = ref.read(registerControllerProvider);
-
-    if (isSuccess) {
-      CherryToast.success(
-        title: const Text('Register Successful'),
-        toastPosition: Position.top,
-      ).show(context);
-
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) context.go(loginRoute);
-      });
-    } else {
-      if (state.error != null) {
-        CherryToast.error(
-          title: const Text('Register Failed'),
-          description: Text(state.error!),
-          toastPosition: Position.top,
-        ).show(context);
-      }
-    }
+          context.go(loginRoute);
+        }
+      },
+    );
   }
 
   @override
   Widget build(final BuildContext context) {
+    _errorListener();
+    _successListener();
     return Form(
       key: _formKey,
       child: Column(
