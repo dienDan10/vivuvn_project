@@ -6,6 +6,7 @@ class TextInputGlobal extends StatelessWidget {
   final bool obscureText;
   final TextEditingController controller;
   final String? Function(String?)? validator;
+  final String? errorText;
 
   const TextInputGlobal({
     super.key,
@@ -14,6 +15,7 @@ class TextInputGlobal extends StatelessWidget {
     required this.controller,
     this.obscureText = false,
     this.validator,
+    this.errorText,
   });
 
   @override
@@ -40,6 +42,7 @@ class TextInputGlobal extends StatelessWidget {
           border: InputBorder.none,
           hintText: hintText,
           contentPadding: const EdgeInsets.all(0),
+          errorText: errorText,
         ),
         validator: validator,
       ),

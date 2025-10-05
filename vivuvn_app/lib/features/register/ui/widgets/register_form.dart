@@ -1,23 +1,40 @@
+import 'package:cherry_toast/cherry_toast.dart';
+import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../login/ui/widgets/btn_submit.dart';
-import '../../../login/ui/widgets/password_input_global.dart';
-import '../../../login/ui/widgets/text_input_global.dart';
+import '../../../../core/routes/routes.dart';
+import '../../controller/register_controller.dart';
+import 'btn_submit_register.dart';
+import 'confirm_password_input.dart';
+import 'email_input.dart';
+import 'password_input.dart';
+import 'username_input.dart';
 
-class RegisterForm extends StatefulWidget {
+class RegisterForm extends ConsumerStatefulWidget {
   const RegisterForm({super.key});
 
   @override
-  State<RegisterForm> createState() => _RegisterFormState();
+  ConsumerState<RegisterForm> createState() => _RegisterFormState();
 }
 
-class _RegisterFormState extends State<RegisterForm> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+class _RegisterFormState extends ConsumerState<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
+
+  late final TextEditingController _usernameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _confirmPasswordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+  }
 
   @override
   void dispose() {
@@ -28,48 +45,74 @@ class _RegisterFormState extends State<RegisterForm> {
     super.dispose();
   }
 
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    FocusScope.of(context).unfocus();
+
+    ref
+        .read(registerControllerProvider.notifier)
+        .updateRegisterData(
+          _emailController.text,
+          _usernameController.text,
+          _passwordController.text,
+        );
+    await ref.read(registerControllerProvider.notifier).register();
+  }
+
+  void _errorListener() {
+    ref.listen(
+      registerControllerProvider.select((final state) => state.error),
+      (final previous, final next) {
+        if (next != null && next.isNotEmpty) {
+          // show toast error message
+          CherryToast.error(
+            title: const Text('Register Failed'),
+            displayCloseButton: true,
+            description: Text(next),
+            toastPosition: Position.top,
+          ).show(context);
+        }
+      },
+    );
+  }
+
+  void _successListener() {
+    ref.listen(
+      registerControllerProvider.select((final state) => state.isSuccess),
+      (final previous, final next) {
+        if (next == true) {
+          CherryToast.success(
+            title: const Text('Register Successful'),
+            toastPosition: Position.top,
+          ).show(context);
+
+          context.go(loginRoute);
+        }
+      },
+    );
+  }
+
   @override
   Widget build(final BuildContext context) {
+    _errorListener();
+    _successListener();
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          // Email field
-          TextInputGlobal(
-            hintText: 'Username',
-            keyboardType: TextInputType.text,
-            controller: _usernameController,
-          ),
-
+          UsernameInput(controller: _usernameController),
           const SizedBox(height: 24),
-
-          // Email field
-          TextInputGlobal(
-            hintText: 'Email',
-            keyboardType: TextInputType.emailAddress,
-            controller: _emailController,
-          ),
-
+          EmailInput(controller: _emailController),
           const SizedBox(height: 24),
-
-          // Password field
-          PasswordInputGlobal(
-            hintText: 'Password',
-            keyboardType: TextInputType.text,
-            controller: _passwordController,
-          ),
+          PasswordInput(controller: _passwordController),
           const SizedBox(height: 24),
-
-          // Confirm Password field
-          PasswordInputGlobal(
-            hintText: 'Confirm Password',
-            keyboardType: TextInputType.text,
+          ConfirmPasswordInput(
             controller: _confirmPasswordController,
+            passwordController: _passwordController,
           ),
           const SizedBox(height: 24),
-
-          // Submit button
-          ButtonSubmit(text: 'Sign up', onPressed: () {}),
+          ButtonSubmitRegister(text: 'Sign Up', onPressed: _submitForm),
         ],
       ),
     );
