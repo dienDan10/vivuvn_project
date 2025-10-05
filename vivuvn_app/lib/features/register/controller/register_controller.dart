@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../data/dto/register_request.dart';
 import '../service/register_service.dart';
 import '../state/register_state.dart';
@@ -17,7 +15,7 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
   RegisterState build() => RegisterState();
 
   Future<bool> register() async {
-    state = state.copyWith(isLoading: true, error: null, emailError: null);
+    state = state.copyWith(isLoading: true, error: null);
 
     final req = RegisterRequest(
       email: state.registerData['email'] ?? '',
@@ -31,16 +29,20 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
       return true;
     } on DioException catch (e) {
       String errorMsg = 'Unknown error';
+      String? errorDetail;
 
       if (e.response != null && e.response?.data != null) {
         var data = e.response?.data;
+
         if (data is String) {
           try {
             data = jsonDecode(data);
           } catch (_) {}
         }
+
         if (data is Map<String, dynamic>) {
-          errorMsg = data['detail'] ?? data['title'] ?? errorMsg;
+          errorDetail = data['detail'] as String?;
+          errorMsg = errorDetail ?? data['title'] ?? errorMsg;
         } else if (data is String) {
           errorMsg = data;
         }
@@ -48,20 +50,7 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
         errorMsg = e.message ?? errorMsg;
       }
 
-      if (errorMsg.contains('Email is already in use')) {
-        // Nếu lỗi email trùng, chỉ cập nhật emailError, giữ isLoading = false
-        state = state.copyWith(
-          emailError: errorMsg,
-          isLoading: false,
-          error: null,
-        );
-      } else {
-        state = state.copyWith(
-          error: errorMsg,
-          emailError: null,
-          isLoading: false,
-        );
-      }
+      state = state.copyWith(error: errorDetail ?? errorMsg, isLoading: false);
 
       return false;
     }
@@ -95,9 +84,5 @@ class RegisterController extends AutoDisposeNotifier<RegisterState> {
         'password': password ?? state.registerData['password'] ?? '',
       },
     );
-  }
-
-  void clearEmailError() {
-    state = state.copyWith(emailError: null);
   }
 }

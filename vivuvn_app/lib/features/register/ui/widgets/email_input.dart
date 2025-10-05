@@ -19,7 +19,6 @@ class EmailInput extends ConsumerWidget {
       keyboardType: TextInputType.emailAddress,
       controller: controller,
       validator: Validator.validateEmail,
-      errorText: state.emailError,
     );
   }
 }

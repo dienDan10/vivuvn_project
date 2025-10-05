@@ -75,8 +75,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
         if (mounted) context.go(loginRoute);
       });
     } else {
-      if (state.error != null &&
-          !state.error!.contains('Email is already in use')) {
+      if (state.error != null) {
         CherryToast.error(
           title: const Text('Register Failed'),
           description: Text(state.error!),
