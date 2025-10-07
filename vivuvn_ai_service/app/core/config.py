@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     # DATABASE_URL: Optional[str] = None  # Commented out - using external MySQL
     
     # Embeddings Configuration
-    EMBEDDING_MODEL: str = "gemini-embedding-001"
-    VECTOR_DIMENSION: int = 384
+    EMBEDDING_MODEL: str = "huyydangg/DEk21_hcmute_embedding"  # Vietnamese-specific embedding model
+    VECTOR_DIMENSION: int = 768  # Standard dimension for most transformer models
 
     # Pinecone Configuration (Serverless)
     PINECONE_API_KEY: Optional[str] = None
@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     # Server Configuration
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+
+    # AI Model Parameters
+    # MAX_TOKENS: int = 2048
+    # TEMPERATURE: float = 0.5
     
     # CORS Configuration
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]

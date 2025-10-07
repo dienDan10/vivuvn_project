@@ -28,16 +28,23 @@ router = APIRouter()
 @router.post("/insert", response_model=DataInsertResponse)
 async def insert_data_item(request: DataInsertRequest):
     """
-    Insert or update a single data item in Pinecone.
+    Insert or update a single data item in Pinecone using optimized embedding service.
     
     Args:
-        request: Data item to insert (destination, attraction, or activity)
+        request: Data item to insert (currently supports 'place' type)
         
     Returns:
         DataInsertResponse: Success status and item ID
     """
     try:
         data_loader = get_data_loader()
+        
+        # Only support 'place' type in optimized version
+        if request.item_type != "place":
+            raise HTTPException(
+                status_code=400,
+                detail="Only 'place' item type is supported in optimized version"
+            )
         
         success = await data_loader.insert_single_item(
             item_type=request.item_type,
@@ -48,7 +55,7 @@ async def insert_data_item(request: DataInsertRequest):
             return DataInsertResponse(
                 success=True,
                 message=f"Successfully inserted {request.item_type}",
-                item_id=request.data.get("id"),
+                item_id=request.data.get("googlePlaceId") or request.data.get("id"),
                 item_type=request.item_type
             )
         else:
@@ -101,24 +108,24 @@ async def delete_data_item(request: DataDeleteRequest):
 @router.post("/batch-upload", response_model=DataBatchUploadResponse)
 async def batch_upload_from_json(
     file: UploadFile = File(..., description="JSON file containing travel data"),
-    data_type: str = Form(..., description="Type of data: destinations, attractions, or activities")
+    data_type: str = Form(..., description="Type of data: 'places' (optimized for Vietnamese locations)")
 ):
     """
-    Batch upload travel data from JSON file.
+    Batch upload travel data from JSON file using optimized chunking.
     
     Args:
         file: JSON file containing travel data
-        data_type: Type of data to upload
+        data_type: Type of data to upload (currently supports 'places' only)
         
     Returns:
         DataBatchUploadResponse: Upload results
     """
     try:
-        # Validate data type
-        if data_type not in ["destinations", "attractions", "activities"]:
+        # Validate data type - only support 'places' in optimized version
+        if data_type != "places":
             raise HTTPException(
                 status_code=400,
-                detail="data_type must be one of: destinations, attractions, activities"
+                detail="Only 'places' data type is supported in optimized version"
             )
         
         # Save uploaded file temporarily
@@ -133,17 +140,12 @@ async def batch_upload_from_json(
         try:
             data_loader = get_data_loader()
             
-            # Load data based on type
-            if data_type == "destinations":
-                loaded_count = await data_loader.load_destinations_from_json(temp_file_path)
-            elif data_type == "attractions":
-                loaded_count = await data_loader.load_attractions_from_json(temp_file_path)
-            elif data_type == "activities":
-                loaded_count = await data_loader.load_activities_from_json(temp_file_path)
+            # Load places data with optimized chunking
+            loaded_count = await data_loader.load_places_from_json(temp_file_path)
             
             return DataBatchUploadResponse(
                 success=True,
-                message=f"Successfully uploaded {loaded_count} {data_type}",
+                message=f"Successfully uploaded {loaded_count} {data_type} with optimized chunking",
                 uploaded_count=loaded_count,
                 data_type=data_type,
                 filename=file.filename
@@ -160,6 +162,48 @@ async def batch_upload_from_json(
     except Exception as e:
         logger.error(f"Error in batch upload: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/load-location-data")
+async def load_location_data_file():
+    """
+    Load data from the local location_data.json file.
+    This is a one-time operation to populate the database.
+    
+    Returns:
+        dict: Load operation results
+    """
+    try:
+        data_loader = get_data_loader()
+        
+        # Path to the location data file
+        file_path = "d:/FU/SEP490/vivuvn_project/vivuvn_api/vivuvn_api/Data/location_data.json"
+        
+        # Check if file exists
+        import os
+        if not os.path.exists(file_path):
+            raise HTTPException(
+                status_code=404,
+                detail="location_data.json file not found"
+            )
+        
+        # Load places from the location data file
+        loaded_count = await data_loader.load_places_from_json(file_path)
+        
+        return {
+            "success": True,
+            "message": f"Successfully loaded {loaded_count} places from location_data.json",
+            "loaded_count": loaded_count,
+            "data_type": "places",
+            "source_file": "location_data.json"
+        }
+        
+    except DataLoadingError as e:
+        logger.error(f"Data loading error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error loading location data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/initialize-index")
@@ -210,5 +254,34 @@ async def get_data_stats():
         return {
             "success": False,
             "message": "Could not retrieve statistics",
+            "error": str(e)
+        }
+
+
+@router.get("/chunking-stats")
+async def get_chunking_stats():
+    """
+    Get statistics about chunking configuration and embedding service.
+    
+    Returns:
+        dict: Chunking statistics and configuration
+    """
+    try:
+        data_loader = get_data_loader()
+        
+        # Get chunking stats
+        stats = await data_loader.get_chunking_stats()
+        
+        return {
+            "success": True,
+            "message": "Chunking statistics retrieved",
+            "stats": stats
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting chunking stats: {e}")
+        return {
+            "success": False,
+            "message": "Could not retrieve chunking statistics",
             "error": str(e)
         }
