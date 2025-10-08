@@ -62,15 +62,15 @@ class ItineraryListItem extends StatelessWidget {
             child: FadeInImage.assetNetwork(
               placeholder: 'assets/images/image-placeholder.jpeg',
               image: itinerary.imageUrl,
-              width: 120,
-              height: 120,
+              width: 110,
+              height: 110,
               fit: BoxFit.cover,
               imageErrorBuilder:
                   (final context, final error, final stackTrace) {
                     return Image.asset(
                       'assets/images/image-placeholder.jpeg',
-                      width: 120,
-                      height: 120,
+                      width: 110,
+                      height: 110,
                       fit: BoxFit.cover,
                     );
                   },
