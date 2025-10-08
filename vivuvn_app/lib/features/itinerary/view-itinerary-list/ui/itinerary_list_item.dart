@@ -79,32 +79,40 @@ class ItineraryListItem extends StatelessWidget {
 
           // Itinerary Details
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                itinerary.name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Row(
-                children: [
-                  Icon(Icons.calendar_month, size: 16, color: Colors.grey[600]),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${DateFormat.MMMd('vi').format(itinerary.startDate)} - ${DateFormat.yMMMd('vi').format(itinerary.endDate)}',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  itinerary.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-            ],
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${DateFormat.MMMd('vi').format(itinerary.startDate)} - ${DateFormat.yMMMd('vi').format(itinerary.endDate)}',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
 
           // Itinerary Actions
-          const Spacer(),
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: InkWell(
