@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../models/itinerary.dart';
+import '../../models/itinerary.dart';
+import 'edit_itinerary_modal.dart';
 
 class ItineraryListItem extends StatelessWidget {
   final Itinerary itinerary;
@@ -14,37 +15,7 @@ class ItineraryListItem extends StatelessWidget {
       showDragHandle: true,
       useRootNavigator: true,
       builder: (final BuildContext ctx) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 20.0),
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Edit Itinerary'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  // Handle edit action
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.public),
-                title: const Text('Set as public'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  // Handle set as public action
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete),
-                title: const Text('Delete Itinerary'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  // Handle delete action
-                },
-              ),
-            ],
-          ),
-        );
+        return const EditItineraryModal();
       },
     );
   }

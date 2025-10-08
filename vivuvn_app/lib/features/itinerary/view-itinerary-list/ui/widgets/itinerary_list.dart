@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/itinerary.dart';
+import '../../models/itinerary.dart';
 import 'itinerary_list_item.dart';
 
 class ItineraryList extends StatelessWidget {
