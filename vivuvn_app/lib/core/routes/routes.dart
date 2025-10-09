@@ -7,3 +7,5 @@ const String homeRoute = '/';
 const String profileRoute = '/profile';
 const String itineraryRoute = '/itinerary';
 const String searchRoute = '/search';
+
+const String overviewRoute = '/overview';
