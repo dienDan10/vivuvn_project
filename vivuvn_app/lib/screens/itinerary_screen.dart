@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../features/itinerary/view-itinerary-list/itinerary_list_layout.dart';
+import '../features/itinerary/view-itinerary-list/ui/itinerary_list_layout.dart';
 
 class ItineraryScreen extends StatelessWidget {
   const ItineraryScreen({super.key});
