@@ -97,7 +97,19 @@ namespace vivuvn_api.Data
 
             modelBuilder.Entity<ExternalService>()
                 .HasIndex(es => es.ServiceTypeId);
-        }
 
+            // Relationship configurations
+            modelBuilder.Entity<Itinerary>()
+                .HasOne(i => i.StartProvince)
+                .WithMany()
+                .HasForeignKey(i => i.StartProvinceId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Itinerary>()
+                .HasOne(i => i.DestinationProvince)
+                .WithMany()
+                .HasForeignKey(i => i.DestinationProvinceId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
     }
 }

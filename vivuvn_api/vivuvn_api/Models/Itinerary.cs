@@ -13,12 +13,19 @@ namespace vivuvn_api.Models
 
         [Required]
         public string Name { get; set; } = string.Empty;
-        public string? StartLocation { get; set; }
-        public string? Destination { get; set; }
+
+        [Required]
+        public int StartProvinceId { get; set; }
+        public Province StartProvince { get; set; } = null!;
+
+        [Required]
+        public int DestinationProvinceId { get; set; }
+        public Province DestinationProvince { get; set; } = null!;
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int DaysCount { get; set; }
+        public int GroupSize { get; set; }
 
         public bool DeleteFlag { get; set; }
 
