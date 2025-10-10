@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
-import '../../features/itinerary/itinerary-overview/ui/itinerary_overview_layout.dart';
-import '../../features/itinerary/overview/overview_layout.dart';
+import '../../features/itinerary/itinerary-detail/ui/itinerary_detail_layout.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_screen.dart';
@@ -21,7 +20,7 @@ import 'routes.dart';
 final goRouterProvider = Provider<GoRouter>((final ref) {
   return GoRouter(
     // initialLocation: splashRoute,
-    initialLocation: itineraryOverviewRoute,
+    initialLocation: itineraryDetailRoute,
     errorBuilder: (final context, final state) => RouteErrorScreen(
       error: state.error.toString(),
       path: state.uri.toString(),
@@ -75,14 +74,8 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
       ),
 
       GoRoute(
-        path: overviewRoute,
-        builder: (final context, final state) => const OverviewLayout(),
-      ),
-
-      GoRoute(
-        path: itineraryOverviewRoute,
-        builder: (final context, final state) =>
-            const ItineraryOverviewLayout(),
+        path: itineraryDetailRoute,
+        builder: (final context, final state) => const ItineraryDetailLayout(),
       ),
 
       // Route with Bottom Navigation
