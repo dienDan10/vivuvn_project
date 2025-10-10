@@ -9,3 +9,5 @@ const String itineraryRoute = '/itinerary';
 const String searchRoute = '/search';
 
 const String overviewRoute = '/overview';
+
+const String itineraryOverviewRoute = '/itineraryOverview';
