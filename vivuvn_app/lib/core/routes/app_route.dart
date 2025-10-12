@@ -77,7 +77,6 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
         path: itineraryDetailRoute,
         builder: (final context, final state) => const ItineraryDetailLayout(),
       ),
-
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
         builder:

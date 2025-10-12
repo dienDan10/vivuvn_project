@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../budget/budget_tab.dart';
 import '../overview/ui/place_list.dart';
 
 class TabbarContent extends StatelessWidget {
@@ -25,7 +26,7 @@ class TabbarContent extends StatelessWidget {
         // Tab 2 - Lịch trình
         Text('Lịch trình trống'),
         // Tab 3 - Ngân sách
-        Text('Ngân sách trống'),
+        BudgetTab(),
       ],
     );
   }
