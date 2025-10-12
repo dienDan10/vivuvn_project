@@ -27,33 +27,50 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
 ]
 dependencies = [
-    "fastapi>=0.117.1",
-    "uvicorn[standard]>=0.35.0",
-    "pydantic>=2.11.9",
-    "pydantic-settings>=2.10.1",
-    "langchain>=0.3.27",
-    "langchain-google-genai>=2.0.9",
-    "langgraph>=0.6.5",
-    "google-genai>=1.38.0",
-    "sentence-transformers>=5.1.0",
-    "pinecone[grpc]>=6.0.1",
-    "python-dotenv>=1.1.1",
-    "httpx>=0.28.1",
-    "python-dateutil>=2.9.0.post0",
-    "pytz>=2025.2",
-    "structlog>=24.2.0",
-    "pandas>=2.3.1",
-    "numpy>=2.3.2",
+    # Core Web Framework (includes uvicorn, pydantic, httpx, python-multipart)
+    "fastapi[standard]==0.117.1",
+    "pydantic-settings==2.10.1",
+
+    # AI & Machine Learning
+    "langchain==0.3.27",
+    "langchain-google-genai==2.0.9",
+    "langgraph==0.6.5",
+    "google-genai==1.38.0",
+    "sentence-transformers==5.1.0",
+
+    # Vector Database
+    "pinecone[grpc]==6.0.1",
+
+    # Configuration & Environment
+    "python-dotenv==1.1.1",
+
+    # Utilities
+    "python-dateutil==2.9.0.post0",
+    "pytz==2025.2",
+
+    # Logging
+    "structlog==24.2.0",
+
+    # Data Processing (used by load_location_data.py)
+    "pandas==2.3.1",
+    "numpy==2.3.2",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.5.5",
-    "pytest-asyncio>=0.25.0",
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio==0.25.0",
     "pytest-cov>=4.1.0",
-    "mypy>=1.14.1",
-    "black>=25.9.0",
-    "isort>=5.13.2",
+
+    # Type checking
+    "mypy==1.14.1",
+
+    # Code formatting
+    "black==25.9.0",
+    "isort==5.13.2",
+
+    # Additional dev tools
     "flake8>=7.0.0",
     "pre-commit>=3.6.0",
     "ipython>=8.20.0",

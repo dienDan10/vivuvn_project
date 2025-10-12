@@ -351,7 +351,218 @@ pre-commit run --all-files
 
 ---
 
-## 🚀 **Deployment**
+## 🐳 **Docker Deployment**
+
+### **📋 Prerequisites**
+
+- [Docker](https://docs.docker.com/get-docker/) (20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (2.0+)
+
+### **🚀 Quick Start with Docker**
+
+#### **1. Build the Docker image**
+```bash
+docker build -t vivuvn-ai-service:latest .
+```
+
+**Build time:** ~8-12 minutes (first build), ~1-2 minutes (cached builds)
+
+#### **2. Configure environment**
+```bash
+# Copy the Docker environment template
+cp .env.docker .env.docker.local
+
+# Edit with your API keys
+notepad .env.docker.local  # Windows
+nano .env.docker.local     # Linux/macOS
+```
+
+**Required settings:**
+- `GEMINI_API_KEY` - Your Google Gemini API key
+- `PINECONE_API_KEY` - Your Pinecone API key
+- `ALLOWED_ORIGINS` - Your frontend URLs
+
+#### **3. Run with Docker Compose (Recommended)**
+```bash
+# Update docker-compose.yml to use your env file
+# Change env_file to .env.docker.local
+
+# Start the service
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Check health
+curl http://localhost:8000/health
+```
+
+#### **4. Run with Docker directly**
+```bash
+docker run -d \
+  --name vivuvn-ai-service \
+  -p 8000:8000 \
+  --env-file .env.docker.local \
+  --restart unless-stopped \
+  vivuvn-ai-service:latest
+```
+
+### **🔍 Docker Container Management**
+
+```bash
+# View logs
+docker logs -f vivuvn-ai-service
+
+# Stop service
+docker-compose down
+# or
+docker stop vivuvn-ai-service
+
+# Restart service
+docker-compose restart
+# or
+docker restart vivuvn-ai-service
+
+# Remove container
+docker rm vivuvn-ai-service
+
+# Remove image
+docker rmi vivuvn-ai-service:latest
+```
+
+### **📊 Docker Image Details**
+
+**Image Characteristics:**
+- **Base Image:** Python 3.11 Slim (Debian Bookworm)
+- **Size:** ~2.5-3GB (includes ML models)
+- **Build Type:** Multi-stage (optimized)
+- **Security:** Runs as non-root user `vivuapp`
+- **Pre-downloaded:** Vietnamese embedding model included
+
+**Performance Metrics:**
+- **Startup Time:** 10-30 seconds
+- **Memory Usage:** ~1.5-2GB RAM (for ML models)
+- **CPU:** Recommended 2+ cores
+- **Health Check:** Built-in `/health` endpoint
+
+### **🔧 Advanced Docker Configuration**
+
+#### **Volume Mounts for Development**
+```yaml
+# Add to docker-compose.yml volumes section:
+volumes:
+  - ./app:/app/app:ro          # Hot reload code changes
+  - ./data:/app/data:ro        # Mount data directory
+  - ./logs:/app/logs           # Persist logs
+```
+
+#### **Resource Limits**
+```yaml
+# Already configured in docker-compose.yml:
+deploy:
+  resources:
+    limits:
+      cpus: '2.0'
+      memory: 3G
+    reservations:
+      cpus: '0.5'
+      memory: 1G
+```
+
+#### **Custom Port Mapping**
+```bash
+# Use a different host port
+docker run -p 9000:8000 --env-file .env.docker.local vivuvn-ai-service:latest
+
+# Access at: http://localhost:9000
+```
+
+### **🌐 Production Deployment**
+
+#### **Using Docker Swarm**
+```bash
+# Initialize swarm
+docker swarm init
+
+# Deploy stack
+docker stack deploy -c docker-compose.yml vivuvn-stack
+
+# Scale service
+docker service scale vivuvn-stack_vivuvn-ai-service=3
+```
+
+#### **Using Kubernetes**
+```bash
+# Build and tag for registry
+docker build -t your-registry.com/vivuvn-ai-service:v1.0.0 .
+docker push your-registry.com/vivuvn-ai-service:v1.0.0
+
+# Create secrets
+kubectl create secret generic vivuvn-secrets \
+  --from-literal=GEMINI_API_KEY=your_key \
+  --from-literal=PINECONE_API_KEY=your_key
+
+# Deploy (create k8s manifests based on docker-compose.yml)
+kubectl apply -f k8s-deployment.yml
+```
+
+#### **Environment Variables for Production**
+```bash
+# .env.docker.production
+DEBUG=False
+LOG_LEVEL=INFO
+PINECONE_INDEX_NAME=vivuvn-travel-prod
+ALLOWED_ORIGINS=["https://vivuvn.com", "https://app.vivuvn.com"]
+```
+
+### **🐛 Docker Troubleshooting**
+
+#### **Container won't start**
+```bash
+# Check logs for errors
+docker logs vivuvn-ai-service
+
+# Common issues:
+# 1. Missing API keys in .env.docker
+# 2. Port 8000 already in use
+# 3. Insufficient memory (need 2GB+)
+```
+
+#### **Health check failing**
+```bash
+# Check health endpoint manually
+docker exec vivuvn-ai-service curl -f http://localhost:8000/health
+
+# Check if port is accessible
+curl http://localhost:8000/health
+```
+
+#### **Image too large**
+```bash
+# The image is ~2.5-3GB due to ML models (unavoidable)
+# This is normal for ML services
+
+# View image layers
+docker history vivuvn-ai-service:latest
+
+# Clean up unused images
+docker system prune -a
+```
+
+#### **Slow startup**
+```bash
+# If startup is slow, check:
+# 1. Model is pre-downloaded in image (should be)
+# 2. Sufficient memory allocated
+# 3. Network connectivity for API validation
+
+# View startup logs
+docker logs -f vivuvn-ai-service
+```
+
+---
+
+## 🚀 **Traditional Deployment (Non-Docker)**
 
 ### **Production Setup:**
 ```bash

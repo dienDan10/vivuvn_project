@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  vivuvn-ai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Optional: use cache from registry to speed up builds
+      # cache_from:
+      #   - vivuvn-ai-service:latest
+    image: minhdang1163/vivuvn-ai-service:latest
+    container_name: vivuvn-ai-service
+
+    # Load environment variables from file
+    # Create .env.docker from .env.docker template and update values
+    env_file:
+      - .env.docker
+
+    # Port mapping (host:container)
+    ports:
+      - "8000:8000"
+
+    # Volume mounts
+    volumes:
+      # REQUIRED: Persistent model cache (ML models downloaded on first run)
+      # This saves ~500MB-1GB in image size and allows model updates without rebuild
+      - model-cache:/home/vivuapp/.cache
+
+      # Optional: Uncomment for development with hot reload
+      # - ./app:/app/app:ro
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check (uses the HEALTHCHECK from Dockerfile)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Resource limits (optional but recommended for production)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Network configuration
+    networks:
+      - vivuvn-network
+
+# Named volumes for data persistence
+volumes:
+  model-cache:
+    name: vivuvn-model-cache
+    driver: local
+
+networks:
+  vivuvn-network:
+    driver: bridge
+    name: vivuvn-network
