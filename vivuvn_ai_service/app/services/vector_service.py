@@ -2,7 +2,7 @@
 Vector service for core Pinecone operations.
 
 This service provides low-level Pinecone vector database operations including:
-- Index management and health checks  
+- Index management and health checks
 - Vector CRUD operations (upsert, delete, search)
 - Basic embedding generation for compatibility
 
@@ -16,10 +16,11 @@ Architecture:
 """
 
 from typing import List, Dict, Any, Optional
-import logging
+import asyncio
+import structlog
 from app.core.config import settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     from pinecone import Pinecone, ServerlessSpec
@@ -28,12 +29,6 @@ except Exception:
     Pinecone = None
     ServerlessSpec = None
     PineconeGRPC = None
-
-try:
-    from sentence_transformers import SentenceTransformer  
-except Exception:
-    SentenceTransformer = None
-
 
 class VectorServiceError(Exception):
     pass
@@ -48,7 +43,7 @@ class VectorService:
     and minimal metadata, use EmbeddingService instead.
     """
     
-    def __init__(self, api_key: str, cloud: str = "aws", region: str = "us-east-1", index_name: str = "default", model_name: Optional[str] = None):
+    def __init__(self, api_key: str, cloud: str = "aws", region: str = "us-east-1", index_name: str = "default"):
         if Pinecone is None:
             raise VectorServiceError("pinecone SDK is not installed")
 
@@ -56,8 +51,6 @@ class VectorService:
         self.cloud = cloud
         self.region = region
         self.index_name = index_name
-        self.model_name = model_name or settings.EMBEDDING_MODEL
-        self._embedder = SentenceTransformer(self.model_name) if SentenceTransformer else None
 
         # Initialize Pinecone with v6+ API (using gRPC for better performance)
         try:
@@ -65,12 +58,12 @@ class VectorService:
         except Exception:
             # Fallback to standard Pinecone client
             self.pc = Pinecone(api_key=self.api_key)
-        
+
         # Create serverless index if it doesn't exist
         self._ensure_index_exists()
-        
+
         # Get index reference
-        self.index = self.pc.Index(self.index_name)
+        self.index = self.pc.Index(self.index_name, pool_threads=50)
 
     def _ensure_index_exists(self):
         """Create serverless index if it doesn't exist."""
@@ -96,56 +89,79 @@ class VectorService:
             logger.error(f"Error ensuring index exists: {e}")
             raise VectorServiceError(f"Failed to create/access index: {e}")
 
-    def generate_embedding(self, text: str) -> List[float]:
+    async def search_places(
+        self,
+        query_embedding: List[float],
+        top_k: int = 10,
+        filter_dict: Optional[Dict[str, Any]] = None,
+        province_filter: Optional[str] = None,
+        min_rating: Optional[float] = None,
+        place_ids: Optional[List[str]] = None
+    ) -> List[Dict[str, Any]]:
         """
-        Generate embedding using Vietnamese model with dimension matching.
-        
-        Note: This method is kept for compatibility but the new EmbeddingService 
-        is recommended for optimized chunking and minimal metadata.
-        """
-        if self._embedder is None:
-            raise VectorServiceError("sentence-transformers is not available")
-        
-        # Generate embedding using sentence transformer
-        emb = self._embedder.encode(text, convert_to_numpy=True)
-        embedding = emb.tolist()
-        
-        # Pad or truncate to match target dimension
-        target_dim = settings.VECTOR_DIMENSION
-        current_dim = len(embedding)
-        
-        if current_dim < target_dim:
-            # Pad with zeros to reach target dimension
-            embedding.extend([0.0] * (target_dim - current_dim))
-        elif current_dim > target_dim:
-            # Truncate to target dimension
-            embedding = embedding[:target_dim]
-        
-        return embedding
+        Search for places using vector similarity with enhanced filtering.
 
-    async def upsert_vectors(self, vectors: List[Dict[str, Any]], namespace: str = "places") -> bool:
+        Args:
+            query_embedding: Query vector embedding (768-dimensional)
+            top_k: Number of results to return
+            filter_dict: Optional metadata filters (e.g., {"province": "Hà Nội"})
+            province_filter: Filter by specific province
+            min_rating: Minimum rating filter (0.0-5.0)
+            place_ids: Filter by specific place IDs
+
+        Returns:
+            List of matching places with metadata
+        """
+        # Build comprehensive filter
+        combined_filter = filter_dict.copy() if filter_dict else {}
+
+        # Add province filter
+        if province_filter:
+            combined_filter["province"] = {"$eq": province_filter}
+
+        # Add rating filter
+        if min_rating is not None:
+            combined_filter["rating"] = {"$gte": min_rating}
+
+        # Add place ID filter
+        if place_ids:
+            combined_filter["place_id"] = {"$in": place_ids}
+
+        # Use async search
+        return await self.search(
+            vector=query_embedding,
+            top_k=top_k,
+            namespace="",  # Default namespace where data is stored
+            filter_dict=combined_filter if combined_filter else None,
+            include_metadata=True
+        )
+
+    async def upsert_vectors(self, vectors: List[Dict[str, Any]], namespace: str = "") -> bool:
         """
         Upsert vectors to Pinecone index.
-        
+
         Args:
-            vectors: List of vector dictionaries with 'id', 'embedding', and 'metadata'
-            namespace: Pinecone namespace to store vectors
-        
+            vectors: List of dicts with 'id', 'values', and 'metadata'
+                     Format: [{"id": "...", "values": [...], "metadata": {...}}]
+            namespace: Pinecone namespace (default: "")
+
         Returns:
             True if successful, False otherwise
         """
         try:
-            upsert_data = [
-                (v['id'], v['embedding'], v['metadata'])
-                for v in vectors
-            ]
-            self.index.upsert(vectors=upsert_data, namespace=namespace)
+            # Pinecone v6+ accepts dict format directly - no conversion needed
+            await asyncio.to_thread(
+                self.index.upsert,
+                vectors=vectors,
+                namespace=namespace
+            )
+            logger.info(f"Upserted {len(vectors)} vectors to namespace '{namespace}'")
             return True
         except Exception as e:
-            logger.error(f"Failed to upsert vectors: {e}")
+            logger.error(f"Failed to upsert vectors to namespace '{namespace}': {e}")
             return False
 
-    async def delete_vectors(self, ids: List[str], namespace: str = "places") -> bool:
+    async def delete_vectors(self, ids: List[str], namespace: str = "") -> bool:
         """
         Delete vectors by IDs from Pinecone index.
         
@@ -164,102 +180,187 @@ class VectorService:
             return False
 
     async def get_index_stats(self) -> Dict[str, Any]:
-        """Get Pinecone index statistics."""
+        """Get Pinecone index statistics as JSON-serializable dict."""
         try:
             stats = self.index.describe_index_stats()
+
+            # Extract values from Pinecone stats object (may be dict or object)
+            total_vectors = stats.get("total_vector_count", 0) if isinstance(stats, dict) else getattr(stats, 'total_vector_count', 0)
+            dimension = stats.get("dimension", settings.VECTOR_DIMENSION) if isinstance(stats, dict) else getattr(stats, 'dimension', settings.VECTOR_DIMENSION)
+            index_fullness = stats.get("index_fullness", 0.0) if isinstance(stats, dict) else getattr(stats, 'index_fullness', 0.0)
+
+            # Handle namespaces (convert to serializable dict)
+            namespaces_dict = {}
+            namespaces = stats.get("namespaces", {}) if isinstance(stats, dict) else getattr(stats, 'namespaces', {})
+
+            if namespaces:
+                for ns_name, ns_data in namespaces.items():
+                    if isinstance(ns_data, dict):
+                        namespaces_dict[ns_name] = {"vector_count": ns_data.get("vector_count", 0)}
+                    else:
+                        # Handle Pinecone namespace object
+                        namespaces_dict[ns_name] = {
+                            "vector_count": getattr(ns_data, 'vector_count', 0)
+                        }
+
             return {
-                "total_vectors": stats.get("total_vector_count", 0),
-                "dimension": stats.get("dimension", settings.VECTOR_DIMENSION),
-                "index_fullness": stats.get("index_fullness", 0.0),
-                "namespaces": stats.get("namespaces", {})
+                "total_vectors": total_vectors,
+                "dimension": dimension,
+                "index_fullness": index_fullness,
+                "namespaces": namespaces_dict
             }
         except Exception as e:
             logger.error(f"Failed to get index stats: {e}")
             return {"error": str(e)}
 
-    def search(self, vector: List[float], top_k: int = 10, namespace: str = "places", 
-              filter_dict: Optional[Dict[str, Any]] = None, 
-              include_metadata: bool = True) -> List[Dict[str, Any]]:
+    async def search(
+        self,
+        vector: List[float],
+        top_k: int = 10,
+        namespace: str = "",
+        filter_dict: Optional[Dict[str, Any]] = None,
+        include_metadata: bool = True
+    ) -> List[Dict[str, Any]]:
         """
-        Core vector search method for the optimized approach.
-        
+        Core vector search with Pinecone best practices.
+
         Args:
             vector: Query embedding vector
-            top_k: Number of results to return
-            namespace: Pinecone namespace to search
-            filter_dict: Optional metadata filter
-            include_metadata: Whether to include metadata in results
-        
+            top_k: Number of results
+            namespace: Namespace to search (default: "")
+            filter_dict: Metadata filters
+            include_metadata: Include metadata in results
+
         Returns:
-            List of search results with id, score, and metadata
+            List of results with id, score, and metadata
         """
         try:
-            response = self.index.query(
+            # Run blocking Pinecone call in thread pool (async-safe)
+            response = await asyncio.to_thread(
+                self.index.query,
                 vector=vector,
                 top_k=top_k,
                 namespace=namespace,
                 filter=filter_dict,
-                include_metadata=include_metadata
+                include_metadata=include_metadata,
+                include_values=False,  # Optimization: don't return vectors
+                metric="cosine",       # Explicit metric
+                show_progress=False    # Production mode
             )
-            
+
+            # Process results
             matches = response.get('matches', []) if isinstance(response, dict) else getattr(response, 'matches', [])
             results = []
-            
+
             for match in matches:
                 result = {
                     'id': match.get('id') if isinstance(match, dict) else getattr(match, 'id', None),
                     'score': match.get('score') if isinstance(match, dict) else getattr(match, 'score', 0.0),
                 }
-                
+
                 if include_metadata:
                     result['metadata'] = match.get('metadata') if isinstance(match, dict) else getattr(match, 'metadata', {})
-                
+
                 results.append(result)
-            
+
+            logger.info(f"Search in namespace '{namespace}' returned {len(results)} results")
             return results
-            
+
         except Exception as e:
-            logger.error(f"Vector search failed: {e}")
+            logger.error(f"Vector search in namespace '{namespace}' failed: {e}")
             raise VectorServiceError(f"Vector search failed: {e}")
+
+    async def query_namespaces(
+        self,
+        vector: List[float],
+        namespaces: List[str],
+        top_k: int = 10,
+        filter_dict: Optional[Dict[str, Any]] = None,
+        include_metadata: bool = True
+    ) -> List[Dict[str, Any]]:
+        """
+        Query across multiple namespaces efficiently using Pinecone's optimized method.
+
+        Args:
+            vector: Query embedding vector
+            namespaces: List of namespaces to search
+            top_k: Number of results per namespace
+            filter_dict: Metadata filters
+            include_metadata: Include metadata in results
+
+        Returns:
+            Combined results from all namespaces
+        """
+        try:
+            response = await asyncio.to_thread(
+                self.index.query_namespaces,
+                vector=vector,
+                namespaces=namespaces,
+                metric="cosine",
+                top_k=top_k,
+                include_values=False,
+                include_metadata=include_metadata,
+                filter=filter_dict,
+                show_progress=False
+            )
+
+            # Process results
+            matches = response.get('matches', []) if isinstance(response, dict) else getattr(response, 'matches', [])
+            results = []
+
+            for match in matches:
+                result = {
+                    'id': match.get('id') if isinstance(match, dict) else getattr(match, 'id', None),
+                    'score': match.get('score') if isinstance(match, dict) else getattr(match, 'score', 0.0),
+                }
+
+                if include_metadata:
+                    result['metadata'] = match.get('metadata') if isinstance(match, dict) else getattr(match, 'metadata', {})
+
+                results.append(result)
+
+            logger.info(f"Multi-namespace query ({len(namespaces)} namespaces) returned {len(results)} results")
+
+            # Log usage if available
+            if hasattr(response, 'usage'):
+                logger.info(f"Query usage: {response.usage}")
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Multi-namespace query failed: {e}")
+            raise VectorServiceError(f"Multi-namespace query failed: {e}")
 
     async def health_check(self) -> bool:
         """
         Check if Pinecone service is healthy.
-        
+
         Validates:
         - Connection to Pinecone
-        - Index accessibility 
-        - Vector dimension compatibility
-        - Embedding model functionality (if available)
+        - Index accessibility
+        - Query functionality
         """
         try:
-            # Test 1: Check if embedding model works (if available)
-            if self._embedder:
-                test_embedding = self.generate_embedding("health check test")
-                if len(test_embedding) != settings.VECTOR_DIMENSION:
-                    logger.error(f"Health check failed: embedding dimension mismatch")
-                    return False
-            else:
-                # Create dummy vector if no embedder
-                test_embedding = [0.1] * settings.VECTOR_DIMENSION
-            
-            # Test 2: Test Pinecone query functionality
-            self.search(
-                vector=test_embedding, 
-                top_k=1, 
-                namespace="places",
+            # Create dummy vector for testing
+            test_embedding = [0.1] * settings.VECTOR_DIMENSION
+
+            # Test Pinecone query functionality
+            await self.search(
+                vector=test_embedding,
+                top_k=1,
+                namespace="",  # Use default namespace
                 include_metadata=False
             )
-            
-            # Test 3: Check index stats
+
+            # Check index stats
             stats = await self.get_index_stats()
             if "error" in stats:
                 logger.error(f"Health check failed: index stats error")
                 return False
-            
+
             logger.info("Vector service health check passed")
             return True
-            
+
         except Exception as e:
             logger.error(f"Pinecone health check failed: {e}")
             return False
@@ -278,8 +379,7 @@ def get_vector_service() -> VectorService:
             api_key=settings.PINECONE_API_KEY,
             cloud=settings.PINECONE_CLOUD,
             region=settings.PINECONE_REGION,
-            index_name=settings.PINECONE_INDEX_NAME,
-            model_name=settings.EMBEDDING_MODEL,
+            index_name=settings.PINECONE_INDEX_NAME
         )
     return _service_instance
 

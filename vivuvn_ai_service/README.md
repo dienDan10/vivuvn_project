@@ -150,12 +150,6 @@ PORT=8000
 ```bash
 # Cách 1: Chạy trực tiếp
 python -m app.main
-
-# Cách 2: Sử dụng uvicorn
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Cách 3: Chạy production mode
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
 #### **Bước 6: Kiểm tra hoạt động** ✅

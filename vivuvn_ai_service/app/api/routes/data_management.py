@@ -4,11 +4,9 @@ Data management API routes for ViVu Vietnam AI Service.
 This module provides endpoints for managing travel data in Pinecone vector database.
 """
 
-import logging
-from typing import Dict, Any, List
+import structlog
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
-import json
 
 from app.utils.data_loader import get_data_loader
 from app.core.exceptions import DataLoadingError
@@ -20,7 +18,7 @@ from app.api.schemas import (
     DataBatchUploadResponse
 )
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 router = APIRouter()
 
@@ -285,3 +283,64 @@ async def get_chunking_stats():
             "message": "Could not retrieve chunking statistics",
             "error": str(e)
         }
+
+
+@router.get("/test-query")
+async def test_pinecone_query():
+    """
+    Diagnostic endpoint to test Pinecone query functionality.
+    Returns detailed information about index and query execution.
+
+    This helps diagnose issues with vector search and data retrieval.
+
+    Returns:
+        dict: Diagnostic information including query results and index stats
+    """
+    try:
+        from app.services.vector_service import get_vector_service
+        from app.services.embedding_service import get_embedding_service
+
+        vector_service = get_vector_service()
+        embedding_service = get_embedding_service()
+
+        # Get index stats (now returns JSON-serializable dict)
+        stats = await vector_service.get_index_stats()
+
+        # Try a test query
+        test_query = "Hà Nội travel destinations Vietnam"
+        test_embedding = embedding_service._generate_embedding(test_query)
+
+        # Query default namespace
+        results = await vector_service.search(
+            vector=test_embedding,
+            top_k=5,
+            namespace="",
+            include_metadata=True
+        )
+
+        return JSONResponse(content={
+            "success": True,
+            "message": "Query test completed",
+            "test_query": test_query,
+            "index_stats": stats,
+            "results_count": len(results),
+            "sample_results": results[:3] if results else [],
+            "diagnosis": {
+                "vectors_in_index": stats.get("total_vectors", 0),
+                "default_namespace_used": True,
+                "query_successful": len(results) > 0,
+                "need_reload_data": len(results) == 0 and stats.get("total_vectors", 0) == 0,
+                "message": "✅ Query successful!" if len(results) > 0 else "⚠️ No results found - may need to reload data"
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Test query failed: {e}", exc_info=True)
+        return JSONResponse(content={
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__,
+            "diagnosis": {
+                "message": f"❌ Query failed: {str(e)}"
+            }
+        })
