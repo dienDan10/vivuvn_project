@@ -1,0 +1,106 @@
+# =============================================================================
+# Stage 1: Builder - Install dependencies
+# =============================================================================
+FROM python:3.11-slim-bookworm AS builder
+
+# Set environment variables for Python
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    cmake \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file first (for layer caching)
+COPY requirements.txt /tmp/requirements.txt
+
+# Install Python dependencies directly (no venv needed in Docker)
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+    # Aggressive cleanup to reduce image size by ~500MB
+    find /usr/local/lib/python3.11/site-packages -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/python3.11/site-packages -type d -name "test" -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/python3.11/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/python3.11/site-packages -type f -name "*.pyc" -delete && \
+    find /usr/local/lib/python3.11/site-packages -type f -name "*.pyo" -delete && \
+    find /usr/local/lib/python3.11/site-packages -name "*.dist-info" -type d -exec rm -rf {}/RECORD \; 2>/dev/null || true && \
+    # Remove pip cache and unnecessary files
+    rm -rf /root/.cache/pip && \
+    rm -rf /tmp/*
+
+# NOTE: ML model will be downloaded at runtime (first startup only)
+# This reduces image size by ~500MB-1GB
+# Model cache will be stored in mounted volume for persistence across container restarts
+
+# =============================================================================
+# Stage 2: Runtime - Minimal production image
+# =============================================================================
+FROM python:3.11-slim-bookworm AS runtime
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    # Set default environment (can be overridden)
+    HOST=0.0.0.0 \
+    PORT=8000 \
+    DEBUG=False \
+    LOG_LEVEL=INFO
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Required for some Python packages
+    libgomp1 \
+    # Useful for debugging (optional, can be removed for smaller image)
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN groupadd -r vivuapp && useradd -r -g vivuapp vivuapp
+
+# Create app directory
+WORKDIR /app
+
+# CRITICAL: Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# NOTE: Model cache NOT copied - will be downloaded at runtime into mounted volume
+# This approach allows:
+# 1. Smaller image size (~1.5-2GB instead of 2.5-3GB)
+# 2. Easy model updates (just delete volume)
+# 3. Shared cache across multiple containers
+# 4. Works across different machines (cloud deployment friendly)
+
+# Copy application code
+COPY --chown=vivuapp:vivuapp app/ /app/app/
+COPY --chown=vivuapp:vivuapp load_location_data.py /app/
+COPY --chown=vivuapp:vivuapp requirements.txt /app/
+
+# NOTE: Data directory should be mounted as volume, not copied into image
+# This saves image size (~4MB) and allows easy updates without rebuild
+# Uncomment only if you need data embedded in image (not recommended)
+# COPY --chown=vivuapp:vivuapp data/ /app/data/
+
+# Create directories for logs, temporary files, data, and model cache
+# These will be mounted as volumes at runtime
+RUN mkdir -p /app/logs /app/tmp /app/data /home/vivuapp/.cache && \
+    chown -R vivuapp:vivuapp /app /home/vivuapp
+
+# Switch to non-root user
+USER vivuapp
+
+# Expose the application port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run the application
+# Uses settings from environment variables or .env file
+CMD ["python", "-m", "app.main"]
