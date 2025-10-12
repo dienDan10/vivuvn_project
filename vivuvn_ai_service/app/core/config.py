@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "ViVu Vietnam AI Service"
     API_V1_STR: str = "/api/v1"
     LOG_LEVEL: str = "INFO"
-    DEBUG: bool = False
+    DEBUG: bool = True
     VERSION: str = "0.1.0"
 
     # Database Configuration - Not needed for this AI service
@@ -30,17 +30,23 @@ class Settings(BaseSettings):
     PINECONE_CLOUD: str = "aws"  # AWS, GCP, or Azure
     PINECONE_REGION: str = "us-east-1"  # Region for serverless
 
+    # Pinecone Query Optimization
+    PINECONE_INCLUDE_VALUES: bool = False  # Don't return vectors in query results
+    PINECONE_SHOW_PROGRESS: bool = False   # Disable progress tracking in production
+    PINECONE_METRIC: str = "cosine"        # Explicit similarity metric
+    PINECONE_DEFAULT_NAMESPACE: str = ""   # Default namespace (empty string)
+
     # AI Configuration (Updated to use google-genai v0.12+)
     GEMINI_API_KEY: Optional[str] = None
-    GOOGLE_GENAI_API_KEY: Optional[str] = None  # Alternative name for compatibility
-    
+    GEMINI_MODEL: str = "gemini-2.5-flash"
+
     # Server Configuration
-    HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    HOST: str = "localhost"
+    PORT: int = 5276
 
     # AI Model Parameters
-    # MAX_TOKENS: int = 2048
-    # TEMPERATURE: float = 0.5
+    MAX_TOKENS: int = 16384  # Increased for complex travel itineraries
+    TEMPERATURE: float = 0.5
     
     # CORS Configuration
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]

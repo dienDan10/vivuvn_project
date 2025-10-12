@@ -5,7 +5,7 @@ This module provides common utility functions used across the application.
 """
 
 import re
-import logging
+import structlog
 from typing import List, Dict, Any, Optional, Union
 import hashlib
 import json
@@ -13,7 +13,7 @@ from datetime import datetime, date
 import asyncio
 from functools import wraps
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 def clean_text(text: str) -> str:

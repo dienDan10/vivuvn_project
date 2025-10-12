@@ -6,7 +6,7 @@ using optimized chunking and minimal metadata approach for better search and cos
 """
 
 import json
-import logging
+import structlog
 from typing import List, Dict, Any
 
 from app.core.exceptions import DataLoadingError
@@ -14,7 +14,7 @@ from app.services.vector_service import get_vector_service
 from app.services.embedding_service import get_embedding_service
 from app.utils.helpers import chunk_list
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class PineconeDataLoader:
@@ -101,18 +101,28 @@ class PineconeDataLoader:
                 logger.warning(f"Failed to process place {place_data.get('name', 'unknown')}: {e}")
                 continue
         
-        # Batch upsert to Pinecone
+        # Batch upsert using VectorService (proper abstraction)
         if vectors_to_upsert:
             try:
                 # Upsert in smaller batches to avoid rate limits
                 batch_size = 100
                 for i in range(0, len(vectors_to_upsert), batch_size):
                     batch = vectors_to_upsert[i:i + batch_size]
-                    self.vector_service.index.upsert(vectors=batch)
-                    logger.debug(f"Upserted batch of {len(batch)} vectors")
-                
+
+                    # Use service method instead of direct index access
+                    success = await self.vector_service.upsert_vectors(
+                        vectors=batch,
+                        namespace=""  # Explicit default namespace
+                    )
+
+                    if not success:
+                        logger.error(f"Failed to upsert batch {i//batch_size + 1}")
+                        raise DataLoadingError("Batch upsert failed")
+
+                    logger.debug(f"Upserted batch {i//batch_size + 1}: {len(batch)} vectors")
+
                 logger.info(f"Successfully upserted {len(vectors_to_upsert)} vectors for {loaded_count} places")
-                
+
             except Exception as e:
                 logger.error(f"Failed to upsert vectors to Pinecone: {e}")
                 raise

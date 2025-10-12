@@ -5,7 +5,6 @@ This module sets up the FastAPI application with middleware, exception handlers,
 and route registration.
 """
 
-import logging
 import time
 from contextlib import asynccontextmanager
 
@@ -15,6 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 import structlog
+import logging
 
 from app.core.config import settings, get_cors_settings
 from app.core.exceptions import (
@@ -24,26 +24,37 @@ from app.core.exceptions import (
 )
 from app.api.routes.travel_planner import router as travel_router
 from app.api.routes.data_management import router as data_router
-from app.api.schemas import HealthCheckResponse, ErrorResponse
+from app.api.schemas import HealthCheckResponse
 
 # Configure structured logging
 structlog.configure(
     processors=[
-        structlog.stdlib.filter_by_level,
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.filter_by_level,  # Filter by log level
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
-        structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
-        structlog.processors.JSONRenderer()
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
     ],
     context_class=dict,
     logger_factory=structlog.stdlib.LoggerFactory(),
     wrapper_class=structlog.stdlib.BoundLogger,
     cache_logger_on_first_use=True,
 )
+
+# Setup handler with ConsoleRenderer
+handler = logging.StreamHandler()
+handler.setFormatter(structlog.stdlib.ProcessorFormatter(
+    processor=structlog.dev.ConsoleRenderer(),
+))
+root_logger = logging.getLogger()
+# Clear any existing handlers to prevent duplication
+root_logger.handlers.clear()
+root_logger.addHandler(handler)
+root_logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper()))
 
 logger = structlog.get_logger(__name__)
 
@@ -382,13 +393,14 @@ app.openapi_tags = [
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     # Run the application
+    # Note: log_config=None disables uvicorn's default logging config to prevent duplication
     uvicorn.run(
         "app.main:app",
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG,
         log_level=settings.LOG_LEVEL.lower(),
-        access_log=True
+        access_log=False
     )

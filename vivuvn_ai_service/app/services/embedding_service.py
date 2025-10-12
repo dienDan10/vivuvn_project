@@ -5,12 +5,12 @@ This service implements an optimized approach where Pinecone stores only search-
 metadata while full place data is stored separately and fetched after search.
 """
 
-import logging
+import structlog
 from typing import List, Dict, Optional, Any
 import uuid
 
 try:
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
 except ImportError:
     RecursiveCharacterTextSplitter = None
 
@@ -21,7 +21,7 @@ except ImportError:
 
 from app.core.config import settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class EmbeddingServiceError(Exception):
@@ -112,9 +112,10 @@ class EmbeddingService:
                     # Generate embedding
                     embedding = self._generate_embedding(embedding_text)
                     
-                    # Create minimal metadata
+                    # Create minimal metadata (use province from place data)
+                    province = place.get('province', 'Vietnam')
                     metadata = self._create_minimal_metadata(
-                        place, chunk_text, chunk_index, total_chunks
+                        place, chunk_text, chunk_index, total_chunks, province=province
                     )
                     
                     # Create vector for Pinecone
@@ -198,14 +199,16 @@ class EmbeddingService:
     
     def _generate_embedding(self, text: str) -> List[float]:
         """
-        Generate 768-dimensional embedding using Vietnamese model.
-        
+        Generate embedding using Vietnamese model (huyydangg/DEk21_hcmute_embedding).
+
+        This model produces 768-dimensional embeddings optimized for Vietnamese text.
+
         Args:
             text: Text to embed
-            
+
         Returns:
-            List[float]: 768-dimensional embedding
-            
+            List[float]: 768-dimensional embedding vector
+
         Raises:
             EmbeddingServiceError: If embedding generation fails
         """
@@ -216,25 +219,22 @@ class EmbeddingService:
                 convert_to_tensor=False,
                 normalize_embeddings=True
             )
-            
+
             # Convert numpy array to list (required for Pinecone)
             embedding_list = embedding.tolist()
-            
-            # Ensure correct dimension
+
+            # Verify dimension matches configuration
             if len(embedding_list) != settings.VECTOR_DIMENSION:
-                logger.warning(
-                    f"Embedding dimension mismatch: got {len(embedding_list)}, "
-                    f"expected {settings.VECTOR_DIMENSION}"
+                raise EmbeddingServiceError(
+                    f"Embedding dimension mismatch: model produced {len(embedding_list)} dimensions, "
+                    f"but config expects {settings.VECTOR_DIMENSION}. "
+                    f"Please update VECTOR_DIMENSION in .env to {len(embedding_list)}"
                 )
-                
-                # Pad or truncate to match target dimension
-                if len(embedding_list) < settings.VECTOR_DIMENSION:
-                    embedding_list.extend([0.0] * (settings.VECTOR_DIMENSION - len(embedding_list)))
-                elif len(embedding_list) > settings.VECTOR_DIMENSION:
-                    embedding_list = embedding_list[:settings.VECTOR_DIMENSION]
-            
+
             return embedding_list
-            
+
+        except EmbeddingServiceError:
+            raise
         except Exception as e:
             logger.error(f"Failed to generate embedding: {e}")
             raise EmbeddingServiceError(f"Embedding generation failed: {e}")
@@ -244,7 +244,8 @@ class EmbeddingService:
         place: Dict[str, Any], 
         chunk_text: str,
         chunk_index: int, 
-        total_chunks: int
+        total_chunks: int,
+        province: str = None
     ) -> Dict[str, Any]:
         """
         Create MINIMAL metadata for Pinecone (query-essential only).
@@ -255,20 +256,22 @@ class EmbeddingService:
             chunk_text: Text chunk
             chunk_index: Index of current chunk
             total_chunks: Total number of chunks
+            province: Province name from parent data structure
             
         Returns:
             dict: Minimal metadata for Pinecone
         """
-        # Extract province from address
-        province = "Vietnam"
-        address = place.get('address', '')
-        if address:
-            address_parts = address.split(', ')
-            if len(address_parts) >= 2:
-                province = address_parts[-2] if len(address_parts) > 2 else address_parts[-1]
-                # Clean up province name
-                if 'Việt Nam' in province:
-                    province = address_parts[-3] if len(address_parts) > 3 else province
+        # Use province from parent data structure (more reliable than parsing address)
+        final_province = province or place.get('province', 'Vietnam')
+        
+        # Clean up province name if needed
+        if final_province:
+            final_province = final_province.strip()
+            # Remove redundant text if present
+            if 'Thành phố' in final_province and final_province != 'Thành phố Hồ Chí Minh':
+                final_province = final_province.replace('Thành phố ', '')
+        else:
+            final_province = 'Vietnam'
         
         return {
             # === IDENTITY (required) ===
@@ -282,7 +285,7 @@ class EmbeddingService:
             # === LOCATION (for filtering/display) ===
             "latitude": float(place.get('latitude', 0) or 0),
             "longitude": float(place.get('longitude', 0) or 0),
-            "province": province.strip() or "",
+            "province": final_province,
             
             # === FILTERING (for search filters) ===
             "rating": float(place.get('rating', 0) or 0),  # Convert None/null to 0.0
