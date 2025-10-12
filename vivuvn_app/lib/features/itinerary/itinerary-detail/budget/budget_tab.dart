@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'budget_header.dart';
-import 'dialogs/add_expense_dialog.dart';
-import 'dialogs/budget_dialog.dart';
-import 'list_expense.dart';
+import 'ui/widgets/add_expense_dialog.dart';
+import 'ui/widgets/budget_dialog.dart';
+import 'ui/widgets/budget_header.dart';
+import 'ui/widgets/list_expense.dart';
 
 class BudgetTab extends StatefulWidget {
   const BudgetTab({super.key});

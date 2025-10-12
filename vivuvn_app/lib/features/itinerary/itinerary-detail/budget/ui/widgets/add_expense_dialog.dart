@@ -100,6 +100,7 @@ Future<Map<String, dynamic>?> showAddExpenseDialog(final BuildContext context) {
                   },
                 ),
                 const SizedBox(height: 12),
+
                 SizedBox(
                   width: double.infinity, // full width
                   child: ElevatedButton(
