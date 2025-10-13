@@ -4,7 +4,7 @@ import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/interested_category.dart';
-import 'widgets/generate_itinerary_with_AI_layout_step.dart';
+import 'widgets/generate_itinerary_with_ai_layout_step.dart';
 import 'widgets/interest_selection_step.dart';
 import 'widgets/modal_footer.dart';
 
