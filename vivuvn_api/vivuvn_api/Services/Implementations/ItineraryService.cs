@@ -19,9 +19,14 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<IEnumerable<ItineraryDto>>(itineraries);
         }
 
-        public Task<ItineraryDto> GetItineraryByIdAsync(int id)
+        public async Task<ItineraryDto> GetItineraryByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id,
+                includeProperties: "StartProvince,DestinationProvince,Days,Days.Items,Days.Items.Location,Days.Items.Location.LocationPhotos,Days.Items.Location.Province,Budget,Budget.Items");
+
+            if (itinerary == null) throw new KeyNotFoundException($"Itinerary with id {id} not found.");
+
+            return _mapper.Map<ItineraryDto>(itinerary);
         }
 
         public async Task<CreateItineraryResponseDto> CreateItineraryAsync(int userId, CreateItineraryRequestDto request)

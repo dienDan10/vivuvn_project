@@ -29,10 +29,11 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpGet("{id}")]
-        public Task<IActionResult> GetItineraryById(int id)
+        public async Task<IActionResult> GetItineraryById(int id)
         {
-            // Logic to retrieve a specific itinerary by ID would go here
-            return Task.FromResult<IActionResult>(Ok(new { message = $"Itinerary details for ID: {id}" }));
+            var itinerary = await _itineraryService.GetItineraryByIdAsync(id);
+
+            return Ok(itinerary);
         }
 
         [HttpPost]

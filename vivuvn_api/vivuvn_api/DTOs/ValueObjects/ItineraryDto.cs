@@ -19,5 +19,8 @@ namespace vivuvn_api.DTOs.ValueObjects
         public int GroupSize { get; set; }
         public string? TransportationVehicle { get; set; }
 
+        public List<ItineraryDayDto> Days { get; set; } = new List<ItineraryDayDto>();
+        public BudgetDto Budget { get; set; }
+
     }
 }

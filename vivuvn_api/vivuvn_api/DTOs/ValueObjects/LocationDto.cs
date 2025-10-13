@@ -1,14 +1,11 @@
-﻿using vivuvn_api.Models;
-
-namespace vivuvn_api.DTOs.ValueObjects
+﻿namespace vivuvn_api.DTOs.ValueObjects
 {
     public class LocationDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
 
-        public int ProvinceId { get; set; }
-        public Province? Province { get; set; }
+        public string ProvinceName { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
