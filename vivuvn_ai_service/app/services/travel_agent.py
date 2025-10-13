@@ -25,6 +25,8 @@ from app.models.travel_models import Activity, DayItinerary, TravelItinerary
 from app.services.vector_service import get_vector_service
 from app.services.embedding_service import get_embedding_service
 from app.prompts.travel_prompts import SYSTEM_PROMPT, create_user_prompt
+# Cluster places geographically for better route optimization
+from app.utils.geo_utils import simple_kmeans_geo
 
 logger = structlog.get_logger(__name__)
 
@@ -38,6 +40,7 @@ class TravelPlanningState(TypedDict):
     travel_request: TravelRequest
     search_filters: Dict[str, Any]
     relevant_places: List[Dict[str, Any]]
+    place_clusters: List[List[Dict[str, Any]]]  # Geographical clusters
     structured_itinerary: Optional[Dict[str, Any]]
     final_response: Optional[TravelResponse]
     error: Optional[str]
@@ -91,6 +94,36 @@ class TravelPlanningAgent:
 
         return workflow.compile()
 
+    def _calculate_dynamic_top_k(self, duration_days: int) -> int:
+        """
+        Calculate optimal top_k based on trip duration.
+
+        Formula: base + (activities_per_day * duration * diversity_factor)
+        Ensures sufficient place diversity while avoiding excessive fetches.
+
+        Args:
+            duration_days: Trip duration in days
+
+        Returns:
+            Optimized top_k value (clamped between min and max)
+
+        Examples:
+            1 day:  8 + (3.5 * 1 * 2.0) = 15
+            3 days: 8 + (3.5 * 3 * 2.0) = 29
+            7 days: 8 + (3.5 * 7 * 2.0) = 57 → capped at 50
+        """
+        # Calculate base top_k using config parameters
+        calculated_k = int(
+            settings.VECTOR_SEARCH_BASE_K +
+            (settings.VECTOR_SEARCH_ACTIVITIES_PER_DAY * duration_days * settings.VECTOR_SEARCH_DIVERSITY_FACTOR)
+        )
+
+        # Clamp between min and max
+        top_k = max(settings.VECTOR_SEARCH_MIN_K, min(calculated_k, settings.VECTOR_SEARCH_MAX_K))
+
+        logger.info(f"Dynamic top_k: {duration_days} days → {top_k} places (calculated: {calculated_k})")
+        return top_k
+
     # ========================================================================
     # NODES
     # ========================================================================
@@ -101,18 +134,22 @@ class TravelPlanningAgent:
             travel_request = state["travel_request"]
             filters = state.get("search_filters", {})
 
+            # Calculate dynamic top_k based on trip duration
+            duration_days = travel_request.duration_days
+            dynamic_top_k = self._calculate_dynamic_top_k(duration_days)
+
             # Build comprehensive search query
             search_query = travel_request.destination
             if travel_request.preferences:
                 search_query += f" {' '.join(travel_request.preferences)}"
 
-            logger.info(f"[Node 2/5] Searching: {search_query}")
+            logger.info(f"[Node 2/5] Searching: {search_query} (duration: {duration_days} days, top_k: {dynamic_top_k})")
 
             # Generate embedding and search with filters
             query_embedding = self.embedding_service._generate_embedding(search_query)
             results = await self.vector_service.search_places(
                 query_embedding=query_embedding,
-                top_k=30,  # More places = better diversity and less hallucination
+                top_k=dynamic_top_k,  # Dynamic based on trip duration
                 province_filter=filters.get("province"),
                 min_rating=filters.get("min_rating"),
                 place_ids=filters.get("place_ids", []),
@@ -123,8 +160,30 @@ class TravelPlanningAgent:
 
             if not results:
                 logger.warning("[Node 2/5] No places found - risk of hallucination!")
+                state["relevant_places"] = []
+                state["place_clusters"] = []
+                return state
 
-            state["relevant_places"] = results
+            try:
+                # Auto-determine k based on number of results and trip duration
+                # More days = potentially need more geographical spread
+                suggested_k = min(4, max(2, duration_days // 2))
+                clusters = simple_kmeans_geo(results, k=suggested_k)
+
+                # Flatten clusters back to list (preserves geographical ordering)
+                ordered_places = []
+                for cluster in clusters:
+                    ordered_places.extend(cluster)
+
+                logger.info(f"[Node 2/5] Organized {len(results)} places into {len(clusters)} geographical clusters")
+
+                state["relevant_places"] = ordered_places
+                state["place_clusters"] = clusters  # Store for prompt formatting
+            except Exception as cluster_error:
+                logger.warning(f"[Node 2/5] Clustering failed: {cluster_error}, using original order")
+                state["relevant_places"] = results
+                state["place_clusters"] = []
+
             return state
 
         except Exception as e:
@@ -145,8 +204,9 @@ class TravelPlanningAgent:
 
             logger.info(f"[Node 2/5] Generating with {len(relevant_places)} verified places")
 
-            # Build user prompt with grounded data
-            user_prompt = create_user_prompt(travel_request, relevant_places)
+            # Build user prompt with grounded data (with optional clusters)
+            place_clusters = state.get("place_clusters", [])
+            user_prompt = create_user_prompt(travel_request, relevant_places, place_clusters)
 
             # Call Gemini with structured output using modern SDK pattern
             import asyncio
@@ -169,16 +229,25 @@ class TravelPlanningAgent:
                 raise ItineraryGenerationError("No structured response from Gemini")
 
             structured_itinerary: TravelItinerary = response.parsed
-            
-            # Convert to dictionary format for compatibility
+
+            # Convert to dictionary format for compatibility (using Pydantic v2 model_dump)
             structured_data = {
-                "days": [day.dict() for day in structured_itinerary.days],
+                "days": [day.model_dump() for day in structured_itinerary.days],
+                "transportation_suggestions": [t.model_dump() for t in structured_itinerary.transportation_suggestions],
                 "total_cost": structured_itinerary.total_cost,
-                "places_used_count": structured_itinerary.places_used_count
+                "places_used_count": structured_itinerary.places_used_count,
+                "schedule_unavailable": structured_itinerary.schedule_unavailable,
+                "unavailable_reason": structured_itinerary.unavailable_reason
             }
 
             logger.info(f"[Node 2/5] Generated {len(structured_data.get('days', []))} days, "
                        f"used {structured_data.get('places_used_count', 0)} database places")
+
+            # Log budget validation status
+            if structured_data.get('schedule_unavailable'):
+                logger.warning(f"[Node 2/5] ⚠️ Budget exceeded: {structured_data.get('unavailable_reason', 'No reason provided')}")
+            else:
+                logger.info(f"[Node 2/5] ✅ Budget OK: {structured_data.get('total_cost', 0):,.0f} VND")
 
             state["structured_itinerary"] = structured_data
             return state
@@ -364,10 +433,6 @@ class TravelPlanningAgent:
                 filters["province"] = province
                 logger.info(f"[Node 1/5] Province filter: {province}")
             
-            # Basic quality filtering
-            filters["min_rating"] = 3.1  # Minimum decent rating
-            logger.info(f"[Node 1/5] Min rating filter: 3.1")
-            
             # Preference-based smart filtering (future enhancement)
             if travel_request.preferences:
                 logger.info(f"[Node 1/5] Preferences noted: {travel_request.preferences}")
@@ -375,7 +440,6 @@ class TravelPlanningAgent:
             
             # Place ID filtering (for specific place requests)
             # Can be extended to filter by specific place IDs if needed
-            
             if additional_filters:
                 filters["additional_filters"] = additional_filters
 
@@ -383,7 +447,6 @@ class TravelPlanningAgent:
                 
             # Store filters in state
             state["search_filters"] = filters
-            logger.info(f"[Node 1/5] Filters built successfully: {list(filters.keys())}")
             
             return state
             
@@ -422,6 +485,7 @@ class TravelPlanningAgent:
                 "travel_request": travel_request,
                 "search_filters": {},
                 "relevant_places": [],
+                "place_clusters": [],
                 "structured_itinerary": None,
                 "final_response": None,
                 "error": None,
