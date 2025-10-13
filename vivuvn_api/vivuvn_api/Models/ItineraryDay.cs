@@ -14,7 +14,6 @@ namespace vivuvn_api.Models
         public DateTime Date { get; set; }
 
         public ICollection<ItineraryItem> Items { get; set; } = new List<ItineraryItem>();
-        public ICollection<ItineraryDayCost> Costs { get; set; } = new List<ItineraryDayCost>();
         public ICollection<ExternalService> ExternalServices { get; set; } = new List<ExternalService>();
     }
 }
