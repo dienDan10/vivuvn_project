@@ -33,12 +33,26 @@ class CreateItineraryModal extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Title
-              Text(
-                'Create New Itinerary',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+              Center(
+                child: Text(
+                  'Create Your New Itinerary',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+              Center(
+                child: Text(
+                  'Plan and organize your next adventure!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.5),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
