@@ -33,6 +33,9 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province.Name))
                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.LocationPhotos.Select(p => p.PhotoUrl).ToList()));
 
+            // Mapping For Search Location
+            CreateMap<Location, SearchLocationDto>();
+
             // Mapping For Budget
             CreateMap<Budget, BudgetDto>();
 

@@ -7,6 +7,7 @@
         IItineraryDayRepository ItineraryDays { get; }
         IBudgetRepository Budgets { get; }
         IProvinceRepository Provinces { get; }
+        ILocationRepository Locations { get; }
 
         Task SaveChangesAsync();
 

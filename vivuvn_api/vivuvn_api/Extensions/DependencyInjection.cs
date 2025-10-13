@@ -17,6 +17,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IItineraryDayRepository, ItineraryDayRepository>();
             services.AddScoped<IBudgetRepository, BudgetRepository>();
             services.AddScoped<IProvinceRepository, ProvinceRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
             return services;
         }
 
