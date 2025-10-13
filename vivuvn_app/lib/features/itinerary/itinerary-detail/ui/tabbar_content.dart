@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../budget/ui/budget_tab.dart';
 import '../overview/ui/place_list.dart';
-import '../schedule/schedule_tab.dart';
+import '../schedule/ui/schedule_tab.dart';
 
 class TabbarContent extends StatelessWidget {
   final TabController tabController;

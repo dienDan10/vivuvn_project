@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
+
 import 'add_place_bottom_sheet.dart';
 import 'add_place_button.dart';
 
 class AddRestaurantTile extends StatelessWidget {
   const AddRestaurantTile({super.key});
+
+  void _openAddRestaurantSheet(final BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (final context) => const FractionallySizedBox(
+        heightFactor: 0.8,
+        child: AddPlaceBottomSheet(type: 'restaurant'),
+      ),
+    );
+  }
 
   @override
   Widget build(final BuildContext context) {
@@ -14,19 +29,8 @@ class AddRestaurantTile extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: AddPlaceButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                builder: (final context) => const FractionallySizedBox(
-                  heightFactor: 0.8,
-                  child: AddPlaceBottomSheet(),
-                ),
-              );
-            },
+            label: 'Thêm địa điểm ăn uống',
+            onPressed: () => _openAddRestaurantSheet(context),
           ),
         ),
       ],
