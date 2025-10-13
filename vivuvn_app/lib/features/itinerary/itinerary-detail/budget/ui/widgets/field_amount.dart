@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../common/validator/validator.dart';
+import '../../../../../../common/validator/validator.dart';
 
 class FieldAmount extends StatelessWidget {
   final TextEditingController controller;

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/field_amount.dart';
-import 'widgets/field_date.dart';
-import 'widgets/field_name.dart';
-import 'widgets/field_type.dart';
-import 'widgets/submit_button.dart';
+import 'field_amount.dart';
+import 'field_date.dart';
+import 'field_name.dart';
+import 'field_type.dart';
+import 'submit_button.dart';
 
 class AddExpenseForm extends StatefulWidget {
   const AddExpenseForm({super.key});
@@ -23,15 +23,17 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
-    final expense = {
-      'name': nameController.text.trim(),
-      'amount': double.tryParse(amountController.text) ?? 0,
-      'type': selectedType,
-      'day': selectedDate == null
-          ? '—'
-          : '${selectedDate!.day}/${selectedDate!.month}',
-    };
-    Navigator.pop(context, expense);
+    // final expense = {
+    //   'name': nameController.text.trim(),
+    //   'amount': double.tryParse(amountController.text) ?? 0,
+    //   'type': selectedType,
+    //   'day': selectedDate == null
+    //       ? '—'
+    //       : '${selectedDate!.day}/${selectedDate!.month}',
+    // };
+    // Logic to add expense to database
+
+    Navigator.of(context).pop();
   }
 
   @override
@@ -40,6 +42,8 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
     amountController.dispose();
     super.dispose();
   }
+
+  // register listener for loading and error states
 
   @override
   Widget build(final BuildContext context) {
