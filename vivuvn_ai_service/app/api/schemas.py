@@ -10,127 +10,20 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-
-class Activity(BaseModel):
-    """Individual activity within a day's itinerary."""
-    
-    time: str = Field(
-        ...,
-        description="Activity start time (HH:MM format)",
-        example="09:00"
-    )
-    name: str = Field(
-        ...,
-        description="Name of the activity",
-        example="Visit War Remnants Museum"
-    )
-    description: str = Field(
-        ...,
-        description="Detailed description of the activity",
-        example="Learn about Vietnam War history through exhibits and artifacts"
-    )
-    location: str = Field(
-        ...,
-        description="Activity location address",
-        example="28 Vo Van Tan, District 3, Ho Chi Minh City"
-    )
-    duration: str = Field(
-        ...,
-        description="Expected duration of the activity",
-        example="2 hours"
-    )
-    cost_estimate: Optional[float] = Field(
-        None,
-        description="Estimated cost in VND",
-        example=15000.0
-    )
-    category: str = Field(
-        ...,
-        description="Activity category",
-        example="history"
-    )
-    
-    @validator("time")
-    def validate_time_format(cls, v):
-        """Validate time format (HH:MM)."""
-        try:
-            hour, minute = map(int, v.split(":"))
-            if not (0 <= hour <= 23 and 0 <= minute <= 59):
-                raise ValueError("Invalid time range")
-            return v
-        except (ValueError, AttributeError):
-            raise ValueError("Time must be in HH:MM format")
-    
-    @validator("cost_estimate")
-    def validate_cost(cls, v):
-        """Validate cost is non-negative."""
-        if v is not None and v < 0:
-            raise ValueError("Cost estimate cannot be negative")
-        return v
-    
-    @validator("category")
-    def validate_category(cls, v):
-        """Validate activity category."""
-        valid_categories = {
-            "food", "sightseeing", "culture", "history", "nature", 
-            "adventure", "shopping", "entertainment", "relaxation",
-            "transportation", "accommodation", "other"
-        }
-        if v.lower() not in valid_categories:
-            raise ValueError(f"Category must be one of: {', '.join(valid_categories)}")
-        return v.lower()
-
-
-class DayItinerary(BaseModel):
-    """Itinerary for a single day."""
-    
-    day: int = Field(
-        ...,
-        description="Day number in the trip",
-        example=1,
-        ge=1
-    )
-    date: str = Field(
-        ...,
-        description="Date in YYYY-MM-DD format",
-        example="2024-03-15"
-    )
-    activities: List[Activity] = Field(
-        ...,
-        description="List of activities for the day",
-        min_items=1
-    )
-    estimated_cost: Optional[float] = Field(
-        None,
-        description="Total estimated cost for the day in VND",
-        example=500000.0
-    )
-    notes: Optional[str] = Field(
-        None,
-        description="Additional notes or recommendations for the day",
-        example="Start early to avoid crowds at popular attractions"
-    )
-    
-    @validator("date")
-    def validate_date_format(cls, v):
-        """Validate date format."""
-        try:
-            datetime.strptime(v, "%Y-%m-%d")
-            return v
-        except ValueError:
-            raise ValueError("Date must be in YYYY-MM-DD format")
-    
-    @validator("estimated_cost")
-    def validate_estimated_cost(cls, v):
-        """Validate estimated cost is non-negative."""
-        if v is not None and v < 0:
-            raise ValueError("Estimated cost cannot be negative")
-        return v
+# Import travel models from dedicated module
+from app.models.travel_models import Activity, DayItinerary, TravelItinerary, TransportationSuggestion
 
 
 class TravelRequest(BaseModel):
     """Request schema for travel itinerary generation."""
     
+    origin: Optional[str] = Field(
+        None,
+        description="Starting location (if different from destination)",
+        example="Hanoi",
+        min_length=2,
+        max_length=100
+    )
     destination: str = Field(
         ...,
         description="Vietnam destination name",
@@ -150,25 +43,20 @@ class TravelRequest(BaseModel):
     )
     preferences: List[str] = Field(
         default_factory=list,
-        description="User preferences and interests",
-        example=["food", "culture", "history"]
+        description="List of travel preferences",
+        example=["food", "culture", "nature"]
     )
-    budget_range: Optional[str] = Field(
-        None,
-        description="Budget range category",
-        example="medium"
-    )
-    group_size: Optional[int] = Field(
-        default=2,
+    group_size: int = Field(
+        1,
         description="Number of travelers",
         example=2,
         ge=1,
-        le=20
+        le=10
     )
-    travel_style: Optional[str] = Field(
-        default="balanced",
-        description="Travel style preference",
-        example="adventurous"
+    budget: Optional[int] = Field(
+        None,
+        description="Budget in VND (e.g., '5000000' for 5 million VND)",
+        example=5000000
     )
     special_requirements: Optional[str] = Field(
         None,
@@ -204,27 +92,13 @@ class TravelRequest(BaseModel):
                 raise ValueError(f"Invalid preference: {pref}")
         return [pref.lower() for pref in v]
     
-    @validator("budget_range")
-    def validate_budget_range(cls, v):
-        """Validate budget range."""
+    @validator("budget")
+    def validate_budget(cls, v):
+        """Validate budget."""
         if v is not None:
-            valid_ranges = {"low", "budget", "medium", "moderate", "high", "luxury"}
-            if v.lower() not in valid_ranges:
-                raise ValueError(f"Budget range must be one of: {', '.join(valid_ranges)}")
-            return v.lower()
-        return v
-    
-    @validator("travel_style")
-    def validate_travel_style(cls, v):
-        """Validate travel style."""
-        if v is not None:
-            valid_styles = {
-                "relaxed", "balanced", "active", "adventurous", "cultural",
-                "luxury", "budget", "family", "romantic", "solo", "backpacker"
-            }
-            if v.lower() not in valid_styles:
-                raise ValueError(f"Travel style must be one of: {', '.join(valid_styles)}")
-            return v.lower()
+            if v < 0:
+                raise ValueError("Budget cannot be negative")
+            return v
         return v
     
     @property
@@ -234,52 +108,27 @@ class TravelRequest(BaseModel):
 
 
 class TravelResponse(BaseModel):
-    """Response schema for generated travel itinerary."""
+    """Response schema for travel itinerary generation."""
     
-    destination: str = Field(
+    success: bool = Field(
         ...,
-        description="Destination name",
-        example="Ho Chi Minh City"
+        description="Whether the itinerary generation was successful",
+        example=True
     )
-    total_days: int = Field(
+    message: str = Field(
         ...,
-        description="Total number of days in the itinerary",
-        example=4
+        description="Response message",
+        example="Itinerary generated successfully"
     )
-    itinerary: List[DayItinerary] = Field(
-        ...,
-        description="Day-by-day itinerary",
-        min_items=1
-    )
-    total_estimated_cost: Optional[float] = Field(
+    itinerary: Optional[TravelItinerary] = Field(
         None,
-        description="Total estimated cost for the entire trip in VND",
-        example=2000000.0
-    )
-    recommendations: List[str] = Field(
-        default_factory=list,
-        description="General travel recommendations and tips",
-        example=[
-            "Try local street food in District 1",
-            "Book Cu Chi Tunnels tour in advance"
-        ]
+        description="Generated travel itinerary"
     )
     weather_info: Optional[str] = Field(
         None,
         description="Weather information for the travel period",
-        example="Expect warm and humid weather with occasional rain"
+        example="Warm and humid, 26-33°C with occasional rain"
     )
-    generated_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="Timestamp when itinerary was generated"
-    )
-    
-    @validator("total_estimated_cost")
-    def validate_total_cost(cls, v):
-        """Validate total estimated cost is non-negative."""
-        if v is not None and v < 0:
-            raise ValueError("Total estimated cost cannot be negative")
-        return v
 
 
 class HealthCheckResponse(BaseModel):
@@ -309,34 +158,6 @@ class ErrorResponse(BaseModel):
             "details": {"field": "destination"}
         }
     )
-
-
-class DestinationInfo(BaseModel):
-    """Information about a travel destination."""
-    
-    name: str = Field(..., example="Ho Chi Minh City")
-    region: str = Field(..., example="South")
-    description: str = Field(..., example="Vibrant metropolis with rich history")
-    coordinates: Optional[dict] = Field(
-        None,
-        example={"lat": 10.8231, "lng": 106.6297}
-    )
-    best_time_to_visit: Optional[str] = Field(
-        None,
-        example="December to April (dry season)"
-    )
-    average_temperature: Optional[str] = Field(
-        None,
-        example="26-30°C"
-    )
-
-
-class VectorSearchResult(BaseModel):
-    """Result from vector similarity search."""
-    
-    content: str = Field(..., description="Original content")
-    similarity_score: float = Field(..., description="Similarity score (0-1)")
-    metadata: dict = Field(default_factory=dict, description="Additional metadata")
 
 
 # Data Management Schemas
@@ -405,14 +226,21 @@ class DataBatchUploadResponse(BaseModel):
 
 # Export all schemas
 __all__ = [
+    # Travel Models (imported from app.models.travel_models)
     "Activity",
     "DayItinerary", 
+    "TravelItinerary",
+    "TransportationSuggestion",
+    
+    # API Request/Response Schemas
     "TravelRequest",
     "TravelResponse",
+    
+    # System Schemas
     "HealthCheckResponse",
     "ErrorResponse",
-    "DestinationInfo",
-    "VectorSearchResult",
+    
+    # Data Management Schemas
     "DataInsertRequest",
     "DataInsertResponse",
     "DataDeleteRequest",

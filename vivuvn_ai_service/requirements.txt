@@ -1,43 +1,60 @@
-# FastAPI and web framework
-fastapi==0.117.1
-uvicorn[standard]==0.35.0
-pydantic==2.11.9
+# =============================================================================
+# Core Web Framework (includes uvicorn, pydantic, httpx, python-multipart)
+# =============================================================================
+fastapi[standard]==0.117.1
 pydantic-settings==2.10.1
 
-# AI and Machine Learning
+# =============================================================================
+# AI & Machine Learning
+# =============================================================================
+# LangChain core (includes langchain-text-splitters, langchain-core)
 langchain==0.3.27
 langchain-google-genai==2.0.9
+
+# LangGraph for AI workflow orchestration
 langgraph==0.6.5
-# New Google Gen AI SDK (replaces google-generativeai)
-google-genai==1.38.0 # Latest unified SDK
+
+# Google Gemini AI (modern unified SDK, replaces google-generativeai)
+google-genai==1.38.0
+
+# Vietnamese embedding model support
 sentence-transformers==5.1.0
 
-# Vector Database - Pinecone (Current v6+)
+# =============================================================================
+# Vector Database
+# =============================================================================
+# Pinecone Serverless v6+ with gRPC support for better performance
 pinecone[grpc]==6.0.1
-# Alternative: use langchain-pinecone for better integration
-# langchain-pinecone==0.4.0
 
-# Environment and Configuration
+# =============================================================================
+# Configuration & Environment
+# =============================================================================
 python-dotenv==1.1.1
 
-# HTTP Client
-httpx==0.28.1
-
+# =============================================================================
 # Utilities
+# =============================================================================
 python-dateutil==2.9.0.post0
 pytz==2025.2
-python-multipart==0.0.19
 
-# Development and Testing
-pytest
-pytest-asyncio==0.25.0
-
+# =============================================================================
 # Logging
+# =============================================================================
+# Structured logging with JSON output
 structlog==24.2.0
 
-# Data Processing
+# =============================================================================
+# Data Processing (optional, used by data loading scripts)
+# =============================================================================
 pandas==2.3.1
 numpy==2.3.2
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+# Testing
+pytest
+pytest-asyncio==0.25.0
 
 # Type checking
 mypy==1.14.1
@@ -45,8 +62,3 @@ mypy==1.14.1
 # Code formatting
 black==25.9.0
 isort==5.13.2
-
-# Optional: Additional useful packages for FastAPI development
-# python-multipart==0.0.17  # For form data handling
-# python-jose[cryptography]==3.4.0  # For JWT tokens
-# passlib[bcrypt]==1.7.4  # For password hashing
