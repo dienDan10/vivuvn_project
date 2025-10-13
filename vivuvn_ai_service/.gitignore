@@ -97,6 +97,9 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
+.env.production
+.env.docker
 .venv
 env/
 venv/
@@ -138,8 +141,8 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
-# Docker
-.dockerignore
+# Docker - keep Docker files in git
+# .dockerignore should be committed
 
 # Application specific
 logs/

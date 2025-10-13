@@ -1,0 +1,108 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment files (secrets should be passed at runtime)
+.env
+.env.*
+!.env.example
+!.env.docker
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing and coverage
+tests/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+sdist/
+wheels/
+pip-wheel-metadata/
+
+# Documentation
+*.md
+!README.md
+docs/
+*.rst
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Logs
+*.log
+logs/
+temp/
+tmp/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Project specific
+CLAUDE.md
+pyproject.toml
+setup.py
+setup.cfg
+
+# Data files - ALWAYS exclude to reduce image size significantly
+# Data should be mounted as volumes at runtime, not baked into image
+# This saves ~4MB+ per data file and allows easy updates without rebuild
+data/
+data/*.json
+data/*.csv
+
+# AI Model cache (will be downloaded in container)
+.cache/
+models/
+
+# Lock files
+poetry.lock
+Pipfile.lock
