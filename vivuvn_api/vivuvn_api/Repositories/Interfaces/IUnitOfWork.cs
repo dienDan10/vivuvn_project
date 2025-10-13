@@ -4,6 +4,8 @@
     {
         IUserRepository Users { get; }
         IItineraryRepository Itineraries { get; }
+        IItineraryDayRepository ItineraryDays { get; }
+        IBudgetRepository Budgets { get; }
 
         Task SaveChangesAsync();
 

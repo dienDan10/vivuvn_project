@@ -18,5 +18,6 @@ namespace vivuvn_api.DTOs.ValueObjects
         public int DaysCount { get; set; }
         public int GroupSize { get; set; }
         public string? TransportationVehicle { get; set; }
+
     }
 }

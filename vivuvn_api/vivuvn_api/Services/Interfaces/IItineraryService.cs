@@ -1,4 +1,5 @@
 ﻿using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
 
 namespace vivuvn_api.Services.Interfaces
@@ -7,6 +8,6 @@ namespace vivuvn_api.Services.Interfaces
     {
         Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId);
         Task<ItineraryDto> GetItineraryByIdAsync(int id);
-        Task<ItineraryDto> CreateItineraryAsync(int userId, CreateItineraryRequestDto request);
+        Task<CreateItineraryResponseDto> CreateItineraryAsync(int userId, CreateItineraryRequestDto request);
     }
 }

@@ -16,7 +16,6 @@ namespace vivuvn_api.Data
 
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Location> Locations { get; set; }
-        public DbSet<Photo> Photos { get; set; }
         public DbSet<LocationPhoto> LocationPhotos { get; set; }
 
         public DbSet<Itinerary> Itineraries { get; set; }
@@ -53,9 +52,6 @@ namespace vivuvn_api.Data
             // Composite Keys
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
-
-            modelBuilder.Entity<LocationPhoto>()
-                .HasKey(lp => new { lp.LocationId, lp.PhotoId });
 
             // Indexes
             modelBuilder.Entity<User>()

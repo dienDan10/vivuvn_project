@@ -48,9 +48,9 @@ namespace vivuvn_api.Controllers
             }
 
             // create itinerary
-            var itinerary = await _itineraryService.CreateItineraryAsync(int.Parse(userId), request);
+            var response = await _itineraryService.CreateItineraryAsync(int.Parse(userId), request);
 
-            return CreatedAtAction(nameof(GetItineraryById), new { id = itinerary.Id }, itinerary);
+            return Ok(response);
         }
     }
 }
