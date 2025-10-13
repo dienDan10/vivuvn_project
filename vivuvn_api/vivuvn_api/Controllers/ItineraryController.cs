@@ -29,6 +29,7 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetItineraryById(int id)
         {
             var itinerary = await _itineraryService.GetItineraryByIdAsync(id);
