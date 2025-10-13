@@ -12,14 +12,16 @@ namespace vivuvn_api.Repositories.Implementations
         public IItineraryRepository Itineraries { get; private set; }
         public IItineraryDayRepository ItineraryDays { get; set; }
         public IBudgetRepository Budgets { get; set; }
+        public IProvinceRepository Provinces { get; set; }
 
-        public UnitOfWork(AppDbContext context, IUserRepository userRepository, IItineraryRepository itineraryRepository, IItineraryDayRepository itineraryDayRepository, IBudgetRepository budgetRepository)
+        public UnitOfWork(AppDbContext context, IUserRepository userRepository, IItineraryRepository itineraryRepository, IItineraryDayRepository itineraryDayRepository, IBudgetRepository budgetRepository, IProvinceRepository provinceRepository)
         {
             _context = context;
             Users = userRepository;
             Itineraries = itineraryRepository;
             ItineraryDays = itineraryDayRepository;
             Budgets = budgetRepository;
+            Provinces = provinceRepository;
         }
 
         public async Task SaveChangesAsync()

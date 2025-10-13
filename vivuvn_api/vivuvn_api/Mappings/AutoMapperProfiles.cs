@@ -40,6 +40,9 @@ namespace vivuvn_api.Mappings
             CreateMap<BudgetItem, BudgetItemDto>()
                 .ForMember(dest => dest.BudgetType, opt => opt.MapFrom(src => src.BudgetType.Name));
 
+            // Mapping for Province
+            CreateMap<Province, ProvinceDto>();
+
         }
     }
 }
