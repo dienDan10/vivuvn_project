@@ -87,6 +87,14 @@ namespace vivuvn_api.Data
             modelBuilder.Entity<Location>()
                 .HasIndex(l => l.ProvinceId);
 
+            modelBuilder.Entity<Location>()
+                .HasIndex(l => l.NameNormalized)
+                .IsUnique();
+
+            modelBuilder.Entity<Province>()
+                .HasIndex(p => p.NameNormalized)
+                .IsUnique();
+
             modelBuilder.Entity<ExternalService>()
                 .HasIndex(es => es.ItineraryDayId);
 

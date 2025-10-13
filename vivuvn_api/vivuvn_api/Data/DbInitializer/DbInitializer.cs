@@ -77,6 +77,7 @@ namespace vivuvn_api.Data.DbInitializer
                 var province = new Province
                 {
                     Name = provinceData.Province,
+                    NameNormalized = TextHelper.ToSearchFriendly(provinceData.Province),
                     ImageUrl = provinceData.ImageUrl,
                 };
 
@@ -89,6 +90,7 @@ namespace vivuvn_api.Data.DbInitializer
                     var location = new Location
                     {
                         Name = locationData.Name,
+                        NameNormalized = TextHelper.ToSearchFriendly(locationData.Name),
                         Description = locationData.Description,
                         Latitude = locationData.Latitude,
                         Longitude = locationData.Longitude,
