@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../dialogs/budget-dialog/budget_dialog.dart';
 import 'widgets/btn_add_budget_item.dart';
 import 'widgets/budget_control.dart';
 import 'widgets/budget_header.dart';
@@ -14,36 +13,25 @@ class BudgetTab extends StatefulWidget {
 }
 
 class _BudgetTabState extends State<BudgetTab> {
-  double _budget = 0;
-
-  void _openBudgetDialog() async {
-    final newBudget = await showBudgetDialog(context, _budget);
-    if (newBudget != null) {
-      setState(() => _budget = newBudget);
-    }
-  }
+  final double _budget = 0;
 
   @override
   Widget build(final BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
+    return const Column(
       children: [
         // Total budget header
-        BudgetHeader(
-          budget: _budget,
-          onSetBudget: _openBudgetDialog,
-          backgroundColor: colorScheme.surface,
-        ),
+        BudgetHeader(),
 
         // Budget controls
-        const BudgetControl(),
+        BudgetControl(),
 
         // Budget list
-        const Expanded(child: ExpenseList()),
+        Expanded(child: ExpenseList()),
 
         // Add expense Button
-        const ButtonAddBudgetItem(),
+        ButtonAddBudgetItem(),
       ],
     );
   }

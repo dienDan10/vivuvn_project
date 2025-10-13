@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../../common/validator/validator.dart';
+import '../../../../../../common/validator/validator.dart';
 
 class BudgetInputField extends StatelessWidget {
   final TextEditingController controller;

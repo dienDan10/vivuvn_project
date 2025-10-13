@@ -4,9 +4,7 @@ import 'budget_input_field.dart';
 import 'submit_button.dart';
 
 class BudgetForm extends StatefulWidget {
-  final double initialBudget;
-
-  const BudgetForm({super.key, required this.initialBudget});
+  const BudgetForm({super.key});
 
   @override
   State<BudgetForm> createState() => _BudgetFormState();
@@ -20,11 +18,7 @@ class _BudgetFormState extends State<BudgetForm> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(
-      text: widget.initialBudget.toStringAsFixed(0),
-    );
-
-    // tự động bật bàn phím khi mở dialog
+    _controller = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_focusNode);
     });
@@ -39,7 +33,6 @@ class _BudgetFormState extends State<BudgetForm> {
 
   void _onSubmit() {
     if (!_formKey.currentState!.validate()) return;
-
     final value = double.tryParse(_controller.text.trim());
     Navigator.pop(context, value);
   }
@@ -58,13 +51,8 @@ class _BudgetFormState extends State<BudgetForm> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
-
-            // Trường nhập ngân sách
             BudgetInputField(controller: _controller, focusNode: _focusNode),
-
             const SizedBox(height: 20),
-
-            // Nút lưu
             SubmitButton(text: 'Lưu', onPressed: _onSubmit),
           ],
         ),
