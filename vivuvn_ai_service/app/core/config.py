@@ -36,13 +36,20 @@ class Settings(BaseSettings):
     PINECONE_METRIC: str = "cosine"        # Explicit similarity metric
     PINECONE_DEFAULT_NAMESPACE: str = ""   # Default namespace (empty string)
 
+    # Dynamic top_k Configuration (optimizes search based on trip duration)
+    VECTOR_SEARCH_BASE_K: int = 8         # Baseline places for any search
+    VECTOR_SEARCH_MIN_K: int = 8           # Minimum top_k (short trips)
+    VECTOR_SEARCH_MAX_K: int = 50           # Maximum top_k (prevent excessive fetches)
+    VECTOR_SEARCH_ACTIVITIES_PER_DAY: float = 3.5  # Expected activities per day
+    VECTOR_SEARCH_DIVERSITY_FACTOR: float = 2.0    # Fetch 2x for AI selection diversity
+
     # AI Configuration (Updated to use google-genai v0.12+)
     GEMINI_API_KEY: Optional[str] = None
     GEMINI_MODEL: str = "gemini-2.5-flash"
 
     # Server Configuration
     HOST: str = "localhost"
-    PORT: int = 5276
+    PORT: int = 8000
 
     # AI Model Parameters
     MAX_TOKENS: int = 16384  # Increased for complex travel itineraries
