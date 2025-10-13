@@ -77,6 +77,7 @@ namespace vivuvn_api.Data.DbInitializer
                 var province = new Province
                 {
                     Name = provinceData.Province,
+                    ImageUrl = provinceData.ImageUrl,
                 };
 
                 _context.Provinces.Add(province);

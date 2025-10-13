@@ -10,6 +10,7 @@ namespace vivuvn_api.DTOs.ValueObjects
         public string Name { get; set; } = string.Empty;
         public int StartProvinceId { get; set; }
         public string StartProvinceName { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
         public int DestinationProvinceId { get; set; }
         public string DestinationProvinceName { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }

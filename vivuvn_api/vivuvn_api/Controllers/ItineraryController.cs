@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using vivuvn_api.DTOs.Request;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Controllers
@@ -32,6 +33,24 @@ namespace vivuvn_api.Controllers
         {
             // Logic to retrieve a specific itinerary by ID would go here
             return Task.FromResult<IActionResult>(Ok(new { message = $"Itinerary details for ID: {id}" }));
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> CreateItinerary([FromBody] CreateItineraryRequestDto request)
+        {
+            // get user id from token
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "User ID claim is missing." });
+            }
+
+            // create itinerary
+            var itinerary = await _itineraryService.CreateItineraryAsync(int.Parse(userId), request);
+
+            return CreatedAtAction(nameof(GetItineraryById), new { id = itinerary.Id }, itinerary);
         }
     }
 }

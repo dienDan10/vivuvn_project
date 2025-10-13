@@ -3,6 +3,7 @@
     public class ProvinceData
     {
         public string Province { get; set; }
+        public string ImageUrl { get; set; }
         public List<LocationData> Places { get; set; }
     }
 
