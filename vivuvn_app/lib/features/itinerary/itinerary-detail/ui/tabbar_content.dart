@@ -26,6 +26,11 @@ class TabbarContent extends StatelessWidget {
         ),
         // Tab 2 - Lịch trình
         ScheduleTab(),
+        // Scaffold(
+        //   body: const Text('Lich trinh trong'),
+        //   floatingActionButton: const ButtonGenerateItinerary(),
+        //   floatingActionButtonLocation: ExpandableFab.location,
+        // ),
         // Tab 3 - Ngân sách
         BudgetTab(),
       ],

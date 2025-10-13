@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 import '../../../../common/helper/app_constants.dart';
 import 'hero_section.dart';
 import 'tabbar_content.dart';
 import 'tabbar_header.dart';
+
+final fab_global_key = GlobalKey<ExpandableFabState>();
 
 class ItineraryDetailLayout extends StatefulWidget {
   const ItineraryDetailLayout({super.key});

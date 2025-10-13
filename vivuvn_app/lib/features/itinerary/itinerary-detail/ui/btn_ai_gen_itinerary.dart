@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
-import '../../../create-itinerary/ui/manually/create_itinerary_modal.dart';
+import '../../create-itinerary/ui/AI-generate/generate_AI_modal.dart';
+import 'itinerary_detail_layout.dart';
 
-class ButtonAddItinerary extends StatefulWidget {
-  const ButtonAddItinerary({super.key});
+class ButtonGenerateItinerary extends StatefulWidget {
+  const ButtonGenerateItinerary({super.key});
 
   @override
-  State<ButtonAddItinerary> createState() => _ButtonAddItineraryState();
+  State<ButtonGenerateItinerary> createState() =>
+      _ButtonGenerateItineraryState();
 }
 
-class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
-  final _key = GlobalKey<ExpandableFabState>();
+class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
   void _showCreateItineraryBottomSheet(final BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -20,14 +21,14 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (final context) => const CreateItineraryModal(),
+      builder: (final context) => const InterestSelectionScreen(),
     );
   }
 
   @override
   Widget build(final BuildContext context) {
     return ExpandableFab(
-      key: _key,
+      key: fab_global_key,
       overlayStyle: ExpandableFabOverlayStyle(
         color: Colors.black.withValues(alpha: 0.7),
       ),
@@ -51,7 +52,7 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
         Row(
           children: [
             Text(
-              'Create new itinerary',
+              'AI Suggested Schedule',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onPrimary,
                 fontSize: 15,
@@ -67,7 +68,7 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
               ),
               onPressed: () {
                 // Close the expandable FAB
-                final state = _key.currentState;
+                final state = fab_global_key.currentState;
                 state?.toggle();
                 // Show the bottom sheet
                 _showCreateItineraryBottomSheet(context);
