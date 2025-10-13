@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'ui/widgets/add_expense_dialog.dart';
-import 'ui/widgets/budget_dialog.dart';
+import 'dialogs/add-expense/add_expense_dialog.dart';
+import 'dialogs/budget-dialog/budget_dialog.dart';
 import 'ui/widgets/budget_header.dart';
 import 'ui/widgets/list_expense.dart';
 
