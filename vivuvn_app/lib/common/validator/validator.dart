@@ -20,4 +20,25 @@ class Validator {
     }
     return null;
   }
+
+  static String? notEmpty(final String? value, {final String fieldName = ''}) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName must not be empty';
+    }
+    return null;
+  }
+
+  static String? money(
+    final String? value, {
+    final String fieldName = 'Số tiền',
+  }) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName must not be empty';
+    }
+    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    if (amount == null || amount <= 0) {
+      return '$fieldName is not valid';
+    }
+    return null;
+  }
 }
