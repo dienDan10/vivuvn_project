@@ -8,7 +8,7 @@ namespace vivuvn_api.Services.Implementations
 {
     public class ProvinceService(IMapper _mapper, IUnitOfWork _unitOfWork) : IProvinceService
     {
-        public async Task<IEnumerable<ProvinceDto>> SearchProvinceAsync(string queryString)
+        public async Task<IEnumerable<ProvinceDto>> SearchProvinceAsync(string? queryString, int? limit = 10)
         {
             if (string.IsNullOrWhiteSpace(queryString))
             {
@@ -17,7 +17,7 @@ namespace vivuvn_api.Services.Implementations
 
             var normalizedQuery = TextHelper.ToSearchFriendly(queryString);
             var provinces = await _unitOfWork.Provinces
-                .GetAllAsync(p => p.NameNormalized.Contains(normalizedQuery));
+                .SearchProvincesAsync(p => p.NameNormalized.Contains(normalizedQuery), limit: limit);
 
             return _mapper.Map<IEnumerable<ProvinceDto>>(provinces);
         }

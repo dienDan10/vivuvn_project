@@ -4,6 +4,6 @@ namespace vivuvn_api.Services.Interfaces
 {
     public interface IProvinceService
     {
-        Task<IEnumerable<ProvinceDto>> SearchProvinceAsync(string queryString);
+        Task<IEnumerable<ProvinceDto>> SearchProvinceAsync(string? queryString, int? limit);
     }
 }
