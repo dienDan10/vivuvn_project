@@ -3,6 +3,7 @@
     public interface IUnitOfWork : IDisposable
     {
         IUserRepository Users { get; }
+        IItineraryRepository Itineraries { get; }
 
         Task SaveChangesAsync();
 

@@ -13,6 +13,7 @@ namespace vivuvn_api.Extensions
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IItineraryRepository, ItineraryRepository>();
             return services;
         }
 
@@ -25,6 +26,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IItineraryService, ItineraryService>();
             return services;
         }
 
