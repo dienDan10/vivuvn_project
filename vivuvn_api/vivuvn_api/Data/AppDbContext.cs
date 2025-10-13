@@ -88,8 +88,7 @@ namespace vivuvn_api.Data
                 .HasIndex(l => l.ProvinceId);
 
             modelBuilder.Entity<Location>()
-                .HasIndex(l => l.NameNormalized)
-                .IsUnique();
+                .HasIndex(l => l.NameNormalized);
 
             modelBuilder.Entity<Province>()
                 .HasIndex(p => p.NameNormalized)

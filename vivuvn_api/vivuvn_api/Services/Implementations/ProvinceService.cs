@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using vivuvn_api.DTOs.ValueObjects;
+using vivuvn_api.Helpers;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
 
@@ -9,8 +10,14 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task<IEnumerable<ProvinceDto>> SearchProvinceAsync(string queryString)
         {
+            if (string.IsNullOrWhiteSpace(queryString))
+            {
+                throw new ArgumentException("Query string cannot be null or empty.", nameof(queryString));
+            }
+
+            var normalizedQuery = TextHelper.ToSearchFriendly(queryString);
             var provinces = await _unitOfWork.Provinces
-                .GetAllAsync(p => p.Name.ToLower().Contains(queryString.ToLower()));
+                .GetAllAsync(p => p.NameNormalized.Contains(normalizedQuery));
 
             return _mapper.Map<IEnumerable<ProvinceDto>>(provinces);
         }
