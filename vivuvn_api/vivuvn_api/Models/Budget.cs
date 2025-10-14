@@ -9,7 +9,6 @@ namespace vivuvn_api.Models
 
         [Required]
         public int ItineraryId { get; set; }
-        public Itinerary Itinerary { get; set; } = null!;
 
         public decimal TotalBudget { get; set; }
 

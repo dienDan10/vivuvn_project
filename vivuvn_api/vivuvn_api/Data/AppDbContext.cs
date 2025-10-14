@@ -16,13 +16,11 @@ namespace vivuvn_api.Data
 
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Location> Locations { get; set; }
-        public DbSet<Photo> Photos { get; set; }
         public DbSet<LocationPhoto> LocationPhotos { get; set; }
 
         public DbSet<Itinerary> Itineraries { get; set; }
         public DbSet<ItineraryDay> ItineraryDays { get; set; }
         public DbSet<ItineraryItem> ItineraryItems { get; set; }
-        public DbSet<ItineraryDayCost> ItineraryDayCosts { get; set; }
         public DbSet<FavoritePlace> FavoritePlaces { get; set; }
 
         public DbSet<Budget> Budgets { get; set; }
@@ -37,26 +35,23 @@ namespace vivuvn_api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Break the cascade path for ItineraryDayCost to ItineraryDay
-            modelBuilder.Entity<ItineraryDayCost>()
-                .HasOne(idc => idc.ItineraryDay)
-                .WithMany(id => id.Costs)
-                .HasForeignKey(idc => idc.ItineraryDayId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //// Break the cascade path for ItineraryDayCost to ItineraryDay
+            //modelBuilder.Entity<ItineraryDayCost>()
+            //    .HasOne(idc => idc.ItineraryDay)
+            //    .WithMany(id => id.Costs)
+            //    .HasForeignKey(idc => idc.ItineraryDayId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            // Break the cascade path for ItineraryDayCost to BudgetItem
-            modelBuilder.Entity<ItineraryDayCost>()
-                .HasOne(idc => idc.BudgetItem)
-                .WithMany()  // Assuming BudgetItem doesn't have a navigation property back to ItineraryDayCost
-                .HasForeignKey(idc => idc.BudgetItemId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //// Break the cascade path for ItineraryDayCost to BudgetItem
+            //modelBuilder.Entity<ItineraryDayCost>()
+            //    .HasOne(idc => idc.BudgetItem)
+            //    .WithMany()  // Assuming BudgetItem doesn't have a navigation property back to ItineraryDayCost
+            //    .HasForeignKey(idc => idc.BudgetItemId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             // Composite Keys
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
-
-            modelBuilder.Entity<LocationPhoto>()
-                .HasKey(lp => new { lp.LocationId, lp.PhotoId });
 
             // Indexes
             modelBuilder.Entity<User>()
@@ -91,6 +86,13 @@ namespace vivuvn_api.Data
 
             modelBuilder.Entity<Location>()
                 .HasIndex(l => l.ProvinceId);
+
+            modelBuilder.Entity<Location>()
+                .HasIndex(l => l.NameNormalized);
+
+            modelBuilder.Entity<Province>()
+                .HasIndex(p => p.NameNormalized)
+                .IsUnique();
 
             modelBuilder.Entity<ExternalService>()
                 .HasIndex(es => es.ItineraryDayId);

@@ -12,8 +12,8 @@ using vivuvn_api.Data;
 namespace vivuvn_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251010153837_modifyItineraryTable")]
-    partial class modifyItineraryTable
+    [Migration("20251013083335_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -224,32 +224,6 @@ namespace vivuvn_api.Migrations
                     b.ToTable("ItineraryDays");
                 });
 
-            modelBuilder.Entity("vivuvn_api.Models.ItineraryDayCost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BudgetItemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ItineraryDayId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BudgetItemId");
-
-                    b.HasIndex("ItineraryDayId");
-
-                    b.ToTable("ItineraryDayCosts");
-                });
-
             modelBuilder.Entity("vivuvn_api.Models.ItineraryItem", b =>
                 {
                     b.Property<int>("ItineraryItemId")
@@ -357,15 +331,22 @@ namespace vivuvn_api.Migrations
 
             modelBuilder.Entity("vivuvn_api.Models.LocationPhoto", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PhotoId")
-                        .HasColumnType("int");
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("LocationId", "PhotoId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("PhotoId");
+                    b.HasIndex("LocationId");
 
                     b.ToTable("LocationPhotos");
                 });
@@ -395,26 +376,6 @@ namespace vivuvn_api.Migrations
                     b.ToTable("PasswordResets");
                 });
 
-            modelBuilder.Entity("vivuvn_api.Models.Photo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("DeleteFlag")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PhotoUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Photos");
-                });
-
             modelBuilder.Entity("vivuvn_api.Models.Province", b =>
                 {
                     b.Property<int>("Id")
@@ -425,6 +386,10 @@ namespace vivuvn_api.Migrations
 
                     b.Property<bool>("DeleteFlag")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -580,7 +545,7 @@ namespace vivuvn_api.Migrations
             modelBuilder.Entity("vivuvn_api.Models.ExternalService", b =>
                 {
                     b.HasOne("vivuvn_api.Models.ItineraryDay", "ItineraryDay")
-                        .WithMany("ExternalServices")
+                        .WithMany()
                         .HasForeignKey("ItineraryDayId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -653,25 +618,6 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Itinerary");
                 });
 
-            modelBuilder.Entity("vivuvn_api.Models.ItineraryDayCost", b =>
-                {
-                    b.HasOne("vivuvn_api.Models.BudgetItem", "BudgetItem")
-                        .WithMany()
-                        .HasForeignKey("BudgetItemId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("vivuvn_api.Models.ItineraryDay", "ItineraryDay")
-                        .WithMany("Costs")
-                        .HasForeignKey("ItineraryDayId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("BudgetItem");
-
-                    b.Navigation("ItineraryDay");
-                });
-
             modelBuilder.Entity("vivuvn_api.Models.ItineraryItem", b =>
                 {
                     b.HasOne("vivuvn_api.Models.ItineraryDay", "ItineraryDay")
@@ -708,15 +654,7 @@ namespace vivuvn_api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("vivuvn_api.Models.Photo", "Photo")
-                        .WithMany()
-                        .HasForeignKey("PhotoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Location");
-
-                    b.Navigation("Photo");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.PasswordReset", b =>
@@ -765,10 +703,6 @@ namespace vivuvn_api.Migrations
 
             modelBuilder.Entity("vivuvn_api.Models.ItineraryDay", b =>
                 {
-                    b.Navigation("Costs");
-
-                    b.Navigation("ExternalServices");
-
                     b.Navigation("Items");
                 });
 

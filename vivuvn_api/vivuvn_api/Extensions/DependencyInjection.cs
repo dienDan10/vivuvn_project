@@ -13,6 +13,11 @@ namespace vivuvn_api.Extensions
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IItineraryRepository, ItineraryRepository>();
+            services.AddScoped<IItineraryDayRepository, ItineraryDayRepository>();
+            services.AddScoped<IBudgetRepository, BudgetRepository>();
+            services.AddScoped<IProvinceRepository, ProvinceRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
             return services;
         }
 
@@ -25,6 +30,8 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IItineraryService, ItineraryService>();
+            services.AddScoped<IProvinceService, ProvinceService>();
             return services;
         }
 
@@ -38,6 +45,24 @@ namespace vivuvn_api.Extensions
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnectionString")));
+            return services;
+        }
+
+        public static IServiceCollection AddCustomHttpClient(this IServiceCollection services, IConfiguration configuration)
+        {
+
+            // AI Client
+            services.AddHttpClient<IAiClientService, AiClientService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("AiService:BaseUrl") ?? "");
+            });
+
+            // Google Map Client
+            services.AddHttpClient<IGoogleMapClientService, GoogleMapClientService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:BaseUrl") ?? "");
+            });
+
             return services;
         }
     }

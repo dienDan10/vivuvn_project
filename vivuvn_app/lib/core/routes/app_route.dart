@@ -20,7 +20,7 @@ import 'routes.dart';
 final goRouterProvider = Provider<GoRouter>((final ref) {
   return GoRouter(
     // initialLocation: splashRoute,
-    initialLocation: itineraryDetailRoute,
+    initialLocation: itineraryRoute,
     errorBuilder: (final context, final state) => RouteErrorScreen(
       error: state.error.toString(),
       path: state.uri.toString(),

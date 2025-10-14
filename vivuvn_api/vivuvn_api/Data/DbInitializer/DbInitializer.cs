@@ -77,6 +77,8 @@ namespace vivuvn_api.Data.DbInitializer
                 var province = new Province
                 {
                     Name = provinceData.Province,
+                    NameNormalized = TextHelper.ToSearchFriendly(provinceData.Province),
+                    ImageUrl = provinceData.ImageUrl,
                 };
 
                 _context.Provinces.Add(province);
@@ -88,6 +90,7 @@ namespace vivuvn_api.Data.DbInitializer
                     var location = new Location
                     {
                         Name = locationData.Name,
+                        NameNormalized = TextHelper.ToSearchFriendly(locationData.Name),
                         Description = locationData.Description,
                         Latitude = locationData.Latitude,
                         Longitude = locationData.Longitude,
@@ -101,32 +104,23 @@ namespace vivuvn_api.Data.DbInitializer
                         WebsiteUri = locationData.WebsiteUri,
                         DeleteFlag = false,
                         ProvinceId = province.Id,
+                        LocationPhotos = new List<LocationPhoto>(),
                     };
 
-                    _context.Locations.Add(location);
-                    _context.SaveChanges();
-
-                    // Add Photos if any
                     if (locationData.Pictures != null && locationData.Pictures.Count > 0)
                     {
                         foreach (var pictureUrl in locationData.Pictures)
                         {
-                            var photo = new Photo
-                            {
-                                PhotoUrl = pictureUrl,
-                                DeleteFlag = false,
-                            };
-                            _context.Photos.Add(photo);
-                            _context.SaveChanges();
                             var locationPhoto = new LocationPhoto
                             {
-                                LocationId = location.Id,
-                                PhotoId = photo.Id,
+                                PhotoUrl = pictureUrl,
                             };
-                            _context.LocationPhotos.Add(locationPhoto);
-                            _context.SaveChanges();
+                            location.LocationPhotos.Add(locationPhoto);
                         }
                     }
+
+                    _context.Locations.Add(location);
+                    _context.SaveChanges();
 
                 }
             }

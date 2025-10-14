@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace vivuvn_api.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,27 +25,14 @@ namespace vivuvn_api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Photos",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DeleteFlag = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Photos", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Provinces",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProvinceCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProvinceCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeleteFlag = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -96,7 +83,7 @@ namespace vivuvn_api.Migrations
                     IsEmailVerified = table.Column<bool>(type: "bit", nullable: false),
                     EmailVerificationToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmailVerificationTokenExpireDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsLock = table.Column<bool>(type: "bit", nullable: false)
+                    LockoutEnd = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -112,15 +99,15 @@ namespace vivuvn_api.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProvinceId = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BannerPhoto = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Latitude = table.Column<double>(type: "float", nullable: true),
                     Longitude = table.Column<double>(type: "float", nullable: true),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Rating = table.Column<double>(type: "float", nullable: true),
-                    ReviewCount = table.Column<int>(type: "int", nullable: false),
-                    MapPlaceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OpenTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CloseTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RatingCount = table.Column<int>(type: "int", nullable: true),
+                    GooglePlaceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PlaceUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DirectionsUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReviewUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     WebsiteUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeleteFlag = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -143,17 +130,28 @@ namespace vivuvn_api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Destination = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StartProvinceId = table.Column<int>(type: "int", nullable: false),
+                    DestinationProvinceId = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DaysCount = table.Column<int>(type: "int", nullable: false),
+                    GroupSize = table.Column<int>(type: "int", nullable: false),
                     DeleteFlag = table.Column<bool>(type: "bit", nullable: false),
                     TransportationVehicle = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Itineraries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Itineraries_Provinces_DestinationProvinceId",
+                        column: x => x.DestinationProvinceId,
+                        principalTable: "Provinces",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Itineraries_Provinces_StartProvinceId",
+                        column: x => x.StartProvinceId,
+                        principalTable: "Provinces",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Itineraries_Users_UserId",
                         column: x => x.UserId,
@@ -211,22 +209,18 @@ namespace vivuvn_api.Migrations
                 name: "LocationPhotos",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     LocationId = table.Column<int>(type: "int", nullable: false),
-                    PhotoId = table.Column<int>(type: "int", nullable: false)
+                    PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LocationPhotos", x => new { x.LocationId, x.PhotoId });
+                    table.PrimaryKey("PK_LocationPhotos", x => x.Id);
                     table.ForeignKey(
                         name: "FK_LocationPhotos_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LocationPhotos_Photos_PhotoId",
-                        column: x => x.PhotoId,
-                        principalTable: "Photos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -388,31 +382,6 @@ namespace vivuvn_api.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "ItineraryDayCosts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BudgetItemId = table.Column<int>(type: "int", nullable: false),
-                    ItineraryDayId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ItineraryDayCosts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ItineraryDayCosts_BudgetItems_BudgetItemId",
-                        column: x => x.BudgetItemId,
-                        principalTable: "BudgetItems",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ItineraryDayCosts_ItineraryDays_ItineraryDayId",
-                        column: x => x.ItineraryDayId,
-                        principalTable: "ItineraryDays",
-                        principalColumn: "Id");
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_BudgetItems_BudgetId",
                 table: "BudgetItems",
@@ -450,19 +419,19 @@ namespace vivuvn_api.Migrations
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Itineraries_DestinationProvinceId",
+                table: "Itineraries",
+                column: "DestinationProvinceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Itineraries_StartProvinceId",
+                table: "Itineraries",
+                column: "StartProvinceId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Itineraries_UserId",
                 table: "Itineraries",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ItineraryDayCosts_BudgetItemId",
-                table: "ItineraryDayCosts",
-                column: "BudgetItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ItineraryDayCosts_ItineraryDayId",
-                table: "ItineraryDayCosts",
-                column: "ItineraryDayId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ItineraryDays_ItineraryId",
@@ -485,9 +454,9 @@ namespace vivuvn_api.Migrations
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LocationPhotos_PhotoId",
+                name: "IX_LocationPhotos_LocationId",
                 table: "LocationPhotos",
-                column: "PhotoId");
+                column: "LocationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Locations_ProvinceId",
@@ -522,13 +491,13 @@ namespace vivuvn_api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "BudgetItems");
+
+            migrationBuilder.DropTable(
                 name: "ExternalServices");
 
             migrationBuilder.DropTable(
                 name: "FavoritePlaces");
-
-            migrationBuilder.DropTable(
-                name: "ItineraryDayCosts");
 
             migrationBuilder.DropTable(
                 name: "ItineraryItems");
@@ -543,10 +512,13 @@ namespace vivuvn_api.Migrations
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
-                name: "ServiceTypes");
+                name: "BudgetTypes");
 
             migrationBuilder.DropTable(
-                name: "BudgetItems");
+                name: "Budgets");
+
+            migrationBuilder.DropTable(
+                name: "ServiceTypes");
 
             migrationBuilder.DropTable(
                 name: "ItineraryDays");
@@ -555,22 +527,13 @@ namespace vivuvn_api.Migrations
                 name: "Locations");
 
             migrationBuilder.DropTable(
-                name: "Photos");
-
-            migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "BudgetTypes");
-
-            migrationBuilder.DropTable(
-                name: "Budgets");
+                name: "Itineraries");
 
             migrationBuilder.DropTable(
                 name: "Provinces");
-
-            migrationBuilder.DropTable(
-                name: "Itineraries");
 
             migrationBuilder.DropTable(
                 name: "Users");

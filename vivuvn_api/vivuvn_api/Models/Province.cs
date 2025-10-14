@@ -8,6 +8,8 @@ namespace vivuvn_api.Models
         public int Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
+        public string NameNormalized { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
         public string? ProvinceCode { get; set; } = string.Empty;
         public bool DeleteFlag { get; set; }
     }

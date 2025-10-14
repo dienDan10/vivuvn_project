@@ -9,11 +9,21 @@ namespace vivuvn_api.Repositories.Implementations
         private readonly AppDbContext _context;
         private IDbContextTransaction? _transaction;
         public IUserRepository Users { get; private set; }
+        public IItineraryRepository Itineraries { get; private set; }
+        public IItineraryDayRepository ItineraryDays { get; set; }
+        public IBudgetRepository Budgets { get; set; }
+        public IProvinceRepository Provinces { get; set; }
+        public ILocationRepository Locations { get; private set; }
 
-        public UnitOfWork(AppDbContext context, IUserRepository userRepository)
+        public UnitOfWork(AppDbContext context, IUserRepository userRepository, IItineraryRepository itineraryRepository, IItineraryDayRepository itineraryDayRepository, IBudgetRepository budgetRepository, IProvinceRepository provinceRepository, ILocationRepository locationRepository)
         {
             _context = context;
             Users = userRepository;
+            Itineraries = itineraryRepository;
+            ItineraryDays = itineraryDayRepository;
+            Budgets = budgetRepository;
+            Provinces = provinceRepository;
+            Locations = locationRepository;
         }
 
         public async Task SaveChangesAsync()
