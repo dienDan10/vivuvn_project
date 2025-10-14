@@ -12,7 +12,7 @@ namespace vivuvn_api.Services.Implementations
         {
             if (string.IsNullOrWhiteSpace(queryString))
             {
-                throw new ArgumentException("Query string cannot be null or empty.", nameof(queryString));
+                return [];
             }
 
             var normalizedQuery = TextHelper.ToSearchFriendly(queryString);

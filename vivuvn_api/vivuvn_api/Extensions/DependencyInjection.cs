@@ -47,5 +47,23 @@ namespace vivuvn_api.Extensions
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnectionString")));
             return services;
         }
+
+        public static IServiceCollection AddCustomHttpClient(this IServiceCollection services, IConfiguration configuration)
+        {
+
+            // AI Client
+            services.AddHttpClient<IAiClientService, AiClientService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("AiService:BaseUrl") ?? "");
+            });
+
+            // Google Map Client
+            services.AddHttpClient<IGoogleMapClientService, GoogleMapClientService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:BaseUrl") ?? "");
+            });
+
+            return services;
+        }
     }
 }
