@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'btn_create_itinerary.dart';
 import 'date_range_picker.dart';
+import 'start_location_input.dart';
 
 class CreateItineraryForm extends StatefulWidget {
   final ScrollController scrollController;
@@ -64,24 +65,7 @@ class _CreateItineraryFormState extends State<CreateItineraryForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // From Input Field
-          Material(
-            color: Colors.transparent,
-            child: TextFormField(
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: 'Hà Nội',
-                labelText: 'From where?',
-                prefixIcon: const Icon(Icons.flight_takeoff, size: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 12,
-                ),
-              ),
-            ),
-          ),
+          const StartLocationInput(),
           const SizedBox(height: 16),
 
           // To Input Field
