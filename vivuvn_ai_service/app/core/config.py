@@ -53,7 +53,7 @@ class Settings(BaseSettings):
 
     # AI Model Parameters
     MAX_TOKENS: int = 16384  # Increased for complex travel itineraries
-    TEMPERATURE: float = 0.5
+    TEMPERATURE: float = 0.3
     
     # CORS Configuration
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]

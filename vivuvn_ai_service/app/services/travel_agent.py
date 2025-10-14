@@ -27,6 +27,7 @@ from app.services.embedding_service import get_embedding_service
 from app.prompts.travel_prompts import SYSTEM_PROMPT, create_user_prompt
 # Cluster places geographically for better route optimization
 from app.utils.geo_utils import simple_kmeans_geo
+import asyncio
 
 logger = structlog.get_logger(__name__)
 
@@ -209,7 +210,6 @@ class TravelPlanningAgent:
             user_prompt = create_user_prompt(travel_request, relevant_places, place_clusters)
 
             # Call Gemini with structured output using modern SDK pattern
-            import asyncio
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.client.models.generate_content(
@@ -258,7 +258,13 @@ class TravelPlanningAgent:
             return state
 
     async def _validate_output_node(self, state: TravelPlanningState) -> TravelPlanningState:
-        """Node 4: Validate output for hallucinations."""
+        """Node 4: Validate output for hallucinations.
+
+        Since all activities must have place_id (database requirement), validation
+        now checks:
+        1. Every activity has a non-empty place_id
+        2. Activity names match database places (fuzzy match for minor variations)
+        """
         try:
             structured_itinerary = state.get("structured_itinerary")
             relevant_places = state.get("relevant_places", [])
@@ -270,43 +276,67 @@ class TravelPlanningAgent:
                 state["error"] = "No itinerary generated to validate"
                 return state
 
-            # Extract place names from database
+            # Extract place IDs and names from database
+            db_place_ids = set()
             db_place_names = set()
             for place in relevant_places:
+                place_id = place.get('metadata', {}).get('place_id', '')
                 name = place.get('metadata', {}).get('name', '')
+                if place_id:
+                    db_place_ids.add(place_id.strip())
                 if name:
                     db_place_names.add(name.lower().strip())
 
             # Check each activity
             days = structured_itinerary.get('days', [])
+            missing_place_id_count = 0
             hallucinated_count = 0
             validated_count = 0
+            total_activities = 0
 
             for day in days:
                 for activity in day.get('activities', []):
-                    if activity.get('from_database', False):
-                        activity_name = activity.get('name', '').lower().strip()
+                    total_activities += 1
+                    activity_place_id = activity.get('place_id', '').strip()
+                    activity_name = activity.get('name', '').lower().strip()
 
-                        # Check if activity name matches any database place
-                        found = False
-                        for db_name in db_place_names:
-                            if db_name in activity_name or activity_name in db_name:
-                                found = True
-                                validated_count += 1
-                                break
+                    # Check 1: Must have place_id (critical for DB foreign key)
+                    if not activity_place_id:
+                        missing_place_id_count += 1
+                        logger.warning(f"[Node 4/5] ❌ Missing place_id: '{activity.get('name')}'")
+                        continue
 
-                        if not found:
-                            hallucinated_count += 1
-                            logger.warning(f"[Node 4/5] Possible hallucination: '{activity.get('name')}'")
+                    # Check 2: place_id should match database (exact match)
+                    if activity_place_id not in db_place_ids:
+                        hallucinated_count += 1
+                        logger.warning(f"[Node 4/5] ⚠️ Unknown place_id: '{activity_place_id}' for '{activity.get('name')}'")
+                        continue
+
+                    # Check 3: Activity name should match database place (fuzzy match)
+                    found = False
+                    for db_name in db_place_names:
+                        if db_name in activity_name or activity_name in db_name:
+                            found = True
+                            validated_count += 1
+                            break
+
+                    if not found:
+                        logger.warning(f"[Node 4/5] ⚠️ Name mismatch (but place_id OK): '{activity.get('name')}'")
+                        # Don't count as hallucination if place_id is valid
+                        validated_count += 1
 
             # Log validation results
-            logger.info(f"[Node 4/5] Validation: {validated_count} verified, "
-                       f"{hallucinated_count} suspicious activities")
+            logger.info(f"[Node 4/5] Validation: {validated_count}/{total_activities} verified, "
+                       f"{missing_place_id_count} missing place_id, {hallucinated_count} unknown place_id")
 
-            state["validation_passed"] = (hallucinated_count == 0)
+            # Pass validation if all activities have valid place_id
+            state["validation_passed"] = (missing_place_id_count == 0 and hallucinated_count == 0)
+
+            if missing_place_id_count > 0:
+                logger.error(f"[Node 4/5] ❌ CRITICAL: {missing_place_id_count} activities missing place_id (DB requirement)")
 
             if hallucinated_count > 0:
-                logger.warning(f"[Node 4/5] Found {hallucinated_count} potential hallucinations")
+                logger.warning(f"[Node 4/5] ⚠️ Found {hallucinated_count} activities with unknown place_id")
 
             return state
 
@@ -338,22 +368,22 @@ class TravelPlanningAgent:
             try:
                 # Create TravelItinerary from the structured data
                 from app.models.travel_models import TravelItinerary, DayItinerary, Activity, TransportationSuggestion
-                
+
                 day_itineraries = []
                 for day_data in structured_itinerary.get("days", []):
                     activities = []
                     for activity_data in day_data.get("activities", []):
+                        # All activities must have place_id (from_database field removed)
                         activity = Activity(
                             time=activity_data.get("time", "09:00"),
                             name=activity_data.get("name", "Hoạt động chưa xác định"),
-                            place_id=activity_data.get("place_id"),
-                            duration_hours=activity_data.get("duration_hours", 1),
+                            place_id=activity_data.get("place_id", ""),
+                            duration_hours=activity_data.get("duration_hours", 1.0),
                             cost_estimate=activity_data.get("cost_estimate", 0.0),
-                            category=activity_data.get("category", "sightseeing"),
-                            from_database=activity_data.get("from_database", False)
+                            category=activity_data.get("category", "sightseeing")
                         )
                         activities.append(activity)
-                    
+
                     day_itinerary = DayItinerary(
                         day=day_data.get("day", 1),
                         date=day_data.get("date", travel_request.start_date.strftime("%Y-%m-%d")),
@@ -362,8 +392,8 @@ class TravelPlanningAgent:
                         notes=day_data.get("notes", "Ghi chú cho ngày này")
                     )
                     day_itineraries.append(day_itinerary)
-                
-                # Create transportation suggestions (empty for now)
+
+                # Create transportation suggestions
                 transportation_suggestions = structured_itinerary.get("transportation_suggestions", [])
                 transport_objects = []
                 for transport_data in transportation_suggestions:
