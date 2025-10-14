@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ui/btn_ai_gen_itinerary.dart';
 import 'widgets/add_hotel_expan.dart';
 import 'widgets/add_place_button.dart';
 import 'widgets/add_restaurant_expan.dart';
@@ -18,30 +20,35 @@ class ScheduleTab extends ConsumerWidget {
     final selectedIndex = ref.watch(selectedDayIndexProvider);
     final selectedDay = days[selectedIndex];
 
-    return Column(
-      children: [
-        const DaySelectorBar(),
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              // Tiêu đề ngày
-              DayTitle(day: selectedDay),
+    return Scaffold(
+      body: Column(
+        children: [
+          const DaySelectorBar(),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // Tiêu đề ngày
+                DayTitle(day: selectedDay),
 
-              // Danh sách địa điểm
-              const PlaceListSection(),
+                // Danh sách địa điểm
+                const PlaceListSection(),
 
-              // Nút thêm địa điểm
-              const AddPlaceButton(),
+                // Nút thêm địa điểm
+                const AddPlaceButton(),
 
-              // Các nhóm mở rộng (expand)
-              const SuggestedPlacesTile(),
-              const AddHotelTile(),
-              const AddRestaurantTile(),
-            ],
+                // Các nhóm mở rộng (expand)
+                const SuggestedPlacesTile(),
+                const AddHotelTile(),
+                const AddRestaurantTile(),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+      // Nút tạo lịch trình bằng AI
+      floatingActionButton: const ButtonGenerateItinerary(),
+      floatingActionButtonLocation: ExpandableFab.location,
     );
   }
 }
