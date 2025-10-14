@@ -46,6 +46,9 @@ namespace vivuvn_api.Mappings
             // Mapping for Province
             CreateMap<Province, ProvinceDto>();
 
+            // Mapping for Favorite Place
+            CreateMap<FavoritePlace, FavoritePlaceDto>();
+
         }
     }
 }

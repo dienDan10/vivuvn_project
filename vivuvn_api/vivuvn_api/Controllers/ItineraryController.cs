@@ -55,6 +55,14 @@ namespace vivuvn_api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{itineraryId}/favorite-places")]
+        [Authorize]
+        public async Task<IActionResult> GetFavoritePlaces(int itineraryId)
+        {
+            var favoritePlaces = await _favoritePlaceService.GetFavoritePlacesByItineraryIdAsync(itineraryId);
+            return Ok(favoritePlaces);
+        }
+
         [HttpPost("{itineraryId}/favorite-places")]
         [Authorize]
         public async Task<IActionResult> AddFavoritePlace(int itineraryId, [FromBody] AddFavoritePlaceRequestDto request)
