@@ -18,6 +18,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IBudgetRepository, BudgetRepository>();
             services.AddScoped<IProvinceRepository, ProvinceRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IFavoritePlaceRepository, FavoritePlaceRepository>();
             return services;
         }
 
@@ -32,6 +33,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IItineraryService, ItineraryService>();
             services.AddScoped<IProvinceService, ProvinceService>();
+            services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
             return services;
         }
 

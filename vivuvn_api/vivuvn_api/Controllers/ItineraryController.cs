@@ -8,7 +8,7 @@ namespace vivuvn_api.Controllers
 {
     [Route("api/v1/itineraries")]
     [ApiController]
-    public class ItineraryController(IItineraryService _itineraryService) : ControllerBase
+    public class ItineraryController(IItineraryService _itineraryService, IFavoritePlaceService _favoritePlaceService) : ControllerBase
     {
         [HttpGet]
         [Authorize]
@@ -53,6 +53,14 @@ namespace vivuvn_api.Controllers
             var response = await _itineraryService.CreateItineraryAsync(int.Parse(userId), request);
 
             return Ok(response);
+        }
+
+        [HttpPost("{itineraryId}/favorite-places")]
+        [Authorize]
+        public async Task<IActionResult> AddFavoritePlace(int itineraryId, [FromBody] AddFavoritePlaceRequestDto request)
+        {
+            await _favoritePlaceService.AddFavoritePlaceAsync(itineraryId, request.LocationId);
+            return Ok();
         }
     }
 }

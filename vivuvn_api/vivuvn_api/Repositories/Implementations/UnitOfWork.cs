@@ -14,8 +14,16 @@ namespace vivuvn_api.Repositories.Implementations
         public IBudgetRepository Budgets { get; set; }
         public IProvinceRepository Provinces { get; set; }
         public ILocationRepository Locations { get; private set; }
+        public IFavoritePlaceRepository FavoritePlaces { get; private set; }
 
-        public UnitOfWork(AppDbContext context, IUserRepository userRepository, IItineraryRepository itineraryRepository, IItineraryDayRepository itineraryDayRepository, IBudgetRepository budgetRepository, IProvinceRepository provinceRepository, ILocationRepository locationRepository)
+        public UnitOfWork(AppDbContext context,
+            IUserRepository userRepository,
+            IItineraryRepository itineraryRepository,
+            IItineraryDayRepository itineraryDayRepository,
+            IBudgetRepository budgetRepository,
+            IProvinceRepository provinceRepository,
+            ILocationRepository locationRepository,
+            IFavoritePlaceRepository favoritePlaceRepository)
         {
             _context = context;
             Users = userRepository;
@@ -24,6 +32,7 @@ namespace vivuvn_api.Repositories.Implementations
             Budgets = budgetRepository;
             Provinces = provinceRepository;
             Locations = locationRepository;
+            FavoritePlaces = favoritePlaceRepository;
         }
 
         public async Task SaveChangesAsync()
