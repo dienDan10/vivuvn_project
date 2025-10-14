@@ -5,6 +5,7 @@
         IUserRepository Users { get; }
         IItineraryRepository Itineraries { get; }
         IItineraryDayRepository ItineraryDays { get; }
+        IItineraryItemRepository ItineraryItems { get; }
         IBudgetRepository Budgets { get; }
         IProvinceRepository Provinces { get; }
         ILocationRepository Locations { get; }

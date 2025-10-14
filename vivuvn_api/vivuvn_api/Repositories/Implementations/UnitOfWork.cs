@@ -11,6 +11,7 @@ namespace vivuvn_api.Repositories.Implementations
         public IUserRepository Users { get; private set; }
         public IItineraryRepository Itineraries { get; private set; }
         public IItineraryDayRepository ItineraryDays { get; set; }
+        public IItineraryItemRepository ItineraryItems { get; set; }
         public IBudgetRepository Budgets { get; set; }
         public IProvinceRepository Provinces { get; set; }
         public ILocationRepository Locations { get; private set; }
@@ -23,7 +24,8 @@ namespace vivuvn_api.Repositories.Implementations
             IBudgetRepository budgetRepository,
             IProvinceRepository provinceRepository,
             ILocationRepository locationRepository,
-            IFavoritePlaceRepository favoritePlaceRepository)
+            IFavoritePlaceRepository favoritePlaceRepository,
+            IItineraryItemRepository itineraryItem)
         {
             _context = context;
             Users = userRepository;
@@ -33,6 +35,7 @@ namespace vivuvn_api.Repositories.Implementations
             Provinces = provinceRepository;
             Locations = locationRepository;
             FavoritePlaces = favoritePlaceRepository;
+            ItineraryItems = itineraryItem;
         }
 
         public async Task SaveChangesAsync()
