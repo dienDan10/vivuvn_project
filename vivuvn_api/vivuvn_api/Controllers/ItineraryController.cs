@@ -62,5 +62,13 @@ namespace vivuvn_api.Controllers
             await _favoritePlaceService.AddFavoritePlaceAsync(itineraryId, request.LocationId);
             return Ok();
         }
+
+        [HttpDelete("{itineraryId}/favorite-places/{locationId}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveFavoritePlace(int itineraryId, int locationId)
+        {
+            await _favoritePlaceService.RemoveFavoritePlaceAsync(itineraryId, locationId);
+            return Ok();
+        }
     }
 }
