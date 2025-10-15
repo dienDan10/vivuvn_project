@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'btn_create_itinerary.dart';
 import 'date_range_picker.dart';
+import 'destination_location_input.dart';
 import 'start_location_input.dart';
 
 class CreateItineraryForm extends StatefulWidget {
@@ -69,24 +70,7 @@ class _CreateItineraryFormState extends State<CreateItineraryForm> {
           const SizedBox(height: 16),
 
           // To Input Field
-          Material(
-            color: Colors.transparent,
-            child: TextFormField(
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: 'Đà Nẵng',
-                labelText: 'Where to go?',
-                prefixIcon: const Icon(Icons.location_on, size: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 12,
-                ),
-              ),
-            ),
-          ),
+          const DestinationLocationInput(),
           const SizedBox(height: 16),
 
           //Date Range Picker

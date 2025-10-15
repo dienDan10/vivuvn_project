@@ -31,4 +31,8 @@ class SearchProvinceController
       state = state.copyWith(isLoading: false);
     }
   }
+
+  void clearProvinces() {
+    state = state.copyWith(provinces: []);
+  }
 }

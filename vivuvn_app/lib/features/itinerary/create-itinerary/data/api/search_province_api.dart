@@ -17,10 +17,13 @@ final class SearchProvinceApi {
   SearchProvinceApi(this._dio);
 
   Future<List<Province>> searchProvince(final String queryText) async {
-    final response = await _dio.get<List<Province>>(
-      '/api/v1/provinces/search?name=$queryText',
-    );
+    final response = await _dio.get('/api/v1/provinces/search?name=$queryText');
 
-    return response.data ?? [];
+    if (response.data == null) return [];
+
+    final List<dynamic> jsonList = response.data as List<dynamic>;
+    return jsonList
+        .map((final json) => Province.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 }
