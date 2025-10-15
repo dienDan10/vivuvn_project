@@ -39,5 +39,13 @@ namespace vivuvn_api.Repositories.Implementations
                 .Include(i => i.BudgetType)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<IEnumerable<BudgetItem>> GetBudgetItemsByBudgetIdAsync(int budgetId)
+        {
+            return await _context.BudgetItems
+                .Where(i => i.BudgetId == budgetId)
+                .Include(i => i.BudgetType)
+                .ToListAsync();
+        }
     }
 }

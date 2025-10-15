@@ -22,7 +22,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<ItineraryDto> GetItineraryByIdAsync(int id)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id,
-                includeProperties: "StartProvince,DestinationProvince,Days,Days.Items,Days.Items.Location,Days.Items.Location.LocationPhotos,Days.Items.Location.Province,Budget,Budget.Items");
+                includeProperties: "StartProvince,DestinationProvince,Days,Days.Items,Days.Items.Location,Days.Items.Location.LocationPhotos,Days.Items.Location.Province,Budget,Budget.Items,Budget.Items.BudgetType");
 
             if (itinerary == null) throw new KeyNotFoundException($"Itinerary with id {id} not found.");
 
