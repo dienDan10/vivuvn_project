@@ -12,11 +12,15 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task AddItemToDayAsync(int dayId, AddItineraryDayItemRequestDto request)
         {
+            // get the order index
+            var existingItems = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == dayId);
+            int orderIndex = existingItems?.Count() + 1 ?? 1;
+
             var itineraryDayItem = new ItineraryItem
             {
                 ItineraryDayId = dayId,
                 LocationId = request.LocationId,
-                OrderIndex = request.OrderIndex,
+                OrderIndex = orderIndex,
                 TransportationVehicle = Constants.TravelMode_Driving, // default to driving
                 TransportationDistance = 500, // in meters
                 TransportationDuration = 278, // in seconds
