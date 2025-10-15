@@ -2,7 +2,7 @@
 
 namespace vivuvn_api.Repositories.Interfaces
 {
-    public interface ILocationRepository : IRepository<Location>
+    public interface IFavoritePlaceRepository : IRepository<FavoritePlace>
     {
     }
 }

@@ -8,7 +8,8 @@ namespace vivuvn_api.Services.Implementations
 {
     public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork) : ILocationService
     {
-        public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery, int? limit = 10)
+        public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
+            int? limit = Constants.DefaultPageSize)
         {
             if (string.IsNullOrEmpty(searchQuery))
             {
@@ -17,9 +18,15 @@ namespace vivuvn_api.Services.Implementations
 
             var searchQueryNormalized = TextHelper.ToSearchFriendly(searchQuery);
             var locations = await _unitOfWork.Locations
-                .SearchLocationsAsync(l => l.NameNormalized.Contains(searchQueryNormalized), limit: limit);
+                .GetAllAsync(l => l.NameNormalized.Contains(searchQueryNormalized), limit: limit);
 
             return _mapper.Map<IEnumerable<SearchLocationDto>>(locations);
+        }
+
+        public async Task<LocationDto> GetLocationByIdAsync(int id)
+        {
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "LocationPhotos");
+            return _mapper.Map<LocationDto>(location);
         }
     }
 }

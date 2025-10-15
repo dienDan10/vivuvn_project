@@ -27,7 +27,10 @@ namespace vivuvn_api.Repositories.Implementations
             await dbSet.AddRangeAsync(entities);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null,
+            string? includeProperties = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            int? limit = null)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)
@@ -42,6 +45,17 @@ namespace vivuvn_api.Repositories.Implementations
                     query = query.Include(includeProperty);
                 }
             }
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            if (limit.HasValue)
+            {
+                query = query.Take(limit.Value);
+            }
+
             return await query.ToListAsync();
         }
 

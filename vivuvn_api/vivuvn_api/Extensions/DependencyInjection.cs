@@ -18,6 +18,8 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IBudgetRepository, BudgetRepository>();
             services.AddScoped<IProvinceRepository, ProvinceRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IFavoritePlaceRepository, FavoritePlaceRepository>();
+            services.AddScoped<IItineraryItemRepository, ItineraryItemRepository>();
             return services;
         }
 
@@ -32,6 +34,8 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IItineraryService, ItineraryService>();
             services.AddScoped<IProvinceService, ProvinceService>();
+            services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
+            services.AddScoped<IItineraryItemService, ItineraryItemService>();
             return services;
         }
 
@@ -58,9 +62,11 @@ namespace vivuvn_api.Extensions
             });
 
             // Google Map Client
-            services.AddHttpClient<IGoogleMapClientService, GoogleMapClientService>(httpClient =>
+            services.AddHttpClient<IGoogleMapRouteService, GoogleMapRouteService>(httpClient =>
             {
-                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:BaseUrl") ?? "");
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:RouteUrl") ?? "");
+                httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
+                httpClient.DefaultRequestHeaders.Add("X-Goog-FieldMask", "routes.duration,routes.distanceMeters");
             });
 
             return services;

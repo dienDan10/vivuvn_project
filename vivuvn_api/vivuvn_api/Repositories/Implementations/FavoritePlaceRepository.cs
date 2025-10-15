@@ -4,12 +4,10 @@ using vivuvn_api.Repositories.Interfaces;
 
 namespace vivuvn_api.Repositories.Implementations
 {
-    public class LocationRepository : Repository<Location>, ILocationRepository
+    public class FavoritePlaceRepository : Repository<FavoritePlace>, IFavoritePlaceRepository
     {
-        public LocationRepository(AppDbContext context) : base(context)
+        public FavoritePlaceRepository(AppDbContext context) : base(context)
         {
         }
-
-
     }
 }

@@ -2,7 +2,8 @@
 
 namespace vivuvn_api.Repositories.Interfaces
 {
-    public interface ILocationRepository : IRepository<Location>
+    public interface IItineraryItemRepository : IRepository<ItineraryItem>
     {
+
     }
 }

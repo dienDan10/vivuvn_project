@@ -4,12 +4,10 @@ using vivuvn_api.Repositories.Interfaces;
 
 namespace vivuvn_api.Repositories.Implementations
 {
-    public class LocationRepository : Repository<Location>, ILocationRepository
+    public class ItineraryItemRepository : Repository<ItineraryItem>, IItineraryItemRepository
     {
-        public LocationRepository(AppDbContext context) : base(context)
+        public ItineraryItemRepository(AppDbContext context) : base(context)
         {
         }
-
-
     }
 }
