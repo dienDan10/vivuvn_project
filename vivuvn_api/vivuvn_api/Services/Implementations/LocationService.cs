@@ -21,5 +21,11 @@ namespace vivuvn_api.Services.Implementations
 
             return _mapper.Map<IEnumerable<SearchLocationDto>>(locations);
         }
+
+        public async Task<LocationDto> GetLocationByIdAsync(int id)
+        {
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "LocationPhotos");
+            return _mapper.Map<LocationDto>(location);
+        }
     }
 }
