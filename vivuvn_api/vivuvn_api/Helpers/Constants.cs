@@ -29,5 +29,8 @@
         public const string TravelMode_Transit = "TRANSIT";
         public const string TravelMode_Two_Wheeler = "TWO_WHEELER";
 
+        // Additional 
+        public const int DefaultPageSize = 10;
+
     }
 }
