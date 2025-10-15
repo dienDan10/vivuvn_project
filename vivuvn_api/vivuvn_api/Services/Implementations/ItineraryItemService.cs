@@ -35,5 +35,26 @@ namespace vivuvn_api.Services.Implementations
 
             return _mapper.Map<IEnumerable<ItineraryItemDto>>(items);
         }
+
+        public async Task RemoveItemFromDayAsync(int dayId, int itemId)
+        {
+            var item = await _unitOfWork.ItineraryItems.GetOneAsync(i => i.ItineraryItemId == itemId && i.ItineraryDayId == dayId);
+
+            if (item is null) throw new KeyNotFoundException($"Itinerary item with id {itemId} not found in day {dayId}.");
+
+            var itemsToUpdate = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == dayId && i.OrderIndex > item.OrderIndex);
+
+            _unitOfWork.ItineraryItems.Remove(item);
+            await _unitOfWork.SaveChangesAsync();
+
+            if (itemsToUpdate is null || !itemsToUpdate.Any()) return;
+
+            // readjust order index of remaining items
+            foreach (var remainingItem in itemsToUpdate)
+            {
+                remainingItem.OrderIndex--;
+            }
+            await _unitOfWork.SaveChangesAsync();
+        }
     }
 }

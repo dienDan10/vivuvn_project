@@ -39,6 +39,14 @@ namespace vivuvn_api.Controllers
             return Ok();
         }
 
+        [HttpDelete("{dayId}/items/{itemId}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveItemFromDay(int dayId, int itemId)
+        {
+            await _itineraryItemService.RemoveItemFromDayAsync(dayId, itemId);
+            return Ok();
+        }
+
         #endregion
     }
 }
