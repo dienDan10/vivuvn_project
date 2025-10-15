@@ -22,6 +22,7 @@ namespace vivuvn_api.Services.Implementations
 
             // fetch transportation details if order index is greater than 1
             await _unitOfWork.ItineraryItems.AddAsync(itineraryDayItem);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

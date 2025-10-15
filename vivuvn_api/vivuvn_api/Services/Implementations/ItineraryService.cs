@@ -74,6 +74,15 @@ namespace vivuvn_api.Services.Implementations
 
             return new CreateItineraryResponseDto { Id = itinerary.Id };
         }
+
+        public async Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId)
+        {
+            var days = await _unitOfWork.ItineraryDays.GetAllAsync(d => d.ItineraryId == itineraryId,
+                includeProperties: "Items,Items.Location,Items.Location.LocationPhotos,Items.Location.Province");
+
+            if (days is null) return [];
+            return _mapper.Map<IEnumerable<ItineraryDayDto>>(days);
+        }
     }
 
 }
