@@ -8,5 +8,6 @@ namespace vivuvn_api.Services.Interfaces
         Task AddItemToDayAsync(int dayId, AddItineraryDayItemRequestDto request);
         Task<IEnumerable<ItineraryItemDto>> GetItemsByDayIdAsync(int dayId);
         Task RemoveItemFromDayAsync(int dayId, int itemId);
+        Task<ItineraryItemDto> UpdateItineraryItemAsync(int itemId, UpdateItineraryItemRequestDto request);
     }
 }

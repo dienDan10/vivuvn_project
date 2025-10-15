@@ -60,5 +60,32 @@ namespace vivuvn_api.Services.Implementations
             }
             await _unitOfWork.SaveChangesAsync();
         }
+
+        public async Task<ItineraryItemDto> UpdateItineraryItemAsync(int itemId, UpdateItineraryItemRequestDto request)
+        {
+            var item = await _unitOfWork.ItineraryItems.GetOneAsync(i => i.ItineraryItemId == itemId);
+
+            if (item is null) throw new KeyNotFoundException($"Itinerary item with id {itemId} not found.");
+
+            if (request.Note is not null)
+            {
+                item.Note = request.Note;
+            }
+
+            if (request.StartTime.HasValue && request.EndTime.HasValue)
+            {
+                if (request.EndTime <= request.StartTime)
+                {
+                    throw new ArgumentException("End time must be after start time.");
+                }
+                item.StartTime = request.StartTime;
+                item.EndTime = request.EndTime;
+                var duration = request.EndTime - request.StartTime;
+                item.EstimateDuration = duration.Value.TotalMinutes;
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<ItineraryItemDto>(item);
+        }
     }
 }
