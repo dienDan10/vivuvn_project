@@ -2,17 +2,15 @@ import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../common/validator/validator.dart';
 import '../../../controller/search_provice_controller.dart';
 import '../../../models/province.dart';
-import 'province_autocomplete_overlay.dart';
+import 'province_suggestion_overlay.dart';
 
 class ProvinceAutocompleteField extends ConsumerStatefulWidget {
   final String labelText;
   final String hintText;
   final IconData prefixIcon;
-  final TextEditingController? controller;
-  final FocusNode? focusNode;
-  final String? Function(String?)? validator;
 
   /// Unique tag to prevent conflicts between multiple instances
   final String debounceTag;
@@ -23,9 +21,6 @@ class ProvinceAutocompleteField extends ConsumerStatefulWidget {
     required this.hintText,
     required this.prefixIcon,
     required this.debounceTag,
-    this.controller,
-    this.focusNode,
-    this.validator,
   });
 
   @override
@@ -40,27 +35,11 @@ class _ProvinceAutocompleteFieldState
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
 
-  bool _isInternalController = false;
-  bool _isInternalFocusNode = false;
-
   @override
   void initState() {
     super.initState();
-
-    if (widget.controller != null) {
-      _controller = widget.controller!;
-    } else {
-      _controller = TextEditingController();
-      _isInternalController = true;
-    }
-
-    if (widget.focusNode != null) {
-      _focusNode = widget.focusNode!;
-    } else {
-      _focusNode = FocusNode();
-      _isInternalFocusNode = true;
-    }
-
+    _controller = TextEditingController();
+    _focusNode = FocusNode();
     _setupListeners();
   }
 
@@ -84,25 +63,21 @@ class _ProvinceAutocompleteFieldState
   }
 
   void _removeOverlay() {
-    if (_overlayEntry == null) return;
-    try {
-      _overlayEntry!.remove();
-    } catch (_) {}
-    _overlayEntry = null;
+    _overlayEntry?.remove();
   }
 
   void _handleProvinceSelection(final Province province) {
     _controller.text = province.name;
-    _controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: _controller.text.length),
-    );
     _removeOverlay();
     _focusNode.unfocus();
   }
 
-  void _showOverlay(final List<Province> suggestions) {
+  void _showOverlay() {
     _removeOverlay();
-    if (suggestions.isEmpty) return;
+
+    final suggestions = ref.read(
+      searchProvinceControllerProvider.select((final state) => state.provinces),
+    );
 
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
@@ -111,25 +86,12 @@ class _ProvinceAutocompleteFieldState
 
     _overlayEntry = OverlayEntry(
       builder: (final ctx) {
-        return Positioned(
+        return ProvinceSuggestionOverlay(
           width: size.width,
-          child: CompositedTransformFollower(
-            link: _layerLink,
-            targetAnchor: Alignment.bottomLeft,
-            followerAnchor: Alignment.topLeft,
-            offset: const Offset(0, 2),
-            child: Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(12),
-              shadowColor: Colors.black.withOpacity(0.2),
-              child: ProvinceAutocompleteOverlay(
-                width: size.width,
-                suggestions: suggestions,
-                query: _controller.text,
-                onSelect: _handleProvinceSelection,
-              ),
-            ),
-          ),
+          suggestions: suggestions,
+          text: _controller.text,
+          layerLink: _layerLink,
+          onSelect: _handleProvinceSelection,
         );
       },
     );
@@ -140,60 +102,57 @@ class _ProvinceAutocompleteFieldState
 
   Future<void> _handleUserInput(final String value) async {
     if (value.trim().isEmpty) return;
-
     await ref
         .read(searchProvinceControllerProvider.notifier)
         .searchProvince(value);
+
+    _showOverlay();
   }
 
   @override
   Widget build(final BuildContext context) {
-    final provinces = ref.watch(
-      searchProvinceControllerProvider.select((final state) => state.provinces),
-    );
+    // Listen to province suggestions changes
+    // ref.listen<List<Province>>(
+    //   searchProvinceControllerProvider.select((final state) => state.provinces),
+    //   (final previous, final next) {
+    //     if ((_focusNode.hasFocus)) {
 
-    WidgetsBinding.instance.addPostFrameCallback((final _) {
-      if (_focusNode.hasFocus && provinces.isNotEmpty) {
-        _showOverlay(provinces);
-      } else {
-        _removeOverlay();
-      }
-    });
+    //     }
+    //   },
+    // );
 
     return CompositedTransformTarget(
       link: _layerLink,
-      child: Material(
-        color: Colors.transparent,
-        child: TextFormField(
-          controller: _controller,
-          focusNode: _focusNode,
-          validator: widget.validator,
-          decoration: InputDecoration(
-            isDense: true,
-            hintText: widget.hintText,
-            labelText: widget.labelText,
-            prefixIcon: Icon(widget.prefixIcon, size: 20),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 14,
-              horizontal: 12,
-            ),
-            // suffixIcon: isLoading
-            //     ? const SizedBox(
-            //         width: 20,
-            //         height: 20,
-            //         child: Padding(
-            //           padding: EdgeInsets.all(8.0),
-            //           child: CircularProgressIndicator(strokeWidth: 2),
-            //         ),
-            //       )
-            //     : null,
+      child: TextFormField(
+        controller: _controller,
+        focusNode: _focusNode,
+        validator: (final value) =>
+            Validator.notEmpty(value, fieldName: 'This field'),
+        decoration: InputDecoration(
+          isDense: true,
+          hintText: widget.hintText,
+          labelText: widget.labelText,
+          prefixIcon: Icon(widget.prefixIcon, size: 20),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: 12,
           ),
-          onChanged: (final value) => EasyDebounce.debounce(
-            widget.debounceTag,
-            const Duration(milliseconds: 500),
-            () => _handleUserInput(value),
-          ),
+          // suffixIcon: isLoading
+          //     ? const SizedBox(
+          //         width: 20,
+          //         height: 20,
+          //         child: Padding(
+          //           padding: EdgeInsets.all(8.0),
+          //           child: CircularProgressIndicator(strokeWidth: 2),
+          //         ),
+          //       )
+          //     : null,
+        ),
+        onChanged: (final value) => EasyDebounce.debounce(
+          widget.debounceTag,
+          const Duration(milliseconds: 500),
+          () => _handleUserInput(value),
         ),
       ),
     );
@@ -202,8 +161,8 @@ class _ProvinceAutocompleteFieldState
   @override
   void dispose() {
     _removeOverlay();
-    if (_isInternalController) _controller.dispose();
-    if (_isInternalFocusNode) _focusNode.dispose();
+    _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 }

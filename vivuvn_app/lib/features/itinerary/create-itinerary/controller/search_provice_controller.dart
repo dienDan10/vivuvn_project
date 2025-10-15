@@ -21,6 +21,7 @@ class SearchProvinceController
     final createItineraryService = ref.read(createItineraryServiceProvider);
     try {
       state = state.copyWith(isLoading: true, error: null);
+      await Future.delayed(const Duration(milliseconds: 1000));
       final provinces = await createItineraryService.searchProvince(queryText);
       state = state.copyWith(provinces: provinces);
     } on DioException catch (e) {

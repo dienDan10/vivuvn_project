@@ -15,27 +15,11 @@ class CreateItineraryForm extends StatefulWidget {
 }
 
 class _CreateItineraryFormState extends State<CreateItineraryForm> {
-  late TextEditingController _fromController = TextEditingController();
-  late TextEditingController _toController = TextEditingController();
   final List<DateTime?> _rangeDatePicker = [
     DateTime.now(),
     DateTime.now().add(const Duration(days: 2)),
   ];
   final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    _fromController = TextEditingController();
-    _toController = TextEditingController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _fromController.dispose();
-    _toController.dispose();
-    super.dispose();
-  }
 
   void _submitForm() {
     // remove keyboard
