@@ -38,6 +38,7 @@ class _ProvinceAutocompleteFieldState
   late TextEditingController _controller;
   late FocusNode _focusNode;
   OverlayEntry? _overlayEntry;
+  final LayerLink _layerLink = LayerLink();
 
   bool _isInternalController = false;
   bool _isInternalFocusNode = false;
@@ -107,17 +108,28 @@ class _ProvinceAutocompleteFieldState
     if (renderBox == null) return;
 
     final size = renderBox.size;
-    final topLeft = renderBox.localToGlobal(Offset.zero);
 
     _overlayEntry = OverlayEntry(
       builder: (final ctx) {
-        return ProvinceAutocompleteOverlay(
-          topLeft: topLeft,
+        return Positioned(
           width: size.width,
-          offsetY: size.height + 2,
-          suggestions: suggestions,
-          query: _controller.text,
-          onSelect: _handleProvinceSelection,
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            targetAnchor: Alignment.bottomLeft,
+            followerAnchor: Alignment.topLeft,
+            offset: const Offset(0, 2),
+            child: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(12),
+              shadowColor: Colors.black.withOpacity(0.2),
+              child: ProvinceAutocompleteOverlay(
+                width: size.width,
+                suggestions: suggestions,
+                query: _controller.text,
+                onSelect: _handleProvinceSelection,
+              ),
+            ),
+          ),
         );
       },
     );
@@ -136,9 +148,6 @@ class _ProvinceAutocompleteFieldState
 
   @override
   Widget build(final BuildContext context) {
-    final isLoading = ref.watch(
-      searchProvinceControllerProvider.select((final state) => state.isLoading),
-    );
     final provinces = ref.watch(
       searchProvinceControllerProvider.select((final state) => state.provinces),
     );
@@ -151,37 +160,40 @@ class _ProvinceAutocompleteFieldState
       }
     });
 
-    return Material(
-      color: Colors.transparent,
-      child: TextFormField(
-        controller: _controller,
-        focusNode: _focusNode,
-        validator: widget.validator,
-        decoration: InputDecoration(
-          isDense: true,
-          hintText: widget.hintText,
-          labelText: widget.labelText,
-          prefixIcon: Icon(widget.prefixIcon, size: 20),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 14,
-            horizontal: 12,
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: Material(
+        color: Colors.transparent,
+        child: TextFormField(
+          controller: _controller,
+          focusNode: _focusNode,
+          validator: widget.validator,
+          decoration: InputDecoration(
+            isDense: true,
+            hintText: widget.hintText,
+            labelText: widget.labelText,
+            prefixIcon: Icon(widget.prefixIcon, size: 20),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
+            // suffixIcon: isLoading
+            //     ? const SizedBox(
+            //         width: 20,
+            //         height: 20,
+            //         child: Padding(
+            //           padding: EdgeInsets.all(8.0),
+            //           child: CircularProgressIndicator(strokeWidth: 2),
+            //         ),
+            //       )
+            //     : null,
           ),
-          suffixIcon: isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              : null,
-        ),
-        onChanged: (final value) => EasyDebounce.debounce(
-          widget.debounceTag,
-          const Duration(milliseconds: 500),
-          () => _handleUserInput(value),
+          onChanged: (final value) => EasyDebounce.debounce(
+            widget.debounceTag,
+            const Duration(milliseconds: 500),
+            () => _handleUserInput(value),
+          ),
         ),
       ),
     );

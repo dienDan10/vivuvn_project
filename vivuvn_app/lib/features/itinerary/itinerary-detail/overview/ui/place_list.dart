@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'add_place_modal.dart';
 import 'place_card.dart';
 
 class PlaceList extends StatelessWidget {
@@ -29,7 +30,14 @@ class PlaceList extends StatelessWidget {
         const SizedBox(height: 12),
         Center(
           child: OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (final context) => const AddPlaceModal(),
+              );
+            },
             icon: const Icon(Icons.location_on_outlined),
             label: const Text('Thêm địa điểm yêu thích'),
           ),
