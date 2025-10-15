@@ -36,6 +36,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IProvinceService, ProvinceService>();
             services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
             services.AddScoped<IItineraryItemService, ItineraryItemService>();
+            services.AddScoped<IBudgetService, BudgetService>();
             return services;
         }
 

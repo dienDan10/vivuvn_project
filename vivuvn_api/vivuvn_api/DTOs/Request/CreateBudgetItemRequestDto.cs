@@ -1,0 +1,15 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace vivuvn_api.DTOs.Request
+{
+    public class CreateBudgetItemRequestDto
+    {
+        public string? Name { get; set; }
+        [Required]
+        public decimal Cost { get; set; }
+        [Required]
+        public int BudgetTypeId { get; set; }
+        [Required]
+        public DateTime Date { get; set; }
+    }
+}

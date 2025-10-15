@@ -16,6 +16,9 @@ namespace vivuvn_api.Models
 
         public decimal Cost { get; set; }
 
+        [Required]
+        public DateTime Date { get; set; }
+
         public int BudgetTypeId { get; set; }
         public BudgetType BudgetType { get; set; } = null!;
     }

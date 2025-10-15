@@ -46,6 +46,28 @@ namespace vivuvn_api.Data.DbInitializer
                 _context.SaveChanges();
             }
 
+            // Add budget types
+            if (!_context.BudgetTypes.Any())
+            {
+                var budgetTypes = new List<BudgetType>
+                {
+                    new BudgetType { Name = Constants.BudgetType_Flights },
+                    new BudgetType { Name = Constants.BudgetType_Lodging },
+                    new BudgetType { Name = Constants.BudgetType_CarRental },
+                    new BudgetType { Name = Constants.BudgetType_Transit },
+                    new BudgetType { Name = Constants.BudgetType_Food },
+                    new BudgetType { Name = Constants.BudgetType_Drinks },
+                    new BudgetType { Name = Constants.BudgetType_Sightseeing },
+                    new BudgetType { Name = Constants.BudgetType_Activities },
+                    new BudgetType { Name = Constants.BudgetType_Shopping },
+                    new BudgetType { Name = Constants.BudgetType_Gas },
+                    new BudgetType { Name = Constants.BudgetType_Groceries },
+                    new BudgetType { Name = Constants.BudgetType_Other },
+                };
+                _context.BudgetTypes.AddRange(budgetTypes);
+                _context.SaveChanges();
+            }
+
             // Add locations data
             if (_context.Locations.Any()) return;
 
@@ -124,6 +146,7 @@ namespace vivuvn_api.Data.DbInitializer
 
                 }
             }
+
         }
     }
 }
