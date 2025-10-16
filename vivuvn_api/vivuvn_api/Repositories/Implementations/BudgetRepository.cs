@@ -47,5 +47,43 @@ namespace vivuvn_api.Repositories.Implementations
                 .Include(i => i.BudgetType)
                 .ToListAsync();
         }
+
+        public async Task<BudgetItem?> UpdateBudgetItemAsync(BudgetItem item)
+        {
+            //get the budget from db
+            var budget = await _context.Budgets
+                .Include(b => b.Items)
+                .FirstOrDefaultAsync(b => b.BudgetId == item.BudgetId);
+
+            if (budget == null)
+            {
+                throw new ArgumentException($"Budget with ID {item.BudgetId} does not exist.");
+            }
+
+            // find the existing item in the budget
+            var existingItem = budget.Items.FirstOrDefault(i => i.Id == item.Id);
+            if (existingItem == null)
+                throw new ArgumentException($"Budget item with ID {item.Id} does not exist.");
+
+            // update the total budget
+            budget.TotalBudget -= existingItem.Cost;
+            budget.TotalBudget += item.Cost;
+
+            // update the item in the budget
+            existingItem.Name = item.Name;
+            existingItem.Date = item.Date;
+            existingItem.Cost = item.Cost;
+            existingItem.BudgetTypeId = item.BudgetTypeId;
+
+
+            _context.BudgetItems.Update(existingItem);
+            _context.Budgets.Update(budget);
+
+            await _context.SaveChangesAsync();
+
+            var updatedItem = await GetBudgetItemByIdAsync(item.Id);
+
+            return updatedItem;
+        }
     }
 }

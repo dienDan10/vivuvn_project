@@ -7,5 +7,6 @@ namespace vivuvn_api.Repositories.Interfaces
         Task<IEnumerable<BudgetItem>> GetBudgetItemsByBudgetIdAsync(int budgetId);
         Task<BudgetItem?> GetBudgetItemByIdAsync(int id);
         Task<BudgetItem?> AddBudgetItemAsync(BudgetItem item);
+        Task<BudgetItem?> UpdateBudgetItemAsync(BudgetItem item);
     }
 }

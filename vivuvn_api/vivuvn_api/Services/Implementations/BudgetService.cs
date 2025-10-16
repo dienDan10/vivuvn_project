@@ -46,5 +46,29 @@ namespace vivuvn_api.Services.Implementations
 
             return _mapper.Map<BudgetItemDto>(budgetItem);
         }
+
+        public async Task<BudgetItemDto?> UpdateBudgetItemAsync(int itemId, UpdateBudgetItemRequestDto request)
+        {
+            var item = await _unitOfWork.Budgets.GetBudgetItemByIdAsync(itemId);
+
+            if (item is null)
+            {
+                throw new ArgumentException($"Budget item with ID {itemId} does not exist.");
+            }
+
+            if (request.Name is not null) item.Name = request.Name;
+
+            if (request.Date is not null) item.Date = request.Date.Value;
+
+            if (request.Cost is not null && request.Cost.Value > 0) item.Cost = request.Cost.Value;
+
+            if (request.BudgetTypeId is not null) item.BudgetTypeId = request.BudgetTypeId.Value;
+
+            var updatedItem = await _unitOfWork.Budgets.UpdateBudgetItemAsync(item);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<BudgetItemDto>(updatedItem);
+        }
     }
 }

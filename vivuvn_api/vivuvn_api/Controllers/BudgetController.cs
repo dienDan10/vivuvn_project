@@ -24,5 +24,13 @@ namespace vivuvn_api.Controllers
             var budgetItem = await _budgetService.AddBudgetItemAsync(itineraryId, request);
             return Ok(budgetItem);
         }
+
+        [HttpPut("{itemId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateBudgetItem(int itineraryId, int itemId, UpdateBudgetItemRequestDto request)
+        {
+            var budgetItem = await _budgetService.UpdateBudgetItemAsync(itemId, request);
+            return Ok(budgetItem);
+        }
     }
 }
