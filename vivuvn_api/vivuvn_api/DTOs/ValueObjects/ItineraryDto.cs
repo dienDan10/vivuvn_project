@@ -21,6 +21,7 @@ namespace vivuvn_api.DTOs.ValueObjects
 
         public List<ItineraryDayDto> Days { get; set; } = new List<ItineraryDayDto>();
         public BudgetDto Budget { get; set; }
+        public List<LocationDto> FavoritePlaces { get; set; } = new List<LocationDto>();
 
     }
 }

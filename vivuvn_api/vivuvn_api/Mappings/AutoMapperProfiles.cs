@@ -19,7 +19,8 @@ namespace vivuvn_api.Mappings
             CreateMap<Itinerary, ItineraryDto>()
                 .ForMember(dest => dest.StartProvinceName, opt => opt.MapFrom(src => src.StartProvince.Name))
                 .ForMember(dest => dest.DestinationProvinceName, opt => opt.MapFrom(src => src.DestinationProvince.Name))
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl));
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl))
+                .ForMember(dest => dest.FavoritePlaces, opt => opt.MapFrom(src => src.FavoritePlaces.Select(fp => fp.Location).ToList()));
 
             // Mapping For Itinerary Day
             CreateMap<ItineraryDay, ItineraryDayDto>();
