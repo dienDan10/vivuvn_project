@@ -82,6 +82,7 @@ builder.Services.Configure<BrevoSettings>(builder.Configuration.GetSection("Brev
 builder.Services.AddServices();
 builder.Services.AddRepositories();
 builder.Services.AddUnitOfWork();
+builder.Services.AddCustomHttpClient(builder.Configuration);
 
 var app = builder.Build();
 

@@ -1,11 +1,16 @@
-﻿namespace vivuvn_api.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace vivuvn_api.Models
 {
     public class LocationPhoto
     {
+        [Key]
+        public int Id { get; set; }
+
         public int LocationId { get; set; }
         public Location Location { get; set; } = null!;
 
-        public int PhotoId { get; set; }
-        public Photo Photo { get; set; } = null!;
+        [Required]
+        public string PhotoUrl { get; set; } = string.Empty;
     }
 }

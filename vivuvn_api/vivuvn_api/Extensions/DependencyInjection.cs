@@ -13,6 +13,13 @@ namespace vivuvn_api.Extensions
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IItineraryRepository, ItineraryRepository>();
+            services.AddScoped<IItineraryDayRepository, ItineraryDayRepository>();
+            services.AddScoped<IBudgetRepository, BudgetRepository>();
+            services.AddScoped<IProvinceRepository, ProvinceRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IFavoritePlaceRepository, FavoritePlaceRepository>();
+            services.AddScoped<IItineraryItemRepository, ItineraryItemRepository>();
             return services;
         }
 
@@ -25,6 +32,11 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IItineraryService, ItineraryService>();
+            services.AddScoped<IProvinceService, ProvinceService>();
+            services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
+            services.AddScoped<IItineraryItemService, ItineraryItemService>();
+            services.AddScoped<IBudgetService, BudgetService>();
             return services;
         }
 
@@ -38,6 +50,26 @@ namespace vivuvn_api.Extensions
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnectionString")));
+            return services;
+        }
+
+        public static IServiceCollection AddCustomHttpClient(this IServiceCollection services, IConfiguration configuration)
+        {
+
+            // AI Client
+            services.AddHttpClient<IAiClientService, AiClientService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("AiService:BaseUrl") ?? "");
+            });
+
+            // Google Map Client
+            services.AddHttpClient<IGoogleMapRouteService, GoogleMapRouteService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:RouteUrl") ?? "");
+                httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
+                httpClient.DefaultRequestHeaders.Add("X-Goog-FieldMask", "routes.duration,routes.distanceMeters");
+            });
+
             return services;
         }
     }

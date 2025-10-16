@@ -9,6 +9,7 @@ namespace vivuvn_api.Models
 
         [Required]
         public string Name { get; set; } = string.Empty;
+        public string NameNormalized { get; set; } = string.Empty;
 
         public int ProvinceId { get; set; }
         public Province? Province { get; set; }

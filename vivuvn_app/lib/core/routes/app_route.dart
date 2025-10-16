@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
+import '../../features/itinerary/itinerary-detail/ui/itinerary_detail_layout.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_screen.dart';
@@ -18,7 +19,8 @@ import 'routes.dart';
 
 final goRouterProvider = Provider<GoRouter>((final ref) {
   return GoRouter(
-    initialLocation: splashRoute,
+    // initialLocation: splashRoute,
+    initialLocation: itineraryRoute,
     errorBuilder: (final context, final state) => RouteErrorScreen(
       error: state.error.toString(),
       path: state.uri.toString(),
@@ -71,6 +73,10 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
         builder: (final context, final state) => const RegisterScreen(),
       ),
 
+      GoRoute(
+        path: itineraryDetailRoute,
+        builder: (final context, final state) => const ItineraryDetailLayout(),
+      ),
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
         builder:
