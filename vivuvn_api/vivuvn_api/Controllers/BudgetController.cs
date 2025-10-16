@@ -32,5 +32,13 @@ namespace vivuvn_api.Controllers
             var budgetItem = await _budgetService.UpdateBudgetItemAsync(itemId, request);
             return Ok(budgetItem);
         }
+
+        [HttpDelete("{itemId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteBudgetItem(int itineraryId, int itemId)
+        {
+            var budgetItem = await _budgetService.DeleteBudgetItemAsync(itemId);
+            return Ok(budgetItem);
+        }
     }
 }

@@ -49,7 +49,7 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<BudgetItemDto?> UpdateBudgetItemAsync(int itemId, UpdateBudgetItemRequestDto request)
         {
-            var item = await _unitOfWork.Budgets.GetBudgetItemByIdAsync(itemId);
+            var item = await _unitOfWork.Budgets.GetBudgetItemByIdAsync(itemId, track: false);
 
             if (item is null)
             {
@@ -69,6 +69,13 @@ namespace vivuvn_api.Services.Implementations
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<BudgetItemDto>(updatedItem);
+        }
+
+        public async Task<BudgetItemDto?> DeleteBudgetItemAsync(int itemId)
+        {
+            var deletedItem = await _unitOfWork.Budgets.DeleteBudgetItemAsync(itemId);
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<BudgetItemDto>(deletedItem);
         }
     }
 }

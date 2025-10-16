@@ -32,12 +32,16 @@ namespace vivuvn_api.Repositories.Implementations
             return item;
         }
 
-        public async Task<BudgetItem?> GetBudgetItemByIdAsync(int id)
+        public async Task<BudgetItem?> GetBudgetItemByIdAsync(int id, bool track = false)
         {
-            return await _context.BudgetItems
-                .Where(i => i.Id == id)
-                .Include(i => i.BudgetType)
-                .FirstOrDefaultAsync();
+            IQueryable<BudgetItem> query = _context.BudgetItems.Where(i => i.Id == id).Include(i => i.BudgetType);
+
+            if (!track)
+            {
+                query = query.AsNoTracking();
+            }
+
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<BudgetItem>> GetBudgetItemsByBudgetIdAsync(int budgetId)
@@ -84,6 +88,36 @@ namespace vivuvn_api.Repositories.Implementations
             var updatedItem = await GetBudgetItemByIdAsync(item.Id);
 
             return updatedItem;
+        }
+
+        public async Task<BudgetItem?> DeleteBudgetItemAsync(int id)
+        {
+            var item = await _context.BudgetItems
+                .Include(i => i.BudgetType)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (item == null)
+            {
+                throw new ArgumentException($"Budget item with ID {id} does not exist.");
+            }
+
+            //get the budget from db
+            var budget = await _context.Budgets
+                .Include(b => b.Items)
+                .FirstOrDefaultAsync(b => b.BudgetId == item.BudgetId);
+
+            if (budget == null)
+            {
+                throw new ArgumentException($"Budget with ID {item.BudgetId} does not exist.");
+            }
+
+            // update the total budget
+            budget.TotalBudget -= item.Cost;
+            // remove the item from the budget
+            budget.Items.Remove(item);
+            _context.BudgetItems.Remove(item);
+            _context.Budgets.Update(budget);
+            return item;
         }
     }
 }
