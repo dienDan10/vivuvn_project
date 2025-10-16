@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../models/province.dart';
 import '../services/create_itinerary_service.dart';
 import '../state/search_province_state.dart';
 
@@ -17,13 +18,14 @@ class SearchProvinceController
     return SearchProvinceState();
   }
 
-  Future<void> searchProvince(final String queryText) async {
+  Future<List<Province>> searchProvince(final String queryText) async {
     final createItineraryService = ref.read(createItineraryServiceProvider);
     try {
       state = state.copyWith(isLoading: true, error: null);
       await Future.delayed(const Duration(milliseconds: 1000));
       final provinces = await createItineraryService.searchProvince(queryText);
       state = state.copyWith(provinces: provinces);
+      return provinces;
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
     } catch (e) {
@@ -31,6 +33,7 @@ class SearchProvinceController
     } finally {
       state = state.copyWith(isLoading: false);
     }
+    return [];
   }
 
   void clearProvinces() {

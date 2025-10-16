@@ -1,14 +1,13 @@
 import 'package:cherry_toast/cherry_toast.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../../screens/select_province_screen.dart';
+import 'add_province_btn.dart';
 import 'btn_create_itinerary.dart';
 import 'date_range_picker.dart';
-import 'destination_location_input.dart';
-import 'start_location_input.dart';
 
 class CreateItineraryForm extends StatefulWidget {
-  final ScrollController scrollController;
-  const CreateItineraryForm({super.key, required this.scrollController});
+  const CreateItineraryForm({super.key});
 
   @override
   State<CreateItineraryForm> createState() => _CreateItineraryFormState();
@@ -19,16 +18,16 @@ class _CreateItineraryFormState extends State<CreateItineraryForm> {
     DateTime.now(),
     DateTime.now().add(const Duration(days: 2)),
   ];
-  final _formKey = GlobalKey<FormState>();
 
-  void _submitForm() {
-    // remove keyboard
-    FocusScope.of(context).unfocus();
+  void _handleSelectProvince() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (final context) => const SelectProvinceScreen(),
+      ),
+    );
+  }
 
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
+  void _createItinerary() {
     // Handle create itinerary logic here
     CherryToast(
       title: const Text('Successful'),
@@ -44,49 +43,53 @@ class _CreateItineraryFormState extends State<CreateItineraryForm> {
   @override
   Widget build(final BuildContext context) {
     _listener();
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // From Input Field
-          const StartLocationInput(),
-          const SizedBox(height: 16),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // From Input Field
+        AddProvinceButton(
+          icon: Icons.flight_takeoff,
+          text: 'From Where?',
+          onClick: _handleSelectProvince,
+        ),
+        const SizedBox(height: 16),
 
-          // To Input Field
-          const DestinationLocationInput(),
-          const SizedBox(height: 16),
+        // To Input Field
+        AddProvinceButton(
+          icon: Icons.flight_land,
+          text: 'To Where?',
+          onClick: _handleSelectProvince,
+        ),
+        const SizedBox(height: 16),
 
-          //Date Range Picker
-          DateRangePickerField(
-            initialValue: _rangeDatePicker,
-            onChanged: (final start, final end) {
-              setState(() {
-                _rangeDatePicker[0] = start;
-                _rangeDatePicker[1] = end;
-              });
-            },
-          ),
-          const SizedBox(height: 20),
+        //Date Range Picker
+        DateRangePickerField(
+          initialValue: _rangeDatePicker,
+          onChanged: (final start, final end) {
+            setState(() {
+              _rangeDatePicker[0] = start;
+              _rangeDatePicker[1] = end;
+            });
+          },
+        ),
+        const SizedBox(height: 20),
 
-          // Action buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              CreateItineraryButton(
-                onPressed: () {
-                  //Handle create
-                  _submitForm();
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
+        // Action buttons
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            CreateItineraryButton(
+              onPressed: () {
+                //Handle create
+              },
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
