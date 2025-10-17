@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 import '../../create-itinerary/ui/ai-generate/generate_ai_modal.dart';
-import 'itinerary_detail_layout.dart';
 
 class ButtonGenerateItinerary extends StatefulWidget {
   const ButtonGenerateItinerary({super.key});
@@ -13,6 +12,7 @@ class ButtonGenerateItinerary extends StatefulWidget {
 }
 
 class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
+  final _fabKey = GlobalKey<ExpandableFabState>();
   void _showCreateItineraryBottomSheet(final BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -28,7 +28,7 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
   @override
   Widget build(final BuildContext context) {
     return ExpandableFab(
-      key: fab_global_key,
+      key: _fabKey,
       overlayStyle: ExpandableFabOverlayStyle(
         color: Colors.black.withValues(alpha: 0.7),
       ),
@@ -68,7 +68,7 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
               ),
               onPressed: () {
                 // Close the expandable FAB
-                final state = fab_global_key.currentState;
+                final state = _fabKey.currentState;
                 state?.toggle();
                 // Show the bottom sheet
                 _showCreateItineraryBottomSheet(context);
