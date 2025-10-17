@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../common/toast/global_toast.dart';
+import '../../../controller/create_itinerary_controller.dart';
 import 'btn_create_itinerary.dart';
 import 'select_date.dart';
 import 'select_destination_location.dart';
@@ -15,41 +17,54 @@ class CreateItineraryForm extends ConsumerStatefulWidget {
 }
 
 class _CreateItineraryFormState extends ConsumerState<CreateItineraryForm> {
-  // void _createItinerary() {
-  //   // Handle create itinerary logic here
-  //   CherryToast(
-  //     title: const Text('Successful'),
-  //     action: const Text('Itinerary Created'),
-  //     themeColor: Colors.green,
-  //   ).show(context);
-  // }
+  void _createItinerary() async {
+    final response = await ref
+        .read(createItineraryControllerProvider.notifier)
+        .createItinerary();
+    if (response != null) {
+      // Handle successful itinerary creation
+      print('Itinerary created with ID: ${response.id}');
+    } else {
+      // Handle failure or error
+      print('Failed to create itinerary.');
+    }
+  }
 
-  // void _listener() {
-  //   // Add any listeners if needed
-  // }
+  void _listener() {
+    ref.listen(
+      createItineraryControllerProvider.select((final state) => state.error),
+      (final previous, final next) {
+        if (next != null && next.isNotEmpty) {
+          // show toast error message
+          GlobalToast.showErrorToast(context, message: next);
+        }
+      },
+    );
+  }
 
   @override
   Widget build(final BuildContext context) {
-    return const Column(
+    _listener();
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // From Input Field
-        SelectStartLocation(),
-        SizedBox(height: 16),
+        const SelectStartLocation(),
+        const SizedBox(height: 16),
 
         // To Input Field
-        SelectDestinationLocation(),
-        SizedBox(height: 16),
+        const SelectDestinationLocation(),
+        const SizedBox(height: 16),
 
         //Date Range Picker
-        SelectDate(),
-        SizedBox(height: 20),
+        const SelectDate(),
+        const SizedBox(height: 20),
 
         // Action buttons
-        Spacer(),
-        CreateItineraryButton(),
+        const Spacer(),
+        CreateItineraryButton(onClick: _createItinerary),
 
-        SizedBox(height: 100),
+        const SizedBox(height: 100),
       ],
     );
   }
