@@ -38,7 +38,7 @@ class _SelectStartLocationState extends ConsumerState<SelectStartLocation> {
 
     return AddProvinceButton(
       icon: Icons.flight_takeoff,
-      text: startProvince?.name ?? 'From where?',
+      text: startProvince?.name ?? 'Chọn nơi khởi hành ?',
       onClick: () => _handleSelectProvince(_selectStartLocation),
     );
   }

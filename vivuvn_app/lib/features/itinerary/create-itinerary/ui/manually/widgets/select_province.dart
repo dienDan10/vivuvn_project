@@ -7,6 +7,7 @@ import '../../../../../../common/validator/validator.dart';
 import '../../../controller/create_itinerary_controller.dart';
 import '../../../models/province.dart';
 import 'custom_icon_btn.dart';
+import 'no_item_found.dart';
 
 class SelectProvince extends ConsumerStatefulWidget {
   final Function(Province)? onSelected;
@@ -84,7 +85,6 @@ class _SelectProvinceState extends ConsumerState<SelectProvince> {
             },
             decorationBuilder: (final context, final child) {
               return Container(
-                height: 400.0,
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -98,6 +98,7 @@ class _SelectProvinceState extends ConsumerState<SelectProvince> {
             suggestionsCallback: (final searchText) => ref
                 .read(createItineraryControllerProvider.notifier)
                 .searchProvince(searchText),
+            emptyBuilder: (final context) => const NoItemFound(),
             onSelected: (final province) {
               _controller.text = province.name;
               if (widget.onSelected != null) {

@@ -39,7 +39,7 @@ class _SelectDestinationLocationState
 
     return AddProvinceButton(
       icon: Icons.flight_land,
-      text: destinationProvince?.name ?? 'Where to?',
+      text: destinationProvince?.name ?? 'Bạn muốn tới đâu ?',
       onClick: () => _handleSelectProvince(_selectEndLocation),
     );
   }
