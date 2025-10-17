@@ -24,12 +24,15 @@ class CreateItineraryController
 
   void setStartProvince(final Province province) {
     state = state.copyWith(startProvince: province);
-    print(province.name);
   }
 
   void setDestinationProvince(final Province province) {
     state = state.copyWith(destinationProvince: province);
-    print(province.name);
+  }
+
+  void setDates(final DateTime? start, final DateTime? end) {
+    state = state.copyWith(startDate: start, endDate: end);
+    print('Set dates: start=$start, end=$end');
   }
 }
 

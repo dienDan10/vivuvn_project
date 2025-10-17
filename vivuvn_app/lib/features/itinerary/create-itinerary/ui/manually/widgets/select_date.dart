@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../controller/create_itinerary_controller.dart';
 import 'date_range_picker.dart';
 
-class SelectDate extends StatefulWidget {
+class SelectDate extends ConsumerStatefulWidget {
   const SelectDate({super.key});
 
   @override
-  State<SelectDate> createState() => _SelectDateState();
+  ConsumerState<SelectDate> createState() => _SelectDateState();
 }
 
-class _SelectDateState extends State<SelectDate> {
+class _SelectDateState extends ConsumerState<SelectDate> {
   final List<DateTime?> _rangeDatePicker = [
     DateTime.now(),
     DateTime.now().add(const Duration(days: 2)),
@@ -20,6 +22,8 @@ class _SelectDateState extends State<SelectDate> {
       _rangeDatePicker[0] = start;
       _rangeDatePicker[1] = end;
     });
+
+    ref.read(createItineraryControllerProvider.notifier).setDates(start, end);
   }
 
   @override
