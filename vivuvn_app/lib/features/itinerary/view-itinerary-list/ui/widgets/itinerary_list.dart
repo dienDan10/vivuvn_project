@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/itinerary_controller.dart';
-import 'EmptyItinerary.dart';
+import 'empty_itinerary.dart';
 import 'itinerary_list_item.dart';
 
 class ItineraryList extends ConsumerStatefulWidget {

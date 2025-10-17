@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../view-itinerary-list/models/itinerary.dart';
 import 'btn_back.dart';
 import 'btn_settings.dart';
 
 class CollapsedAppbar extends StatelessWidget {
-  const CollapsedAppbar({super.key});
+  final Itinerary itinerary;
+  const CollapsedAppbar({super.key, required this.itinerary});
 
   @override
   Widget build(final BuildContext context) {
@@ -15,25 +17,24 @@ class CollapsedAppbar extends StatelessWidget {
         left: 12,
         right: 12,
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Back icon
-          ButtonBack(onAppbar: true),
-
-          // Title
+          const ButtonBack(onAppbar: true),
           Expanded(
             child: Text(
-              'Ngày định mệnh của chúng ta đã đến, giờ đây anh không biết phải làm gì nữa',
-              style: TextStyle(color: Colors.black, fontSize: 16),
+              itinerary.name,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-
-          // setting icon
-          ButtonSettings(onAppbar: true),
+          const ButtonSettings(onAppbar: true),
         ],
       ),
     );

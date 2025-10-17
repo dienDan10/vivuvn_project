@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../../core/routes/routes.dart';
 import '../../models/itinerary.dart';
 import 'edit_itinerary_modal.dart';
 
@@ -22,49 +24,51 @@ class ItineraryListItem extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Itinerary Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: FadeInImage.assetNetwork(
-              placeholder: 'assets/images/image-placeholder.jpeg',
-              image: itinerary.imageUrl,
-              width: 110,
-              height: 110,
-              fit: BoxFit.cover,
-              imageErrorBuilder:
-                  (final context, final error, final stackTrace) {
-                    return Image.asset(
-                      'assets/images/image-placeholder.jpeg',
-                      width: 110,
-                      height: 110,
-                      fit: BoxFit.cover,
-                    );
-                  },
+    return InkWell(
+      onTap: () {
+        context.push(createItineraryDetailRoute(itinerary.id));
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Hình ảnh
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: FadeInImage.assetNetwork(
+                placeholder: 'assets/images/image-placeholder.jpeg',
+                image: itinerary.imageUrl,
+                width: 110,
+                height: 110,
+                fit: BoxFit.cover,
+                imageErrorBuilder:
+                    (final context, final error, final stackTrace) {
+                      return Image.asset(
+                        'assets/images/image-placeholder.jpeg',
+                        width: 110,
+                        height: 110,
+                        fit: BoxFit.cover,
+                      );
+                    },
+              ),
             ),
-          ),
 
-          // Itinerary Details
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Text(
-                  itinerary.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+            const SizedBox(width: 12),
+            // Thông tin hành trình
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text(
+                    itinerary.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
+                  Row(
                     children: [
                       Icon(
                         Icons.calendar_month,
@@ -72,26 +76,36 @@ class ItineraryListItem extends StatelessWidget {
                         color: Colors.grey[600],
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        '${DateFormat.MMMd('vi').format(itinerary.startDate)} - ${DateFormat.yMMMd('vi').format(itinerary.endDate)}',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            '${DateFormat.MMMd('vi').format(itinerary.startDate)} - ${DateFormat.yMMMd('vi').format(itinerary.endDate)}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.visible,
+                            softWrap: false,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Itinerary Actions
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: InkWell(
-              child: const Icon(Icons.more_vert_outlined, size: 32.0),
-              onTap: () => _showBottomSheet(context),
+            // Nút more
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: InkWell(
+                child: const Icon(Icons.more_vert_outlined, size: 32.0),
+                onTap: () => _showBottomSheet(context),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
