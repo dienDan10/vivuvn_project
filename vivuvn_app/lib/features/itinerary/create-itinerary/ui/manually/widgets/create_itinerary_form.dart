@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../../common/toast/global_toast.dart';
+import '../../../../../../core/routes/routes.dart';
 import '../../../controller/create_itinerary_controller.dart';
 import 'btn_create_itinerary.dart';
 import 'select_date.dart';
@@ -22,11 +24,11 @@ class _CreateItineraryFormState extends ConsumerState<CreateItineraryForm> {
         .read(createItineraryControllerProvider.notifier)
         .createItinerary();
     if (response != null) {
-      // Handle successful itinerary creation
-      print('Itinerary created with ID: ${response.id}');
-    } else {
-      // Handle failure or error
-      print('Failed to create itinerary.');
+      // move to itinerary detail page
+      if (mounted) {
+        context.pop(); // close create itinerary bottom sheet
+        context.push(createItineraryDetailRoute(response.id));
+      }
     }
   }
 

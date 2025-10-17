@@ -5,7 +5,9 @@ const String registerRoute = '/register';
 
 const String homeRoute = '/';
 const String profileRoute = '/profile';
-const String itineraryRoute = '/itinerary';
 const String searchRoute = '/search';
 
-const String itineraryDetailRoute = '/itinerary/:id';
+// itineraries routes
+const String itineraryRoute = '/itineraries';
+const String itineraryDetailRoute = '/itineraries/:id';
+String createItineraryDetailRoute(final int id) => '/itineraries/$id';

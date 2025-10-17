@@ -21,8 +21,8 @@ class CreateItineraryRequest {
       'name': name,
       'startProvinceId': startProvinceId,
       'destinationProvinceId': destinationProvinceId,
-      'startDate': startDate.millisecondsSinceEpoch,
-      'endDate': endDate.millisecondsSinceEpoch,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
     };
   }
 
