@@ -1,32 +1,28 @@
 import 'package:flutter/material.dart';
 
 class CreateItineraryButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final double width;
-  final String label;
+  final VoidCallback? onClick;
 
-  const CreateItineraryButton({
-    super.key,
-    this.onPressed,
-    this.width = 100,
-    this.label = 'Create',
-  });
+  const CreateItineraryButton({super.key, this.onClick});
 
   @override
   Widget build(final BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green[800],
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 14),
+    return InkWell(
+      onTap: onClick,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 60),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(40),
+          color: Theme.of(context).colorScheme.primary,
         ),
-        child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        child: Text(
+          'Tạo hành trình',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onPrimary,
+            fontSize: 16.0,
+          ),
+        ),
       ),
     );
   }

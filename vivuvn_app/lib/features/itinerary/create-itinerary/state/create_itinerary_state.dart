@@ -1,16 +1,18 @@
+import '../models/province.dart';
+
 class CreateItineraryState {
   final bool isLoading;
   final String? error;
-  final String startProvinceId;
-  final String destinationProvinceId;
+  final Province? startProvince;
+  final Province? destinationProvince;
   final DateTime? startDate;
   final DateTime? endDate;
 
   CreateItineraryState({
     this.isLoading = false,
     this.error,
-    this.startProvinceId = '',
-    this.destinationProvinceId = '',
+    this.startProvince,
+    this.destinationProvince,
     this.startDate,
     this.endDate,
   });
@@ -18,17 +20,16 @@ class CreateItineraryState {
   CreateItineraryState copyWith({
     final bool? isLoading,
     final String? error,
-    final String? startProvinceId,
-    final String? destinationProvinceId,
+    final Province? startProvince,
+    final Province? destinationProvince,
     final DateTime? startDate,
     final DateTime? endDate,
   }) {
     return CreateItineraryState(
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      startProvinceId: startProvinceId ?? this.startProvinceId,
-      destinationProvinceId:
-          destinationProvinceId ?? this.destinationProvinceId,
+      startProvince: startProvince ?? this.startProvince,
+      destinationProvince: destinationProvince ?? this.destinationProvince,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
     );

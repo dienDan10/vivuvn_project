@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
-import '../../features/itinerary/itinerary-detail/ui/itinerary_detail_layout.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
+import '../../screens/itinerary_detail_screen.dart';
 import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
 import '../../screens/profile_screen.dart';
@@ -20,7 +20,7 @@ import 'routes.dart';
 final goRouterProvider = Provider<GoRouter>((final ref) {
   return GoRouter(
     // initialLocation: splashRoute,
-    initialLocation: itineraryDetailRoute,
+    initialLocation: splashRoute,
     errorBuilder: (final context, final state) => RouteErrorScreen(
       error: state.error.toString(),
       path: state.uri.toString(),
@@ -31,11 +31,6 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
       final authStatus = ref.read(
         authControllerProvider.select((final state) => state.status),
       );
-
-      // Show splash screen while checking auth status
-      // if (authStatus == AuthStatus.unknown) {
-      //   return location == '/splash' ? null : '/splash';
-      // }
 
       // If unauthenticated, redirect to login (except if already on login/signup)
       if (authStatus == AuthStatus.unauthenticated) {
@@ -75,7 +70,10 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
 
       GoRoute(
         path: itineraryDetailRoute,
-        builder: (final context, final state) => const ItineraryDetailLayout(),
+        builder: (final context, final state) {
+          final itineraryId = state.pathParameters['id']!;
+          return ItineraryDetailScreen(itineraryId: int.parse(itineraryId));
+        },
       ),
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(

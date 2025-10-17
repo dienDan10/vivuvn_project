@@ -9,7 +9,8 @@ import 'tabbar_header.dart';
 final fab_global_key = GlobalKey<ExpandableFabState>();
 
 class ItineraryDetailLayout extends StatefulWidget {
-  const ItineraryDetailLayout({super.key});
+  final int itineraryId;
+  const ItineraryDetailLayout({super.key, required this.itineraryId});
 
   @override
   State<ItineraryDetailLayout> createState() => _ItineraryDetailLayoutState();

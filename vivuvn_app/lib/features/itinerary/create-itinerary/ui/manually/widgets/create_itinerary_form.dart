@@ -1,92 +1,73 @@
-import 'package:cherry_toast/cherry_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../../common/toast/global_toast.dart';
+import '../../../../../../core/routes/routes.dart';
+import '../../../controller/create_itinerary_controller.dart';
 import 'btn_create_itinerary.dart';
-import 'date_range_picker.dart';
-import 'destination_location_input.dart';
-import 'start_location_input.dart';
+import 'select_date.dart';
+import 'select_destination_location.dart';
+import 'select_start_location.dart';
 
-class CreateItineraryForm extends StatefulWidget {
-  final ScrollController scrollController;
-  const CreateItineraryForm({super.key, required this.scrollController});
+class CreateItineraryForm extends ConsumerStatefulWidget {
+  const CreateItineraryForm({super.key});
 
   @override
-  State<CreateItineraryForm> createState() => _CreateItineraryFormState();
+  ConsumerState<CreateItineraryForm> createState() =>
+      _CreateItineraryFormState();
 }
 
-class _CreateItineraryFormState extends State<CreateItineraryForm> {
-  final List<DateTime?> _rangeDatePicker = [
-    DateTime.now(),
-    DateTime.now().add(const Duration(days: 2)),
-  ];
-  final _formKey = GlobalKey<FormState>();
-
-  void _submitForm() {
-    // remove keyboard
-    FocusScope.of(context).unfocus();
-
-    if (!_formKey.currentState!.validate()) {
-      return;
+class _CreateItineraryFormState extends ConsumerState<CreateItineraryForm> {
+  void _createItinerary() async {
+    final response = await ref
+        .read(createItineraryControllerProvider.notifier)
+        .createItinerary();
+    if (response != null) {
+      // move to itinerary detail page
+      if (mounted) {
+        context.pop(); // close create itinerary bottom sheet
+        context.push(createItineraryDetailRoute(response.id));
+      }
     }
-
-    // Handle create itinerary logic here
-    CherryToast(
-      title: const Text('Successful'),
-      action: const Text('Itinerary Created'),
-      themeColor: Colors.green,
-    ).show(context);
   }
 
   void _listener() {
-    // Add any listeners if needed
+    ref.listen(
+      createItineraryControllerProvider.select((final state) => state.error),
+      (final previous, final next) {
+        if (next != null && next.isNotEmpty) {
+          // show toast error message
+          GlobalToast.showErrorToast(context, message: next);
+        }
+      },
+    );
   }
 
   @override
   Widget build(final BuildContext context) {
     _listener();
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // From Input Field
-          const StartLocationInput(),
-          const SizedBox(height: 16),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // From Input Field
+        const SelectStartLocation(),
+        const SizedBox(height: 16),
 
-          // To Input Field
-          const DestinationLocationInput(),
-          const SizedBox(height: 16),
+        // To Input Field
+        const SelectDestinationLocation(),
+        const SizedBox(height: 16),
 
-          //Date Range Picker
-          DateRangePickerField(
-            initialValue: _rangeDatePicker,
-            onChanged: (final start, final end) {
-              setState(() {
-                _rangeDatePicker[0] = start;
-                _rangeDatePicker[1] = end;
-              });
-            },
-          ),
-          const SizedBox(height: 20),
+        //Date Range Picker
+        const SelectDate(),
+        const SizedBox(height: 20),
 
-          // Action buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              CreateItineraryButton(
-                onPressed: () {
-                  //Handle create
-                  _submitForm();
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
+        // Action buttons
+        const Spacer(),
+        CreateItineraryButton(onClick: _createItinerary),
+
+        const SizedBox(height: 100),
+      ],
     );
   }
 }
