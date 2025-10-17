@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
-import '../../../create-itinerary/ui/create_itinerary_modal.dart';
+import '../../../create-itinerary/ui/manually/create_itinerary_modal.dart';
 
 class ButtonAddItinerary extends StatefulWidget {
   const ButtonAddItinerary({super.key});

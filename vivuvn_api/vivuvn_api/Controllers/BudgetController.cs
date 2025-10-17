@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.Services.Interfaces;
@@ -9,6 +9,7 @@ namespace vivuvn_api.Controllers
     [ApiController]
     public class BudgetController(IBudgetService _budgetService) : ControllerBase
     {
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetBudgetItems(int itineraryId)
@@ -25,6 +26,7 @@ namespace vivuvn_api.Controllers
             return Ok(budgetItem);
         }
 
+
         [HttpPut("{itemId}")]
         [Authorize]
         public async Task<IActionResult> UpdateBudgetItem(int itineraryId, int itemId, UpdateBudgetItemRequestDto request)
@@ -40,5 +42,6 @@ namespace vivuvn_api.Controllers
             var budgetItem = await _budgetService.DeleteBudgetItemAsync(itemId);
             return Ok(budgetItem);
         }
+
     }
 }
