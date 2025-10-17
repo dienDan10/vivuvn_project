@@ -16,11 +16,11 @@ class AddProvinceButton extends StatelessWidget {
     return InkWell(
       onTap: onClick,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           borderRadius: const BorderRadius.all(Radius.circular(10)),
-          border: BoxBorder.all(color: Colors.black45),
+          border: BoxBorder.all(color: Colors.black26, width: 0.6),
         ),
         child: Row(
           spacing: 20.0,
@@ -28,11 +28,7 @@ class AddProvinceButton extends StatelessWidget {
             Icon(icon),
             Text(
               text,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black45,
-              ),
+              style: const TextStyle(fontSize: 16, color: Colors.black54),
             ),
           ],
         ),
