@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../overview/ui/place_card.dart';
+import '../../../overview/ui/widgets/place_card.dart';
 import '../schedule_data.dart';
 import 'transport_section.dart';
 
