@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../controller/itinerary_schedule_controller.dart';
 import 'day_selector_button.dart';
 
@@ -54,7 +55,7 @@ class DaySelectorBar extends ConsumerWidget {
                 children: List.generate(days.length, (final index) {
                   final date = days[index].date;
                   final label = date != null
-                      ? '${date.day}/${date.month}' // ví dụ 26/10
+                      ? '${date.day}/${date.month}'
                       : 'Ngày ${days[index].dayNumber}';
 
                   return Padding(

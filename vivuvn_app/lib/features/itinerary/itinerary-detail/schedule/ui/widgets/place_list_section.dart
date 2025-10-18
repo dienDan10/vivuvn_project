@@ -1,32 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../overview/ui/widgets/place_card.dart';
-import '../schedule_data.dart';
+import '../../controller/itinerary_schedule_controller.dart';
+import 'add_place_button.dart';
+import 'schedule_place_card.dart';
 import 'transport_section.dart';
 
-class PlaceListSection extends StatelessWidget {
+class PlaceListSection extends ConsumerWidget {
   const PlaceListSection({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final state = ref.watch(itineraryScheduleControllerProvider);
+
+    // Lấy danh sách ngày
+    final days = state.days;
+    if (days.isEmpty) {
+      return const Center(child: Text('Không có ngày nào trong lịch trình.'));
+    }
+
+    // Lấy ngày được chọn
+    final selectedDay = days[state.selectedIndex];
+    final items = selectedDay.items;
+
+    // Nếu chưa có địa điểm, chỉ hiển thị nút thêm địa điểm
+    if (items.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 8),
+        child: AddPlaceButton(),
+      );
+    }
+
+    // danh sách địa điểm
     return Column(
       children: [
-        ...samplePlaces.asMap().entries.map((final entry) {
+        ...items.asMap().entries.map((final entry) {
           final index = entry.key;
-          final place = entry.value;
+          final item = entry.value;
+          final location = item.location;
+
+          if (location == null) return const SizedBox.shrink();
 
           return Column(
             children: [
-              PlaceCard(title: place.title, description: place.description),
-              if (index != samplePlaces.length - 1)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32),
-                  child: TransportSection(),
+              SchedulePlaceCard(
+                title: location.name,
+                description: location.description,
+                imageUrl: location.photos.isNotEmpty
+                    ? location.photos.first
+                    : null,
+                index: index,
+              ),
+              if (index != items.length - 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: TransportSection(index: index),
                 ),
             ],
           );
         }),
         const SizedBox(height: 8),
+        const AddPlaceButton(),
       ],
     );
   }

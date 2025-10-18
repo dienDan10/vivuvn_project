@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../ui/btn_ai_gen_itinerary.dart';
 import '../controller/itinerary_schedule_controller.dart';
 import 'widgets/add_hotel_expan.dart';
-import 'widgets/add_place_button.dart';
 import 'widgets/add_restaurant_expan.dart';
 import 'widgets/day_selector_bar.dart';
 import 'widgets/day_title.dart';
@@ -13,7 +12,7 @@ import 'widgets/place_list_section.dart';
 import 'widgets/suggested_places_tile.dart';
 
 class ScheduleTab extends ConsumerStatefulWidget {
-  final int? itineraryId; // <-- cho phép null để kiểm tra
+  final int? itineraryId;
 
   const ScheduleTab({super.key, required this.itineraryId});
 
@@ -25,7 +24,6 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
   @override
   void initState() {
     super.initState();
-    // gọi fetchDays khi mount
     Future.microtask(() {
       ref
           .read(itineraryScheduleControllerProvider.notifier)
@@ -73,16 +71,12 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
                   )
                 : ListView(
                     padding: EdgeInsets.zero,
-                    children: [
-                      DayTitle(
-                        day:
-                            'Ngày ${selectedDay.dayNumber} - ${selectedDay.date?.day}/${selectedDay.date?.month}',
-                      ),
-                      const PlaceListSection(),
-                      const AddPlaceButton(),
-                      const SuggestedPlacesTile(),
-                      const AddHotelTile(),
-                      const AddRestaurantTile(),
+                    children: const [
+                      DayTitle(),
+                      PlaceListSection(),
+                      SuggestedPlacesTile(),
+                      AddHotelTile(),
+                      AddRestaurantTile(),
                     ],
                   ),
           ),
