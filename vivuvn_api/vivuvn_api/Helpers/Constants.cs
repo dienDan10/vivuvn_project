@@ -34,7 +34,13 @@
         public const string BudgetType_Groceries = "Tạp hóa";
         public const string BudgetType_Other = "Khác";
 
-        // Travel Modes
+        // Transportation Modes (for inter-city/province travel)
+        public const string TransportationMode_Airplane = "Máy bay";
+        public const string TransportationMode_Bus = "Xe khách";
+        public const string TransportationMode_Train = "Tàu hỏa";
+        public const string TransportationMode_PrivateCar = "Ô tô cá nhân";
+
+        // Travel Modes (for Google Maps routing within city)
         public const string TravelMode_Driving = "DRIVE";
         public const string TravelMode_Walking = "WALK";
         public const string TravelMode_Bicycling = "BICYCLE";

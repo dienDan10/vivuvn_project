@@ -25,8 +25,28 @@ namespace vivuvn_api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
-            var result = await _authService.RegisterAsync(request);
-            return Ok(result);
+            await _authService.RegisterAsync(request);
+            return Ok(new
+            {
+                Message = "Register successful!. Check you email to confirm email registration"
+            });
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequestDto request)
+        {
+            await _authService.VerifyEmailAsync(request);
+            return Ok(new
+            {
+                Message = "Email verify successful!"
+            });
+        }
+
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerificationRequestDto request)
+        {
+            await _authService.ResendEmailVerificationAsync(request);
+            return Ok();
         }
 
         [HttpPost("refresh-token")]
