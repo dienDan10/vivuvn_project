@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # AI Model Parameters
-    MAX_TOKENS: int = 16384  # Increased for complex travel itineraries
+    MAX_TOKENS: int = 32000  # Increased for complex travel itineraries
     TEMPERATURE: float = 0.3
     
     # CORS Configuration

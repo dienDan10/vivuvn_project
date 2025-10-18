@@ -27,6 +27,7 @@ from app.services.embedding_service import get_embedding_service
 from app.prompts.travel_prompts import SYSTEM_PROMPT, create_user_prompt
 # Cluster places geographically for better route optimization
 from app.utils.geo_utils import simple_kmeans_geo
+from app.utils.helpers import normalize_province_name
 import asyncio
 
 logger = structlog.get_logger(__name__)
@@ -451,35 +452,41 @@ class TravelPlanningAgent:
         """Node 1: Build smart search filters based on travel request."""
         try:
             travel_request = state["travel_request"]
-            
+
             logger.info(f"[Node 1/5] Building search filters for {travel_request.destination}")
-            
+
             filters = {}
             additional_filters = {}
-            
-            # Province/Location filtering
+
+            # Province/Location filtering with normalization
+            # Normalize province name to remove prefixes like "Thành phố", "Tỉnh", etc.
             province = travel_request.destination.strip()
+
             if province:
-                filters["province"] = province
-                logger.info(f"[Node 1/5] Province filter: {province}")
-            
+                # Normalize the province name to handle cases where:
+                # - User inputs "Hà Nội" but database has "Thành phố Hà Nội"
+                # - User inputs "Thành phố Đà Nẵng" but database has "Đà Nẵng"
+                normalized_province = normalize_province_name(province)
+                filters["province"] = normalized_province
+                logger.info(f"[Node 1/5] Province filter: '{province}' -> normalized: '{normalized_province}'")
+
             # Preference-based smart filtering (future enhancement)
             if travel_request.preferences:
                 logger.info(f"[Node 1/5] Preferences noted: {travel_request.preferences}")
                 # Can be expanded to filter by categories when available in data
-            
+
             # Place ID filtering (for specific place requests)
             # Can be extended to filter by specific place IDs if needed
             if additional_filters:
                 filters["additional_filters"] = additional_filters
 
             logger.info(f"[Node 1/5] Built filters: {filters}")
-                
+
             # Store filters in state
             state["search_filters"] = filters
-            
+
             return state
-            
+
         except Exception as e:
             logger.error(f"[Node 1/5] Filter building failed: {e}")
             state["error"] = f"Filter building failed: {str(e)}"
