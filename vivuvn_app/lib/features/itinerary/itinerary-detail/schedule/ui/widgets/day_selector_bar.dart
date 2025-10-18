@@ -1,21 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../../controller/itinerary_schedule_controller.dart';
 import 'day_selector_button.dart';
-
-final selectedDayIndexProvider = StateProvider<int>((final ref) => 0);
-
-final daysProvider = Provider<List<String>>((final ref) {
-  return ['22/10', '23/10', '24/10', '25/10', '26/10', '25/10', '25/10'];
-});
 
 class DaySelectorBar extends ConsumerWidget {
   const DaySelectorBar({super.key});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final days = ref.watch(daysProvider);
-    final selectedIndex = ref.watch(selectedDayIndexProvider);
+    final state = ref.watch(itineraryScheduleControllerProvider);
+
+    final days = state.days;
+    final selectedIndex = state.selectedIndex;
+
+    if (state.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.error != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          'Lỗi: ${state.error}',
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
+      );
+    }
+
+    if (days.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Text('Chưa có ngày nào trong lịch trình.'),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -32,14 +52,21 @@ class DaySelectorBar extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: List.generate(days.length, (final index) {
+                  final date = days[index].date;
+                  final label = date != null
+                      ? '${date.day}/${date.month}' // ví dụ 26/10
+                      : 'Ngày ${days[index].dayNumber}';
+
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: DaySelectorButton(
-                      label: days[index],
+                      label: label,
                       isSelected: selectedIndex == index,
-                      onTap: () =>
-                          ref.read(selectedDayIndexProvider.notifier).state =
-                              index,
+                      onTap: () {
+                        ref
+                            .read(itineraryScheduleControllerProvider.notifier)
+                            .selectDay(index);
+                      },
                     ),
                   );
                 }),
