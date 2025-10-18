@@ -17,4 +17,18 @@ class GlobalToast {
       toastPosition: Position.top,
     ).show(context);
   }
+
+  static void showSuccessToast(
+    final BuildContext context, {
+    final String? message,
+    final String? title,
+  }) {
+    CherryToast.success(
+      title: title != null ? Text(title) : null,
+      description: message != null ? Text(message) : null,
+      animationDuration: const Duration(milliseconds: 300),
+      animationType: AnimationType.fromTop,
+      toastPosition: Position.top,
+    ).show(context);
+  }
 }

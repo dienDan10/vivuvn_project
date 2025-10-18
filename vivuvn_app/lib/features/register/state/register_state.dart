@@ -1,26 +1,30 @@
 class RegisterState {
   final bool isLoading;
-  final String? error;
   final bool isSuccess;
-  final Map<String, dynamic> registerData;
+  final bool isEmailVerified;
+  final String? error;
+  final Map<String, String> registerData;
 
-  RegisterState({
+  const RegisterState({
     this.isLoading = false,
-    this.error,
     this.isSuccess = false,
+    this.isEmailVerified = false,
+    this.error,
     this.registerData = const {},
   });
 
   RegisterState copyWith({
     final bool? isLoading,
-    final String? error,
     final bool? isSuccess,
-    final Map<String, dynamic>? registerData,
+    final bool? isEmailVerified,
+    final String? error,
+    final Map<String, String>? registerData,
   }) {
     return RegisterState(
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
       isSuccess: isSuccess ?? this.isSuccess,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      error: error,
       registerData: registerData ?? this.registerData,
     );
   }
