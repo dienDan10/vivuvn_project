@@ -95,15 +95,17 @@ class _AddPlaceSearchFieldState extends ConsumerState<AddPlaceSearchField> {
   Future<void> _handleLocationSelected(
     final SearchLocationResponse suggestion,
   ) async {
-    ref.read(searchLocationControllerProvider.notifier).clearLocations();
-
     // Gọi API để thêm place vào wishlist
-    await ref
+    final success = await ref
         .read(favouritePlacesControllerProvider.notifier)
         .addPlaceToWishlist(widget.itineraryId, suggestion.id);
 
     if (!mounted) return;
 
-    Navigator.pop(context);
+    // Chỉ clear và đóng modal nếu thành công
+    if (success) {
+      ref.read(searchLocationControllerProvider.notifier).clearLocations();
+      Navigator.pop(context);
+    }
   }
 }
