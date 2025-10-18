@@ -8,9 +8,7 @@ import 'resend_email_verification_btn.dart';
 import 'verify_email_button.dart';
 
 class EmailVerificationModal extends ConsumerStatefulWidget {
-  final String email;
-
-  const EmailVerificationModal({super.key, required this.email});
+  const EmailVerificationModal({super.key});
 
   @override
   ConsumerState<EmailVerificationModal> createState() =>
@@ -27,6 +25,7 @@ class _EmailVerificationModalState
     6,
     (final index) => FocusNode(),
   );
+  bool isCodeComplete = false;
 
   @override
   void dispose() {
@@ -45,6 +44,12 @@ class _EmailVerificationModalState
     } else if (value.isEmpty && index > 0) {
       _focusNodes[index - 1].requestFocus();
     }
+
+    setState(() {
+      isCodeComplete = _controllers.every(
+        (final controller) => controller.text.isNotEmpty,
+      );
+    });
   }
 
   String _getVerificationCode() {
@@ -73,7 +78,9 @@ class _EmailVerificationModalState
         mainAxisSize: MainAxisSize.min,
         children: [
           // Header
-          EmailVerificationModalHeader(email: widget.email),
+          EmailVerificationModalHeader(
+            email: registerState.registerData['email']!,
+          ),
           const SizedBox(height: 32),
 
           // OTP Input
@@ -104,7 +111,7 @@ class _EmailVerificationModalState
             ),
 
           // Verify button
-          VerifyEmailButton(onPressed: _verifyEmail),
+          VerifyEmailButton(onPressed: isCodeComplete ? _verifyEmail : null),
           const SizedBox(height: 16),
 
           // Resend code

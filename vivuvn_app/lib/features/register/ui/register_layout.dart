@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../common/toast/global_toast.dart';
+import '../../../core/routes/routes.dart';
 import '../../login/ui/widgets/loading_overlay.dart';
 import '../controller/register_controller.dart';
 import 'widgets/email_verification_modal.dart';
@@ -16,9 +18,6 @@ class RegisterLayout extends ConsumerStatefulWidget {
 
 class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
   void _showEmailVerificationModal() {
-    final email =
-        ref.read(registerControllerProvider).registerData['email'] ?? '';
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -28,7 +27,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (final context) => EmailVerificationModal(email: email),
+      builder: (final context) => const EmailVerificationModal(),
     );
   }
 
@@ -49,9 +48,13 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
       registerControllerProvider.select((final state) => state.isEmailVerified),
       (final previous, final next) {
         if (previous != next && next) {
-          Navigator.of(context).pop(); // Close modal
-          // TODO: Navigate to login or home screen
-          context.pop(); // Go back to login
+          context.pop(); // Close modal
+          context.go(loginRoute); // Go back to login
+          // display success toast
+          GlobalToast.showSuccessToast(
+            context,
+            message: 'Email verified successfully! Please log in.',
+          );
         }
       },
     );
