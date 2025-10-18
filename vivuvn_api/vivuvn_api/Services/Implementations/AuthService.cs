@@ -99,13 +99,15 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task RegisterAsync(RegisterRequestDto request)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user is not null && user.IsEmailVerified)
             {
                 // Send verification email again
                 user.Username = request.Username;
                 user.PasswordHash = HashPassword(user, request.Password);
+
+                // if user is a google user, don't need to send verification email
                 await CreateAndSendEmailVerificationToken(user);
                 return;
             }
