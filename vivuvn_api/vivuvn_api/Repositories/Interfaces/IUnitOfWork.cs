@@ -7,6 +7,8 @@
         IItineraryDayRepository ItineraryDays { get; }
         IItineraryItemRepository ItineraryItems { get; }
         IBudgetRepository Budgets { get; }
+        IBudgetItemRepository BudgetItems { get; }
+        IBudgetTypeRepository BudgetTypes { get; }
         IProvinceRepository Provinces { get; }
         ILocationRepository Locations { get; }
         IFavoritePlaceRepository FavoritePlaces { get; }

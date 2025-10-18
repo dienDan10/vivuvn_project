@@ -8,11 +8,14 @@ namespace vivuvn_api.Repositories.Implementations
     {
         private readonly AppDbContext _context;
         private IDbContextTransaction? _transaction;
+        
         public IUserRepository Users { get; private set; }
         public IItineraryRepository Itineraries { get; private set; }
         public IItineraryDayRepository ItineraryDays { get; set; }
         public IItineraryItemRepository ItineraryItems { get; set; }
         public IBudgetRepository Budgets { get; set; }
+        public IBudgetItemRepository BudgetItems { get; private set; }
+        public IBudgetTypeRepository BudgetTypes { get; private set; }
         public IProvinceRepository Provinces { get; set; }
         public ILocationRepository Locations { get; private set; }
         public IFavoritePlaceRepository FavoritePlaces { get; private set; }
@@ -22,6 +25,8 @@ namespace vivuvn_api.Repositories.Implementations
             IItineraryRepository itineraryRepository,
             IItineraryDayRepository itineraryDayRepository,
             IBudgetRepository budgetRepository,
+            IBudgetItemRepository budgetItemRepository,
+            IBudgetTypeRepository budgetTypeRepository,
             IProvinceRepository provinceRepository,
             ILocationRepository locationRepository,
             IFavoritePlaceRepository favoritePlaceRepository,
@@ -32,6 +37,8 @@ namespace vivuvn_api.Repositories.Implementations
             Itineraries = itineraryRepository;
             ItineraryDays = itineraryDayRepository;
             Budgets = budgetRepository;
+            BudgetItems = budgetItemRepository;
+            BudgetTypes = budgetTypeRepository;
             Provinces = provinceRepository;
             Locations = locationRepository;
             FavoritePlaces = favoritePlaceRepository;
