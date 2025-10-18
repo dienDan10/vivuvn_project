@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../common/helper/app_constants.dart';
+import '../../../../core/routes/routes.dart';
 import '../controller/itinerary_detail_controller.dart';
 import 'hero_section.dart';
 import 'tabbar_content.dart';
@@ -25,13 +27,11 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
     Future.microtask(() {
       ref
           .read(itineraryDetailControllerProvider.notifier)
           .setItineraryId(widget.itineraryId);
     });
-
     _registerListener();
   }
 
@@ -61,14 +61,20 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   Widget build(final BuildContext context) {
     final detailState = ref.watch(itineraryDetailControllerProvider);
 
-    // Nếu chưa có ID hoặc chưa có data thì loading
+    //lỗi unauthorized → điều hướng về login
+    if (detailState.error == 'unauthorized') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.go(loginRoute);
+      });
+    }
+
     if (detailState.itineraryId == null ||
         detailState.itinerary == null ||
         detailState.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (detailState.error != null) {
+    if (detailState.error != null && detailState.error != 'unauthorized') {
       return Scaffold(
         body: Center(
           child: Text(
@@ -78,6 +84,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
         ),
       );
     }
+
     return Scaffold(
       body: NestedScrollView(
         controller: _scrollController,
