@@ -5,7 +5,7 @@ import '../../../../core/data/remote/network/network_service.dart';
 import '../dto/register_request.dart';
 import '../dto/register_response.dart';
 
-final registerApiProvider = Provider<RegisterApi>((final ref) {
+final registerApiProvider = Provider.autoDispose<RegisterApi>((final ref) {
   final dio = ref.watch(networkServiceProvider);
   return RegisterApi(dio);
 });

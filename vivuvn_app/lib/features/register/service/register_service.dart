@@ -4,7 +4,9 @@ import '../data/api/register_api.dart';
 import '../data/dto/register_request.dart';
 import '../data/dto/register_response.dart';
 
-final registerServiceProvider = Provider<IRegisterService>((final ref) {
+final registerServiceProvider = Provider.autoDispose<IRegisterService>((
+  final ref,
+) {
   final api = ref.watch(registerApiProvider);
   return RegisterService(api);
 });
