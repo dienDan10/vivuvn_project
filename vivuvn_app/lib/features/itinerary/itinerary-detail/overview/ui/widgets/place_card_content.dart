@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'place_card_description.dart';
+import 'place_card_header.dart';
+
 class PlaceCardContent extends StatelessWidget {
   const PlaceCardContent({
     required this.title,
@@ -17,66 +20,10 @@ class PlaceCardContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(context),
+        PlaceCardHeader(title: title, index: index),
         const SizedBox(height: 6),
-        _buildDescription(context),
+        PlaceCardDescription(description: description),
       ],
-    );
-  }
-
-  /// Header với badge số thứ tự và title
-  Widget _buildHeader(final BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Row(
-      children: [
-        if (index != null) ...[
-          _buildIndexBadge(colorScheme, textTheme),
-          const SizedBox(width: 8),
-        ],
-        Expanded(
-          child: Text(
-            title,
-            style: textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Badge hiển thị số thứ tự
-  Widget _buildIndexBadge(
-    final ColorScheme colorScheme,
-    final TextTheme textTheme,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        '#$index',
-        style: textTheme.labelSmall?.copyWith(
-          color: colorScheme.onPrimaryContainer,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  /// Description text
-  Widget _buildDescription(final BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Text(
-      description,
-      style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
     );
   }
 }

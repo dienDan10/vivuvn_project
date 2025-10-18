@@ -6,33 +6,35 @@ import '../schedule/ui/schedule_tab.dart';
 
 class TabbarContent extends StatelessWidget {
   final TabController tabController;
-  const TabbarContent({super.key, required this.tabController});
+  final int itineraryId;
+
+  const TabbarContent({
+    super.key,
+    required this.tabController,
+    required this.itineraryId,
+  });
 
   @override
   Widget build(final BuildContext context) {
     return TabBarView(
       controller: tabController,
       physics: const NeverScrollableScrollPhysics(),
-      children: const [
+      children: [
         // Tab 1 - Tổng quan
         CustomScrollView(
           slivers: [
-            PlaceList(),
-            SliverFillRemaining(
+            PlaceList(itineraryId: itineraryId),
+            const SliverFillRemaining(
               hasScrollBody: false,
               child: SizedBox(height: 5),
             ),
           ],
         ),
         // Tab 2 - Lịch trình
-        ScheduleTab(),
-        // Scaffold(
-        //   body: const Text('Lich trinh trong'),
-        //   floatingActionButton: const ButtonGenerateItinerary(),
-        //   floatingActionButtonLocation: ExpandableFab.location,
-        // ),
+        const ScheduleTab(),
+
         // Tab 3 - Ngân sách
-        BudgetTab(),
+        const BudgetTab(),
       ],
     );
   }

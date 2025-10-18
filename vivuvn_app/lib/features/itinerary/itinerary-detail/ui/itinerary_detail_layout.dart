@@ -87,7 +87,12 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
         ],
         body: Column(
           children: [
-            Expanded(child: TabbarContent(tabController: _tabController)),
+            Expanded(
+              child: TabbarContent(
+                tabController: _tabController,
+                itineraryId: widget.itineraryId,
+              ),
+            ),
           ],
         ),
       ),
