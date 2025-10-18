@@ -54,15 +54,5 @@ namespace vivuvn_api.Controllers
 
             return Ok(response);
         }
-
-        [HttpPost]
-        [Authorize]
-        [Route("auto-generate/{id:int}")]
-        public async Task<IActionResult> AutoGenerateItinerary(int id, [FromBody] AutoGenerateItineraryRequest request)
-        {
-            // auto-generate itinerary
-            var response = await _itineraryService.AutoGenerateItineraryAsync(id, request);
-            return Ok(response);
-		}
 	}
 }

@@ -16,7 +16,7 @@ namespace vivuvn_api.Services.Implementations
 			Converters = { new TimeOnlyJsonConverter() }
 		};
 
-		public async Task<T> GenerateItineraryAsync<T>(AutoGenerateItineraryRequest request)
+		public async Task<T> GenerateItineraryAsync<T>(AITravelItineraryGenerateRequest request)
 		{
 			try
 			{

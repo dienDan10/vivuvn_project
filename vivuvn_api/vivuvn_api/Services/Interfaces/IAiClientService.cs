@@ -4,6 +4,6 @@ namespace vivuvn_api.Services.Interfaces
 {
     public interface IAiClientService
     {
-        Task<T> GenerateItineraryAsync<T>(AutoGenerateItineraryRequest request);
+        Task<T> GenerateItineraryAsync<T>(AITravelItineraryGenerateRequest request);
 	}
 }
