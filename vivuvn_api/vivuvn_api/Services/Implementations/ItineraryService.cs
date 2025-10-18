@@ -1,14 +1,16 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
+using vivuvn_api.Helpers;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper) : IItineraryService
+    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient) : IItineraryService
     {
 
 
@@ -82,6 +84,292 @@ namespace vivuvn_api.Services.Implementations
 
             if (days is null) return [];
             return _mapper.Map<IEnumerable<ItineraryDayDto>>(days);
+        }
+
+		public async Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
+		{
+            // Generate itinerary from AI service
+            var aiResponse = await _aiClient.GenerateItineraryAsync<AutoGenerateItineraryResponse>(request);
+
+            if (aiResponse?.Itinerary == null)
+            {
+                throw new InvalidOperationException("Failed to generate itinerary from AI service.");
+            }
+
+            if(aiResponse.Itinerary.ScheduleUnavailable)
+            {
+                throw new ArgumentException(aiResponse.Itinerary.UnavailableReason);
+			}
+
+            // Save the generated itinerary to database
+            var savedSuccessfully = await SaveTravelItineraryToDatabaseAsync(itineraryId, aiResponse.Itinerary);
+
+            if (!savedSuccessfully)
+            {
+                throw new InvalidOperationException("Failed to save generated itinerary to database.");
+            }
+
+            // Retrieve and return the complete itinerary with all details
+            var itinerary = await GetItineraryByIdAsync(itineraryId);
+
+            return itinerary;
+        }
+
+        /// <summary>
+        /// Saves AI-generated travel itinerary to database (Private helper method)
+        /// </summary>
+        /// <param name="itineraryId">The ID of the existing itinerary to update</param>
+        /// <param name="travelItinerary">The AI-generated travel itinerary data</param>
+        /// <returns>True if successfully saved, false otherwise</returns>
+        private async Task<bool> SaveTravelItineraryToDatabaseAsync(int itineraryId, TravelItinerary travelItinerary)
+        {
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+
+                // Get the existing itinerary with its days
+                var itinerary = await _unitOfWork.Itineraries.GetOneAsync(
+                    i => i.Id == itineraryId,
+                    includeProperties: "Days,Days.Items,Budget,Budget.Items");
+
+                if (itinerary == null)
+                {
+                    throw new KeyNotFoundException($"Itinerary with id {itineraryId} not found.");
+                }
+
+                // Clear existing itinerary items from all days
+                await ClearExistingItineraryItemsAsync(itinerary.Days);
+
+                // Get budget and clear existing budget items
+                var budget = await GetAndClearBudgetItemsAsync(itineraryId);
+
+				// Get all budget types
+				var allBudgetTypes = await _unitOfWork.BudgetTypes.GetAllAsync();
+				var budgetTypeDict = allBudgetTypes.ToDictionary(bt => bt.Name, bt => bt.BudgetTypeId);
+
+				// Process each day from the AI-generated itinerary
+				await ProcessItineraryDaysAsync(itineraryId, travelItinerary.Days, budget, budgetTypeDict, itinerary.Days);
+
+                // Process transportation suggestions
+                await ProcessTransportationSuggestionsAsync(travelItinerary.TransportationSuggestions, budget, budgetTypeDict);
+
+                // Update budget total if TotalCost is provided
+                await UpdateBudgetTotalAsync(itineraryId, travelItinerary.TotalCost, budget);
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Clears all existing itinerary items from the days
+        /// </summary>
+        private async Task ClearExistingItineraryItemsAsync(ICollection<ItineraryDay> days)
+        {
+            foreach (var day in days)
+            {
+                if (day.Items != null && day.Items.Any())
+                {
+                    foreach (var item in day.Items.ToList())
+                    {
+                        _unitOfWork.ItineraryItems.Remove(item);
+                    }
+                }
+            }
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Gets the budget and clears all existing budget items
+        /// </summary>
+        private async Task<Budget?> GetAndClearBudgetItemsAsync(int itineraryId)
+        {
+            var budget = await _unitOfWork.Budgets.GetOneAsync(
+                b => b.ItineraryId == itineraryId,
+                includeProperties: "Items");
+
+            if (budget != null && budget.Items != null && budget.Items.Any())
+            {
+                var existingBudgetItems = await _unitOfWork.BudgetItems.GetByBudgetIdAsync(budget.BudgetId);
+                foreach (var budgetItem in existingBudgetItems.ToList())
+                {
+                    _unitOfWork.BudgetItems.Remove(budgetItem);
+                }
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return budget;
+        }
+
+        /// <summary>
+        /// Processes all itinerary days and their activities
+        /// </summary>
+        private async Task ProcessItineraryDaysAsync(
+            int itineraryId,
+            List<AIDayItineraryDto> aiDays,
+            Budget? budget,
+            Dictionary<string, int> budgetTypeDict,
+            ICollection<ItineraryDay> existingDays)
+        {
+            foreach (var aiDay in aiDays)
+            {
+                // Find or create the itinerary day
+                var existingDay = existingDays.FirstOrDefault(d => d.DayNumber == aiDay.Day);
+
+                if (existingDay == null)
+                {
+                    existingDay = new ItineraryDay
+                    {
+                        ItineraryId = itineraryId,
+                        DayNumber = aiDay.Day,
+                        Date = aiDay.Date
+                    };
+                    await _unitOfWork.ItineraryDays.AddAsync(existingDay);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+
+                // Process activities for this day
+                await ProcessActivitiesForDayAsync(existingDay, aiDay.Activities, aiDay.Date, budget, budgetTypeDict);
+            }
+        }
+
+        /// <summary>
+        /// Processes all activities for a specific day
+        /// </summary>
+        private async Task ProcessActivitiesForDayAsync(
+            ItineraryDay day,
+            List<AIActivityDto> activities,
+            DateTime date,
+            Budget? budget,
+            Dictionary<string, int> budgetTypeDict)
+        {
+            int orderIndex = 1;
+
+            foreach (var activity in activities)
+            {
+                // Find the location by GooglePlaceId
+                var location = await _unitOfWork.Locations.GetOneAsync(
+                    l => l.GooglePlaceId == activity.PlaceId && !l.DeleteFlag);
+
+                if (location == null)
+                {
+                    Console.WriteLine($"Warning: Location with PlaceId {activity.PlaceId} not found in database. Skipping activity: {activity.Name}");
+                    continue;
+                }
+
+                // Create itinerary item
+                var itineraryItem = _mapper.Map<ItineraryItem>(activity);
+                itineraryItem.ItineraryDayId = day.Id;
+                itineraryItem.LocationId = location.Id;
+                itineraryItem.OrderIndex = orderIndex++;
+                itineraryItem.TransportationVehicle = Constants.TravelMode_Driving;
+                itineraryItem.TransportationDuration = 500;
+                itineraryItem.TransportationDistance = 278;
+
+                await _unitOfWork.ItineraryItems.AddAsync(itineraryItem);
+
+                // Create budget item if activity has cost
+                if (activity.CostEstimate > 0 && budget != null)
+                {
+                    await CreateActivityBudgetItemAsync(activity, budget, date, budgetTypeDict);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a budget item for an activity
+        /// </summary>
+        private async Task CreateActivityBudgetItemAsync(
+            AIActivityDto activity,
+            Budget budget,
+            DateTime date,
+            Dictionary<string, int> budgetTypeDict)
+        {
+            var activityBudgetTypeId = budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Activities);
+
+            if (activityBudgetTypeId > 0)
+            {
+                var budgetItem = new BudgetItem
+                {
+                    BudgetId = budget.BudgetId,
+                    Name = activity.Name,
+                    Cost = activity.CostEstimate,
+                    Date = date,
+                    BudgetTypeId = activityBudgetTypeId
+                };
+                await _unitOfWork.BudgetItems.AddAsync(budgetItem);
+            }
+        }
+
+        /// <summary>
+        /// Processes transportation suggestions and creates budget items
+        /// </summary>
+        private async Task ProcessTransportationSuggestionsAsync(
+            List<AITransportationSuggestionDto> transportations,
+            Budget? budget,
+            Dictionary<string, int> budgetTypeDict)
+        {
+            if (budget == null) return;
+
+            foreach (var transportation in transportations)
+            {
+                if (transportation.EstimatedCost > 0)
+                {
+                    var transportationBudgetTypeId = transportation.Mode switch
+					{
+						var m when m.Equals(Constants.TransportationMode_Airplane, StringComparison.OrdinalIgnoreCase)
+							=> budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Flights),
+						var m when m.Equals(Constants.TransportationMode_Bus, StringComparison.OrdinalIgnoreCase)
+							|| m.Equals(Constants.TransportationMode_Train, StringComparison.OrdinalIgnoreCase)
+							=> budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit),
+						var m when m.Equals(Constants.TransportationMode_PrivateCar, StringComparison.OrdinalIgnoreCase)
+							=> budgetTypeDict.GetValueOrDefault(Constants.BudgetType_CarRental),
+						_ => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit)
+					};
+
+					if (transportationBudgetTypeId > 0)
+                    {
+                        var budgetItem = new BudgetItem
+                        {
+                            BudgetId = budget.BudgetId,
+                            Name = $"{transportation.Mode} - {transportation.Details}",
+                            Cost = transportation.EstimatedCost,
+                            Date = transportation.Date,
+                            BudgetTypeId = transportationBudgetTypeId
+                        };
+                        await _unitOfWork.BudgetItems.AddAsync(budgetItem);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Updates the total budget amount
+        /// </summary>
+        private async Task UpdateBudgetTotalAsync(int itineraryId, decimal totalCost, Budget? budget)
+        {
+            if (totalCost <= 0) return;
+
+            if (budget != null)
+            {
+                budget.TotalBudget = totalCost;
+                _unitOfWork.Budgets.Update(budget);
+            }
+            else
+            {
+                var newBudget = new Budget
+                {
+                    ItineraryId = itineraryId,
+                    TotalBudget = totalCost
+                };
+                await _unitOfWork.Budgets.AddAsync(newBudget);
+            }
         }
     }
 
