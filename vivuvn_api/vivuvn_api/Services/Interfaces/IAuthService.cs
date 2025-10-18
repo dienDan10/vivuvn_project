@@ -1,6 +1,5 @@
 ﻿using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
-using vivuvn_api.Models;
 
 namespace vivuvn_api.Services.Interfaces
 {
@@ -8,6 +7,8 @@ namespace vivuvn_api.Services.Interfaces
     {
         Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request);
         Task<TokenResponseDto> LoginAsync(LoginRequestDto request);
+        Task<TokenResponseDto> GoogleLoginAsync(GoogleLoginRequestDto request);
+
         Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
     }
 }

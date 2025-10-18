@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vivuvn_api.Data;
 using vivuvn_api.DTOs.Request;
@@ -9,7 +11,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class AuthService(AppDbContext _context, ITokenService _tokenService) : IAuthService
+    public class AuthService(AppDbContext _context, ITokenService _tokenService, IConfiguration _config) : IAuthService
     {
         public async Task<TokenResponseDto> LoginAsync(LoginRequestDto request)
         {
@@ -31,6 +33,65 @@ namespace vivuvn_api.Services.Implementations
             if (!user.IsEmailVerified) throw new BadHttpRequestException("Email has not been verified");
 
             return await CreateTokenResponse(user);
+        }
+
+        public async Task<TokenResponseDto> GoogleLoginAsync([FromBody] GoogleLoginRequestDto request)
+        {
+            try
+            {
+                // 1️⃣ Verify Google ID token
+                var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken,
+                    new GoogleJsonWebSignature.ValidationSettings
+                    {
+                        Audience = new[] { _config["GoogleOAuth:ClientId"] } // Web client ID
+                    });
+
+                // 2️⃣ Extract user info
+                var email = payload.Email;
+                var name = payload.Name;
+                var picture = payload.Picture;
+                var googleId = payload.Subject;
+
+                // Find or create user in  DB
+                var user = await _context.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.Email == email);
+
+                if (user == null)
+                {
+                    // Create new user
+                    user = new User
+                    {
+                        Email = email,
+                        Username = name,
+                        UserPhoto = picture,
+                        GoogleIdToken = googleId,
+                        IsEmailVerified = true // Assume email is verified by Google
+                    };
+                    // Assign "Traveler" role by default
+                    var travelerRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == Constants.Role_Traveler);
+                    if (travelerRole == null)
+                    {
+                        throw new Exception("An unexpected error has occurred");
+                    }
+                    user.UserRoles = new List<UserRole> { new UserRole { RoleId = travelerRole.Id } };
+                    await _context.Users.AddAsync(user);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Generate JWT token
+                return await CreateTokenResponse(user);
+
+            }
+            catch (InvalidJwtException)
+            {
+                throw new UnauthorizedAccessException("Invalid Google token");
+            }
+            catch (Exception ex)
+            {
+                throw new BadHttpRequestException("Fail to login with google");
+            }
         }
 
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -74,7 +135,7 @@ namespace vivuvn_api.Services.Implementations
                 Id = user.Id.ToString(),
                 Email = user.Email,
                 Username = user.Username
-            }; 
+            };
         }
 
         public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
