@@ -32,15 +32,18 @@ class _ButtonGoogleLoginState extends ConsumerState<ButtonGoogleLogin> {
             ),
           ],
         ),
-        child: Row(
-          spacing: 50,
+        child: Stack(
           children: [
             SvgPicture.asset('assets/images/google.svg', width: 25),
-            Text(
-              'Continue with Google',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
-                fontWeight: FontWeight.w600,
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                'Continue with Google',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ],
