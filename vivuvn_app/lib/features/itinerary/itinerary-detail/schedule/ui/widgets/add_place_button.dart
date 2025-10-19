@@ -5,9 +5,13 @@ import 'add_place_bottom_sheet.dart';
 class AddPlaceButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
+  final int itineraryId;
+  final int dayId;
 
   const AddPlaceButton({
     super.key,
+    required this.itineraryId,
+    required this.dayId,
     this.label = 'Thêm địa điểm',
     this.onPressed,
   });
@@ -19,9 +23,9 @@ class AddPlaceButton extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (final context) => const FractionallySizedBox(
+      builder: (final context) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(),
+        child: AddPlaceBottomSheet(itineraryId: itineraryId, dayId: dayId),
       ),
     );
   }

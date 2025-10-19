@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-
 import 'add_place_bottom_sheet.dart';
 import 'add_place_button.dart';
 
 class AddRestaurantTile extends StatelessWidget {
-  const AddRestaurantTile({super.key});
+  final int itineraryId;
+  final int dayId;
+
+  const AddRestaurantTile({
+    super.key,
+    required this.itineraryId,
+    required this.dayId,
+  });
 
   void _openAddRestaurantSheet(final BuildContext context) {
     showModalBottomSheet(
@@ -13,9 +19,13 @@ class AddRestaurantTile extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (final context) => const FractionallySizedBox(
+      builder: (final context) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(type: 'restaurant'),
+        child: AddPlaceBottomSheet(
+          type: 'restaurant',
+          itineraryId: itineraryId,
+          dayId: dayId,
+        ),
       ),
     );
   }
@@ -26,12 +36,11 @@ class AddRestaurantTile extends StatelessWidget {
       title: const Text('Thêm nhà hàng / quán ăn'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: AddPlaceButton(
-            label: 'Thêm địa điểm ăn uống',
-            onPressed: () => _openAddRestaurantSheet(context),
-          ),
+        AddPlaceButton(
+          itineraryId: itineraryId,
+          dayId: dayId,
+          label: 'Thêm địa điểm ăn uống',
+          onPressed: () => _openAddRestaurantSheet(context),
         ),
       ],
     );

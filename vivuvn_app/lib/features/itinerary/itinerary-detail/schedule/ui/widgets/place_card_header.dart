@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../overview/ui/widgets/place_card_image.dart';
 import '../../model/location.dart';
 
 class PlaceCardHeader extends StatelessWidget {
@@ -10,30 +11,18 @@ class PlaceCardHeader extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center, // Căn giữa theo chiều dọc
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: location.photos.isNotEmpty
-              ? Image.network(
-                  location.photos.first,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                )
-              : Container(
-                  width: 80,
-                  height: 80,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image_not_supported_outlined),
-                ),
+        PlaceCardImage(
+          imageUrl: location.photos.isNotEmpty ? location.photos.first : null,
+          size: 80,
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             location.name,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            softWrap: true, // Cho phép xuống dòng
+            softWrap: true,
           ),
         ),
       ],

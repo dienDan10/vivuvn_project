@@ -16,11 +16,11 @@ class PlaceCardDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 🔹 Mô tả
+        // Mô tả
         if (location.description.isNotEmpty)
           PlaceDescriptionSection(description: location.description),
 
-        // 🔹 Thông tin khác
+        //  Thông tin khác
         if (location.address.isNotEmpty)
           PlaceInfoRow(
             icon: Icons.location_on_outlined,
@@ -38,7 +38,7 @@ class PlaceCardDetails extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        // 🔹 Ảnh bổ sung
+        //  Ảnh bổ sung
         if (location.photos.length > 1)
           PlacePhotosSection(photos: location.photos),
       ],

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
-
 import '../schedule_data.dart';
 import 'add_place_bottom_sheet.dart';
 import 'suggested_place_item.dart';
 
 class SuggestedPlacesTile extends StatelessWidget {
-  const SuggestedPlacesTile({super.key});
+  final int itineraryId;
+  final int dayId;
+
+  const SuggestedPlacesTile({
+    super.key,
+    required this.itineraryId,
+    required this.dayId,
+  });
 
   void _openAddPlaceSheet(final BuildContext context) {
     showModalBottomSheet(
@@ -14,9 +20,9 @@ class SuggestedPlacesTile extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (final context) => const FractionallySizedBox(
+      builder: (final context) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(),
+        child: AddPlaceBottomSheet(itineraryId: itineraryId, dayId: dayId),
       ),
     );
   }
