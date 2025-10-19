@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../../common/toast/global_toast.dart';
 import '../../../../../../core/routes/routes.dart';
+import '../../../../view-itinerary-list/controller/itinerary_controller.dart';
 import '../../../controller/create_itinerary_controller.dart';
 import 'btn_create_itinerary.dart';
 import 'select_date.dart';
@@ -28,6 +29,7 @@ class _CreateItineraryFormState extends ConsumerState<CreateItineraryForm> {
       if (mounted) {
         context.pop(); // close create itinerary bottom sheet
         context.push(createItineraryDetailRoute(response.id));
+        ref.read(itineraryControllerProvider.notifier).fetchItineraries();
       }
     }
   }
