@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/dto/search_location_response.dart';
+import '../modal/location.dart';
 import '../services/search_location_service.dart';
 import '../state/search_location_state.dart';
 
@@ -17,9 +17,7 @@ class SearchLocationController
     return SearchLocationState();
   }
 
-  Future<List<SearchLocationResponse>> searchLocation(
-    final String queryText,
-  ) async {
+  Future<List<Location>> searchLocation(final String queryText) async {
     final searchLocationService = ref.read(searchLocationServiceProvider);
     try {
       final provinces = await searchLocationService.searchLocations(queryText);

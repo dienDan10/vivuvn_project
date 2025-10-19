@@ -4,7 +4,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import '../../controller/favourite_places_controller.dart';
 import '../../controller/search_location_controller.dart';
-import '../../data/dto/search_location_response.dart';
+import '../../modal/location.dart';
 import 'empty_search_result.dart';
 import 'location_suggestion_card.dart';
 import 'search_error_widget.dart';
@@ -38,7 +38,7 @@ class _AddPlaceSearchFieldState extends ConsumerState<AddPlaceSearchField> {
         .map((final p) => p.locationId)
         .toSet();
 
-    return TypeAheadField<SearchLocationResponse>(
+    return TypeAheadField<Location>(
       controller: _controller,
       focusNode: _focusNode,
       hideOnSelect: false,
@@ -90,9 +90,7 @@ class _AddPlaceSearchFieldState extends ConsumerState<AddPlaceSearchField> {
     }
   }
 
-  Future<void> _handleLocationSelected(
-    final SearchLocationResponse suggestion,
-  ) async {
+  Future<void> _handleLocationSelected(final Location suggestion) async {
     // Gọi API để thêm place vào wishlist
     final success = await ref
         .read(favouritePlacesControllerProvider.notifier)

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../data/dto/search_location_response.dart';
+import '../../modal/location.dart';
 import 'location_card_content.dart';
 
 class LocationSuggestionCard extends StatelessWidget {
@@ -10,7 +10,7 @@ class LocationSuggestionCard extends StatelessWidget {
     this.isAlreadyAdded = false,
   });
 
-  final SearchLocationResponse location;
+  final Location location;
   final bool isAlreadyAdded;
 
   @override

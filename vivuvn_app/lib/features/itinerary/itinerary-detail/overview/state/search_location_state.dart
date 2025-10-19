@@ -1,9 +1,9 @@
-import '../../overview/data/dto/search_location_response.dart';
+import '../modal/location.dart';
 
 class SearchLocationState {
   final String searchText;
   final bool isLoading;
-  final List<SearchLocationResponse> locations;
+  final List<Location> locations;
   final String? error;
 
   SearchLocationState({
@@ -16,7 +16,7 @@ class SearchLocationState {
   SearchLocationState copyWith({
     final String? searchText,
     final bool? isLoading,
-    final List<SearchLocationResponse>? locations,
+    final List<Location>? locations,
     final String? error,
   }) {
     return SearchLocationState(
