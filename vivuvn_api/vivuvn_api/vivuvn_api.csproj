@@ -25,6 +25,7 @@
     <Folder Include="Middleware\" />
     <Folder Include="Migrations\" />
     <Folder Include="Images\" />
+    <Folder Include="images\" />
   </ItemGroup>
 
 </Project>

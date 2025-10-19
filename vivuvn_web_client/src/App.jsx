@@ -17,6 +17,9 @@ const Login = lazy(() => import("./pages/Login"));
 const ControlPanelLayout = lazy(() =>
 	import("./layouts/control-panel/ControlPanelLayout")
 );
+const ProvinceLayout = lazy(() =>
+	import("./features/admin/province/ProvinceLayout")
+);
 
 const router = createBrowserRouter([
 	{
@@ -41,6 +44,16 @@ const router = createBrowserRouter([
 			</ProtectedRoute>
 		),
 		errorElement: <PageNotFound />,
+		children: [
+			{
+				path: "provinces",
+				element: (
+					<Suspense fallback={<SpinnerLarge />}>
+						<ProvinceLayout />
+					</Suspense>
+				),
+			},
+		],
 	},
 	{
 		path: "*",
