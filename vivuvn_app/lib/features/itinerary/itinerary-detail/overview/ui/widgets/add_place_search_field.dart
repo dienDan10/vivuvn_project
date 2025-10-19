@@ -12,9 +12,7 @@ import 'search_loading_indicator.dart';
 import 'search_text_field.dart';
 
 class AddPlaceSearchField extends ConsumerStatefulWidget {
-  const AddPlaceSearchField({super.key, required this.itineraryId});
-
-  final int itineraryId;
+  const AddPlaceSearchField({super.key});
 
   @override
   ConsumerState<AddPlaceSearchField> createState() =>
@@ -98,7 +96,7 @@ class _AddPlaceSearchFieldState extends ConsumerState<AddPlaceSearchField> {
     // Gọi API để thêm place vào wishlist
     final success = await ref
         .read(favouritePlacesControllerProvider.notifier)
-        .addPlaceToWishlist(widget.itineraryId, suggestion.id);
+        .addPlaceToWishlist(suggestion.id);
 
     if (!mounted) return;
 

@@ -8,8 +8,7 @@ import 'tabbar_content.dart';
 import 'tabbar_header.dart';
 
 class ItineraryDetailLayout extends ConsumerStatefulWidget {
-  final int itineraryId;
-  const ItineraryDetailLayout({super.key, required this.itineraryId});
+  const ItineraryDetailLayout({super.key});
 
   @override
   ConsumerState<ItineraryDetailLayout> createState() =>
@@ -25,12 +24,6 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
-    Future.microtask(() {
-      ref
-          .read(itineraryDetailControllerProvider.notifier)
-          .setItineraryId(widget.itineraryId);
-    });
 
     _registerListener();
   }
@@ -60,11 +53,19 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   @override
   Widget build(final BuildContext context) {
     final detailState = ref.watch(itineraryDetailControllerProvider);
+    // load itinerary detail
+    ref.listen(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itineraryId,
+      ),
+      (final previous, final next) {
+        ref
+            .read(itineraryDetailControllerProvider.notifier)
+            .fetchItineraryDetail();
+      },
+    );
 
-    // Nếu chưa có ID hoặc chưa có data thì loading
-    if (detailState.itineraryId == null ||
-        detailState.itinerary == null ||
-        detailState.isLoading) {
+    if (detailState.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -78,6 +79,18 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
         ),
       );
     }
+
+    if (detailState.itinerary == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Không tìm thấy chi tiết hành trình.',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: NestedScrollView(
         controller: _scrollController,
@@ -87,12 +100,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
         ],
         body: Column(
           children: [
-            Expanded(
-              child: TabbarContent(
-                tabController: _tabController,
-                itineraryId: widget.itineraryId,
-              ),
-            ),
+            Expanded(child: TabbarContent(tabController: _tabController)),
           ],
         ),
       ),

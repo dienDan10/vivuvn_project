@@ -9,7 +9,6 @@ class SlidablePlaceCard extends ConsumerWidget {
   const SlidablePlaceCard({
     required this.title,
     required this.description,
-    required this.itineraryId,
     required this.locationId,
     this.imageUrl,
     this.index,
@@ -18,7 +17,6 @@ class SlidablePlaceCard extends ConsumerWidget {
 
   final String title;
   final String description;
-  final int itineraryId;
   final int locationId;
   final String? imageUrl;
   final int? index;
@@ -83,7 +81,7 @@ class SlidablePlaceCard extends ConsumerWidget {
     if (confirmed == true) {
       await ref
           .read(favouritePlacesControllerProvider.notifier)
-          .deletePlaceFromWishlist(itineraryId, locationId);
+          .deletePlaceFromWishlist(locationId);
     }
   }
 }

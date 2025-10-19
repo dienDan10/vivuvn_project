@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/favourtie_places_api.dart';
+import '../data/dto/add_favorite_place_request.dart';
+import '../data/dto/delete_favorite_place_request.dart';
 import '../data/dto/favourite_places_response.dart';
 
 final favouritePlacesServiceProvider =
@@ -13,10 +15,9 @@ abstract class IFavouritePlacesService {
   Future<List<FavouritePlacesResponse>> getFavouritePlaces(
     final int itineraryId,
   );
-  Future<void> addPlaceToWishlist(final int itineraryId, final int locationId);
+  Future<void> addPlaceToWishlist(final AddFavoritePlaceRequest request);
   Future<void> deletePlaceFromWishlist(
-    final int itineraryId,
-    final int locationId,
+    final DeleteFavoritePlaceRequest request,
   );
 }
 
@@ -33,18 +34,14 @@ class FavouritePlacesService implements IFavouritePlacesService {
   }
 
   @override
-  Future<void> addPlaceToWishlist(
-    final int itineraryId,
-    final int locationId,
-  ) async {
-    await _favouritePlacesApi.addPlaceToWishlist(itineraryId, locationId);
+  Future<void> addPlaceToWishlist(final AddFavoritePlaceRequest request) async {
+    await _favouritePlacesApi.addPlaceToWishlist(request);
   }
 
   @override
   Future<void> deletePlaceFromWishlist(
-    final int itineraryId,
-    final int locationId,
+    final DeleteFavoritePlaceRequest request,
   ) async {
-    await _favouritePlacesApi.deletePlaceFromWishlist(itineraryId, locationId);
+    await _favouritePlacesApi.deletePlaceFromWishlist(request);
   }
 }

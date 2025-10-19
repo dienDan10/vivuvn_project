@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../data/dto/add_favorite_place_request.dart';
+import '../data/dto/delete_favorite_place_request.dart';
 import '../services/favourite_places_service.dart';
 import '../state/favourite_places_state.dart';
 
@@ -19,12 +21,16 @@ class FavouritePlacesController
   }
 
   /// Load favourite places by itineraryId
-  Future<void> loadFavouritePlaces(final int itineraryId) async {
-    state = state.copyWith(isLoading: true, error: null);
+  Future<void> loadFavouritePlaces(final int? itineraryId) async {
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      itineraryId: itineraryId,
+    );
 
     try {
       final service = ref.read(favouritePlacesServiceProvider);
-      final places = await service.getFavouritePlaces(itineraryId);
+      final places = await service.getFavouritePlaces(itineraryId!);
       state = state.copyWith(places: places, isLoading: false);
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
@@ -35,16 +41,18 @@ class FavouritePlacesController
   }
 
   /// Add a place to wishlist
-  Future<bool> addPlaceToWishlist(
-    final int itineraryId,
-    final int locationId,
-  ) async {
+  Future<bool> addPlaceToWishlist(final int locationId) async {
     try {
       final service = ref.read(favouritePlacesServiceProvider);
-      await service.addPlaceToWishlist(itineraryId, locationId);
+      final request = AddFavoritePlaceRequest(
+        itineraryId: state.itineraryId!,
+        locationId: locationId,
+      );
+
+      await service.addPlaceToWishlist(request);
 
       // Reload the list after adding
-      await loadFavouritePlaces(itineraryId);
+      await loadFavouritePlaces(state.itineraryId);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
@@ -57,16 +65,17 @@ class FavouritePlacesController
   }
 
   /// Delete a place from wishlist
-  Future<bool> deletePlaceFromWishlist(
-    final int itineraryId,
-    final int locationId,
-  ) async {
+  Future<bool> deletePlaceFromWishlist(final int locationId) async {
     try {
       final service = ref.read(favouritePlacesServiceProvider);
-      await service.deletePlaceFromWishlist(itineraryId, locationId);
+      final request = DeleteFavoritePlaceRequest(
+        itineraryId: state.itineraryId!,
+        locationId: locationId,
+      );
+      await service.deletePlaceFromWishlist(request);
 
       // Reload the list after deletion
-      await loadFavouritePlaces(itineraryId);
+      await loadFavouritePlaces(state.itineraryId);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);

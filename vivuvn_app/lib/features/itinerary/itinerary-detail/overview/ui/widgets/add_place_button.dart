@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'add_place_modal.dart';
 
 class AddPlaceButton extends StatelessWidget {
-  const AddPlaceButton({required this.itineraryId, super.key});
-
-  final int itineraryId;
+  const AddPlaceButton({super.key});
 
   void _showAddPlaceModal(final BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (final context) => AddPlaceModal(itineraryId: itineraryId),
+      builder: (final context) => const AddPlaceModal(),
     );
   }
 

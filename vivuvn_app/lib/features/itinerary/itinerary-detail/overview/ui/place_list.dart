@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../controller/itinerary_detail_controller.dart';
 import '../controller/favourite_places_controller.dart';
 import 'widgets/place_list_item.dart';
 
 class PlaceList extends ConsumerStatefulWidget {
-  const PlaceList({required this.itineraryId, super.key});
-
-  final int itineraryId;
+  const PlaceList({super.key});
 
   @override
   ConsumerState<PlaceList> createState() => _PlaceListState();
@@ -40,11 +39,16 @@ class _PlaceListState extends ConsumerState<PlaceList>
           ),
         );
 
-    // Load favourite places khi widget được khởi tạo
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final itineraryId = ref.read(
+        itineraryDetailControllerProvider.select(
+          (final state) => state.itineraryId,
+        ),
+      );
+
       ref
           .read(favouritePlacesControllerProvider.notifier)
-          .loadFavouritePlaces(widget.itineraryId);
+          .loadFavouritePlaces(itineraryId);
     });
   }
 
@@ -54,7 +58,7 @@ class _PlaceListState extends ConsumerState<PlaceList>
     super.dispose();
   }
 
-  void _toggleExpanded() {
+  void toggleExpanded() {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -118,8 +122,7 @@ class _PlaceListState extends ConsumerState<PlaceList>
           places: places,
           isExpanded: _isExpanded,
           iconRotationAnimation: _iconRotationAnimation,
-          onToggle: _toggleExpanded,
-          itineraryId: widget.itineraryId,
+          onToggle: toggleExpanded,
         ),
         childCount: totalItemCount,
       ),

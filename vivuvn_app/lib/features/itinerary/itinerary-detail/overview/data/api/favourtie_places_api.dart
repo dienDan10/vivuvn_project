@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
+import '../dto/add_favorite_place_request.dart';
+import '../dto/delete_favorite_place_request.dart';
 import '../dto/favourite_places_response.dart';
 
 final favouritePlacesApiProvider = Provider.autoDispose<FavouritePlacesApi>((
@@ -39,23 +41,19 @@ class FavouritePlacesApi {
   }
 
   /// Add a place to wishlist
-  Future<void> addPlaceToWishlist(
-    final int itineraryId,
-    final int locationId,
-  ) async {
+  Future<void> addPlaceToWishlist(final AddFavoritePlaceRequest request) async {
     await _dio.post(
-      '/api/v1/itineraries/$itineraryId/favorite-places',
-      data: {'locationId': locationId},
+      '/api/v1/itineraries/${request.itineraryId}/favorite-places',
+      data: {'locationId': request.locationId},
     );
   }
 
   /// Delete a place from wishlist
   Future<void> deletePlaceFromWishlist(
-    final int itineraryId,
-    final int locationId,
+    final DeleteFavoritePlaceRequest request,
   ) async {
     await _dio.delete(
-      '/api/v1/itineraries/$itineraryId/favorite-places/$locationId',
+      '/api/v1/itineraries/${request.itineraryId}/favorite-places/${request.locationId}',
     );
   }
 }

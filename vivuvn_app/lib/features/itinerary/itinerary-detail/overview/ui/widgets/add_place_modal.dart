@@ -4,9 +4,7 @@ import 'add_place_modal_header.dart';
 import 'add_place_search_field.dart';
 
 class AddPlaceModal extends StatelessWidget {
-  const AddPlaceModal({required this.itineraryId, super.key});
-
-  final int itineraryId;
+  const AddPlaceModal({super.key});
 
   @override
   Widget build(final BuildContext context) {
@@ -24,12 +22,12 @@ class AddPlaceModal extends StatelessWidget {
             color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: Column(
+          child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AddPlaceModalHeader(),
-              const SizedBox(height: 24),
-              AddPlaceSearchField(itineraryId: itineraryId),
+              AddPlaceModalHeader(),
+              SizedBox(height: 24),
+              AddPlaceSearchField(),
             ],
           ),
         ),

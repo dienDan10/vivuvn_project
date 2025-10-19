@@ -12,7 +12,6 @@ class PlaceListItem extends StatelessWidget {
     required this.isExpanded,
     required this.iconRotationAnimation,
     required this.onToggle,
-    required this.itineraryId,
     super.key,
   });
 
@@ -21,7 +20,6 @@ class PlaceListItem extends StatelessWidget {
   final bool isExpanded;
   final Animation<double> iconRotationAnimation;
   final VoidCallback onToggle;
-  final int itineraryId;
 
   @override
   Widget build(final BuildContext context) {
@@ -50,7 +48,6 @@ class PlaceListItem extends StatelessWidget {
         place: place,
         index: index,
         isExpanded: isExpanded,
-        itineraryId: itineraryId,
       );
     }
 
@@ -61,7 +58,7 @@ class PlaceListItem extends StatelessWidget {
 
     // Add button
     if (index == places.length + 2) {
-      return AddPlaceButton(itineraryId: itineraryId);
+      return const AddPlaceButton();
     }
 
     // Bottom spacing

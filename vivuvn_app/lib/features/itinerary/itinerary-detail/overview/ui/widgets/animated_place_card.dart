@@ -8,14 +8,12 @@ class AnimatedPlaceCard extends StatelessWidget {
     required this.place,
     required this.index,
     required this.isExpanded,
-    required this.itineraryId,
     super.key,
   });
 
   final FavouritePlacesResponse place;
   final int index;
   final bool isExpanded;
-  final int itineraryId;
 
   @override
   Widget build(final BuildContext context) {
@@ -32,7 +30,6 @@ class AnimatedPlaceCard extends StatelessWidget {
           description: place.description,
           imageUrl: place.imageUrl,
           index: index,
-          itineraryId: itineraryId,
           locationId: place.locationId,
         ),
       ),

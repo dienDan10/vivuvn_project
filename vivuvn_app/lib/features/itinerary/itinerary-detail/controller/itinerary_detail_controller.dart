@@ -17,22 +17,25 @@ class ItineraryDetailController
   ItineraryDetailState build() => ItineraryDetailState();
 
   /// Lưu ID và fetch detail
-  Future<void> setItineraryId(final int id) async {
-    // nếu id trùng thì không fetch lại nữa
-    if (state.itineraryId == id && state.itinerary != null) return;
+  void setItineraryId(final int id) async {
+    state = state.copyWith(itineraryId: id);
+  }
 
-    state = state.copyWith(itineraryId: id, isLoading: true, error: null);
-
+  /// Fetch itinerary detail by ID
+  Future<void> fetchItineraryDetail() async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final data = await ref
           .read(itineraryDetailServiceProvider)
-          .getItineraryDetail(id);
-      state = state.copyWith(itinerary: data, isLoading: false);
+          .getItineraryDetail(state.itineraryId!);
+      state = state.copyWith(itinerary: data);
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg, isLoading: false);
+      state = state.copyWith(error: errorMsg);
     } catch (e) {
-      state = state.copyWith(error: 'unknown error', isLoading: false);
+      state = state.copyWith(error: 'unknown error');
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
   }
 }
