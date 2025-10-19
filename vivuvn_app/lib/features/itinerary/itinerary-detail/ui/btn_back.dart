@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ButtonBack extends StatelessWidget {
   final bool onAppbar;
@@ -8,7 +9,9 @@ class ButtonBack extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        context.pop();
+      },
       child: Container(
         height: 40,
         width: 40,

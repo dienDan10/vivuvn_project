@@ -30,6 +30,7 @@ class AnimatedPlaceCard extends StatelessWidget {
           description: place.description,
           imageUrl: place.imageUrl,
           index: index,
+          locationId: place.locationId,
         ),
       ),
     );

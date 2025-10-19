@@ -1,44 +1,37 @@
 import 'package:flutter/material.dart';
 
 import '../../data/dto/search_location_response.dart';
-import 'place_icon.dart';
-import 'place_info.dart';
+import 'location_card_content.dart';
 
 class LocationSuggestionCard extends StatelessWidget {
-  const LocationSuggestionCard({super.key, required this.location});
+  const LocationSuggestionCard({
+    super.key,
+    required this.location,
+    this.isAlreadyAdded = false,
+  });
 
   final SearchLocationResponse location;
+  final bool isAlreadyAdded;
 
   @override
   Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8, left: 4, right: 4, top: 4),
       elevation: 0,
-      color: Colors.transparent,
+      color: isAlreadyAdded
+          ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+          : Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide.none,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              const PlaceIcon(),
-              const SizedBox(width: 12),
-              Expanded(
-                child: PlaceInfo(
-                  name: location.name,
-                  address: location.provinceName ?? location.address,
-                ),
-              ),
-              Icon(
-                Icons.add_circle_outline,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ],
-          ),
+        child: LocationCardContent(
+          location: location,
+          isAlreadyAdded: isAlreadyAdded,
         ),
       ),
     );

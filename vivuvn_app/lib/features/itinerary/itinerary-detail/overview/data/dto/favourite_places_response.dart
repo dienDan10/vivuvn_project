@@ -16,49 +16,22 @@ class FavouritePlacesResponse {
   });
 
   factory FavouritePlacesResponse.fromJson(final Map<String, dynamic> json) {
-    return FavouritePlacesResponse(
-      idInWishlist: json['idInWishlist'] as int,
-      locationId: json['locationId'] as int,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      imageUrl: json['imageUrl'] as String,
-      provinceName: json['provinceName'] as String,
-    );
-  }
+    final location = json['location'] as Map<String, dynamic>?;
 
-  //Fake data for testing
-  static List<FavouritePlacesResponse> fakeData() {
-    return [
-      FavouritePlacesResponse(
-        idInWishlist: 1,
-        locationId: 101,
-        name: 'Bãi biển Mỹ Khê',
-        description:
-            'Bãi biển Mỹ Khê là một trong những bãi biển đẹp nhất Việt Nam, nổi tiếng với cát trắng mịn và nước biển trong xanh.',
-        imageUrl:
-            'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
-        provinceName: 'Đà Nẵng',
-      ),
-      FavouritePlacesResponse(
-        idInWishlist: 2,
-        locationId: 102,
-        name: 'Cầu Rồng',
-        description:
-            'Cầu Rồng là biểu tượng hiện đại của Đà Nẵng, nổi bật với thiết kế hình con rồng phun lửa và nước vào cuối tuần.',
-        imageUrl:
-            'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400',
-        provinceName: 'Đà Nẵng',
-      ),
-      FavouritePlacesResponse(
-        idInWishlist: 3,
-        locationId: 103,
-        name: 'Ngũ Hành Sơn',
-        description:
-            'Ngũ Hành Sơn là một quần thể núi đá vôi nổi tiếng với các hang động và chùa chiền linh thiêng, thu hút nhiều du khách và phật tử.',
-        imageUrl:
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400',
-        provinceName: 'Đà Nẵng',
-      ),
-    ];
+    // Lấy ảnh đầu tiên từ list photos
+    String imageUrl = '';
+    final photos = location?['photos'] as List<dynamic>?;
+    if (photos != null && photos.isNotEmpty) {
+      imageUrl = photos[0] as String? ?? '';
+    }
+
+    return FavouritePlacesResponse(
+      idInWishlist: json['id'] as int? ?? 0,
+      locationId: location?['id'] as int? ?? 0,
+      name: location?['name'] as String? ?? '',
+      description: location?['description'] as String? ?? '',
+      imageUrl: imageUrl,
+      provinceName: location?['provinceName'] as String? ?? '',
+    );
   }
 }
