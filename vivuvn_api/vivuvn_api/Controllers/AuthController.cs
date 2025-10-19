@@ -6,8 +6,19 @@ namespace vivuvn_api.Controllers
 {
     [Route("api/v1/auth")]
     [ApiController]
-    public class AuthController(IAuthService _authService) : ControllerBase
+    public class AuthController(IAuthService _authService, IImageService _imageService) : ControllerBase
     {
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadImage([FromForm] UploadImageRequest request)
+        {
+            var imageUrl = await _imageService.UploadImageAsync(request.file);
+            return Ok(new
+            {
+                ImageUrl = imageUrl
+            });
+        }
+
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
