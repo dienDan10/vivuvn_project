@@ -1,8 +1,9 @@
-import { Button, Popconfirm, Space, Table } from "antd";
+import { Button, Popconfirm, Space, Table, Image, Avatar } from "antd";
 import {
 	EditOutlined,
 	DeleteOutlined,
 	ReloadOutlined,
+	PictureOutlined,
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
 import { useState } from "react";
@@ -57,6 +58,39 @@ function ProvinceTable({ onEditProvince }) {
 
 	const columns = [
 		{
+			title: "Image",
+			dataIndex: "imageUrl",
+			key: "imageUrl",
+			width: 80,
+			render: (imageUrl) => {
+				if (imageUrl) {
+					return (
+						<Image
+							src={imageUrl}
+							alt="Province"
+							width={50}
+							height={50}
+							style={{
+								objectFit: "cover",
+								borderRadius: "4px",
+							}}
+							preview={{
+								mask: "View",
+							}}
+						/>
+					);
+				}
+				return (
+					<Avatar
+						shape="square"
+						size={50}
+						icon={<PictureOutlined />}
+						style={{ backgroundColor: "#f0f0f0", color: "#bfbfbf" }}
+					/>
+				);
+			},
+		},
+		{
 			title: "ID",
 			dataIndex: "id",
 			key: "id",
@@ -70,7 +104,7 @@ function ProvinceTable({ onEditProvince }) {
 		},
 		{
 			title: "Code",
-			dataIndex: "code",
+			dataIndex: "provinceCode",
 			key: "provinceCode",
 			sorter: (a, b) => a.provinceCode.localeCompare(b.provinceCode),
 		},

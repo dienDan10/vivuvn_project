@@ -28,9 +28,10 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 			form.setFieldsValue({
 				name: province.name || "",
 				provinceCode: province.provinceCode || "",
+				nameNormalized: province.nameNormalized || "",
 			});
 
-			// Set image preview for existing image
+			// Set image preview for existing image URL from database
 			if (province.imageUrl) {
 				setImagePreview(province.imageUrl);
 			}
@@ -43,6 +44,10 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 			form.resetFields();
 			setImagePreview(null);
 			setImageFile(null);
+		} else if (!open) {
+			// Clean up when modal closes
+			setImagePreview(null);
+			setImageFile(null);
 		}
 	}, [open, form, isEdit]);
 
@@ -50,10 +55,16 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 		const values = await form.validateFields();
 		setSubmitting(true);
 
-		// Prepare form data
+		// Prepare submit values
+		// TODO: When upload API is ready, upload imageFile first to get URL
+		// For now, keeping existing imageUrl if no new file uploaded
 		const submitValues = {
-			...values,
-			imageFile: imageFile,
+			name: values.name,
+			provinceCode: values.provinceCode,
+			nameNormalized: values.nameNormalized,
+			// If new file uploaded, backend will handle it via imageFile
+			// If editing without new file, keep existing imageUrl
+			imageFile: imageFile, // Backend will process this
 		};
 
 		if (isEdit) {
@@ -144,29 +155,34 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 						<Input placeholder="Enter province name" />
 					</Form.Item>
 
-					<Form.Item
-						name="provinceCode"
-						label="Province Code"
-						rules={[{ required: true, message: "Please enter province code" }]}
-					>
+					<Form.Item name="provinceCode" label="Province Code">
 						<Input placeholder="Enter province code" />
 					</Form.Item>
 
-					{/* Province Image - Full width */}
-					<Form.Item label="Province Image" name="image">
+					<Form.Item name="nameNormalized" label="Name Normalized">
+						<Input placeholder="Enter name normalized" />
+					</Form.Item>
+
+					{/* Image Upload with Preview */}
+					<Form.Item label="Province Image">
 						<div className="flex flex-col md:flex-row gap-4 items-start">
 							{/* Image preview on the left */}
 							<div className="w-full md:w-1/3 flex justify-center">
 								{imagePreview ? (
 									<img
 										src={imagePreview}
-										alt="Preview"
+										alt="Province Preview"
 										style={{
 											maxWidth: "100%",
 											height: "auto",
 											objectFit: "contain",
 											borderRadius: "4px",
 											border: "1px solid #d9d9d9",
+										}}
+										onError={(e) => {
+											e.target.src =
+												"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+											e.target.alt = "Failed to load image";
 										}}
 									/>
 								) : (

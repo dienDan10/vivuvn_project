@@ -6,6 +6,7 @@
         public string Name { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
 		public bool DeleteFlag { get; set; }
-		public string ProvinceCode { get; set; }
+		public string ProvinceCode { get; set; } = string.Empty;
+        public string NameNormalized { get; set; } = string.Empty;
 	}
 }

@@ -1,12 +1,16 @@
-﻿using vivuvn_api.DTOs.ValueObjects;
+﻿using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.ValueObjects;
 
 namespace vivuvn_api.Services.Interfaces
 {
     public interface IProvinceService
     {
-		Task DeleteProvince(int id);
+		Task<ProvinceDto> CreateProvinceAsync(CreateProvinceRequestDto requestDto);
+		Task DeleteProvinceAsync(int id);
 		Task<IEnumerable<ProvinceDto>> GetAllProvincesAsync();
-		Task<ProvinceDto> RestoreProvince(int id);
+		Task<ProvinceDto> GetProvinceByIdAsync(int id);
+		Task<ProvinceDto> RestoreProvinceAsync(int id);
 		Task<IEnumerable<ProvinceDto>> SearchProvinceAsync(string? queryString, int? limit);
-    }
+		Task<ProvinceDto> UpdateProvinceAsync(int id, UpdateProvinceRequestDto requestDto);
+	}
 }
