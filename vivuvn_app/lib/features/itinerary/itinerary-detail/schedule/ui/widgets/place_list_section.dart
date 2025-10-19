@@ -38,19 +38,11 @@ class PlaceListSection extends ConsumerWidget {
           final index = entry.key;
           final item = entry.value;
           final location = item.location;
-
           if (location == null) return const SizedBox.shrink();
 
           return Column(
             children: [
-              SchedulePlaceCard(
-                title: location.name,
-                description: location.description,
-                imageUrl: location.photos.isNotEmpty
-                    ? location.photos.first
-                    : null,
-                index: index,
-              ),
+              SchedulePlaceCard(index: index, location: location),
               if (index != items.length - 1)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),

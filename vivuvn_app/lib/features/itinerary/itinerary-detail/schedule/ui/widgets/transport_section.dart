@@ -39,7 +39,7 @@ class TransportSection extends ConsumerWidget {
     final durationMin = '${(duration / 60).round()} phút';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4, left: 4),
+      padding: const EdgeInsets.only(bottom: 2, left: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -65,6 +65,7 @@ class TransportSection extends ConsumerWidget {
     );
   }
 
+  //neu co nhieu loai phuong tien
   String _getVehicleIcon(final String transport) {
     switch (transport.toUpperCase()) {
       case 'DRIVE':
@@ -73,8 +74,6 @@ class TransportSection extends ConsumerWidget {
         return '🚶‍♂️';
       case 'BIKE':
         return '🚴‍♂️';
-      case 'BUS':
-        return '🚌';
       default:
         return '🚗';
     }
@@ -88,8 +87,6 @@ class TransportSection extends ConsumerWidget {
         return 'Walk';
       case 'BIKE':
         return 'Bike';
-      case 'BUS':
-        return 'Bus';
       default:
         return 'Drive';
     }

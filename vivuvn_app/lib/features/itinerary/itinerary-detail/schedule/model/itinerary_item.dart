@@ -1,4 +1,4 @@
-import 'location';
+import 'location.dart';
 
 class ItineraryItem {
   final int itineraryItemId;
