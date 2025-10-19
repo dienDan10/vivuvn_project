@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/dto/favourite_places_response.dart';
-import 'widgets/add_place_button.dart';
-import 'widgets/animated_place_card.dart';
-import 'widgets/place_list_header.dart';
+import '../../controller/itinerary_detail_controller.dart';
+import '../controller/favourite_places_controller.dart';
+import 'widgets/place_list_item.dart';
 
-/// Main widget hiển thị danh sách địa điểm yêu thích
-/// Hỗ trợ expand/collapse với animation
-class PlaceList extends StatefulWidget {
+class PlaceList extends ConsumerStatefulWidget {
   const PlaceList({super.key});
 
   @override
-  State<PlaceList> createState() => _PlaceListState();
+  ConsumerState<PlaceList> createState() => _PlaceListState();
 }
 
-class _PlaceListState extends State<PlaceList>
+class _PlaceListState extends ConsumerState<PlaceList>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   bool _isExpanded = false; // ← Trạng thái đóng/mở (mặc định đóng)
   late AnimationController _animationController;
@@ -22,10 +20,6 @@ class _PlaceListState extends State<PlaceList>
 
   @override
   bool get wantKeepAlive => true; // ← Giữ state khi switch tabs
-
-  // Sử dụng fake data từ FavouritePlacesResponse
-  final List<FavouritePlacesResponse> _places =
-      FavouritePlacesResponse.fakeData();
 
   @override
   void initState() {
@@ -44,6 +38,18 @@ class _PlaceListState extends State<PlaceList>
             curve: Curves.easeInOut,
           ),
         );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final itineraryId = ref.read(
+        itineraryDetailControllerProvider.select(
+          (final state) => state.itineraryId,
+        ),
+      );
+
+      ref
+          .read(favouritePlacesControllerProvider.notifier)
+          .loadFavouritePlaces(itineraryId);
+    });
   }
 
   @override
@@ -52,7 +58,7 @@ class _PlaceListState extends State<PlaceList>
     super.dispose();
   }
 
-  void _toggleExpanded() {
+  void toggleExpanded() {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -67,56 +73,59 @@ class _PlaceListState extends State<PlaceList>
   Widget build(final BuildContext context) {
     super.build(context); // ← Gọi super.build để AutomaticKeepAlive hoạt động
 
+    // Lấy danh sách places từ controller
+    final favouritePlacesState = ref.watch(favouritePlacesControllerProvider);
+    final places = favouritePlacesState.places;
+
+    // Hiển thị loading nếu đang tải lần đầu
+    if (favouritePlacesState.isLoading && places.isEmpty) {
+      return const SliverFillRemaining(
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Hiển thị error nếu có
+    if (favouritePlacesState.error != null && places.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                favouritePlacesState.error!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Calculate total items: header(1) + places(n) + spacing(1) + button(1) + bottom(1)
+    const extraItemsCount = 4;
+    final totalItemCount = places.length + extraItemsCount;
+
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (final context, final index) => _buildItem(context, index),
-        childCount:
-            _places.length + 4, // header + places + spacing + button + bottom
+        (final context, final index) => PlaceListItem(
+          index: index,
+          places: places,
+          isExpanded: _isExpanded,
+          iconRotationAnimation: _iconRotationAnimation,
+          onToggle: toggleExpanded,
+        ),
+        childCount: totalItemCount,
       ),
     );
-  }
-
-  /// Build từng item trong list dựa trên index
-  Widget _buildItem(final BuildContext context, final int index) {
-    // Header với toggle button
-    if (index == 0) {
-      return PlaceListHeader(
-        placesCount: _places.length,
-        isExpanded: _isExpanded,
-        iconRotationAnimation: _iconRotationAnimation,
-        onToggle: _toggleExpanded,
-      );
-    }
-
-    // Nếu đang thu gọn, chỉ hiển thị bottom spacing
-    if (!_isExpanded) {
-      if (index == 1) {
-        return const SizedBox(height: 12);
-      }
-      return const SizedBox.shrink();
-    }
-
-    // Place cards với animation
-    if (index <= _places.length) {
-      final place = _places[index - 1];
-      return AnimatedPlaceCard(
-        place: place,
-        index: index,
-        isExpanded: _isExpanded,
-      );
-    }
-
-    // Spacing sau place cards
-    if (index == _places.length + 1) {
-      return const SizedBox(height: 12);
-    }
-
-    // Add button
-    if (index == _places.length + 2) {
-      return const AddPlaceButton();
-    }
-
-    // Bottom spacing
-    return const SizedBox(height: 80);
   }
 }

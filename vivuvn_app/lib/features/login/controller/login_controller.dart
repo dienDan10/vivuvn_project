@@ -48,6 +48,29 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
     }
   }
 
+  Future<void> loginWithGoogle() async {
+    try {
+      state = state.copyWith(isLoading: true, error: null);
+
+      final result = await ref.read(loginServiceProvider).loginWithGoogle();
+
+      // save token to local storage
+      await ref
+          .read(secureStorageProvider)
+          .write(key: accessTokenKey, value: result.accessToken);
+      await ref
+          .read(secureStorageProvider)
+          .write(key: refreshTokenKey, value: result.refreshToken);
+
+      // set authenticated state
+      ref.read(authControllerProvider.notifier).setAuthenticated();
+    } on DioException catch (e) {
+      state = state.copyWith(error: DioExceptionHandler.handleException(e));
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   void updateLoginData(final String email, final String password) {
     state = state.copyWith(loginData: {'email': email, 'password': password});
   }

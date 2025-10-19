@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../common/helper/app_constants.dart';
-import '../../../../core/routes/routes.dart';
 import '../controller/itinerary_detail_controller.dart';
+import '../state/itinerary_detail_state.dart';
 import 'hero_section.dart';
 import 'tabbar_content.dart';
 import 'tabbar_header.dart';
 
 class ItineraryDetailLayout extends ConsumerStatefulWidget {
-  final int itineraryId;
-  const ItineraryDetailLayout({super.key, required this.itineraryId});
+  const ItineraryDetailLayout({super.key});
 
   @override
   ConsumerState<ItineraryDetailLayout> createState() =>
@@ -27,12 +25,31 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    Future.microtask(() {
-      ref
-          .read(itineraryDetailControllerProvider.notifier)
-          .setItineraryId(widget.itineraryId);
-    });
     _registerListener();
+    ref.listen<ItineraryDetailState>(itineraryDetailControllerProvider, (
+      final previous,
+      final next,
+    ) {
+      if (previous?.itineraryId != next.itineraryId &&
+          next.itineraryId != null) {
+        ref
+            .read(itineraryDetailControllerProvider.notifier)
+            .fetchItineraryDetail();
+      }
+    });
+  }
+
+  void _registerListener() {
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging && _tabController.index != 0) {
+        _scrollController.animateTo(
+          appbarExpandedHeight -
+              (kToolbarHeight + MediaQuery.of(context).padding.top),
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
@@ -42,38 +59,16 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     super.dispose();
   }
 
-  void _registerListener() {
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        if (_tabController.index != 0) {
-          _scrollController.animateTo(
-            appbarExpandedHeight -
-                (kToolbarHeight + MediaQuery.of(context).padding.top),
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        }
-      }
-    });
-  }
-
   @override
   Widget build(final BuildContext context) {
     final detailState = ref.watch(itineraryDetailControllerProvider);
 
-    //lỗi unauthorized → điều hướng về login
-    if (detailState.error == 'unauthorized') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.go(loginRoute);
-      });
-    }
-
-    if (detailState.itineraryId == null ||
-        detailState.itinerary == null ||
-        detailState.isLoading) {
+    // Khi chưa có ID hoặc đang loading
+    if (detailState.itineraryId == null || detailState.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    // Khi có lỗi
     if (detailState.error != null && detailState.error != 'unauthorized') {
       return Scaffold(
         body: Center(
@@ -85,6 +80,13 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
       );
     }
 
+    // Khi không tìm thấy dữ liệu
+    if (detailState.itinerary == null) {
+      return const Scaffold(
+        body: Center(child: Text('Không tìm thấy dữ liệu hành trình')),
+      );
+    }
+
     return Scaffold(
       body: NestedScrollView(
         controller: _scrollController,
@@ -92,15 +94,9 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
           HeroSection(itinerary: detailState.itinerary!),
           TabbarHeader(tabController: _tabController),
         ],
-        body: Column(
-          children: [
-            Expanded(
-              child: TabbarContent(
-                tabController: _tabController,
-                itineraryId: widget.itineraryId,
-              ),
-            ),
-          ],
+        body: TabbarContent(
+          tabController: _tabController,
+          itineraryId: detailState.itineraryId!,
         ),
       ),
     );

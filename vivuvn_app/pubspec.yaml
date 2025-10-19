@@ -46,11 +46,11 @@ dependencies:
   cherry_toast: ^1.13.0
   flutter_expandable_fab: ^2.5.2
   calendar_date_picker2: ^2.0.1
-  easy_debounce: ^2.0.3
   flutter_slidable: ^4.0.3
   cached_network_image: ^3.4.1
   flutter_typeahead: 5.2.0
   equatable: ^2.0.5
+  google_sign_in: ^7.1.1
 
 dev_dependencies:
   flutter_test:
