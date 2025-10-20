@@ -4,6 +4,7 @@
     {
         public int BudgetId { get; set; }
         public decimal TotalBudget { get; set; }
+        public decimal EstimatedBudget { get; set; }
         public ICollection<BudgetItemDto> Items { get; set; } = new List<BudgetItemDto>();
     }
 }

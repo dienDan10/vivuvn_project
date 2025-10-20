@@ -11,5 +11,7 @@ namespace vivuvn_api.Repositories.Interfaces
         Task<BudgetItem?> UpdateBudgetItemAsync(BudgetItem item);
         Task<BudgetItem?> DeleteBudgetItemAsync(int id);
 
+        Task<IEnumerable<BudgetType>> GetAllBudgetTypesAsync();
+
     }
 }

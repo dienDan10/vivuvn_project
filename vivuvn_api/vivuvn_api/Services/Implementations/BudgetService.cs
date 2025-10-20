@@ -21,6 +21,12 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<IEnumerable<BudgetItemDto>>(budgetItems);
         }
 
+        public async Task<IEnumerable<BudgetTypeDto>> GetBudgetTypesAsync()
+        {
+            var budgetTypes = await _unitOfWork.Budgets.GetAllBudgetTypesAsync();
+            return _mapper.Map<IEnumerable<BudgetTypeDto>>(budgetTypes);
+        }
+
 
         public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto item)
         {
@@ -46,6 +52,23 @@ namespace vivuvn_api.Services.Implementations
             budgetItem = await _unitOfWork.Budgets.GetBudgetItemByIdAsync(budgetItem.Id);
 
             return _mapper.Map<BudgetItemDto>(budgetItem);
+        }
+
+        public async Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request)
+        {
+            var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, tracked: true);
+            if (budget is null)
+            {
+                throw new ArgumentException($"Budget for Itinerary ID {itineraryId} does not exist.");
+            }
+
+            if (request.EstimatedBudget.HasValue && request.EstimatedBudget.Value >= 0)
+            {
+                budget.EstimatedBudget = request.EstimatedBudget.Value;
+            }
+            _unitOfWork.Budgets.Update(budget);
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<BudgetDto>(budget);
         }
 
         public async Task<BudgetItemDto?> UpdateBudgetItemAsync(int itemId, UpdateBudgetItemRequestDto request)

@@ -45,16 +45,19 @@ namespace vivuvn_api.Mappings
             CreateMap<BudgetItem, BudgetItemDto>()
                 .ForMember(dest => dest.BudgetType, opt => opt.MapFrom(src => src.BudgetType != null ? src.BudgetType.Name : null));
 
+            // Mapping for Budget Type
+            CreateMap<BudgetType, BudgetTypeDto>();
+
             // Mapping for Province
             CreateMap<Province, ProvinceDto>();
             CreateMap<CreateProvinceRequestDto, Province>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
                 .ForMember(dest => dest.DeleteFlag, opt => opt.MapFrom(src => false));
-			CreateMap<UpdateProvinceRequestDto, Province>()
-				.ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
+            CreateMap<UpdateProvinceRequestDto, Province>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
 
-			// Mapping for Favorite Place
-			CreateMap<FavoritePlace, FavoritePlaceDto>();
+            // Mapping for Favorite Place
+            CreateMap<FavoritePlace, FavoritePlaceDto>();
 
             // Mapping for AI Generated Itinerary to Database Models
             // Map TravelItinerary to Itinerary (updates existing itinerary)
@@ -101,6 +104,6 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.TransportationDuration, opt => opt.Ignore())
                 .ForMember(dest => dest.TransportationDistance, opt => opt.Ignore());
 
-		}
-	}
+        }
+    }
 }

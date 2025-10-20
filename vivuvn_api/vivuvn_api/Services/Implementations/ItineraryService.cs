@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -86,16 +85,16 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<IEnumerable<ItineraryDayDto>>(days);
         }
 
-		public async Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
-		{
-			// Retrieve and return the complete itinerary with all details
-			var itinerary =  await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId,
-				includeProperties: "StartProvince,DestinationProvince");
+        public async Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
+        {
+            // Retrieve and return the complete itinerary with all details
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId,
+                includeProperties: "StartProvince,DestinationProvince");
 
             if (itinerary == null)
             {
                 throw new KeyNotFoundException($"Itinerary with id {itineraryId} not found.");
-			}
+            }
 
             // Generate itinerary from AI service
             var aiRequest = new AITravelItineraryGenerateRequest()
@@ -107,20 +106,20 @@ namespace vivuvn_api.Services.Implementations
                 Preferences = request.Preferences,
                 GroupSize = request.GroupSize,
                 Budget = request.Budget,
-				SpecialRequirements = request.SpecialRequirements,
-			};
+                SpecialRequirements = request.SpecialRequirements,
+            };
 
-			var aiResponse = await _aiClient.GenerateItineraryAsync<AutoGenerateItineraryResponse>(aiRequest);
+            var aiResponse = await _aiClient.GenerateItineraryAsync<AutoGenerateItineraryResponse>(aiRequest);
 
             if (aiResponse?.Itinerary == null)
             {
                 throw new InvalidOperationException("Failed to generate itinerary from AI service.");
             }
 
-            if(aiResponse.Itinerary.ScheduleUnavailable)
+            if (aiResponse.Itinerary.ScheduleUnavailable)
             {
                 throw new ArgumentException(aiResponse.Itinerary.UnavailableReason);
-			}
+            }
 
             // Save the generated itinerary to database
             var savedSuccessfully = await SaveTravelItineraryToDatabaseAsync(itineraryId, aiResponse.Itinerary);
@@ -130,9 +129,9 @@ namespace vivuvn_api.Services.Implementations
                 throw new InvalidOperationException("Failed to save generated itinerary to database.");
             }
 
-			var itineraryDto = await GetItineraryByIdAsync(itineraryId);
+            var itineraryDto = await GetItineraryByIdAsync(itineraryId);
 
-			return itineraryDto;
+            return itineraryDto;
         }
 
         /// <summary>
@@ -163,12 +162,12 @@ namespace vivuvn_api.Services.Implementations
                 // Get budget and clear existing budget items
                 var budget = await GetAndClearBudgetItemsAsync(itineraryId);
 
-				// Get all budget types
-				var allBudgetTypes = await _unitOfWork.BudgetTypes.GetAllAsync();
-				var budgetTypeDict = allBudgetTypes.ToDictionary(bt => bt.Name, bt => bt.BudgetTypeId);
+                // Get all budget types
+                var allBudgetTypes = await _unitOfWork.Budgets.GetAllBudgetTypesAsync();
+                var budgetTypeDict = allBudgetTypes.ToDictionary(bt => bt.Name, bt => bt.BudgetTypeId);
 
-				// Process each day from the AI-generated itinerary
-				await ProcessItineraryDaysAsync(itineraryId, travelItinerary.Days, budget, budgetTypeDict, itinerary.Days);
+                // Process each day from the AI-generated itinerary
+                await ProcessItineraryDaysAsync(itineraryId, travelItinerary.Days, budget, budgetTypeDict, itinerary.Days);
 
                 // Process transportation suggestions
                 await ProcessTransportationSuggestionsAsync(travelItinerary.TransportationSuggestions, budget, budgetTypeDict);
@@ -217,10 +216,10 @@ namespace vivuvn_api.Services.Implementations
 
             if (budget != null && budget.Items != null && budget.Items.Any())
             {
-                var existingBudgetItems = await _unitOfWork.BudgetItems.GetByBudgetIdAsync(budget.BudgetId);
+                var existingBudgetItems = await _unitOfWork.Budgets.GetBudgetItemsByBudgetIdAsync(budget.BudgetId);
                 foreach (var budgetItem in existingBudgetItems.ToList())
                 {
-                    _unitOfWork.BudgetItems.Remove(budgetItem);
+                    await _unitOfWork.Budgets.DeleteBudgetItemAsync(budgetItem.Id);
                 }
                 await _unitOfWork.SaveChangesAsync();
             }
@@ -324,7 +323,7 @@ namespace vivuvn_api.Services.Implementations
                     Date = date,
                     BudgetTypeId = activityBudgetTypeId
                 };
-                await _unitOfWork.BudgetItems.AddAsync(budgetItem);
+                await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);
             }
         }
 
@@ -343,18 +342,18 @@ namespace vivuvn_api.Services.Implementations
                 if (transportation.EstimatedCost > 0)
                 {
                     var transportationBudgetTypeId = transportation.Mode switch
-					{
-						var m when m.Equals(Constants.TransportationMode_Airplane, StringComparison.OrdinalIgnoreCase)
-							=> budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Flights),
-						var m when m.Equals(Constants.TransportationMode_Bus, StringComparison.OrdinalIgnoreCase)
-							|| m.Equals(Constants.TransportationMode_Train, StringComparison.OrdinalIgnoreCase)
-							=> budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit),
-						var m when m.Equals(Constants.TransportationMode_PrivateCar, StringComparison.OrdinalIgnoreCase)
-							=> budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Gas),
-						_ => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit)
-					};
+                    {
+                        var m when m.Equals(Constants.TransportationMode_Airplane, StringComparison.OrdinalIgnoreCase)
+                            => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Flights),
+                        var m when m.Equals(Constants.TransportationMode_Bus, StringComparison.OrdinalIgnoreCase)
+                            || m.Equals(Constants.TransportationMode_Train, StringComparison.OrdinalIgnoreCase)
+                            => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit),
+                        var m when m.Equals(Constants.TransportationMode_PrivateCar, StringComparison.OrdinalIgnoreCase)
+                            => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Gas),
+                        _ => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit)
+                    };
 
-					if (transportationBudgetTypeId > 0)
+                    if (transportationBudgetTypeId > 0)
                     {
                         var budgetItem = new BudgetItem
                         {
@@ -364,7 +363,7 @@ namespace vivuvn_api.Services.Implementations
                             Date = transportation.Date,
                             BudgetTypeId = transportationBudgetTypeId
                         };
-                        await _unitOfWork.BudgetItems.AddAsync(budgetItem);
+                        await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);
                     }
                 }
             }
