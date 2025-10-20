@@ -17,8 +17,18 @@ class FieldName extends StatelessWidget {
         labelText: 'Tên chi phí',
         border: OutlineInputBorder(),
       ),
-      validator: (final value) =>
-          Validator.notEmpty(value, fieldName: 'budget name'),
+      validator: (final value) {
+        // Check empty
+        final emptyError = Validator.notEmpty(value, fieldName: 'Tên chi phí');
+        if (emptyError != null) return emptyError;
+
+        // Check prohibited words
+        if (Validator.containsSensitiveWords(value)) {
+          return 'Tên chứa từ ngữ không được phép';
+        }
+
+        return null;
+      },
     );
   }
 }

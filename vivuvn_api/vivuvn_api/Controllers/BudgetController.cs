@@ -11,7 +11,7 @@ namespace vivuvn_api.Controllers
     {
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetBudget(int itineraryId)
         {
             var budget = await _budgetService.GetBudgetByItineraryIdAsync(itineraryId);
@@ -19,7 +19,7 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpGet("items")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetBudgetItems(int itineraryId)
         {
             var budgetItems = await _budgetService.GetBudgetItemsAsync(itineraryId);
@@ -27,7 +27,7 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpGet("budget-types")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetBudgetTypes()
         {
             var budgetTypes = await _budgetService.GetBudgetTypesAsync();
@@ -35,7 +35,7 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpPost("items")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> CreateBudgetItem(int itineraryId, CreateBudgetItemRequestDto request)
         {
             var budgetItem = await _budgetService.AddBudgetItemAsync(itineraryId, request);
@@ -43,7 +43,7 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpPut]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UpdateBudget(int itineraryId, [FromBody] UpdateBudgetRequestDto request)
         {
             var budget = await _budgetService.UpdateBudgetAsync(itineraryId, request);
@@ -52,7 +52,7 @@ namespace vivuvn_api.Controllers
 
 
         [HttpPut("items/{itemId}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UpdateBudgetItem(int itineraryId, int itemId, UpdateBudgetItemRequestDto request)
         {
             var budgetItem = await _budgetService.UpdateBudgetItemAsync(itemId, request);
@@ -60,7 +60,7 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpDelete("items/{itemId}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> DeleteBudgetItem(int itineraryId, int itemId)
         {
             var budgetItem = await _budgetService.DeleteBudgetItemAsync(itemId);

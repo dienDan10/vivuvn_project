@@ -5,11 +5,13 @@ import '../../../../../../common/validator/validator.dart';
 class BudgetInputField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
+  final void Function(String)? onChanged;
 
   const BudgetInputField({
     super.key,
     required this.controller,
     required this.focusNode,
+    this.onChanged,
   });
 
   @override
@@ -23,7 +25,9 @@ class BudgetInputField extends StatelessWidget {
         border: OutlineInputBorder(),
         labelText: 'Số tiền',
       ),
-      validator: (final value) => Validator.money(value, fieldName: 'Budget'),
+      validator: (final value) =>
+          Validator.moneyOrZero(value, fieldName: 'Budget'),
+      onChanged: onChanged,
     );
   }
 }
