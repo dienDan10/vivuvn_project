@@ -5,9 +5,11 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: vivuvn-sqlserver
+    env_file:
+      - .env
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_SecureDB_2024!@#}
+      - SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Express
     ports:
       - "1434:1433"
@@ -29,17 +31,22 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: vivuvn-api
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
-      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_SecureDB_2024!@#}
+      - SA_PASSWORD=${SA_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
       - BREVO_API_KEY=${BREVO_API_KEY}
       - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - GOOGLE_MAPS_ROUTE_URL=${GOOGLE_MAPS_ROUTE_URL} 
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
-    env_file:
-      - .env
+      - AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL}
+      - ADMIN_PANEL_URL=${ADMIN_PANEL_URL}
     ports:
       - "5277:80"
     depends_on:

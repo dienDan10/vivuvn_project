@@ -13,74 +13,7 @@ using vivuvn_api.Mappings;
 var builder = WebApplication.CreateBuilder(args);
 
 // Replace environment variable placeholders in configuration
-if (builder.Environment.EnvironmentName == "Docker")
-{
-    var config = builder.Configuration;
-
-    // Replace connection string placeholder
-    var connectionString = config.GetConnectionString("DefaultConnectionString");
-    if (!string.IsNullOrEmpty(connectionString) && connectionString.Contains("${SA_PASSWORD}"))
-    {
-        var saPassword = Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "VivuVN@123456";
-        connectionString = connectionString.Replace("${SA_PASSWORD}", saPassword);
-        builder.Configuration["ConnectionStrings:DefaultConnectionString"] = connectionString;
-    }
-
-    // Replace JWT secret key
-    var jwtKey = config["JWT:Key"];
-    if (!string.IsNullOrEmpty(jwtKey) && jwtKey.Contains("${JWT_SECRET_KEY}"))
-    {
-        var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
-        if (!string.IsNullOrEmpty(secretKey))
-        {
-            builder.Configuration["JWT:Key"] = secretKey;
-        }
-    }
-
-    // Replace Brevo API Key
-    var brevoApiKey = config["BrevoApi:ApiKey"];
-    if (!string.IsNullOrEmpty(brevoApiKey) && brevoApiKey.Contains("${BREVO_API_KEY}"))
-    {
-        var apiKey = Environment.GetEnvironmentVariable("BREVO_API_KEY");
-        if (!string.IsNullOrEmpty(apiKey))
-        {
-            builder.Configuration["BrevoApi:ApiKey"] = apiKey;
-        }
-    }
-
-    // Replace Brevo Sender Email
-    var brevoSenderEmail = config["BrevoApi:SenderEmail"];
-    if (!string.IsNullOrEmpty(brevoSenderEmail) && brevoSenderEmail.Contains("${BREVO_SENDER_EMAIL}"))
-    {
-        var senderEmail = Environment.GetEnvironmentVariable("BREVO_SENDER_EMAIL");
-        if (!string.IsNullOrEmpty(senderEmail))
-        {
-            builder.Configuration["BrevoApi:SenderEmail"] = senderEmail;
-        }
-    }
-
-    // Replace Google Maps API Key
-    var googleMapsApiKey = config["GoogleMapService:ApiKey"];
-    if (!string.IsNullOrEmpty(googleMapsApiKey) && googleMapsApiKey.Contains("${GOOGLE_MAPS_API_KEY}"))
-    {
-        var apiKey = Environment.GetEnvironmentVariable("GOOGLE_MAPS_API_KEY");
-        if (!string.IsNullOrEmpty(apiKey))
-        {
-            builder.Configuration["GoogleMapService:ApiKey"] = apiKey;
-        }
-    }
-
-    // Replace Google OAuth Client ID
-    var googleOAuthClientId = config["GoogleOAuth:ClientId"];
-    if (!string.IsNullOrEmpty(googleOAuthClientId) && googleOAuthClientId.Contains("${GOOGLE_OAUTH_CLIENT_ID}"))
-    {
-        var clientId = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_ID");
-        if (!string.IsNullOrEmpty(clientId))
-        {
-            builder.Configuration["GoogleOAuth:ClientId"] = clientId;
-        }
-    }
-}
+builder.ReplaceDockerEnvironmentVariables();
 
 // Add Exception Handlers
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();

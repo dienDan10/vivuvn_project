@@ -3,6 +3,12 @@
 **/obj/
 **/out/
 
+**/appsettings.json
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.json
+!**/appsettings.Docker.json
+
 # Visual Studio files
 .vs/
 *.user
