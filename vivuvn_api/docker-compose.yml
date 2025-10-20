@@ -64,3 +64,4 @@ volumes:
 networks:
   vivuvn-network:
     driver: bridge
+    name: vivuvn-network

@@ -6,7 +6,7 @@ namespace vivuvn_api.Controllers
 {
     [Route("api/v1/auth")]
     [ApiController]
-    public class AuthController(IAuthService _authService, IImageService _imageService) : ControllerBase
+    public class AuthController(IAuthService _authService) : ControllerBase
     {
 
         [HttpPost("login")]
