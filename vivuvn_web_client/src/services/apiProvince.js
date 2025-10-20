@@ -1,7 +1,17 @@
 import axios from "../utils/axios-customize";
 
-export const getAllProvinces = async () => {
-	const res = await axios.get("/v1/provinces");
+export const getAllProvinces = async (filters = {}) => {
+	const params = new URLSearchParams();
+
+	if (filters.name) params.append("name", filters.name);
+	if (filters.provinceCode) params.append("provinceCode", filters.provinceCode);
+	if (filters.sortBy) params.append("sortBy", filters.sortBy);
+	if (filters.isDescending !== undefined)
+		params.append("isDescending", filters.isDescending);
+	if (filters.pageNumber) params.append("pageNumber", filters.pageNumber);
+	if (filters.pageSize) params.append("pageSize", filters.pageSize);
+
+	const res = await axios.get(`/v1/provinces?${params.toString()}`);
 	return res;
 };
 

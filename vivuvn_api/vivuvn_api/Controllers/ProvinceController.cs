@@ -21,9 +21,9 @@ namespace vivuvn_api.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-		public async Task<IActionResult> GetAllProvinces()
+		public async Task<IActionResult> GetAllProvinces([FromQuery] GetAllProvincesRequestDto requestDto)
         {
-            var provinces = await _provinceService.GetAllProvincesAsync();
+            var provinces = await _provinceService.GetAllProvincesAsync(requestDto);
             return Ok(provinces);
 		}
 

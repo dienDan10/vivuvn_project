@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Helpers;
 using vivuvn_api.Models;
@@ -10,10 +12,56 @@ namespace vivuvn_api.Services.Implementations
 {
 	public class ProvinceService(IMapper _mapper, IUnitOfWork _unitOfWork, IImageService _imageService) : IProvinceService
 	{
-		public async Task<IEnumerable<ProvinceDto>> GetAllProvincesAsync()
+		public async Task<PaginatedResponseDto<ProvinceDto>> GetAllProvincesAsync(GetAllProvincesRequestDto requestDto)
 		{
-			var provinces = await _unitOfWork.Provinces.GetAllAsync();
-			return _mapper.Map<IEnumerable<ProvinceDto>>(provinces);
+			// Build filter expression
+			Expression<Func<Province, bool>>? filter = null;
+
+			if (!string.IsNullOrEmpty(requestDto.Name) || !string.IsNullOrEmpty(requestDto.ProvinceCode))
+			{
+				filter = p =>
+					(string.IsNullOrEmpty(requestDto.Name) || p.NameNormalized.Contains(TextHelper.ToSearchFriendly(requestDto.Name))) &&
+					(string.IsNullOrEmpty(requestDto.ProvinceCode) || p.ProvinceCode == requestDto.ProvinceCode);
+			}
+
+			// Build orderBy function
+			Func<IQueryable<Province>, IOrderedQueryable<Province>>? orderBy = null;
+
+			if (!string.IsNullOrEmpty(requestDto.SortBy))
+			{
+				orderBy = requestDto.SortBy.ToLower() switch
+				{
+					"name" => q => requestDto.IsDescending ? q.OrderByDescending(p => p.NameNormalized) : q.OrderBy(p => p.NameNormalized),
+					"provinceCode" => q => requestDto.IsDescending ? q.OrderByDescending(p => p.ProvinceCode) : q.OrderBy(p => p.ProvinceCode),
+					"id" => q => requestDto.IsDescending ? q.OrderByDescending(p => p.Id) : q.OrderBy(p => p.Id),
+					_ => q => q.OrderBy(p => p.Id)
+				};
+			}
+			else
+			{
+				orderBy = q => q.OrderBy(p => p.Id);
+			}
+
+			// Get paginated data
+			var (items, totalCount) = await _unitOfWork.Provinces.GetPagedAsync(
+				filter: filter,
+				orderBy: orderBy,
+				pageNumber: requestDto.PageNumber,
+				pageSize: requestDto.PageSize
+			);
+
+			var provinceDtos = _mapper.Map<IEnumerable<ProvinceDto>>(items);
+
+			return new PaginatedResponseDto<ProvinceDto>
+			{
+				Data = provinceDtos,
+				PageNumber = requestDto.PageNumber,
+				PageSize = requestDto.PageSize,
+				TotalCount = totalCount,
+				TotalPages = (int)Math.Ceiling(totalCount / (double)requestDto.PageSize),
+				HasPreviousPage = requestDto.PageNumber > 1,
+				HasNextPage = requestDto.PageNumber < (int)Math.Ceiling(totalCount / (double)requestDto.PageSize)
+			};
 		}
 
 		public async Task<ProvinceDto> RestoreProvinceAsync(int id)

@@ -20,6 +20,9 @@ const ControlPanelLayout = lazy(() =>
 const ProvinceLayout = lazy(() =>
 	import("./features/admin/province/ProvinceLayout")
 );
+const TravelerLayout = lazy(() =>
+	import("./features/admin/traveler/TravelerLayout")
+);
 
 const router = createBrowserRouter([
 	{
@@ -50,6 +53,14 @@ const router = createBrowserRouter([
 				element: (
 					<Suspense fallback={<SpinnerLarge />}>
 						<ProvinceLayout />
+					</Suspense>
+				),
+			},
+			{
+				path: "travelers",
+				element: (
+					<Suspense fallback={<SpinnerLarge />}>
+						<TravelerLayout />
 					</Suspense>
 				),
 			},
