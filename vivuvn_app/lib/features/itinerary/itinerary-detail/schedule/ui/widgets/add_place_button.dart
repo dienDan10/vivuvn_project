@@ -30,7 +30,7 @@ class AddPlaceButton extends ConsumerWidget {
       ),
       builder: (final context) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(dayId: dayId, itineraryId: itineraryId!),
+        child: AddPlaceBottomSheet(dayId: dayId),
       ),
     );
   }

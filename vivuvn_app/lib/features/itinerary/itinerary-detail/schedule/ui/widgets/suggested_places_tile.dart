@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../controller/itinerary_detail_controller.dart';
 import '../schedule_data.dart';
 import 'add_place_bottom_sheet.dart';
@@ -21,11 +22,7 @@ class SuggestedPlacesTile extends ConsumerWidget {
       ),
       builder: (_) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(
-          type: 'place',
-          itineraryId: itineraryId!,
-          dayId: dayId,
-        ),
+        child: AddPlaceBottomSheet(type: 'place', dayId: dayId),
       ),
     );
   }

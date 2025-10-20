@@ -7,12 +7,10 @@ import 'search_location_field.dart';
 
 class AddPlaceBottomSheet extends ConsumerWidget {
   final String type;
-  final int itineraryId;
   final int dayId;
 
   const AddPlaceBottomSheet({
     super.key,
-    required this.itineraryId,
     required this.dayId,
     this.type = 'place',
   });
@@ -39,6 +37,7 @@ class AddPlaceBottomSheet extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // Thanh nhỏ ở đầu để người dùng biết có thể kéo
             Container(
               width: 40,
               height: 4,
@@ -55,9 +54,10 @@ class AddPlaceBottomSheet extends ConsumerWidget {
                   final messenger = ScaffoldMessenger.of(context);
                   final navigator = Navigator.of(context);
 
+                  // Gọi controller chỉ với dayId
                   await ref
                       .read(itineraryScheduleControllerProvider.notifier)
-                      .addItem(itineraryId, dayId, location.id);
+                      .addItemToDay(dayId, location.id);
 
                   if (!context.mounted) return;
 

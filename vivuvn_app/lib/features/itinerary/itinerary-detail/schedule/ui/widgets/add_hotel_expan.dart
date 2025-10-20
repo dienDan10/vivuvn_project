@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../controller/itinerary_detail_controller.dart';
 import 'add_place_bottom_sheet.dart';
 import 'add_place_button.dart';
@@ -20,11 +21,7 @@ class AddHotelTile extends ConsumerWidget {
       ),
       builder: (_) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(
-          type: 'hotel',
-          itineraryId: itineraryId!,
-          dayId: dayId,
-        ),
+        child: AddPlaceBottomSheet(type: 'hotel', dayId: dayId),
       ),
     );
   }

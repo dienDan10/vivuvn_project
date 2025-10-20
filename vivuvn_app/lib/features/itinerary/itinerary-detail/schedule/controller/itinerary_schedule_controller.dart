@@ -79,15 +79,18 @@ class ItineraryScheduleController
   }
 
   // Thêm item vào ngày rồi fetch lại
-  Future<void> addItem(
-    final int itineraryId,
-    final int dayId,
-    final int locationId,
-  ) async {
+  Future<void> addItemToDay(final int dayId, final int locationId) async {
+    final itineraryId = state.itineraryId;
+    if (itineraryId == null) {
+      state = state.copyWith(error: 'Itinerary ID not found');
+      return;
+    }
+
     try {
       await ref
           .read(itineraryScheduleServiceProvider)
           .addItemToDay(itineraryId, dayId, locationId);
+
       await fetchItemsByDay(itineraryId, dayId); // load lại danh sách
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
