@@ -11,13 +11,13 @@ namespace vivuvn_api.Services.Implementations
         private readonly string _bucketName;
         private readonly IWebHostEnvironment _env;
 
-        public ImageService(IWebHostEnvironment env)
+        public ImageService(IWebHostEnvironment env, IConfiguration configuration)
         {
             _env = env;
-            var creadentialsPath = Path.Combine(_env.ContentRootPath, "Secrets", "fir-basic-3901c-firebase-adminsdk-fbsvc-2d720d3826.json");
+            var creadentialsPath = Path.Combine(_env.ContentRootPath, configuration["Firebase:CredentialPath"]);
             var credentials = GoogleCredential.FromFile(creadentialsPath);
             _storageClient = StorageClient.Create(credentials);
-            _bucketName = "fir-basic-3901c.firebasestorage.app";
+            _bucketName = configuration["Firebase:BucketName"];
         }
 
         public async Task<string> UploadImageAsync(IFormFile file)
@@ -53,5 +53,25 @@ namespace vivuvn_api.Services.Implementations
 
             return true;
         }
-    }
+
+		public async Task<bool> DeleteImageAsync(string fileUrl)
+		{
+			try
+			{
+				// Parse objectName from URL
+				// URL format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{objectName}?alt=media
+				var uri = new Uri(fileUrl);
+				var segments = uri.Segments;
+				var encodedObjectName = segments[^1].Replace("?alt=media", "");
+				var objectName = Uri.UnescapeDataString(encodedObjectName);
+
+				await _storageClient.DeleteObjectAsync(_bucketName, objectName);
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+	}
 }

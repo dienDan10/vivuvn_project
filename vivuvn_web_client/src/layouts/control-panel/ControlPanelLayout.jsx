@@ -11,7 +11,7 @@ import { ROLE_ADMIN, ROLE_OPERATOR } from "../../utils/constant";
 
 function ControlPanelLayout() {
 	const [collapsed, setCollapsed] = useState(false);
-	const { isAuthenticated, user } = useSelector((state) => state.user);
+	const { isAuthenticated } = useSelector((state) => state.user);
 	return (
 		<ConfigProvider
 			theme={{
@@ -53,11 +53,6 @@ function ControlPanelLayout() {
 					</Header>
 
 					<Content className="px-12 py-10">
-						{user?.roles.includes(ROLE_ADMIN) && (
-							<div className="flex justify-center items-center">
-								<span>Loading...</span>
-							</div>
-						)}
 						<RoleBaseRoute>
 							<Outlet />
 						</RoleBaseRoute>

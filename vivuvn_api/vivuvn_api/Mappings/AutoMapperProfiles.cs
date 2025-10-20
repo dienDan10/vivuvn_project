@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Models;
 
@@ -46,9 +47,14 @@ namespace vivuvn_api.Mappings
 
             // Mapping for Province
             CreateMap<Province, ProvinceDto>();
+            CreateMap<CreateProvinceRequestDto, Province>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.DeleteFlag, opt => opt.MapFrom(src => false));
+			CreateMap<UpdateProvinceRequestDto, Province>()
+				.ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
 
-            // Mapping for Favorite Place
-            CreateMap<FavoritePlace, FavoritePlaceDto>();
+			// Mapping for Favorite Place
+			CreateMap<FavoritePlace, FavoritePlaceDto>();
 
             // Mapping for AI Generated Itinerary to Database Models
             // Map TravelItinerary to Itinerary (updates existing itinerary)
