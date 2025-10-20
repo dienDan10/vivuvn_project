@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # SQL Server service
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: vivuvn-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_SecureDB_2024!@#}
+      - MSSQL_PID=Express
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - vivuvn-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" -C || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # .NET API service
+  vivuvn-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vivuvn-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_SecureDB_2024!@#}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+    env_file:
+      - .env
+    ports:
+      - "5277:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - ./images:/app/images
+    networks:
+      - vivuvn-network
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+
+networks:
+  vivuvn-network:
+    driver: bridge

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_ProductionDB_2024!@#}
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    # Remove sql-scripts volume - not needed for production
+    restart: always
+    # Production tuning
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  vivuvn-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      # Add production-specific environment variables
+      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_ProductionDB_2024!@#}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+    restart: always
+    # Production tuning
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    # Remove volumes mapping for production (security)
+    # volumes: []  # This removes the ./images:/app/images mapping
+    
+    # Production health checks
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
