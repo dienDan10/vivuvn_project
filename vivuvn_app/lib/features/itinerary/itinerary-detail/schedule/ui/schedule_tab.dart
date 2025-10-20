@@ -24,22 +24,14 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref
-          .read(itineraryScheduleControllerProvider.notifier)
-          .fetchDays(widget.itineraryId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(itineraryScheduleControllerProvider.notifier).fetchDays();
     });
   }
 
   @override
   Widget build(final BuildContext context) {
     final state = ref.watch(itineraryScheduleControllerProvider);
-
-    if (widget.itineraryId == null) {
-      return const Center(
-        child: Text('Thiếu itineraryId, không thể tải lịch trình.'),
-      );
-    }
 
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());

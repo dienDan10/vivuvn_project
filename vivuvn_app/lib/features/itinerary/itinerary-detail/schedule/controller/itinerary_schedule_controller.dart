@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../controller/itinerary_detail_controller.dart';
 import '../model/itinerary_day.dart';
 import '../service/itinerary_schedule_service.dart';
 import '../state/itinerary_schedule_state.dart';
@@ -18,13 +19,14 @@ class ItineraryScheduleController
   ItineraryScheduleState build() => ItineraryScheduleState();
 
   // Lấy danh sách ngày
-  Future<void> fetchDays(final int? itineraryId) async {
-    if (itineraryId == null) {
-      state = state.copyWith(error: 'Thiếu itineraryId', isLoading: false);
-      return;
-    }
+  Future<void> fetchDays() async {
+    final itineraryId = ref.read(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itineraryId,
+      ),
+    );
 
-    if (state.itineraryId == itineraryId && state.days.isNotEmpty) return;
+    state = state.copyWith(itineraryId: itineraryId);
 
     state = state.copyWith(
       itineraryId: itineraryId,
@@ -34,7 +36,7 @@ class ItineraryScheduleController
     try {
       final data = await ref
           .read(itineraryScheduleServiceProvider)
-          .getItineraryDays(itineraryId);
+          .getItineraryDays(state.itineraryId!);
       state = state.copyWith(days: data, isLoading: false);
     } on DioException catch (e) {
       state = state.copyWith(
