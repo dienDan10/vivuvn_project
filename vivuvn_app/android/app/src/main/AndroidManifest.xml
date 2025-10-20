@@ -3,6 +3,11 @@
         android:label="vivuvn_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- <meta-data
+            android:name="com.google.android.gms.client.id"
+            android:value="830479318433-49c4as7i8tmrumph58vvnjkqrreaeld6.apps.googleusercontent.com" /> -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

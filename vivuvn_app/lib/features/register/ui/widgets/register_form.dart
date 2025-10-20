@@ -1,10 +1,7 @@
-import 'package:cherry_toast/cherry_toast.dart';
-import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/routes/routes.dart';
+import '../../../../common/toast/global_toast.dart';
 import '../../controller/register_controller.dart';
 import 'btn_submit_register.dart';
 import 'confirm_password_input.dart';
@@ -66,28 +63,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
       (final previous, final next) {
         if (next != null && next.isNotEmpty) {
           // show toast error message
-          CherryToast.error(
-            title: const Text('Register Failed'),
-            displayCloseButton: true,
-            description: Text(next),
-            toastPosition: Position.top,
-          ).show(context);
-        }
-      },
-    );
-  }
-
-  void _successListener() {
-    ref.listen(
-      registerControllerProvider.select((final state) => state.isSuccess),
-      (final previous, final next) {
-        if (next == true) {
-          CherryToast.success(
-            title: const Text('Register Successful'),
-            toastPosition: Position.top,
-          ).show(context);
-
-          context.go(loginRoute);
+          GlobalToast.showErrorToast(context, message: next);
         }
       },
     );
@@ -96,7 +72,6 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   @override
   Widget build(final BuildContext context) {
     _errorListener();
-    _successListener();
     return Form(
       key: _formKey,
       child: Column(

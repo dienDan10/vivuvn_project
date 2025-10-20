@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
-import '../../../create-itinerary/ui/create_itinerary_modal.dart';
+import '../../../../../screens/create_itinerary_screen.dart';
 
 class ButtonAddItinerary extends StatefulWidget {
   const ButtonAddItinerary({super.key});
@@ -17,10 +17,8 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (final context) => const CreateItineraryModal(),
+      enableDrag: false,
+      builder: (final context) => const CreateItineraryScreen(),
     );
   }
 

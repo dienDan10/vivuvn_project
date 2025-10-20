@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../../../common/helper/app_constants.dart';
+import '../../view-itinerary-list/models/itinerary.dart';
 import 'btn_back.dart';
 import 'btn_settings.dart';
 
 class ExpandedAppbarBackground extends StatelessWidget {
-  const ExpandedAppbarBackground({super.key});
+  final Itinerary itinerary;
+  const ExpandedAppbarBackground({super.key, required this.itinerary});
 
   @override
   Widget build(final BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Image with gradient overlay
+        // Ảnh hành trình với gradient overlay
         DecoratedBox(
           position: DecorationPosition.foreground,
           decoration: BoxDecoration(
@@ -26,32 +28,29 @@ class ExpandedAppbarBackground extends StatelessWidget {
             ),
           ),
           child: Image.network(
-            'https://picsum.photos/seed/250/400/300',
+            itinerary.imageUrl,
             fit: BoxFit.cover,
+            errorBuilder: (final context, final error, final stackTrace) =>
+                Image.asset(
+                  'assets/images/images-placeholder.jpeg',
+                  fit: BoxFit.cover,
+                ),
           ),
         ),
 
-        // Icons - back and settings
+        // Nút back và settings
         Positioned(
           top: MediaQuery.of(context).padding.top + 7,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            width: MediaQuery.of(context).size.width,
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Back icon
-                ButtonBack(),
-
-                // setting icon
-                ButtonSettings(),
-              ],
-            ),
+          left: 12,
+          right: 12,
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [ButtonBack(), ButtonSettings()],
           ),
         ),
 
-        // Title - centered
-        const Positioned(
+        // Tên & ngày hành trình
+        Positioned(
           top: appbarExpandedHeight * 0.4,
           left: 20,
           right: 20,
@@ -59,25 +58,29 @@ class ExpandedAppbarBackground extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ngày định mệnh của chúng ta đã đến',
-                textAlign: TextAlign.center,
-                maxLines: 3,
+                itinerary.name,
+                textAlign: TextAlign.left,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 28,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                '22/10 → 25/10, 2025',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+                '${_formatDate(itinerary.startDate)} → ${_formatDate(itinerary.endDate)}',
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
               ),
             ],
           ),
         ),
       ],
     );
+  }
+
+  String _formatDate(final DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
   }
 }

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../view-itinerary-list/models/itinerary.dart';
 import 'collapsed_appbar.dart';
 import 'expanded_appbar_background.dart';
 
 class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double minExtentHeight;
   final double maxExtentHeight;
+  final Itinerary itinerary;
 
   CustomSliverAppBarDelegate({
-    this.minExtentHeight = kToolbarHeight + 38,
+    required this.itinerary,
     required this.maxExtentHeight,
+    this.minExtentHeight = kToolbarHeight + 38,
   });
 
   @override
@@ -21,13 +24,13 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Background
+        // Background (hiển thị khi expand)
         Opacity(
           opacity: disappearanceFactor(shrinkOffset),
-          child: const ExpandedAppbarBackground(),
+          child: ExpandedAppbarBackground(itinerary: itinerary),
         ),
 
-        // Appbar - positioned at the top
+        // Collapsed appbar (hiển thị khi thu nhỏ)
         Positioned(
           top: 0,
           left: 0,
@@ -35,7 +38,7 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
           height: kToolbarHeight + MediaQuery.of(context).padding.top,
           child: Opacity(
             opacity: appearanceFactor(shrinkOffset),
-            child: const CollapsedAppbar(),
+            child: CollapsedAppbar(itinerary: itinerary),
           ),
         ),
       ],
@@ -43,42 +46,28 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 
   double disappearanceFactor(final double shrinkOffset) {
-    final totalScrollDistance = maxExtentHeight - minExtentHeight;
-    final halfwayPoint = totalScrollDistance * 0.8;
-
-    if (shrinkOffset <= halfwayPoint) {
-      return 1.0; // Fully visible until halfway
-    }
-
-    final remainingDistance = totalScrollDistance - halfwayPoint;
-    final factor = 1 - ((shrinkOffset - halfwayPoint) / remainingDistance);
+    final total = maxExtentHeight - minExtentHeight;
+    final halfway = total * 0.8;
+    if (shrinkOffset <= halfway) return 1.0;
+    final factor = 1 - ((shrinkOffset - halfway) / (total - halfway));
     return factor.clamp(0.0, 1.0);
   }
 
   double appearanceFactor(final double shrinkOffset) {
-    final totalScrollDistance = maxExtentHeight - minExtentHeight;
-    final halfwayPoint = totalScrollDistance * 0.8;
-
-    if (shrinkOffset <= halfwayPoint) {
-      return 0.0; // Hidden until halfway
-    }
-
-    final remainingDistance = totalScrollDistance - halfwayPoint;
-    final factor = (shrinkOffset - halfwayPoint) / remainingDistance;
+    final total = maxExtentHeight - minExtentHeight;
+    final halfway = total * 0.8;
+    if (shrinkOffset <= halfway) return 0.0;
+    final factor = (shrinkOffset - halfway) / (total - halfway);
     return factor.clamp(0.0, 1.0);
   }
 
   @override
   double get maxExtent => maxExtentHeight;
-
   @override
   double get minExtent => minExtentHeight;
 
   @override
-  bool shouldRebuild(
-    covariant final SliverPersistentHeaderDelegate oldDelegate,
-  ) {
-    return oldDelegate.maxExtent != maxExtentHeight ||
-        oldDelegate.minExtent != minExtentHeight;
-  }
+  bool shouldRebuild(covariant final CustomSliverAppBarDelegate oldDelegate) =>
+      oldDelegate.itinerary != itinerary ||
+      oldDelegate.maxExtentHeight != maxExtentHeight;
 }

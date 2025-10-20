@@ -26,6 +26,13 @@ namespace vivuvn_api.Controllers
             return Ok(tokenResponseDto);
         }
 
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequestDto request)
+        {
+            var result = await _authService.GoogleLoginAsync(request);
+            return Ok(result);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {

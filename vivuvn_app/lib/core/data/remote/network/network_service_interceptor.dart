@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../common/auth/auth_controller.dart';
 import '../../../../common/dtos/refresh_token_response.dart';
 import '../../../../common/http_status_code/http_status_code.dart';
 import '../token/itoken_service.dart';
@@ -9,14 +10,15 @@ import '../token/token_service.dart';
 final networkServiceInterceptorProvider =
     Provider.family<NetworkServiceInterceptor, Dio>((final ref, final dio) {
       final tokenService = ref.watch(tokenServiceProvider(dio));
-      return NetworkServiceInterceptor(tokenService, dio);
+      return NetworkServiceInterceptor(tokenService, dio, ref);
     });
 
 class NetworkServiceInterceptor extends Interceptor {
   final ITokenService _tokenService;
   final Dio _dio;
+  final Ref<NetworkServiceInterceptor> _ref;
 
-  NetworkServiceInterceptor(this._tokenService, this._dio);
+  NetworkServiceInterceptor(this._tokenService, this._dio, this._ref);
 
   @override
   void onRequest(
@@ -64,14 +66,13 @@ class NetworkServiceInterceptor extends Interceptor {
       return handler.resolve(newResponse);
     } on DioException catch (e) {
       // if the refresh token request fails
-      if (e.response?.statusCode == refreshTokenExpired &&
-          e.requestOptions.path == '/api/v1/auth/refresh-token') {
+      if (e.requestOptions.path == '/api/v1/auth/refresh-token' &&
+          e.response?.statusCode == badRequest) {
         // Handle refresh token errors
         await _tokenService.clearTokens();
-        // set error status code
-        //err.response?.statusCode = refreshTokenExpired;
 
-        // redirect user to login page
+        // set application state to logged out
+        _ref.read(authControllerProvider.notifier).logout();
 
         return handler.next(err);
       }
