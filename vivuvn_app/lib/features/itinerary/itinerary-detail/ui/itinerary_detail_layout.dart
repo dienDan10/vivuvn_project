@@ -99,10 +99,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
           HeroSection(itinerary: detailState.itinerary!),
           TabbarHeader(tabController: _tabController),
         ],
-        body: TabbarContent(
-          tabController: _tabController,
-          itineraryId: detailState.itineraryId!,
-        ),
+        body: TabbarContent(tabController: _tabController),
       ),
     );
   }

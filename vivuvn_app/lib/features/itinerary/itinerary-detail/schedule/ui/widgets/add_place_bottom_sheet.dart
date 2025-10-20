@@ -62,12 +62,8 @@ class AddPlaceBottomSheet extends ConsumerWidget {
                   if (!context.mounted) return;
 
                   messenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Đã thêm: ${location.name}'),
-                      duration: const Duration(seconds: 1),
-                    ),
+                    SnackBar(content: Text('Đã thêm: ${location.name}')),
                   );
-
                   navigator.pop();
                 },
               ),

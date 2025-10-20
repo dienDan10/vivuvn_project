@@ -12,9 +12,7 @@ import 'widgets/place_list_section.dart';
 import 'widgets/suggested_places_tile.dart';
 
 class ScheduleTab extends ConsumerStatefulWidget {
-  final int? itineraryId;
-
-  const ScheduleTab({super.key, required this.itineraryId});
+  const ScheduleTab({super.key});
 
   @override
   ConsumerState<ScheduleTab> createState() => _ScheduleTabState();
@@ -31,23 +29,23 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
 
   @override
   Widget build(final BuildContext context) {
-    final state = ref.watch(itineraryScheduleControllerProvider);
+    final scheduleState = ref.watch(itineraryScheduleControllerProvider);
 
-    if (state.isLoading) {
+    if (scheduleState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (state.error != null) {
+    if (scheduleState.error != null) {
       return Center(
         child: Text(
-          'Lỗi: ${state.error}',
+          'Lỗi: ${scheduleState.error}',
           style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       );
     }
 
-    final days = state.days;
-    final selectedIndex = state.selectedIndex;
+    final days = scheduleState.days;
+    final selectedIndex = scheduleState.selectedIndex;
     final selectedDay = (days.isNotEmpty && selectedIndex < days.length)
         ? days[selectedIndex]
         : null;
@@ -65,22 +63,10 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
                     padding: EdgeInsets.zero,
                     children: [
                       const DayTitle(),
-                      PlaceListSection(
-                        itineraryId: widget.itineraryId!,
-                        dayId: selectedDay.id,
-                      ),
-                      SuggestedPlacesTile(
-                        itineraryId: widget.itineraryId!,
-                        dayId: selectedDay.id,
-                      ),
-                      AddHotelTile(
-                        itineraryId: widget.itineraryId!,
-                        dayId: selectedDay.id,
-                      ),
-                      AddRestaurantTile(
-                        itineraryId: widget.itineraryId!,
-                        dayId: selectedDay.id,
-                      ),
+                      PlaceListSection(dayId: selectedDay.id),
+                      SuggestedPlacesTile(dayId: selectedDay.id),
+                      AddHotelTile(dayId: selectedDay.id),
+                      AddRestaurantTile(dayId: selectedDay.id),
                     ],
                   ),
           ),
