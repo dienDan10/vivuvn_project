@@ -1,28 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../controller/itinerary_detail_controller.dart';
 import '../schedule_data.dart';
 import 'add_place_bottom_sheet.dart';
 import 'suggested_place_item.dart';
 
-class SuggestedPlacesTile extends StatelessWidget {
-  const SuggestedPlacesTile({super.key});
+class SuggestedPlacesTile extends ConsumerWidget {
+  final int dayId;
 
-  void _openAddPlaceSheet(final BuildContext context) {
+  const SuggestedPlacesTile({super.key, required this.dayId});
+
+  void _openAddPlaceSheet(final BuildContext context, final WidgetRef ref) {
+    final itineraryId = ref.read(itineraryDetailControllerProvider).itineraryId;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (final context) => const FractionallySizedBox(
+      builder: (_) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(),
+        child: AddPlaceBottomSheet(type: 'place', dayId: dayId),
       ),
     );
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     return ExpansionTile(
       title: const Text('Địa điểm gợi ý'),
       children: [
@@ -37,7 +43,7 @@ class SuggestedPlacesTile extends StatelessWidget {
               final place = samplePlaces[index];
               return SuggestedPlaceItem(
                 title: place.title,
-                onTap: () => _openAddPlaceSheet(context),
+                onTap: () => _openAddPlaceSheet(context, ref),
               );
             },
           ),

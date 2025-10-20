@@ -6,7 +6,6 @@ import '../schedule/ui/schedule_tab.dart';
 
 class TabbarContent extends StatelessWidget {
   final TabController tabController;
-
   const TabbarContent({super.key, required this.tabController});
 
   @override
@@ -27,7 +26,11 @@ class TabbarContent extends StatelessWidget {
         ),
         // Tab 2 - Lịch trình
         ScheduleTab(),
-
+        // Scaffold(
+        //   body: const Text('Lich trinh trong'),
+        //   floatingActionButton: const ButtonGenerateItinerary(),
+        //   floatingActionButtonLocation: ExpandableFab.location,
+        // ),
         // Tab 3 - Ngân sách
         BudgetTab(),
       ],

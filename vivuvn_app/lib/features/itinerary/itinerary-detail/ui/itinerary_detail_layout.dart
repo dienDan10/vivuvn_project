@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../common/helper/app_constants.dart';
 import '../controller/itinerary_detail_controller.dart';
+import '../state/itinerary_detail_state.dart';
 import 'hero_section.dart';
 import 'tabbar_content.dart';
 import 'tabbar_header.dart';
@@ -20,56 +21,61 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   final ScrollController _scrollController = ScrollController();
   late TabController _tabController;
 
+  late ProviderSubscription<ItineraryDetailState> _itineraryListener;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _registerScrollListener();
+    _setupItineraryListener();
+  }
 
-    _registerListener();
+  void _setupItineraryListener() {
+    _itineraryListener = ref.listenManual<ItineraryDetailState>(
+      itineraryDetailControllerProvider,
+      (final previous, final next) {
+        if (previous?.itineraryId != next.itineraryId &&
+            next.itineraryId != null) {
+          ref
+              .read(itineraryDetailControllerProvider.notifier)
+              .fetchItineraryDetail();
+        }
+      },
+    );
+  }
+
+  void _registerScrollListener() {
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging && _tabController.index != 0) {
+        _scrollController.animateTo(
+          appbarExpandedHeight -
+              (kToolbarHeight + MediaQuery.of(context).padding.top),
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _tabController.dispose();
-    super.dispose();
-  }
+    _itineraryListener.close();
 
-  void _registerListener() {
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        if (_tabController.index != 0) {
-          _scrollController.animateTo(
-            appbarExpandedHeight -
-                (kToolbarHeight + MediaQuery.of(context).padding.top),
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        }
-      }
-    });
+    super.dispose();
   }
 
   @override
   Widget build(final BuildContext context) {
     final detailState = ref.watch(itineraryDetailControllerProvider);
-    // load itinerary detail
-    ref.listen(
-      itineraryDetailControllerProvider.select(
-        (final state) => state.itineraryId,
-      ),
-      (final previous, final next) {
-        ref
-            .read(itineraryDetailControllerProvider.notifier)
-            .fetchItineraryDetail();
-      },
-    );
 
-    if (detailState.isLoading) {
+    if (detailState.itineraryId == null || detailState.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (detailState.error != null) {
+    if (detailState.error != null && detailState.error != 'unauthorized') {
       return Scaffold(
         body: Center(
           child: Text(
@@ -82,12 +88,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
 
     if (detailState.itinerary == null) {
       return const Scaffold(
-        body: Center(
-          child: Text(
-            'Không tìm thấy chi tiết hành trình.',
-            style: TextStyle(color: Colors.red),
-          ),
-        ),
+        body: Center(child: Text('Không tìm thấy dữ liệu hành trình')),
       );
     }
 
@@ -98,11 +99,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
           HeroSection(itinerary: detailState.itinerary!),
           TabbarHeader(tabController: _tabController),
         ],
-        body: Column(
-          children: [
-            Expanded(child: TabbarContent(tabController: _tabController)),
-          ],
-        ),
+        body: TabbarContent(tabController: _tabController),
       ),
     );
   }
