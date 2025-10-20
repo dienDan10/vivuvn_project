@@ -5,6 +5,7 @@ namespace vivuvn_api.Services.Interfaces
 {
     public interface IBudgetService
     {
+        Task<BudgetDto?> GetBudgetByItineraryIdAsync(int itineraryId);
         Task<IEnumerable<BudgetItemDto>> GetBudgetItemsAsync(int itineraryId);
         Task<IEnumerable<BudgetTypeDto>> GetBudgetTypesAsync();
         Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto item);

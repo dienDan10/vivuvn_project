@@ -9,6 +9,17 @@ namespace vivuvn_api.Services.Implementations
 {
     public class BudgetService(IUnitOfWork _unitOfWork, IMapper _mapper) : IBudgetService
     {
+        public async Task<BudgetDto?> GetBudgetByItineraryIdAsync(int itineraryId)
+        {
+            var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, includeProperties: "Items,Items.BudgetType");
+
+            if (budget == null)
+            {
+                throw new ArgumentException($"Budget for Itinerary ID {itineraryId} does not exist.");
+            }
+            return _mapper.Map<BudgetDto>(budget);
+        }
+
         public async Task<IEnumerable<BudgetItemDto>> GetBudgetItemsAsync(int itineraryId)
         {
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId);

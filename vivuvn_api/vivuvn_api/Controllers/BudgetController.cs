@@ -10,6 +10,14 @@ namespace vivuvn_api.Controllers
     public class BudgetController(IBudgetService _budgetService) : ControllerBase
     {
 
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetBudget(int itineraryId)
+        {
+            var budget = await _budgetService.GetBudgetByItineraryIdAsync(itineraryId);
+            return Ok(budget);
+        }
+
         [HttpGet("items")]
         [Authorize]
         public async Task<IActionResult> GetBudgetItems(int itineraryId)
