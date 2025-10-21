@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../common/helper/app_constants.dart';
 import '../controller/itinerary_detail_controller.dart';
 import '../state/itinerary_detail_state.dart';
+import 'budget_header_persistent_header.dart';
 import 'day_selector_persistent_header.dart';
 import 'hero_section.dart';
 import 'tabbar_content.dart';
@@ -111,6 +112,10 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
               // Add DaySelectorBar only when Schedule tab is active
               if (_tabController.index == 1)
                 const DaySelectorPersistentHeader(),
+
+              // Add Budget headers only when Budget tab is active
+              if (_tabController.index == 2)
+                const BudgetHeaderPersistentHeader(),
             ],
             body: TabbarContent(tabController: _tabController),
           );

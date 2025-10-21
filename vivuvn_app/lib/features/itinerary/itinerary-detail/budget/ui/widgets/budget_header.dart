@@ -58,7 +58,7 @@ class BudgetHeader extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        vertical: BudgetConstants.verticalPadding,
+        //vertical: BudgetConstants.verticalPadding,
         horizontal: BudgetConstants.sectionSpacing,
       ),
       child: Column(
