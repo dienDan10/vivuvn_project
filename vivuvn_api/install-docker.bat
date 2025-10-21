@@ -47,6 +47,12 @@ if not exist ".env" (
     )
 )
 
+REM Check if AI service .env.docker exists
+if not exist "..\vivuvn_ai_service\.env.docker" (
+    echo ??  AI service .env.docker not found. Please ensure the AI service is properly configured.
+    echo    Path: ..\vivuvn_ai_service\.env.docker
+)
+
 REM Stop any existing containers
 echo ?? Stopping existing containers...
 docker-compose down -v
@@ -56,6 +62,7 @@ echo ?? Pulling required Docker images...
 docker pull mcr.microsoft.com/dotnet/sdk:8.0
 docker pull mcr.microsoft.com/dotnet/aspnet:8.0
 docker pull mcr.microsoft.com/mssql/server:2022-latest
+docker pull minhdang1163/vivuvn-ai-service:latest
 
 REM Build and start containers
 echo ?? Building and starting containers...
@@ -65,6 +72,11 @@ REM Wait for SQL Server to be ready
 echo ? Waiting for SQL Server to be ready...
 echo    This may take 30-60 seconds...
 timeout /t 30 /nobreak >nul
+
+REM Wait for AI Service to be ready
+echo ? Waiting for AI Service to be ready...
+echo    This may take 60-120 seconds (downloading ML models)...
+timeout /t 60 /nobreak >nul
 
 REM Wait a bit more for the API to fully start
 echo ? Waiting for API to start...
@@ -82,15 +94,17 @@ echo.
 echo ?? Services:
 echo    ?? API: http://localhost:5277
 echo    ?? Swagger: http://localhost:5277/swagger
+echo    ?? AI Service: http://localhost:8000 (if exposed)
 echo    ???  SQL Server: localhost:1434
 echo       Username: sa
 echo       Password: [Check your .env file]
 echo.
 echo ?? Useful Commands:
-echo    View API logs:    docker-compose logs -f vivuvn-api
-echo    View SQL logs:    docker-compose logs -f sqlserver
-echo    Stop services:    docker-compose down
-echo    Restart services: docker-compose restart
+echo    View API logs:        docker-compose logs -f vivuvn-api
+echo    View AI Service logs: docker-compose logs -f vivuvn-ai-service
+echo    View SQL logs:        docker-compose logs -f sqlserver
+echo    Stop services:        docker-compose down
+echo    Restart services:     docker-compose restart
 echo.
 echo ???  For troubleshooting, check the README-Docker.md file
 
