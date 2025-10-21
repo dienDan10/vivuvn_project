@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum BudgetSortOption {
-  dateNewest('Ngày (mới nhất)', Icons.calendar_today),
-  dateOldest('Ngày (xa nhất)', Icons.calendar_month),
-  amountHighest('Giá (cao nhất)', Icons.arrow_downward),
-  amountLowest('Giá (thấp nhất)', Icons.arrow_upward),
-  typeAZ('Loại chi phí (A-Z)', Icons.category);
+import '../../controller/budget_controller.dart';
+import '../../data/enums/budget_sort_option.dart';
 
-  final String label;
-  final IconData icon;
-  const BudgetSortOption(this.label, this.icon);
+class BudgetControl extends ConsumerStatefulWidget {
+  const BudgetControl({super.key});
+
+  @override
+  ConsumerState<BudgetControl> createState() => _BudgetControlState();
 }
 
-class BudgetControl extends StatelessWidget {
-  final BudgetSortOption currentSort;
-  final Function(BudgetSortOption) onSortChanged;
-
-  const BudgetControl({
-    super.key,
-    required this.currentSort,
-    required this.onSortChanged,
-  });
+class _BudgetControlState extends ConsumerState<BudgetControl> {
+  void _handleSortChange(final BudgetSortOption option) {
+    ref.read(budgetControllerProvider.notifier).sortBudgetItem(option);
+  }
 
   @override
   Widget build(final BuildContext context) {
+    final currentSort = ref.watch(
+      budgetControllerProvider.select((final state) => state.currentSort),
+    );
+
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 8, top: 8, bottom: 8),
       child: Row(
@@ -62,6 +60,10 @@ class BudgetControl extends StatelessWidget {
   }
 
   void _showSortOptions(final BuildContext context) {
+    final currentSort = ref.read(
+      budgetControllerProvider.select((final state) => state.currentSort),
+    );
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -116,7 +118,7 @@ class BudgetControl extends StatelessWidget {
                       )
                     : null,
                 onTap: () {
-                  onSortChanged(option);
+                  _handleSortChange(option);
                   Navigator.pop(context);
                 },
               );

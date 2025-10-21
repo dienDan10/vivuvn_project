@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/itinerary_detail_controller.dart';
 import '../controller/budget_controller.dart';
-import '../utils/budget_sorter.dart';
 import 'widgets/btn_add_budget_item.dart';
 import 'widgets/budget_control.dart';
 import 'widgets/budget_header.dart';
@@ -18,8 +17,6 @@ class BudgetTab extends ConsumerStatefulWidget {
 }
 
 class _BudgetTabState extends ConsumerState<BudgetTab> {
-  BudgetSortOption _currentSort = BudgetSortOption.dateNewest;
-
   @override
   void initState() {
     super.initState();
@@ -38,30 +35,17 @@ class _BudgetTabState extends ConsumerState<BudgetTab> {
     });
   }
 
-  /// Handle sort option change
-  void _handleSortChange(final BudgetSortOption option) {
-    setState(() {
-      _currentSort = option;
-    });
-  }
-
   @override
   Widget build(final BuildContext context) {
-    final budgetState = ref.watch(budgetControllerProvider);
-    final sortedItems = BudgetSorter.sort(budgetState.items, _currentSort);
-
-    return Scaffold(
+    return const Scaffold(
       body: Column(
         children: [
-          const BudgetHeader(),
-          BudgetControl(
-            currentSort: _currentSort,
-            onSortChanged: _handleSortChange,
-          ),
-          Expanded(child: ExpenseList(items: sortedItems)),
+          BudgetHeader(),
+          BudgetControl(),
+          Expanded(child: ExpenseList()),
         ],
       ),
-      floatingActionButton: const ButtonAddBudgetItem(),
+      floatingActionButton: ButtonAddBudgetItem(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }

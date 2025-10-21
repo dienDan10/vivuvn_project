@@ -49,12 +49,14 @@ class Validator {
   }) {
     if (value == null || value.trim().isEmpty) return 'Please enter a budget';
     final amount = double.tryParse(value.replaceAll(',', '').trim());
-    if (amount == null || amount <= 0)
+    if (amount == null || amount <= 0) {
       return 'Budget must be a positive number';
+    }
     // Optional: enforce minimum reasonable amount (e.g., 1)
     if (currency == 'USD' && amount < 1) return 'Budget must be at least 1 USD';
-    if (currency == 'VND' && amount < 1000)
+    if (currency == 'VND' && amount < 1000) {
       return 'Budget must be at least 1,000 VND';
+    }
     return null;
   }
 

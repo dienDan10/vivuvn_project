@@ -1,3 +1,4 @@
+import '../data/enums/budget_sort_option.dart';
 import '../data/models/budget.dart';
 import '../data/models/budget_items.dart';
 import '../data/models/budget_type.dart';
@@ -16,6 +17,7 @@ class BudgetState {
   final Budget? budget;
   final List<BudgetItem> items;
   final List<BudgetType> types;
+  final BudgetSortOption currentSort;
 
   const BudgetState({
     this.isLoading = false,
@@ -24,6 +26,7 @@ class BudgetState {
     this.budget,
     this.items = const [],
     this.types = const [],
+    this.currentSort = BudgetSortOption.dateNewest,
   });
 
   /// Create a copy with updated fields
@@ -34,6 +37,7 @@ class BudgetState {
     final Budget? budget,
     final List<BudgetItem>? items,
     final List<BudgetType>? types,
+    final BudgetSortOption? currentSort,
   }) {
     return BudgetState(
       isLoading: isLoading ?? this.isLoading,
@@ -42,43 +46,7 @@ class BudgetState {
       budget: budget ?? this.budget,
       items: items ?? this.items,
       types: types ?? this.types,
+      currentSort: currentSort ?? this.currentSort,
     );
-  }
-
-  @override
-  bool operator ==(final Object other) {
-    if (identical(this, other)) return true;
-
-    return other is BudgetState &&
-        other.isLoading == isLoading &&
-        other.error == error &&
-        other.itineraryId == itineraryId &&
-        other.budget == budget &&
-        _listEquals(other.items, items) &&
-        _listEquals(other.types, types);
-  }
-
-  @override
-  int get hashCode {
-    return isLoading.hashCode ^
-        error.hashCode ^
-        itineraryId.hashCode ^
-        budget.hashCode ^
-        items.hashCode ^
-        types.hashCode;
-  }
-
-  @override
-  String toString() {
-    return 'BudgetState(isLoading: $isLoading, error: $error, itineraryId: $itineraryId, itemsCount: ${items.length}, typesCount: ${types.length})';
-  }
-
-  /// Helper to compare lists
-  bool _listEquals<T>(final List<T> a, final List<T> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
   }
 }

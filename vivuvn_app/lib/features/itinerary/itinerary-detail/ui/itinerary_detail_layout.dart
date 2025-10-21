@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../common/helper/app_constants.dart';
 import '../controller/itinerary_detail_controller.dart';
 import '../state/itinerary_detail_state.dart';
+import 'day_selector_persistent_header.dart';
 import 'hero_section.dart';
 import 'tabbar_content.dart';
 import 'tabbar_header.dart';
@@ -55,6 +56,11 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
           curve: Curves.easeInOut,
         );
       }
+
+      // Rebuild to show/hide DaySelectorBar
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -93,13 +99,22 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     }
 
     return Scaffold(
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (final context, final innerBoxIsScrolled) => [
-          HeroSection(itinerary: detailState.itinerary!),
-          TabbarHeader(tabController: _tabController),
-        ],
-        body: TabbarContent(tabController: _tabController),
+      body: AnimatedBuilder(
+        animation: _tabController,
+        builder: (final context, final child) {
+          return NestedScrollView(
+            controller: _scrollController,
+            headerSliverBuilder: (final context, final innerBoxIsScrolled) => [
+              HeroSection(itinerary: detailState.itinerary!),
+              TabbarHeader(tabController: _tabController),
+
+              // Add DaySelectorBar only when Schedule tab is active
+              if (_tabController.index == 1)
+                const DaySelectorPersistentHeader(),
+            ],
+            body: TabbarContent(tabController: _tabController),
+          );
+        },
       ),
     );
   }
