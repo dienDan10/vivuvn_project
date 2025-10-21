@@ -15,6 +15,13 @@ namespace vivuvn_api.Controllers
             return Ok(locations);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllLocations([FromQuery] GetAllLocationsRequestDto request)
+        {
+            var locations = await _locationService.GetAllLocationsAsync(request);
+            return Ok(locations);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLocationById(int id)
         {

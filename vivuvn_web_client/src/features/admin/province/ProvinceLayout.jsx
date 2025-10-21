@@ -3,6 +3,7 @@ import { Button, Space, Card, Typography, Alert } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import ProvinceTable from "./ProvinceTable";
 import ProvinceForm from "./ProvinceForm";
+import ProvinceQuery from "./ProvinceQuery";
 import { useGetProvinces } from "./useGetProvinces";
 
 const { Title } = Typography;
@@ -62,6 +63,8 @@ function ProvinceLayout() {
 						}
 					/>
 				)}
+
+				<ProvinceQuery />
 
 				<ProvinceTable onEditProvince={handleEdit} />
 

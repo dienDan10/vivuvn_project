@@ -10,9 +10,13 @@ import { useState } from "react";
 import { useGetProvinces } from "./useGetProvinces";
 import { useDeleteProvince } from "./useDeleteProvince";
 import { useRestoreProvince } from "./useRestoreProvince";
+import { useDispatch, useSelector } from "react-redux";
+import { setPage, setPageSize, setSorting } from "../../../redux/provinceSlice";
 
 function ProvinceTable({ onEditProvince }) {
-	const { provinces, isPending } = useGetProvinces();
+	const dispatch = useDispatch();
+	const { provinces, totalCount, isPending } = useGetProvinces();
+	const filters = useSelector((state) => state.province.filters);
 	const deleteMutation = useDeleteProvince();
 	const restoreMutation = useRestoreProvince();
 
@@ -94,19 +98,37 @@ function ProvinceTable({ onEditProvince }) {
 			title: "ID",
 			dataIndex: "id",
 			key: "id",
-			sorter: (a, b) => a.id - b.id,
+			sorter: true,
+			sortOrder:
+				filters.sortBy === "id"
+					? filters.isDescending
+						? "descend"
+						: "ascend"
+					: null,
 		},
 		{
 			title: "Name",
 			dataIndex: "name",
 			key: "name",
-			sorter: (a, b) => a.name.localeCompare(b.name),
+			sorter: true,
+			sortOrder:
+				filters.sortBy === "name"
+					? filters.isDescending
+						? "descend"
+						: "ascend"
+					: null,
 		},
 		{
 			title: "Code",
 			dataIndex: "provinceCode",
 			key: "provinceCode",
-			sorter: (a, b) => a.provinceCode.localeCompare(b.provinceCode),
+			sorter: true,
+			sortOrder:
+				filters.sortBy === "provinceCode"
+					? filters.isDescending
+						? "descend"
+						: "ascend"
+					: null,
 		},
 		{
 			title: "Actions",
@@ -163,15 +185,42 @@ function ProvinceTable({ onEditProvince }) {
 		...province,
 	}));
 
+	const handleTableChange = (pagination, _filters, sorter) => {
+		// Handle pagination
+		if (pagination.current !== filters.pageNumber) {
+			dispatch(setPage(pagination.current));
+		}
+		if (pagination.pageSize !== filters.pageSize) {
+			dispatch(setPageSize(pagination.pageSize));
+		}
+
+		// Handle sorting
+		if (sorter.field) {
+			dispatch(
+				setSorting({
+					sortBy: sorter.field,
+					isDescending: sorter.order === "descend",
+				})
+			);
+		} else {
+			dispatch(setSorting({ sortBy: "", isDescending: false }));
+		}
+	};
+
 	return (
 		<Table
 			columns={columns}
 			dataSource={dataSource || []}
 			rowKey="id"
 			loading={isPending}
+			onChange={handleTableChange}
 			pagination={{
+				current: filters.pageNumber,
+				pageSize: filters.pageSize,
+				total: totalCount,
 				showSizeChanger: true,
 				showTotal: (total) => `Total ${total} provinces`,
+				pageSizeOptions: ["5", "10", "20", "50"],
 			}}
 		/>
 	);

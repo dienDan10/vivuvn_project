@@ -14,9 +14,11 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 	const [imagePreview, setImagePreview] = useState(null);
 	const [imageFile, setImageFile] = useState(null);
 
-	// Query province detail for edit mode
-	const { province, isPending: isLoadingProvince } =
-		useGetProvinceById(provinceId);
+	// Query province detail for edit mode - only when modal is open and in edit mode
+	const { province, isPending: isLoadingProvince } = useGetProvinceById(
+		provinceId,
+		open && isEdit // Only fetch when modal is open AND in edit mode
+	);
 
 	const createMutation = useCreateProvince();
 	const updateMutation = useUpdateProvince();
