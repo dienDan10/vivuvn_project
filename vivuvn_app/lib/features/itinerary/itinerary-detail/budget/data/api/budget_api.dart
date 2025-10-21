@@ -15,24 +15,41 @@ final budgetApiProvider = Provider.autoDispose<BudgetApi>((final ref) {
   return BudgetApi(dio);
 });
 
+/// API client cho budget feature
+///
+/// Xử lý tất cả HTTP requests liên quan đến budget:
+/// - GET: Lấy budget, budget items, budget types
+/// - POST: Tạo budget item mới
+/// - PUT: Cập nhật budget và budget items
+/// - DELETE: Xóa budget items
 class BudgetApi {
   final Dio _dio;
 
-  BudgetApi(this._dio);
+  const BudgetApi(this._dio);
 
-  /// Get all budget items for an itinerary
+  /// Fetch budget items cho một itinerary
+  ///
+  /// Returns: Danh sách budget items
   Future<List<BudgetItem>> getBudgetItems(final int itineraryId) async {
     final budget = await getBudget(itineraryId);
     return budget.items;
   }
 
-  /// Fetch the full Budget object for an itinerary.
+  /// Fetch full Budget object cho một itinerary
+  ///
+  /// Returns: Budget với totalBudget, estimatedBudget và items
+  /// Nếu không có data, return empty budget
   Future<Budget> getBudget(final int itineraryId) async {
     final response = await _dio.get('/api/v1/itineraries/$itineraryId/budget');
 
     if (response.data == null) {
-      // return an empty budget object to keep the API non-nullable
-      return Budget(budgetId: 0, totalBudget: 0, estimatedBudget: 0, items: []);
+      // Return empty budget nếu chưa có data
+      return const Budget(
+        budgetId: 0,
+        totalBudget: 0,
+        estimatedBudget: 0,
+        items: [],
+      );
     }
 
     final Map<String, dynamic> json = Map<String, dynamic>.from(
@@ -41,7 +58,9 @@ class BudgetApi {
     return Budget.fromMap(json);
   }
 
-  /// Create a new budget item for an itinerary
+  /// Tạo budget item mới
+  ///
+  /// POST /api/v1/itineraries/{id}/budget/items
   Future<void> addBudgetItem(final AddBudgetItemRequest request) async {
     await _dio.post(
       '/api/v1/itineraries/${request.itineraryId}/budget/items',
@@ -49,7 +68,9 @@ class BudgetApi {
     );
   }
 
-  /// Update an existing budget item
+  /// Cập nhật budget item
+  ///
+  /// PUT /api/v1/itineraries/{id}/budget/items/{itemId}
   Future<void> updateBudgetItem(final UpdateBudgetItemRequest request) async {
     final int itineraryId = request.itineraryId;
     final int itemId = request.itemId;
@@ -61,7 +82,9 @@ class BudgetApi {
     );
   }
 
-  /// Update the budget (totalBudget and/or estimatedBudget)
+  /// Cập nhật budget (estimatedBudget)
+  ///
+  /// PUT /api/v1/itineraries/{id}/budget
   Future<void> updateBudget(final UpdateBudgetRequest request) async {
     await _dio.put(
       '/api/v1/itineraries/${request.itineraryId}/budget',
@@ -69,14 +92,19 @@ class BudgetApi {
     );
   }
 
-  /// Delete a budget item by id
+  /// Xóa budget item
+  ///
+  /// DELETE /api/v1/itineraries/{id}/budget/items/{itemId}
   Future<void> deleteBudgetItem(final DeleteBudgetItemRequest request) async {
     await _dio.delete(
       '/api/v1/itineraries/${request.itineraryId}/budget/items/${request.itemId}',
     );
   }
 
-  /// Get available budget types of an itinerary
+  /// Lấy danh sách budget types của một itinerary
+  ///
+  /// GET /api/v1/itineraries/{id}/budget/budget-types
+  /// Returns: Danh sách budget types có sẵn
   Future<List<BudgetType>> getBudgetTypes(final int itineraryId) async {
     final response = await _dio.get(
       '/api/v1/itineraries/$itineraryId/budget/budget-types',

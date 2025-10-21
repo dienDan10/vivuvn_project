@@ -1,5 +1,13 @@
 import 'dart:convert';
 
+/// DTO để tạo budget item mới
+///
+/// Required fields:
+/// - itineraryId: ID của itinerary
+/// - name: Tên khoản chi
+/// - cost: Số tiền (VND)
+/// - budgetTypeId: ID loại chi tiêu
+/// - date: Ngày chi tiêu
 class AddBudgetItemRequest {
   final int itineraryId;
   final String name;
@@ -7,7 +15,7 @@ class AddBudgetItemRequest {
   final int budgetTypeId;
   final DateTime date;
 
-  AddBudgetItemRequest({
+  const AddBudgetItemRequest({
     required this.itineraryId,
     required this.name,
     required this.cost,
@@ -15,6 +23,7 @@ class AddBudgetItemRequest {
     required this.date,
   });
 
+  /// Convert to Map for API request
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
@@ -25,4 +34,8 @@ class AddBudgetItemRequest {
   }
 
   String toJson() => json.encode(toMap());
+
+  @override
+  String toString() =>
+      'AddBudgetItemRequest(name: $name, cost: $cost, typeId: $budgetTypeId, date: ${date.toIso8601String()})';
 }

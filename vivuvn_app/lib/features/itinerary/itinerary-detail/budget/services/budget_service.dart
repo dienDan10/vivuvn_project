@@ -15,70 +15,47 @@ final budgetServiceProvider = Provider.autoDispose<IBudgetService>((final ref) {
   return BudgetService(budgetApi);
 });
 
+/// Service layer cho budget feature
+///
+/// Xử lý business logic và gọi API thông qua BudgetApi.
+/// Không xử lý state management (do Controller đảm nhận).
 class BudgetService implements IBudgetService {
   final BudgetApi _budgetApi;
-  BudgetService(this._budgetApi);
+
+  const BudgetService(this._budgetApi);
 
   @override
   Future<Budget> getBudget(final int itineraryId) async {
-    try {
-      return await _budgetApi.getBudget(itineraryId);
-    } catch (e) {
-      rethrow;
-    }
+    return await _budgetApi.getBudget(itineraryId);
   }
 
   @override
   Future<List<BudgetItem>> getBudgetItems(final int itineraryId) async {
-    try {
-      return await _budgetApi.getBudgetItems(itineraryId);
-    } catch (e) {
-      rethrow;
-    }
+    return await _budgetApi.getBudgetItems(itineraryId);
   }
 
   @override
   Future<void> addBudgetItem(final AddBudgetItemRequest request) async {
-    try {
-      return await _budgetApi.addBudgetItem(request);
-    } catch (e) {
-      rethrow;
-    }
+    return await _budgetApi.addBudgetItem(request);
   }
 
   @override
   Future<void> updateBudgetItem(final UpdateBudgetItemRequest request) async {
-    try {
-      return await _budgetApi.updateBudgetItem(request);
-    } catch (e) {
-      rethrow;
-    }
+    return await _budgetApi.updateBudgetItem(request);
   }
 
   @override
   Future<void> updateBudget(final UpdateBudgetRequest request) async {
-    try {
-      return await _budgetApi.updateBudget(request);
-    } catch (e) {
-      rethrow;
-    }
+    return await _budgetApi.updateBudget(request);
   }
 
   @override
   Future<void> deleteBudgetItem(final DeleteBudgetItemRequest request) async {
-    try {
-      return await _budgetApi.deleteBudgetItem(request);
-    } catch (e) {
-      rethrow;
-    }
+    return await _budgetApi.deleteBudgetItem(request);
   }
 
   @override
   Future<List<BudgetType>> getBudgetTypes(final int itineraryId) async {
-    try {
-      return await _budgetApi.getBudgetTypes(itineraryId);
-    } catch (e) {
-      rethrow;
-    }
+    return await _budgetApi.getBudgetTypes(itineraryId);
   }
 }

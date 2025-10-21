@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../common/toast/global_toast.dart';
 import '../../controller/budget_controller.dart';
-import '../../data/dto/add_budget_item_request.dart';
+import '../../data/models/budget_items.dart';
+import '../../state/expense_form_notifier.dart';
+import '../../utils/budget_constants.dart';
+import '../../utils/expense_form_submit_handler.dart';
 import 'field_amount.dart';
 import 'field_date.dart';
+import 'field_error_text.dart';
 import 'field_name.dart';
 import 'field_type_picker.dart';
-import 'submit_button.dart';
 
 class AddExpenseForm extends ConsumerStatefulWidget {
-  const AddExpenseForm({super.key});
+  final Function(VoidCallback)? onRegisterSaveCallback;
+  final BudgetItem? initialItem; // For edit mode
+
+  const AddExpenseForm({
+    super.key,
+    this.onRegisterSaveCallback,
+    this.initialItem,
+  });
 
   @override
   ConsumerState<AddExpenseForm> createState() => _AddExpenseFormState();
@@ -21,93 +30,21 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final amountController = TextEditingController();
-  String selectedType = 'Chưa chọn';
-  int selectedTypeId = 0;
-  DateTime? selectedDate;
-  String? dateError;
-  String? typeError;
 
+  /// Submit form thông qua ExpenseFormSubmitHandler
   Future<void> _submit() async {
-    // Reset error states
-    setState(() {
-      dateError = null;
-      typeError = null;
-    });
-
-    // Validate form fields
-    final formValid = _formKey.currentState!.validate();
-
-    // Validate date
-    if (selectedDate == null) {
-      setState(() {
-        dateError = 'Vui lòng chọn ngày';
-      });
-    }
-
-    // Validate budget type
-    if (selectedTypeId == 0) {
-      setState(() {
-        typeError = 'Vui lòng chọn loại chi phí';
-      });
-    }
-
-    // Stop if any validation failed
-    if (!formValid || dateError != null || typeError != null) {
-      return;
-    }
-
-    final controller = ref.read(budgetControllerProvider.notifier);
-    final state = ref.read(budgetControllerProvider);
-
-    if (state.itineraryId == null) {
-      if (mounted) {
-        GlobalToast.showErrorToast(
-          context,
-          title: 'Lỗi',
-          message: 'Không tìm thấy itinerary ID',
-        );
-      }
-      return;
-    }
-
-    final amount = double.tryParse(amountController.text.trim());
-    if (amount == null) {
-      if (mounted) {
-        GlobalToast.showErrorToast(
-          context,
-          title: 'Lỗi',
-          message: 'Số tiền không hợp lệ',
-        );
-      }
-      return;
-    }
-
-    final request = AddBudgetItemRequest(
-      itineraryId: state.itineraryId!,
-      name: nameController.text.trim(),
-      cost: amount,
-      budgetTypeId: selectedTypeId,
-      date: selectedDate!,
+    final shouldClose = await ExpenseFormSubmitHandler.submit(
+      context: context,
+      ref: ref,
+      formKey: _formKey,
+      nameController: nameController,
+      amountController: amountController,
+      initialItem: widget.initialItem,
+      exchangeRate: BudgetConstants.exchangeRate,
     );
 
-    final success = await controller.addBudgetItem(request);
-
-    if (mounted) {
-      if (success) {
-        Navigator.pop(context);
-        GlobalToast.showSuccessToast(
-          context,
-          title: 'Thành công',
-          message: 'Thêm chi phí thành công',
-        );
-      } else {
-        final errorMsg = ref.read(budgetControllerProvider).error;
-        GlobalToast.showErrorToast(
-          context,
-          title: 'Lỗi',
-          message: errorMsg ?? 'Có lỗi xảy ra',
-        );
-      }
+    if (shouldClose && mounted) {
+      Navigator.pop(context);
     }
   }
 
@@ -121,108 +58,105 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
   @override
   void initState() {
     super.initState();
-    // Load budget types when form opens
+
+    // Register save callback with parent
+    widget.onRegisterSaveCallback?.call(_submit);
+
+    // Load budget types and initialize form after widget tree is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Pre-fill data if editing
+      if (widget.initialItem != null) {
+        final item = widget.initialItem!;
+        final formNotifier = ref.read(expenseFormProvider.notifier);
+
+        nameController.text = item.name;
+        amountController.text = item.cost.toStringAsFixed(0);
+
+        // Initialize form state with item data
+        formNotifier.initializeWithItem(item);
+      }
+
+      final controller = ref.read(budgetControllerProvider.notifier);
       final state = ref.read(budgetControllerProvider);
+
       if (state.itineraryId != null && state.types.isEmpty) {
-        ref
-            .read(budgetControllerProvider.notifier)
-            .loadBudgetTypes(state.itineraryId!);
+        controller.loadBudgetTypes(state.itineraryId!);
+      }
+
+      // If editing and budgetTypeObj is null, resolve typeId from loaded types
+      if (widget.initialItem != null &&
+          widget.initialItem!.budgetTypeObj == null) {
+        final formState = ref.read(expenseFormProvider);
+        if (formState.selectedTypeId == 0) {
+          final typeId = controller.getBudgetTypeIdByName(
+            formState.selectedType,
+          );
+          if (typeId != null) {
+            ref
+                .read(expenseFormProvider.notifier)
+                .setType(typeId, formState.selectedType);
+          }
+        }
       }
     });
   }
 
   @override
   Widget build(final BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Thêm chi phí',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 16),
+    final formState = ref.watch(expenseFormProvider);
+    final formNotifier = ref.read(expenseFormProvider.notifier);
 
-              FieldName(controller: nameController),
-              const SizedBox(height: 12),
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          FieldName(controller: nameController),
+          const SizedBox(height: 12),
 
-              FieldAmount(controller: amountController),
-              const SizedBox(height: 12),
+          FieldAmount(
+            controller: amountController,
+            onCurrencyChanged: (final isUSDSelected) {
+              formNotifier.setCurrency(isUSDSelected);
+            },
+          ),
+          const SizedBox(height: 12),
 
-              Consumer(
-                builder: (final context, final ref, final child) {
-                  final types = ref.watch(budgetControllerProvider).types;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FieldTypePicker(
-                        selectedType: selectedType,
-                        budgetTypes: types,
-                        onSelected: (final typeId, final typeName) {
-                          setState(() {
-                            selectedTypeId = typeId!;
-                            selectedType = typeName;
-                            typeError = null; // Clear error when selected
-                          });
-                        },
-                      ),
-                      if (typeError != null) ...[
-                        const SizedBox(height: 4),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: Text(
-                            typeError!,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-
-              Column(
+          Consumer(
+            builder: (final context, final ref, final child) {
+              final types = ref.watch(budgetControllerProvider).types;
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  FieldDate(
-                    selectedDate: selectedDate,
-                    onSelected: (final date) {
-                      setState(() {
-                        selectedDate = date ?? selectedDate;
-                        dateError = null; // Clear error when selected
-                      });
+                  FieldTypePicker(
+                    selectedType: formState.selectedType,
+                    budgetTypes: types,
+                    onSelected: (final typeId, final typeName) {
+                      formNotifier.setType(typeId!, typeName);
                     },
                   ),
-                  if (dateError != null) ...[
-                    const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: Text(
-                        dateError!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
+                  FieldErrorText(errorMessage: formState.typeError),
                 ],
-              ),
-              const SizedBox(height: 16),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
 
-              SubmitButton(text: 'Xong', onPressed: _submit),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FieldDate(
+                selectedDate: formState.selectedDate,
+                onSelected: (final date) {
+                  if (date != null) {
+                    formNotifier.setDate(date);
+                  }
+                },
+              ),
+              FieldErrorText(errorMessage: formState.dateError),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

@@ -16,13 +16,24 @@ final budgetControllerProvider =
       () => BudgetController(),
     );
 
+/// Controller quản lý state và business logic cho budget feature
+///
+/// Cung cấp các operations:
+/// - Load budget và danh sách chi tiêu
+/// - Add/Update/Delete budget items
+/// - Update estimated budget
+/// - Load budget types
+/// - Validation cho tất cả operations
 class BudgetController extends AutoDisposeNotifier<BudgetState> {
   @override
   BudgetState build() {
-    return BudgetState();
+    return const BudgetState();
   }
 
-  /// Load budget (and items) by itineraryId
+  /// Load budget và danh sách chi tiêu theo itineraryId
+  ///
+  /// Set loading state trước khi gọi API và update state sau khi hoàn thành.
+  /// Handle errors và set error message vào state.
   Future<void> loadBudget(final int? itineraryId) async {
     state = state.copyWith(
       isLoading: true,
@@ -46,16 +57,19 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
     }
   }
 
+  /// Thêm budget item mới
+  ///
+  /// Validate request trước khi gọi API.
+  /// Reload budget sau khi thêm thành công.
+  ///
+  /// Returns: true nếu thành công, false nếu có lỗi
   Future<bool> addBudgetItem(final AddBudgetItemRequest request) async {
     try {
       final service = ref.read(budgetServiceProvider);
 
-      // validate and throw ValidationException on error
       _validateBudgetItemForAdd(request);
 
       await service.addBudgetItem(request);
-
-      // reload
       await loadBudget(state.itineraryId);
       return true;
     } on DioException catch (e) {
@@ -71,9 +85,14 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
     }
   }
 
+  /// Update budget item
+  ///
+  /// Validate request và ít nhất 1 field phải được update.
+  /// Reload budget sau khi update thành công.
+  ///
+  /// Returns: true nếu thành công, false nếu có lỗi
   Future<bool> updateBudgetItem(final UpdateBudgetItemRequest request) async {
     try {
-      // validate using the helper
       _validateUpdateRequest(request);
 
       final service = ref.read(budgetServiceProvider);
@@ -95,6 +114,11 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
     }
   }
 
+  /// Xóa budget item
+  ///
+  /// Reload budget sau khi xóa thành công.
+  ///
+  /// Returns: true nếu thành công, false nếu có lỗi
   Future<bool> deleteBudgetItem(final DeleteBudgetItemRequest request) async {
     try {
       final service = ref.read(budgetServiceProvider);
@@ -112,9 +136,14 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
     }
   }
 
+  /// Update estimated budget
+  ///
+  /// Validate estimated budget phải >= 0.
+  /// Reload budget sau khi update thành công.
+  ///
+  /// Returns: true nếu thành công, false nếu có lỗi
   Future<bool> updateBudget(final UpdateBudgetRequest request) async {
     try {
-      // validate estimatedBudget
       _validateEstimatedBudget(request.estimatedBudget);
 
       final service = ref.read(budgetServiceProvider);
@@ -136,6 +165,10 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
     }
   }
 
+  /// Load danh sách budget types
+  ///
+  /// Gọi API để lấy tất cả budget types cho itinerary.
+  /// Update vào state.types để sử dụng trong type picker.
   Future<void> loadBudgetTypes(final int itineraryId) async {
     try {
       final service = ref.read(budgetServiceProvider);
@@ -146,6 +179,25 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
       state = state.copyWith(error: errorMsg);
     } catch (e) {
       state = state.copyWith(error: 'Unknown error');
+    }
+  }
+
+  /// Tìm budget type ID theo tên
+  ///
+  /// Sử dụng khi API không trả về budgetTypeObj.
+  ///
+  /// Returns: budgetTypeId nếu tìm thấy, null nếu không tìm thấy
+  int? getBudgetTypeIdByName(final String typeName) {
+    if (state.types.isEmpty) return null;
+
+    try {
+      final matchingType = state.types.firstWhere(
+        (final type) => type.name == typeName,
+      );
+      return matchingType.budgetTypeId;
+    } catch (e) {
+      // If no match found, return null
+      return null;
     }
   }
 

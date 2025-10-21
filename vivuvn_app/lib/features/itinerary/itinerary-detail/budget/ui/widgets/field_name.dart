@@ -15,7 +15,13 @@ class FieldName extends StatelessWidget {
       decoration: const InputDecoration(
         prefixIcon: Icon(Icons.shopping_cart_outlined),
         labelText: 'Tên chi phí',
-        border: OutlineInputBorder(),
+        border: InputBorder.none,
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey, width: 0.5),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue, width: 1.5),
+        ),
       ),
       validator: (final value) {
         // Check empty

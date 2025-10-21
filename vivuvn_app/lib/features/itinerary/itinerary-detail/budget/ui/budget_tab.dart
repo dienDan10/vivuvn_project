@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/itinerary_detail_controller.dart';
 import '../controller/budget_controller.dart';
+import '../utils/budget_sorter.dart';
 import 'widgets/btn_add_budget_item.dart';
 import 'widgets/budget_control.dart';
 import 'widgets/budget_header.dart';
 import 'widgets/list_expense.dart';
 
+/// Main budget tab widget with sorting and CRUD operations
 class BudgetTab extends ConsumerStatefulWidget {
   const BudgetTab({super.key});
 
@@ -16,10 +18,16 @@ class BudgetTab extends ConsumerStatefulWidget {
 }
 
 class _BudgetTabState extends ConsumerState<BudgetTab> {
+  BudgetSortOption _currentSort = BudgetSortOption.dateNewest;
+
   @override
   void initState() {
     super.initState();
-    // Load budget when tab is first opened
+    _loadBudgetData();
+  }
+
+  /// Load budget data when tab is first opened
+  void _loadBudgetData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final itineraryId = ref
           .read(itineraryDetailControllerProvider)
@@ -30,22 +38,31 @@ class _BudgetTabState extends ConsumerState<BudgetTab> {
     });
   }
 
+  /// Handle sort option change
+  void _handleSortChange(final BudgetSortOption option) {
+    setState(() {
+      _currentSort = option;
+    });
+  }
+
   @override
   Widget build(final BuildContext context) {
-    return const Column(
-      children: [
-        // Total budget header
-        BudgetHeader(),
+    final budgetState = ref.watch(budgetControllerProvider);
+    final sortedItems = BudgetSorter.sort(budgetState.items, _currentSort);
 
-        // Budget controls
-        BudgetControl(),
-
-        // Budget list
-        Expanded(child: ExpenseList()),
-
-        // Add expense Button
-        ButtonAddBudgetItem(),
-      ],
+    return Scaffold(
+      body: Column(
+        children: [
+          const BudgetHeader(),
+          BudgetControl(
+            currentSort: _currentSort,
+            onSortChanged: _handleSortChange,
+          ),
+          Expanded(child: ExpenseList(items: sortedItems)),
+        ],
+      ),
+      floatingActionButton: const ButtonAddBudgetItem(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

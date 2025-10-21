@@ -56,8 +56,8 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final amount = double.tryParse(_amountController.text.trim());
-    if (amount == null) return;
+    // If empty, treat as 0
+    final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
 
     // Convert to VND if USD selected
     double vndAmount = amount;

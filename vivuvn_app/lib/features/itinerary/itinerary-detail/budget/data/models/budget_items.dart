@@ -2,6 +2,15 @@ import 'dart:convert';
 
 import 'budget_type.dart';
 
+/// Model đại diện cho một budget item (khoản chi tiêu)
+///
+/// Chứa:
+/// - id: ID của item (nullable khi tạo mới)
+/// - name: Tên khoản chi
+/// - cost: Số tiền (VND)
+/// - budgetType: Tên loại chi tiêu (string)
+/// - budgetTypeObj: Object loại chi tiêu (nullable)
+/// - date: Ngày chi tiêu
 class BudgetItem {
   final int? id;
   final String name;
@@ -9,7 +18,8 @@ class BudgetItem {
   final String budgetType;
   final BudgetType? budgetTypeObj;
   final DateTime date;
-  BudgetItem({
+
+  const BudgetItem({
     this.id,
     required this.name,
     required this.cost,
@@ -70,8 +80,53 @@ class BudgetItem {
   }
 
   String toJson() => json.encode(toMap());
+
   factory BudgetItem.fromJson(final String source) =>
       BudgetItem.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  /// Create copy with updated fields
+  BudgetItem copyWith({
+    final int? id,
+    final String? name,
+    final double? cost,
+    final String? budgetType,
+    final BudgetType? budgetTypeObj,
+    final DateTime? date,
+  }) {
+    return BudgetItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      cost: cost ?? this.cost,
+      budgetType: budgetType ?? this.budgetType,
+      budgetTypeObj: budgetTypeObj ?? this.budgetTypeObj,
+      date: date ?? this.date,
+    );
+  }
+
+  @override
+  bool operator ==(final Object other) {
+    if (identical(this, other)) return true;
+
+    return other is BudgetItem &&
+        other.id == id &&
+        other.name == name &&
+        other.cost == cost &&
+        other.budgetType == budgetType &&
+        other.date == date;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        cost.hashCode ^
+        budgetType.hashCode ^
+        date.hashCode;
+  }
+
+  @override
+  String toString() =>
+      'BudgetItem(id: $id, name: $name, cost: $cost, type: $budgetType)';
 
   static List<BudgetItem> sampleItems() {
     final now = DateTime.now();
