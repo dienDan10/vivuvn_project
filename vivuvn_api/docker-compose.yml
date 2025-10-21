@@ -25,6 +25,39 @@ services:
       retries: 5
       start_period: 60s
 
+    # AI Service
+  vivuvn-ai-service:
+    image: minhdang1163/vivuvn-ai-service:latest
+    container_name: vivuvn-ai-service
+    env_file:
+      - ../vivuvn_ai_service/.env.docker  # Fixed: correct path to env file
+    volumes:
+      - model-cache:/home/vivuapp/.cache
+    networks:
+      - vivuvn-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Added: Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    # Added: Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   # .NET API service
   vivuvn-api:
     build:
@@ -52,6 +85,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      vivuvn-ai-service:
+        condition: service_healthy
     volumes:
       - ./images:/app/images
     networks:
@@ -60,8 +95,10 @@ services:
 
 volumes:
   sqlserver_data:
+  model-cache:
+    name: vivuvn-model-cache
+    driver: local
 
 networks:
   vivuvn-network:
     driver: bridge
-    name: vivuvn-network
