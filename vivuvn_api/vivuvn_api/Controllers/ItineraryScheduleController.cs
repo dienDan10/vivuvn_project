@@ -18,6 +18,17 @@ namespace vivuvn_api.Controllers
             var schedule = await _itineraryService.GetItineraryScheduleAsync(itineraryId);
             return Ok(schedule);
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("auto-generate")]
+        public async Task<IActionResult> AutoGenerateItinerary(int itineraryId, [FromBody] AutoGenerateItineraryRequest request)
+        {
+            // auto-generate itinerary
+            var response = await _itineraryService.AutoGenerateItineraryAsync(itineraryId, request);
+            return Ok(response);
+        }
+
         #endregion
 
         #region Schedule items
@@ -56,16 +67,6 @@ namespace vivuvn_api.Controllers
             return Ok();
         }
 
-		#endregion
-
-		[HttpPost]
-		[Authorize]
-		[Route("auto-generate")]
-		public async Task<IActionResult> AutoGenerateItinerary(int itineraryId, [FromBody] AutoGenerateItineraryRequest request)
-		{
-			// auto-generate itinerary
-			var response = await _itineraryService.AutoGenerateItineraryAsync(itineraryId, request);
-			return Ok(response);
-		}
-	}
+        #endregion
+    }
 }

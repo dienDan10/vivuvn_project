@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/budget_controller.dart';
-import '../../data/models/budget_items.dart';
 import '../../utils/budget_constants.dart';
 import '../../utils/expense_dialogs.dart';
 import 'budget_item_tile.dart';
 
 /// Widget hiển thị danh sách chi tiêu
 class ExpenseList extends ConsumerWidget {
-  final List<BudgetItem>? items;
-
-  const ExpenseList({super.key, this.items});
+  const ExpenseList({super.key});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(budgetControllerProvider);
-    final expenses = items ?? state.items;
+    final expenses = ref.watch(
+      budgetControllerProvider.select((final state) => state.items),
+    );
+
+    final isLoading = ref.watch(
+      budgetControllerProvider.select((final state) => state.isLoading),
+    );
 
     // Loading state
-    if (state.isLoading) {
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 

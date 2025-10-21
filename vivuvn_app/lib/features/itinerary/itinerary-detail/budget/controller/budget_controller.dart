@@ -8,6 +8,8 @@ import '../data/dto/add_budget_item_request.dart';
 import '../data/dto/delete_budget_item_request.dart';
 import '../data/dto/update_budget_item_request.dart';
 import '../data/dto/update_budget_request.dart';
+import '../data/enums/budget_sort_option.dart';
+import '../data/models/budget_items.dart';
 import '../services/budget_service.dart';
 import '../state/budget_state.dart';
 
@@ -55,6 +57,33 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
     } catch (e) {
       state = state.copyWith(error: 'Unknown error', isLoading: false);
     }
+  }
+
+  void sortBudgetItem(final BudgetSortOption option) {
+    final sortedItems = List<BudgetItem>.from(state.items);
+
+    switch (option) {
+      case BudgetSortOption.dateNewest:
+        sortedItems.sort((final a, final b) => b.date.compareTo(a.date));
+        break;
+      case BudgetSortOption.dateOldest:
+        sortedItems.sort((final a, final b) => a.date.compareTo(b.date));
+        break;
+      case BudgetSortOption.amountHighest:
+        sortedItems.sort((final a, final b) => b.cost.compareTo(a.cost));
+        break;
+      case BudgetSortOption.amountLowest:
+        sortedItems.sort((final a, final b) => a.cost.compareTo(b.cost));
+        break;
+      case BudgetSortOption.typeAZ:
+        sortedItems.sort(
+          (final a, final b) =>
+              a.budgetType.toLowerCase().compareTo(b.budgetType.toLowerCase()),
+        );
+        break;
+    }
+
+    state = state.copyWith(items: sortedItems, currentSort: option);
   }
 
   /// Thêm budget item mới

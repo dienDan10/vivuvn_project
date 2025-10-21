@@ -15,10 +15,7 @@ class DaySelectorBar extends ConsumerWidget {
     final selectedIndex = state.selectedIndex;
 
     if (state.isLoading) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (state.error != null) {

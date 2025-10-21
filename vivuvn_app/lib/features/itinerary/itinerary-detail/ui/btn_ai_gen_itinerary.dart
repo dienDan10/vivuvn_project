@@ -29,9 +29,9 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
   Widget build(final BuildContext context) {
     return ExpandableFab(
       key: _fabKey,
-      overlayStyle: ExpandableFabOverlayStyle(
-        color: Colors.black.withValues(alpha: 0.7),
-      ),
+      // overlayStyle: ExpandableFabOverlayStyle(
+      //   color: Colors.black.withValues(alpha: 0.7),
+      // ),
       distance: 70,
       childrenAnimation: ExpandableFabAnimation.none,
       openButtonBuilder: RotateFloatingActionButtonBuilder(
