@@ -68,5 +68,13 @@ namespace vivuvn_api.Controllers
 
             return NoContent();
         }
+
+        [HttpPut("{id}/dates")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryDates(int id, [FromBody] UpdateItineraryDatesRequestDto request)
+        {
+            await _itineraryService.UpdateItineraryDatesAsync(id, request);
+            return Ok();
+        }
     }
 }

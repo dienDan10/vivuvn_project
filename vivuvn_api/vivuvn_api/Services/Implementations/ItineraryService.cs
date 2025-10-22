@@ -13,7 +13,6 @@ namespace vivuvn_api.Services.Implementations
     {
         #region Itinerary Service Methods
 
-
         public async Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId)
         {
             var itineraries = await _unitOfWork.Itineraries.GetAllAsync(i => i.UserId == userId && !i.DeleteFlag, includeProperties: "StartProvince,DestinationProvince");
@@ -86,6 +85,56 @@ namespace vivuvn_api.Services.Implementations
             _unitOfWork.Itineraries.Update(itinerary);
             await _unitOfWork.SaveChangesAsync();
             return true;
+        }
+
+        public async Task UpdateItineraryDatesAsync(int itineraryId, UpdateItineraryDatesRequestDto request)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+
+            if (itinerary == null)
+            {
+                throw new KeyNotFoundException($"Itinerary with id {itineraryId} not found.");
+            }
+
+            itinerary.StartDate = request.StartDate;
+            itinerary.EndDate = request.EndDate;
+            itinerary.DaysCount = (request.EndDate - request.StartDate).Days + 1;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Update itinerary days
+            var days = await _unitOfWork.ItineraryDays.GetAllAsync(d => d.ItineraryId == itineraryId);
+            foreach (var day in days)
+            {
+                day.Date = itinerary.StartDate.AddDays(day.DayNumber - 1);
+                _unitOfWork.ItineraryDays.Update(day);
+            }
+
+            // days < itinerary.DaysCount: add new days
+            if (days.Count() < itinerary.DaysCount)
+            {
+                for (int dayNumber = days.Count() + 1; dayNumber <= itinerary.DaysCount; dayNumber++)
+                {
+                    var newDay = new ItineraryDay
+                    {
+                        ItineraryId = itinerary.Id,
+                        DayNumber = dayNumber,
+                        Date = itinerary.StartDate.AddDays(dayNumber - 1)
+                    };
+                    await _unitOfWork.ItineraryDays.AddAsync(newDay);
+                }
+            }
+            // days > itinerary.DaysCount: remove extra days
+            else if (days.Count() > itinerary.DaysCount)
+            {
+                var daysToRemove = days.Where(d => d.DayNumber > itinerary.DaysCount).ToList();
+                foreach (var dayToRemove in daysToRemove)
+                {
+                    _unitOfWork.ItineraryDays.Remove(dayToRemove);
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
         }
 
         #endregion
