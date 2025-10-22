@@ -98,10 +98,10 @@ class TravelPlanningAgent:
 
     def _calculate_dynamic_top_k(self, duration_days: int) -> int:
         """
-        Calculate optimal top_k based on trip duration.
+        Calculate optimal top_k based on trip duration (optimized for token efficiency).
 
         Formula: base + (activities_per_day * duration * diversity_factor)
-        Ensures sufficient place diversity while avoiding excessive fetches.
+        Reduced from previous values to minimize token usage while maintaining quality.
 
         Args:
             duration_days: Trip duration in days
@@ -110,18 +110,18 @@ class TravelPlanningAgent:
             Optimized top_k value (clamped between min and max)
 
         Examples:
-            1 day:  8 + (3.5 * 1 * 2.0) = 15
-            3 days: 8 + (3.5 * 3 * 2.0) = 29
-            7 days: 8 + (3.5 * 7 * 2.0) = 57 → capped at 50
+            1 day:  8 + (3.0 * 1 * 1.5) = 12-13
+            3 days: 8 + (3.0 * 3 * 1.5) = 21-22
+            7 days: 8 + (3.0 * 7 * 1.5) = 39-40 (capped at 35)
         """
-        # Calculate base top_k using config parameters
+        # Optimized formula: reduced diversity factor and activities per day
         calculated_k = int(
             settings.VECTOR_SEARCH_BASE_K +
-            (settings.VECTOR_SEARCH_ACTIVITIES_PER_DAY * duration_days * settings.VECTOR_SEARCH_DIVERSITY_FACTOR)
+            (3.0 * duration_days * 1.5)  # Reduced from 3.5 * 2.0 = 7.0 to 3.0 * 1.5 = 4.5
         )
 
-        # Clamp between min and max
-        top_k = max(settings.VECTOR_SEARCH_MIN_K, min(calculated_k, settings.VECTOR_SEARCH_MAX_K))
+        # Clamp between min and max (with tighter max)
+        top_k = max(settings.VECTOR_SEARCH_MIN_K, min(calculated_k, 35))  # Reduced max from 50 to 35
 
         logger.info(f"Dynamic top_k: {duration_days} days → {top_k} places (calculated: {calculated_k})")
         return top_k
