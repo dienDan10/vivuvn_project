@@ -62,8 +62,10 @@ namespace vivuvn_api.Repositories.Implementations
         {
             try
             {
-                await _context.SaveChangesAsync();
-                await _transaction?.CommitAsync()!;
+                if (_transaction != null)
+                {
+                    await _transaction.CommitAsync();
+                }
             }
             catch
             {

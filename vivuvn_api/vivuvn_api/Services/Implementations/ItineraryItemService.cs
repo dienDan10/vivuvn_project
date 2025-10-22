@@ -26,9 +26,15 @@ namespace vivuvn_api.Services.Implementations
                 TransportationDuration = 278, // in seconds
             };
 
-            if (orderIndex != 1) // get transportation details for items that are not the first in the day
+            if (orderIndex > 1) // get transportation details for items that are not the first in the day
             {
-                await UpdateTransportationDetailsAsync(newItem);
+                var prevItem = await _unitOfWork.ItineraryItems.GetOneAsync(i =>
+                    i.ItineraryDayId == dayId && i.OrderIndex == orderIndex - 1);
+
+                if (prevItem is not null)
+                {
+                    await UpdateTransportationDetailsAsync(prevItem, newItem);
+                }
             }
 
             // fetch transportation details if order index is greater than 1
@@ -47,23 +53,57 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task RemoveItemFromDayAsync(int dayId, int itemId)
         {
-            var item = await _unitOfWork.ItineraryItems.GetOneAsync(i => i.ItineraryItemId == itemId && i.ItineraryDayId == dayId);
+            await _unitOfWork.BeginTransactionAsync();
 
-            if (item is null) throw new KeyNotFoundException($"Itinerary item with id {itemId} not found in day {dayId}.");
-
-            var itemsToUpdate = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == dayId && i.OrderIndex > item.OrderIndex);
-
-            _unitOfWork.ItineraryItems.Remove(item);
-            await _unitOfWork.SaveChangesAsync();
-
-            if (itemsToUpdate is null || !itemsToUpdate.Any()) return;
-
-            // readjust order index of remaining items
-            foreach (var remainingItem in itemsToUpdate)
+            try
             {
-                remainingItem.OrderIndex--;
+                var item = await _unitOfWork.ItineraryItems
+                    .GetOneAsync(i => i.ItineraryItemId == itemId && i.ItineraryDayId == dayId)
+                    ?? throw new KeyNotFoundException($"Itinerary item with id {itemId} not found in day {dayId}.");
+
+                var itemsToUpdate = await _unitOfWork.ItineraryItems.GetAllAsync(
+                    i => i.ItineraryDayId == dayId && i.OrderIndex > item.OrderIndex,
+                    orderBy: q => q.OrderBy(i => i.OrderIndex)
+                );
+
+                _unitOfWork.ItineraryItems.Remove(item);
+                await _unitOfWork.SaveChangesAsync();
+
+                if (itemsToUpdate is null || !itemsToUpdate.Any())
+                {
+                    await _unitOfWork.CommitTransactionAsync();
+                    return;
+                }
+
+                // Recalculate distance and travel time
+                var prevItem = await _unitOfWork.ItineraryItems.GetOneAsync(i =>
+                    i.ItineraryDayId == dayId && i.OrderIndex == item.OrderIndex - 1);
+
+                if (prevItem is not null)
+                {
+                    var nextItem = itemsToUpdate.FirstOrDefault();
+
+                    if (nextItem is not null)
+                    {
+                        await UpdateTransportationDetailsAsync(prevItem, nextItem);
+                        _unitOfWork.ItineraryItems.Update(nextItem);
+                    }
+                }
+
+                // Readjust order index of remaining items
+                foreach (var remainingItem in itemsToUpdate)
+                {
+                    remainingItem.OrderIndex--;
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
             }
-            await _unitOfWork.SaveChangesAsync();
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new BadHttpRequestException("Something went wrong when trying to remove item form days");
+            }
         }
 
         public async Task<ItineraryItemDto> UpdateItineraryItemAsync(int itemId, UpdateItineraryItemRequestDto request)
@@ -93,11 +133,9 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<ItineraryItemDto>(item);
         }
 
-        private async Task UpdateTransportationDetailsAsync(ItineraryItem curItem)
+        private async Task UpdateTransportationDetailsAsync(ItineraryItem prevItem, ItineraryItem curItem)
         {
-            var prevItem = await _unitOfWork.ItineraryItems.GetOneAsync(i =>
-                i.ItineraryDayId == curItem.ItineraryDayId && i.OrderIndex == curItem.OrderIndex - 1,
-                includeProperties: "Location");
+            var prevItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == prevItem.LocationId);
 
             var curItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == curItem.LocationId);
 
@@ -105,7 +143,7 @@ namespace vivuvn_api.Services.Implementations
             {
                 Origin = new OriginDestination
                 {
-                    PlaceId = prevItem?.Location?.GooglePlaceId
+                    PlaceId = prevItemLocation?.GooglePlaceId
                 },
                 Destination = new OriginDestination
                 {
