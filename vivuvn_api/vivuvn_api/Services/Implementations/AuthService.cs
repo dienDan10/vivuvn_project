@@ -1,4 +1,5 @@
-﻿using Google.Apis.Auth;
+﻿using AutoMapper;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +13,9 @@ using vivuvn_api.Services.Interfaces;
 namespace vivuvn_api.Services.Implementations
 {
 
-    public class AuthService(AppDbContext _context, ITokenService _tokenService, IEmailService _emailService, IConfiguration _config) : IAuthService
+    public class AuthService(AppDbContext _context, ITokenService _tokenService, IEmailService _emailService, IConfiguration _config, IMapper _mapper) : IAuthService
     {
-        public async Task<TokenResponseDto> LoginAsync(LoginRequestDto request)
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
         {
             var user = await _context.Users
                 .Include(u => u.UserRoles)
@@ -33,7 +34,14 @@ namespace vivuvn_api.Services.Implementations
             // Check if email is verified
             if (!user.IsEmailVerified) throw new BadHttpRequestException("Email has not been verified");
 
-            return await CreateTokenResponse(user);
+            var tokenResponse = await CreateTokenResponse(user);
+
+            return new LoginResponseDto
+            {
+                AccessToken = tokenResponse.AccessToken,
+                RefreshToken = tokenResponse.RefreshToken,
+                User = _mapper.Map<DTOs.ValueObjects.UserDto>(user)
+            };
         }
 
 
