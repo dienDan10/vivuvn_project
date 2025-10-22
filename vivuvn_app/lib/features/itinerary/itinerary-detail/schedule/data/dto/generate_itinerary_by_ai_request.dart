@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 class GenerateItineraryByAiRequest {
-  final List<String> preferences;
+  final int itineraryId;
+  final List<String>? preferences;
   final int groupSize;
   final double budget;
   final String? specialRequirements;
 
   GenerateItineraryByAiRequest({
+    required this.itineraryId,
     this.preferences = const [],
     required this.groupSize,
     required this.budget,
@@ -15,10 +17,11 @@ class GenerateItineraryByAiRequest {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'preferences': preferences,
-      'group_size': groupSize,
-      'budget': budget,
-      'special_requirements': specialRequirements ?? '',
+      'Preferences': preferences,
+      'GroupSize': groupSize,
+      // Server expects an integer (Int64) for Budget.
+      'Budget': budget.round(),
+      'SpecialRequirements': specialRequirements ?? '',
     };
   }
 

@@ -38,19 +38,10 @@ class InterestFooter extends StatelessWidget {
               ),
             ),
             onPressed: (canProceed && !isLoading) ? onNext : null,
-            child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Text(
-                    primaryLabel,
-                    style: const TextStyle(fontSize: 18, color: Colors.white),
-                  ),
+            child: Text(
+              primaryLabel,
+              style: const TextStyle(fontSize: 18, color: Colors.white),
+            ),
           ),
         ),
       ],

@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/api/automically_generate_by_ai.dart';
+import '../../../../../common/validator/validation_exception.dart';
+import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../data/api/automically_generate_by_ai_api.dart';
 import '../data/dto/generate_itinerary_by_ai_request.dart';
 import '../model/interested_category.dart';
 import '../state/automically_generate_by_ai_state.dart';
@@ -61,7 +64,7 @@ class AutomaticallyGenerateByAiController
   }
 
   Future<void> submitGenerate() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, error: null, isGenerated: false);
 
     int? itineraryId = state.itineraryId;
     itineraryId ??= ref.read(
@@ -77,8 +80,8 @@ class AutomaticallyGenerateByAiController
       return;
     }
 
+    final api = ref.read(automaticallyGenerateByAiProvider);
     try {
-      final api = ref.read(automaticallyGenerateByAiProvider);
       final request = GenerateItineraryByAiRequest(
         itineraryId: itineraryId,
         preferences: state.selectedInterests.map((final e) => e.name).toList(),
@@ -86,11 +89,28 @@ class AutomaticallyGenerateByAiController
         budget: state.budget,
         specialRequirements: state.specialRequirements,
       );
-      await api.generateItineraryByAi(
-        itineraryId: itineraryId,
-        request: request,
-      );
-    } catch (e) {
+      final response = await api.generateItineraryByAi(request: request);
+      bool parsedHasData() {
+        final data = response.data;
+        if (data == null) return false;
+        if (data is Map) return data.isNotEmpty;
+        if (data is List) return data.isNotEmpty;
+        return true;
+      }
+
+      if (response.statusCode == 200 && parsedHasData()) {
+        state = state.copyWith(isGenerated: true);
+      } else {
+        state = state.copyWith(
+          error:
+              'Server accepted the request but did not return generated itinerary data. It may be processing in background.',
+        );
+      }
+    } on DioException catch (e) {
+      state = state.copyWith(error: DioExceptionHandler.handleException(e));
+    } on ValidationException catch (e) {
+      state = state.copyWith(error: e.toString());
+    } on Exception catch (e) {
       state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isLoading: false);

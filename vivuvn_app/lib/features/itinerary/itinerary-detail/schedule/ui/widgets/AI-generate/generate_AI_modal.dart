@@ -3,8 +3,10 @@ import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../../../common/toast/global_toast.dart';
+import '../../../../../../../core/routes/routes.dart';
 import '../../../controller/automically_generate_by_ai_controller.dart';
 import 'widgets/generate_itinerary_with_AI_layout_step.dart';
 import 'widgets/interest_selection_step.dart';
@@ -164,13 +166,8 @@ class _InterestSelectionScreenState
                   final newState = ref.read(
                     automicallyGenerateByAiControllerProvider,
                   );
-                  if (newState.error != null) {
-                    // Show error
-                    GlobalToast.showErrorToast(
-                      context,
-                      message: newState.error,
-                    );
-                  } else {
+
+                  if (newState.isGenerated == true) {
                     GlobalToast.showSuccessToast(
                       context,
                       message: 'Itinerary generated successfully',
@@ -178,6 +175,17 @@ class _InterestSelectionScreenState
                     Navigator.of(
                       context,
                     ).maybePop(); // close sheet/modal on success
+                    final id = newState.itineraryId;
+                    if (id != null && mounted) {
+                      context.go(createItineraryDetailRoute(id));
+                    }
+                  } else {
+                    // Show error (or informational) toast
+                    GlobalToast.showErrorToast(
+                      context,
+                      message:
+                          newState.error ?? 'Generation did not return data.',
+                    );
                   }
                 },
               ),

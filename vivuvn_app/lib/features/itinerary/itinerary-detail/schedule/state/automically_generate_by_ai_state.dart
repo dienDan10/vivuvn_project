@@ -12,6 +12,8 @@ class AutomaticallyGenerateByAiState {
   final int groupSize;
   final double budget;
   final String? specialRequirements;
+  // Whether server response included generated data
+  final bool isGenerated;
 
   AutomaticallyGenerateByAiState({
     this.isLoading = false,
@@ -23,6 +25,7 @@ class AutomaticallyGenerateByAiState {
     this.groupSize = 1,
     this.budget = 0.0,
     this.specialRequirements,
+    this.isGenerated = false,
   });
 
   AutomaticallyGenerateByAiState copyWith({
@@ -35,6 +38,7 @@ class AutomaticallyGenerateByAiState {
     final int? groupSize,
     final double? budget,
     final String? specialRequirements,
+    final bool? isGenerated,
   }) {
     return AutomaticallyGenerateByAiState(
       isLoading: isLoading ?? this.isLoading,
@@ -46,6 +50,7 @@ class AutomaticallyGenerateByAiState {
       groupSize: groupSize ?? this.groupSize,
       budget: budget ?? this.budget,
       specialRequirements: specialRequirements ?? this.specialRequirements,
+      isGenerated: isGenerated ?? this.isGenerated,
     );
   }
 }
