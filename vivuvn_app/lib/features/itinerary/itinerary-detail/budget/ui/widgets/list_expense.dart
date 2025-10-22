@@ -32,6 +32,7 @@ class ExpenseList extends ConsumerWidget {
 
     // List of expenses
     return ListView.builder(
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(
         horizontal: BudgetConstants.horizontalPadding,
       ),

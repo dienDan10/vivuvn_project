@@ -52,17 +52,17 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
     return Scaffold(
       body: selectedDay == null
           ? const Center(child: Text('Chưa có ngày nào trong lịch trình.'))
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  const DayTitle(),
-                  PlaceListSection(dayId: selectedDay.id),
-                  SuggestedPlacesTile(dayId: selectedDay.id),
-                  AddHotelTile(dayId: selectedDay.id),
-                  AddRestaurantTile(dayId: selectedDay.id),
-                  const SizedBox(height: 80), // Space for FAB
-                ],
-              ),
+          : ListView(
+              padding: EdgeInsets.zero,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                const DayTitle(),
+                PlaceListSection(dayId: selectedDay.id),
+                SuggestedPlacesTile(dayId: selectedDay.id),
+                AddHotelTile(dayId: selectedDay.id),
+                AddRestaurantTile(dayId: selectedDay.id),
+                const SizedBox(height: 80), // Space for FAB
+              ],
             ),
       floatingActionButton: const ButtonGenerateItinerary(),
       floatingActionButtonLocation: ExpandableFab.location,

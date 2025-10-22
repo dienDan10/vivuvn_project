@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../controller/itinerary_detail_controller.dart';
 import '../controller/budget_controller.dart';
 import 'widgets/btn_add_budget_item.dart';
-import 'widgets/budget_control.dart';
-import 'widgets/budget_header.dart';
 import 'widgets/list_expense.dart';
 
 /// Main budget tab widget with sorting and CRUD operations
@@ -40,8 +38,8 @@ class _BudgetTabState extends ConsumerState<BudgetTab> {
     return const Scaffold(
       body: Column(
         children: [
-          BudgetHeader(),
-          BudgetControl(),
+          // BudgetHeader(),
+          // BudgetControl(),
           Expanded(child: ExpenseList()),
         ],
       ),
