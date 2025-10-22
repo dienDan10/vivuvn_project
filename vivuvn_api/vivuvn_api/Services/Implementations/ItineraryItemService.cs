@@ -8,7 +8,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryItemService(IUnitOfWork _unitOfWork, IMapper _mapper) : IItineraryItemService
+    public class ItineraryItemService(IUnitOfWork _unitOfWork, IMapper _mapper, IGoogleMapRouteService _routeService) : IItineraryItemService
     {
         public async Task AddItemToDayAsync(int dayId, AddItineraryDayItemRequestDto request)
         {
@@ -16,7 +16,7 @@ namespace vivuvn_api.Services.Implementations
             var existingItems = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == dayId);
             int orderIndex = existingItems?.Count() + 1 ?? 1;
 
-            var itineraryDayItem = new ItineraryItem
+            var newItem = new ItineraryItem
             {
                 ItineraryDayId = dayId,
                 LocationId = request.LocationId,
@@ -26,8 +26,13 @@ namespace vivuvn_api.Services.Implementations
                 TransportationDuration = 278, // in seconds
             };
 
+            if (orderIndex != 1) // get transportation details for items that are not the first in the day
+            {
+                await UpdateTransportationDetailsAsync(newItem);
+            }
+
             // fetch transportation details if order index is greater than 1
-            await _unitOfWork.ItineraryItems.AddAsync(itineraryDayItem);
+            await _unitOfWork.ItineraryItems.AddAsync(newItem);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -86,6 +91,36 @@ namespace vivuvn_api.Services.Implementations
 
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<ItineraryItemDto>(item);
+        }
+
+        private async Task UpdateTransportationDetailsAsync(ItineraryItem curItem)
+        {
+            var prevItem = await _unitOfWork.ItineraryItems.GetOneAsync(i =>
+                i.ItineraryDayId == curItem.ItineraryDayId && i.OrderIndex == curItem.OrderIndex - 1,
+                includeProperties: "Location");
+
+            var curItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == curItem.LocationId);
+
+            var request = new ComputeRouteRequestDto
+            {
+                Origin = new OriginDestination
+                {
+                    PlaceId = prevItem?.Location?.GooglePlaceId
+                },
+                Destination = new OriginDestination
+                {
+                    PlaceId = curItemLocation?.GooglePlaceId
+                },
+            };
+
+            var response = await _routeService.GetRouteInformationAsync(request);
+
+            curItem.TransportationDistance = response?.Routes?.FirstOrDefault()?.DistanceMeters ?? 500;
+            curItem.TransportationVehicle = Constants.TravelMode_Driving;
+
+            _ = double.TryParse(response?.Routes?.FirstOrDefault()?.Duration.Replace("s", ""), out double durationInSeconds);
+
+            curItem.TransportationDuration = durationInSeconds;
         }
     }
 }

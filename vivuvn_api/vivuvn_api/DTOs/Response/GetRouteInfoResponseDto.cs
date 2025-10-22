@@ -2,20 +2,18 @@
 
 namespace vivuvn_api.DTOs.Response
 {
-    public class RouteInforResponseDto
+    public class GetRouteInfoResponseDto
     {
         [JsonPropertyName("routes")]
-        public List<Route> Routes { get; set; } = new();
+        public List<RouteInfo> Routes { get; set; } = new();
     }
 
-    public class Route
+    public class RouteInfo
     {
-        [JsonPropertyName("duration")]
-        public string Duration { get; set; } = string.Empty;
-
         [JsonPropertyName("distanceMeters")]
         public int DistanceMeters { get; set; }
 
+        [JsonPropertyName("duration")]
+        public string Duration { get; set; } = string.Empty;
     }
-
 }
