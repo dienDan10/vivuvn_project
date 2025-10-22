@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
-import '../../create-itinerary/ui/ai-generate/generate_ai_modal.dart';
+import '../schedule/ui/widgets/AI-generate/generate_AI_modal.dart';
 
 class ButtonGenerateItinerary extends StatefulWidget {
   const ButtonGenerateItinerary({super.key});

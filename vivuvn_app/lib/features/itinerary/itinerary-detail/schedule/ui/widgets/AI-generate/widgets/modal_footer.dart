@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/interested_category.dart';
+import '../../../../model/interested_category.dart';
 
 class InterestFooter extends StatelessWidget {
   final bool canProceed;
@@ -8,6 +8,7 @@ class InterestFooter extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onNext;
   final String primaryLabel;
+  final bool isLoading;
 
   const InterestFooter({
     super.key,
@@ -16,6 +17,7 @@ class InterestFooter extends StatelessWidget {
     required this.onCancel,
     required this.onNext,
     this.primaryLabel = 'Next',
+    this.isLoading = false,
   });
 
   @override
@@ -35,11 +37,20 @@ class InterestFooter extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: canProceed ? onNext : null,
-            child: Text(
-              primaryLabel,
-              style: const TextStyle(fontSize: 18, color: Colors.white),
-            ),
+            onPressed: (canProceed && !isLoading) ? onNext : null,
+            child: isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    primaryLabel,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
           ),
         ),
       ],

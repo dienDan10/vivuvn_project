@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/interested_category.dart';
+import '../../../../model/interested_category.dart';
 import 'interest_grid.dart';
 
 class InterestSelectionStep extends StatelessWidget {

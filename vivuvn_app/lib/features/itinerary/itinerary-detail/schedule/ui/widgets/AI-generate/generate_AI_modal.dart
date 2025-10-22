@@ -2,49 +2,55 @@
 import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/interested_category.dart';
-import 'widgets/generate_itinerary_with_ai_layout_step.dart';
+import '../../../../../../../common/toast/global_toast.dart';
+import '../../../controller/automically_generate_by_ai_controller.dart';
+import 'widgets/generate_itinerary_with_AI_layout_step.dart';
 import 'widgets/interest_selection_step.dart';
 import 'widgets/modal_footer.dart';
 
-class InterestSelectionScreen extends StatefulWidget {
+class InterestSelectionScreen extends ConsumerStatefulWidget {
   const InterestSelectionScreen({super.key});
 
   @override
-  State<InterestSelectionScreen> createState() =>
+  ConsumerState<InterestSelectionScreen> createState() =>
       _InterestSelectionScreenState();
 }
 
-class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
-  final Set<InterestCategory> _selectedInterests = {};
-  final int maxSelection = 3;
-  int _step = 1; // start at step 1 (interest selection)
+class _InterestSelectionScreenState
+    extends ConsumerState<InterestSelectionScreen> {
   final GlobalKey<FormState> _generateFormKey = GlobalKey<FormState>();
 
-  void _toggleInterest(final InterestCategory interest) {
-    // If already selected, remove it; otherwise try to add.
-    if (_selectedInterests.contains(interest)) {
-      setState(() => _selectedInterests.remove(interest));
-      return;
-    }
-
-    if (_selectedInterests.length < maxSelection) {
-      setState(() => _selectedInterests.add(interest));
-      return;
-    }
-
-    // Already reached max selection: show a styled CherryToast warning.
-    CherryToast.warning(
-      title: const Text('Limit reached'),
-      description: Text('You can only select up to $maxSelection interests.'),
-      displayCloseButton: false,
-    ).show(context);
+  @override
+  void initState() {
+    super.initState();
+    // Attach to parent schedule controller after first frame so that
+    // `automicallyGenerateByAiController` has the itineraryId available in
+    // its state for the UI.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = ref.read(
+        automicallyGenerateByAiControllerProvider.notifier,
+      );
+      controller.attachToParent();
+    });
   }
 
   @override
   Widget build(final BuildContext context) {
-    final bool canProceed = _selectedInterests.isNotEmpty;
+    final controller = ref.read(
+      automicallyGenerateByAiControllerProvider.notifier,
+    );
+    final state = ref.watch(automicallyGenerateByAiControllerProvider);
+
+    // For step 1 (selection) we require at least one interest.
+    // For step 2 (form) additionally require that itineraryId is known and
+    // that we're not currently loading.
+    final bool canProceed = state.step == 1
+        ? state.selectedInterests.isNotEmpty
+        : state.selectedInterests.isNotEmpty &&
+              state.itineraryId != null &&
+              !state.isLoading;
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -72,23 +78,23 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
               const SizedBox(height: 20),
 
               // Back arrow when on step 2
-              if (_step == 2)
+              if (state.step == 2)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    onPressed: () => setState(() => _step = 1),
+                    onPressed: () => controller.prevStep(),
                     icon: const Icon(Icons.arrow_back),
                   ),
                 ),
 
               // dynamic content per step
-              if (_step == 1)
+              if (state.step == 1)
                 Expanded(
                   child: InterestSelectionStep(
                     scrollController: scrollController,
-                    selectedInterests: _selectedInterests,
-                    onToggle: _toggleInterest,
-                    maxSelection: maxSelection,
+                    selectedInterests: state.selectedInterests,
+                    onToggle: controller.toggleInterest,
+                    maxSelection: state.maxSelection,
                   ),
                 )
               else
@@ -96,7 +102,7 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                   child: SingleChildScrollView(
                     controller: scrollController,
                     child: GenerateItineraryWithAiLayout(
-                      selectedInterests: _selectedInterests
+                      selectedInterests: state.selectedInterests
                           .map((final e) => e.name)
                           .toList(),
                       formKey: _generateFormKey,
@@ -109,12 +115,13 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
               // Footer buttons (Cancel and Next/Generate)
               InterestFooter(
                 canProceed: canProceed,
-                selectedInterests: _selectedInterests,
+                selectedInterests: state.selectedInterests,
                 onCancel: () => Navigator.of(context).maybePop(),
-                primaryLabel: _step == 2 ? 'Generate' : 'Next',
+                primaryLabel: state.step == 2 ? 'Generate' : 'Next',
+                isLoading: state.isLoading,
                 onNext: () async {
-                  if (_step == 1) {
-                    setState(() => _step = 2);
+                  if (state.step == 1) {
+                    controller.nextStep();
                     return;
                   }
 
@@ -132,7 +139,7 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                     return;
                   }
 
-                  // Step == 2: trigger AI generation (mocked async flow)
+                  // Step == 2: trigger AI generation using controller
                   showDialog<void>(
                     context: context,
                     barrierDismissible: false,
@@ -148,12 +155,30 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                     ),
                   );
 
-                  // Simulate async work (replace with real AI call)
-                  await Future.delayed(const Duration(seconds: 2));
+                  await controller.submitGenerate();
 
-                  // Close progress dialog and the modal
+                  // Close progress dialog
                   Navigator.of(context).pop(); // close progress dialog
-                  Navigator.of(context).maybePop(); // close sheet/modal
+
+                  // Show toast depending on result
+                  final newState = ref.read(
+                    automicallyGenerateByAiControllerProvider,
+                  );
+                  if (newState.error != null) {
+                    // Show error
+                    GlobalToast.showErrorToast(
+                      context,
+                      message: newState.error,
+                    );
+                  } else {
+                    GlobalToast.showSuccessToast(
+                      context,
+                      message: 'Itinerary generated successfully',
+                    );
+                    Navigator.of(
+                      context,
+                    ).maybePop(); // close sheet/modal on success
+                  }
                 },
               ),
             ],

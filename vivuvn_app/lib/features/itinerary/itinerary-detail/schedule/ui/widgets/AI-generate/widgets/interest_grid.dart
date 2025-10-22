@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/interested_category.dart';
+import '../../../../model/interested_category.dart';
 
 class InterestGrid extends StatelessWidget {
   final ScrollController controller;
