@@ -30,7 +30,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<PaginatedResponseDto<LocationDto>> GetAllLocationsAsync(GetAllLocationsRequestDto requestDto)
         {
             // Build filter expression
-            var predicate = PredicateBuilder.New<Location>(l => !l.DeleteFlag);
+            var predicate = PredicateBuilder.New<Location>();
 
             if (!string.IsNullOrEmpty(requestDto.Name))
             {

@@ -30,11 +30,6 @@ export function useLogin() {
 			const { accessToken, refreshToken } = data;
 			tokenManager.setTokens(accessToken, refreshToken);
 
-			console.log("Login successful, tokens set:", {
-				accessToken,
-				refreshToken,
-			});
-
 			// Get the intended destination or default to /manage
 			const from = location.state?.from?.pathname || "/manage";
 			navigate(from, { replace: true });

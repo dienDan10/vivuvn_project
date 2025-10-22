@@ -1,4 +1,6 @@
-﻿using vivuvn_api.DTOs.ValueObjects;
+﻿using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
+using vivuvn_api.DTOs.ValueObjects;
 
 namespace vivuvn_api.Services.Interfaces
 {
@@ -7,5 +9,6 @@ namespace vivuvn_api.Services.Interfaces
         Task<UserDto> GetProfileAsync(string email);
         Task<UserDto?> LockUserAccountAsync(int userId);
         Task<UserDto?> UnlockUserAccountAsync(int userId);
+        Task<PaginatedResponseDto<UserDto>> GetAllUsersAsync(GetAllUsersRequestDto requestDto);
     }
 }
