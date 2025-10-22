@@ -2,11 +2,12 @@
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using vivuvn_api.Data;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.Helpers;
 using vivuvn_api.Models;
-using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
@@ -16,19 +17,22 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
         {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email, includeProperties: "UserRoles,UserRoles.Role");
+            var user = await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            if (user == null) throw new BadHttpRequestException("Email hoặc mật khẩu không đúng");
+            if (user == null) throw new BadHttpRequestException("Email or Password incorrect");
 
             var passwordVerificationResult = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password);
 
-            if (passwordVerificationResult == PasswordVerificationResult.Failed) throw new BadHttpRequestException("Email hoặc mật khẩu không đúng");
+            if (passwordVerificationResult == PasswordVerificationResult.Failed) throw new BadHttpRequestException("Email or Password incorrect");
 
             // Check if user is locked
-            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow) throw new BadHttpRequestException("Tài khoản này đã bị khóa");
+            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow) throw new BadHttpRequestException("This account is locked");
 
             // Check if email is verified
-            if (!user.IsEmailVerified) throw new BadHttpRequestException("Email chưa được xác thực");
+            if (!user.IsEmailVerified) throw new BadHttpRequestException("Email has not been verified");
 
             var tokenResponse = await CreateTokenResponse(user);
 
@@ -59,7 +63,10 @@ namespace vivuvn_api.Services.Implementations
                 var googleId = payload.Subject;
 
                 // Find or create user in  DB
-                var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == email, includeProperties: "UserRoles,UserRoles.Role");
+                var user = await _context.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.Email == email);
 
                 if (user == null)
                 {
@@ -73,14 +80,14 @@ namespace vivuvn_api.Services.Implementations
                         IsEmailVerified = true // Assume email is verified by Google
                     };
                     // Assign "Traveler" role by default
-                    var travelerRole = await _unitOfWork.Roles.GetOneAsync(r => r.Name == Constants.Role_Traveler);
+                    var travelerRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == Constants.Role_Traveler);
                     if (travelerRole == null)
                     {
-                        throw new Exception("Đã xảy ra lỗi không mong đợi");
+                        throw new Exception("An unexpected error has occurred");
                     }
                     user.UserRoles = new List<UserRole> { new UserRole { RoleId = travelerRole.Id } };
-                    await _unitOfWork.Users.AddAsync(user);
-                    await _unitOfWork.SaveChangesAsync();
+                    await _context.Users.AddAsync(user);
+                    await _context.SaveChangesAsync();
                 }
 
                 // Generate JWT token
@@ -89,44 +96,33 @@ namespace vivuvn_api.Services.Implementations
             }
             catch (InvalidJwtException)
             {
-                throw new UnauthorizedAccessException("Token Google không hợp lệ");
+                throw new UnauthorizedAccessException("Invalid Google token");
             }
             catch (Exception ex)
             {
-                throw new BadHttpRequestException("Đăng nhập bằng Google thất bại");
+                throw new BadHttpRequestException("Fail to login with google");
             }
         }
 
 
         public async Task RegisterAsync(RegisterRequestDto request)
         {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            // if user is a google user, don't need to send verification email
-            if (user is not null && user.GoogleIdToken is not null)
-            {
-                user.Username = request.Username;
-                user.PasswordHash = HashPassword(user, request.Password);
-                _unitOfWork.Users.Update(user);
-                await _unitOfWork.SaveChangesAsync();
-                return;
-            }
-
-            // if user exists but email not verified, resend verification email
-            if (user is not null && !user.IsEmailVerified)
+            if (user is not null && user.IsEmailVerified)
             {
                 // Send verification email again
                 user.Username = request.Username;
                 user.PasswordHash = HashPassword(user, request.Password);
 
+                // if user is a google user, don't need to send verification email
                 await CreateAndSendEmailVerificationToken(user);
                 return;
             }
 
-            // if user exists and email verified, throw error
             if (user is not null)
             {
-                throw new BadHttpRequestException("Email đã được sử dụng");
+                throw new BadHttpRequestException("Email is already in use");
             }
 
             var newUser = new User
@@ -139,19 +135,19 @@ namespace vivuvn_api.Services.Implementations
             newUser.PasswordHash = HashPassword(newUser, request.Password);
 
             // Assign "Traveler" role by default
-            var travelerRole = await _unitOfWork.Roles.GetOneAsync(r => r.Name == Constants.Role_Traveler);
+            var travelerRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == Constants.Role_Traveler);
 
             if (travelerRole == null)
             {
-                throw new Exception("Đã xảy ra lỗi không mong đợi");
+                throw new Exception("An unexpected error has occurred");
             }
 
             newUser.UserRoles = new List<UserRole> { new UserRole { RoleId = travelerRole.Id } };
 
 
             // Add user to db
-            await _unitOfWork.Users.AddAsync(newUser);
-            await _unitOfWork.SaveChangesAsync();
+            await _context.Users.AddAsync(newUser);
+            await _context.SaveChangesAsync();
 
             // Send Email to User
             await CreateAndSendEmailVerificationToken(newUser);
@@ -161,25 +157,25 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task VerifyEmailAsync(VerifyEmailRequestDto request)
         {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email);
-            if (user == null) throw new BadHttpRequestException("Không tìm thấy người dùng");
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            if (user == null) throw new BadHttpRequestException("User not found");
             if (user.IsEmailVerified) return;
             if (user.EmailVerificationToken != request.Token || user.EmailVerificationTokenExpireDate <= DateTime.UtcNow)
             {
 
-                throw new BadHttpRequestException("Mã xác thực không hợp lệ hoặc đã hết hạn");
+                throw new BadHttpRequestException("Invalid or expired verification token");
             }
             user.IsEmailVerified = true;
             user.EmailVerificationToken = null;
             user.EmailVerificationTokenExpireDate = null;
-            _unitOfWork.Users.Update(user);
-            await _unitOfWork.SaveChangesAsync();
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
         }
 
         public async Task ResendEmailVerificationAsync(ResendEmailVerificationRequestDto request)
         {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email);
-            if (user == null) throw new BadHttpRequestException("Không tìm thấy người dùng");
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            if (user == null) throw new BadHttpRequestException("User not found");
             if (user.IsEmailVerified) return;
             await CreateAndSendEmailVerificationToken(user);
         }
@@ -188,97 +184,9 @@ namespace vivuvn_api.Services.Implementations
         {
             var user = await ValidateRefreshTokenAsync(request.RefreshToken);
 
-            if (user == null) throw new BadHttpRequestException("Refresh token không hợp lệ");
+            if (user == null) throw new BadHttpRequestException("Invalid refresh token");
 
             return await CreateTokenResponse(user);
-        }
-
-        public async Task ChangePasswordAsync(int userId, ChangePasswordRequestDto request)
-        {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.Id == userId)
-                ?? throw new BadHttpRequestException("Không tìm thấy người dùng");
-
-            var passwordHasher = new PasswordHasher<User>();
-
-            var passwordVerificationResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
-
-            if (passwordVerificationResult == PasswordVerificationResult.Failed)
-                throw new BadHttpRequestException("Mật khẩu hiện tại không đúng");
-
-            // Check if new password is different from current
-            var isSamePassword = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.NewPassword);
-
-            if (isSamePassword == PasswordVerificationResult.Success)
-                throw new BadHttpRequestException("New password must be different from current password");
-
-            user.PasswordHash = HashPassword(user, request.NewPassword);
-            _unitOfWork.Users.Update(user);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task RequestPasswordResetAsync(ForgotPasswordRequestDto request)
-        {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email);
-
-            if (user is null) return;
-
-            // check if user register via google
-            if (user.GoogleIdToken is not null)
-            {
-                await _emailService.SendPasswordResetNotAvailableEmailAsync(user.Email);
-                return;
-            }
-
-            // check if there's an existing password reset token
-            var existingReset = await _unitOfWork.PasswordResets
-                .GetOneAsync(pr => pr.UserId == user.Id);
-
-            // Create password reset token
-            var resetToken = _tokenService.CreatePasswordResetToken();
-
-            if (existingReset is not null)
-            {
-                existingReset.PasswordResetToken = resetToken;
-                existingReset.ExpireDate = DateTime.UtcNow.AddMinutes(Constants.PasswordResetTokenExpirationMinutes);
-                _unitOfWork.PasswordResets.Update(existingReset);
-            }
-            else
-            {
-                var passwordReset = new PasswordReset
-                {
-                    UserId = user.Id,
-                    PasswordResetToken = resetToken,
-                    ExpireDate = DateTime.UtcNow.AddMinutes(Constants.PasswordResetTokenExpirationMinutes)
-                };
-
-                await _unitOfWork.PasswordResets.AddAsync(passwordReset);
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-            // Send Email to User
-            await _emailService.SendPasswordResetEmailAsync(user.Email, user.Username, resetToken);
-        }
-
-        public async Task ResetPasswordAsync(ResetPasswordRequestDto request)
-        {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email)
-                ?? throw new BadHttpRequestException("Đặt lại mật khẩu không thành công");
-
-            var passwordReset = await _unitOfWork.PasswordResets
-                .GetOneAsync(pr => pr.PasswordResetToken == request.Token
-                && pr.UserId == user.Id
-                && pr.ExpireDate > DateTime.UtcNow);
-
-            if (passwordReset is null)
-            {
-                throw new BadHttpRequestException("Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn");
-            }
-
-            user.PasswordHash = HashPassword(user, request.NewPassword);
-            _unitOfWork.Users.Update(user);
-            // Remove password reset token
-            _unitOfWork.PasswordResets.Remove(passwordReset);
-            await _unitOfWork.SaveChangesAsync();
         }
 
         private string HashPassword(User user, string password)
@@ -290,8 +198,8 @@ namespace vivuvn_api.Services.Implementations
         {
             user.EmailVerificationToken = _tokenService.CreateEmailVerificationToken();
             user.EmailVerificationTokenExpireDate = DateTime.UtcNow.AddMinutes(Constants.EmailVerificationTokenExpirationMinutes);
-            _unitOfWork.Users.Update(user);
-            await _unitOfWork.SaveChangesAsync();
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
             // Send Email to User
             await _emailService.SendEmailAsync(user.Email, "Email Verification", $"Your verification token is {user.EmailVerificationToken}");
         }
@@ -312,14 +220,17 @@ namespace vivuvn_api.Services.Implementations
             var refreshToken = _tokenService.CreateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(Constants.RefreshTokenExpirationDays);
-            _unitOfWork.Users.Update(user);
-            await _unitOfWork.SaveChangesAsync();
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
             return refreshToken;
         }
 
         private async Task<User?> ValidateRefreshTokenAsync(string token)
         {
-            var user = await _unitOfWork.Users.GetOneAsync(u => u.RefreshToken == token);
+            var user = await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.RefreshToken == token);
             if (user == null || user.RefreshToken == null || user.RefreshTokenExpireDate <= DateTime.UtcNow)
             {
                 return null;
