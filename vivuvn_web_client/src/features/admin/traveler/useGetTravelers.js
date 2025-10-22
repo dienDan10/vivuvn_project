@@ -1,25 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 // import { getAllTravelers } from "../../../services/apiTraveler";
 import { useSelector } from "react-redux";
-import { filterTravelers, delay } from "../../../mocks/travelerMockData";
+import { getAllTravelers } from "../../../services/apiTraveler";
 
 export function useGetTravelers() {
 	const filters = useSelector((state) => state.traveler.filters);
 
 	const { data, isPending, error, refetch } = useQuery({
 		queryKey: ["travelers", filters],
-		// Real API call:
-		// queryFn: () => getAllTravelers(filters),
-		// Mock data with delay:
-		queryFn: async () => {
-			await delay(500);
-			return filterTravelers(filters);
-		},
+		queryFn: () => getAllTravelers(filters),
 	});
 
 	return {
-		travelers: data?.data?.users || data?.data?.travelers,
+		travelers: data?.data?.data,
 		totalCount: data?.data?.totalCount,
+		pageNumber: data?.data?.pageNumber,
+		pageSize: data?.data?.pageSize,
+		totalPages: data?.data?.totalPages,
+		hasPreviousPage: data?.data?.hasPreviousPage,
+		hasNextPage: data?.data?.hasNextPage,
 		isPending,
 		error,
 		refetch,

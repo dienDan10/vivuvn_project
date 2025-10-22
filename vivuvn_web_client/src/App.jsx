@@ -1,76 +1,11 @@
-import { lazy, Suspense, useEffect } from "react";
-import {
-	createBrowserRouter,
-	RouterProvider,
-	Navigate,
-} from "react-router-dom";
-import { SpinnerLarge } from "./components/Spinner";
-import PageNotFound from "./pages/PageNotFound";
+import { useEffect } from "react";
+import { RouterProvider } from "react-router-dom";
 import { notification } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { clearNotification } from "./redux/notificationSlice";
-import ProtectedRoute from "./components/ProtectedRoute";
 import useAuthPersistence from "./hooks/useAuthPersistence";
 import FetchUserProfile from "./features/auth/FetchUserProfile";
-
-const Login = lazy(() => import("./pages/Login"));
-const ControlPanelLayout = lazy(() =>
-	import("./layouts/control-panel/ControlPanelLayout")
-);
-const ProvinceLayout = lazy(() =>
-	import("./features/admin/province/ProvinceLayout")
-);
-const TravelerLayout = lazy(() =>
-	import("./features/admin/traveler/TravelerLayout")
-);
-
-const router = createBrowserRouter([
-	{
-		path: "/",
-		element: <Navigate to="/manage" replace />,
-	},
-	{
-		path: "/login",
-		element: (
-			<Suspense fallback={<SpinnerLarge />}>
-				<Login />
-			</Suspense>
-		),
-	},
-	{
-		path: "/manage",
-		element: (
-			<ProtectedRoute>
-				<Suspense fallback={<SpinnerLarge />}>
-					<ControlPanelLayout />
-				</Suspense>
-			</ProtectedRoute>
-		),
-		errorElement: <PageNotFound />,
-		children: [
-			{
-				path: "provinces",
-				element: (
-					<Suspense fallback={<SpinnerLarge />}>
-						<ProvinceLayout />
-					</Suspense>
-				),
-			},
-			{
-				path: "travelers",
-				element: (
-					<Suspense fallback={<SpinnerLarge />}>
-						<TravelerLayout />
-					</Suspense>
-				),
-			},
-		],
-	},
-	{
-		path: "*",
-		element: <PageNotFound />,
-	},
-]);
+import { router } from "./router";
 
 function App() {
 	const [api, notificationContextHolder] = notification.useNotification();

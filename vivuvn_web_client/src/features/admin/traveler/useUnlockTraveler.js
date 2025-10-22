@@ -2,21 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { unlockTraveler } from "../../../services/apiTraveler";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
-import { delay } from "../../../mocks/travelerMockData";
+import { unlockTraveler as unlockTravelerApi } from "../../../services/apiTraveler";
 
 export function useUnlockTraveler() {
 	const queryClient = useQueryClient();
 	const dispatch = useDispatch();
 
 	return useMutation({
-		// Real API call:
-		// mutationFn: unlockTraveler,
-		// Mock behavior:
-		mutationFn: async (travelerId) => {
-			await delay(300);
-			console.log("Mock: Unlocking traveler", travelerId);
-			return { success: true };
-		},
+		mutationFn: unlockTravelerApi,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["travelers"] });
 			dispatch(
