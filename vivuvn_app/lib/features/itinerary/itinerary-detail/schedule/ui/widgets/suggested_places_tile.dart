@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../controller/itinerary_detail_controller.dart';
 import '../schedule_data.dart';
 import 'add_place_bottom_sheet.dart';
 import 'suggested_place_item.dart';
@@ -12,8 +11,6 @@ class SuggestedPlacesTile extends ConsumerWidget {
   const SuggestedPlacesTile({super.key, required this.dayId});
 
   void _openAddPlaceSheet(final BuildContext context, final WidgetRef ref) {
-    final itineraryId = ref.read(itineraryDetailControllerProvider).itineraryId;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
