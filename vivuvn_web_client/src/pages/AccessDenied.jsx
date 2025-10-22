@@ -12,9 +12,9 @@ function AccessDenied() {
 				<Button
 					color="default"
 					variant="solid"
-					onClick={() => navigate("/login")}
+					onClick={() => navigate("/manage")}
 				>
-					Back To Login
+					Back To Dashboard
 				</Button>
 			}
 		/>

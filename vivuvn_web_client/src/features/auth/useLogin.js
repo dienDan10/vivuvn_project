@@ -51,7 +51,11 @@ export function useLogin() {
 				})
 			);
 
-			// Navigate to intended destination
+			// Store tokens using token manager
+			const { accessToken, refreshToken } = data;
+			tokenManager.setTokens(accessToken, refreshToken);
+
+			// Get the intended destination or default to /manage
 			const from = location.state?.from?.pathname || "/manage";
 			navigate(from, { replace: true });
 		},
