@@ -27,6 +27,14 @@ namespace vivuvn_api.Controllers
             return Ok(profile);
         }
 
+        [HttpGet]
+        [Authorize(Roles = $"{Constants.Role_Admin}")]
+        public async Task<IActionResult> GetAllUsers([FromQuery] GetAllUsersRequestDto requestDto)
+        {
+            var users = await _userService.GetAllUsersAsync(requestDto);
+            return Ok(users);
+        }
+
         [HttpPut("{userId}/lock")]
         [Authorize(Roles = $"{Constants.Role_Admin}")]
         public async Task<IActionResult> LockUserAccount(int userId)

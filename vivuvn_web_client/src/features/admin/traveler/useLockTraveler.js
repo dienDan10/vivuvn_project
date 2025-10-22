@@ -2,21 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { lockTraveler } from "../../../services/apiTraveler";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
-import { delay } from "../../../mocks/travelerMockData";
+import { lockTraveler as lockTravelerApi } from "../../../services/apiTraveler";
 
 export function useLockTraveler() {
 	const queryClient = useQueryClient();
 	const dispatch = useDispatch();
 
-	return useMutation({
-		// Real API call:
-		// mutationFn: lockTraveler,
-		// Mock behavior:
-		mutationFn: async (travelerId) => {
-			await delay(300);
-			console.log("Mock: Locking traveler", travelerId);
-			return { success: true };
-		},
+	const { isPending, mutate } = useMutation({
+		mutationFn: lockTravelerApi,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["travelers"] });
 			dispatch(
@@ -37,4 +30,6 @@ export function useLockTraveler() {
 			);
 		},
 	});
+
+	return { isPending, mutate };
 }

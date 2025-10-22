@@ -6,3 +6,4 @@ export const WARNING_NOTIFICATION = "warning";
 // roles
 export const ROLE_ADMIN = "Admin";
 export const ROLE_OPERATOR = "Operator";
+export const ROLE_TRAVELER = "Traveler";

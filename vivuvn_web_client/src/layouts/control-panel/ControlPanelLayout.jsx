@@ -53,9 +53,7 @@ function ControlPanelLayout() {
 					</Header>
 
 					<Content className="px-12 py-10">
-						<RoleBaseRoute>
-							<Outlet />
-						</RoleBaseRoute>
+						<Outlet />
 					</Content>
 				</Layout>
 			</Layout>

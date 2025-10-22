@@ -18,6 +18,8 @@ function TravelerTable() {
 	const lockMutation = useLockTraveler();
 	const unlockMutation = useUnlockTraveler();
 
+	console.log("Travelers data:", travelers);
+
 	const handleLock = (id) => {
 		lockMutation.mutate(id);
 	};

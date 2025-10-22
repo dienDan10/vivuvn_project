@@ -1,36 +1,23 @@
 import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
-import {
-	MdAccountCircle,
-	MdOutlineDiscount,
-	MdSpaceDashboard,
-	MdHotel,
-	MdFlight,
-	MdDirectionsCar,
-} from "react-icons/md";
+import { MdAccountCircle, MdSpaceDashboard } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { ROLE_ADMIN, ROLE_OPERATOR } from "../../utils/constant";
-import {
-	FaLocationDot,
-	FaMapLocationDot,
-	FaRoute,
-	FaTicket,
-} from "react-icons/fa6";
+import { FaLocationDot, FaMapLocationDot } from "react-icons/fa6";
 import { BiTrip } from "react-icons/bi";
 
 function ControlPanelSider({ collapsed }) {
 	const location = useLocation();
 	const { user } = useSelector((state) => state.user);
 	const { pathname } = location;
-	console.log("User:", user);
 	const isAdmin = user?.roles !== null && user.roles.includes(ROLE_ADMIN);
 	const isOperator = user?.roles !== null && user.roles.includes(ROLE_OPERATOR);
 
 	const calcSelectedKey = () => {
 		if (pathname.includes("dashboard")) return "1";
-		if (pathname.includes("operators")) return "operators";
-		if (pathname.includes("travelers")) return "travelers";
+		if (pathname.includes("operators")) return "3";
+		if (pathname.includes("travelers")) return "4";
 		if (pathname.includes("destinations")) return "5";
 		if (pathname.includes("itineraries")) return "6";
 		if (pathname.includes("provinces")) return "7";
@@ -56,7 +43,7 @@ function ControlPanelSider({ collapsed }) {
 					(isAdmin || isOperator) && {
 						key: "1",
 						icon: <MdSpaceDashboard />,
-						label: <Link to="dashboard">Dashboard</Link>,
+						label: <Link to="/manage">Dashboard</Link>,
 					},
 					isAdmin && {
 						key: "2",
@@ -64,29 +51,29 @@ function ControlPanelSider({ collapsed }) {
 						label: <p>Users</p>,
 						children: [
 							{
-								key: "operators",
-								label: <Link to="operators">Operators</Link>,
+								key: "3",
+								label: <Link to="/manage/operators">Operators</Link>,
 							},
 							{
-								key: "travelers",
-								label: <Link to="travelers">Travelers</Link>,
+								key: "4",
+								label: <Link to="/manage/travelers">Travelers</Link>,
 							},
 						],
 					},
 					isAdmin && {
 						key: "5",
 						icon: <FaMapLocationDot />,
-						label: <Link to="destinations">Destinations</Link>,
+						label: <Link to="/manage/destinations">Destinations</Link>,
 					},
 					isAdmin && {
 						key: "6",
 						icon: <BiTrip />,
-						label: <Link to="itineraries">Itineraries</Link>,
+						label: <Link to="/manage/itineraries">Itineraries</Link>,
 					},
 					isAdmin && {
 						key: "7",
 						icon: <FaLocationDot />,
-						label: <Link to="provinces">Provinces</Link>,
+						label: <Link to="/manage/provinces">Provinces</Link>,
 					},
 				]}
 			/>
