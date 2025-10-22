@@ -11,6 +11,7 @@ namespace vivuvn_api.Services.Implementations
 {
     public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient) : IItineraryService
     {
+        #region Itinerary Service Methods
 
 
         public async Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId)
@@ -22,7 +23,7 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<ItineraryDto> GetItineraryByIdAsync(int id)
         {
-            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id,
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id && !i.DeleteFlag,
                 includeProperties: "StartProvince,DestinationProvince");
 
             if (itinerary == null) throw new KeyNotFoundException($"Itinerary with id {id} not found.");
@@ -68,6 +69,7 @@ namespace vivuvn_api.Services.Implementations
             var budget = new Budget
             {
                 ItineraryId = itinerary.Id,
+                EstimatedBudget = 0, // default estimated budget
                 TotalBudget = 0 // default budget amount
             };
             await _unitOfWork.Budgets.AddAsync(budget);
@@ -76,6 +78,17 @@ namespace vivuvn_api.Services.Implementations
             return new CreateItineraryResponseDto { Id = itinerary.Id };
         }
 
+        public async Task<bool> DeleteItineraryByIdAsync(int id)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id && !i.DeleteFlag);
+            if (itinerary == null) return false;
+            itinerary.DeleteFlag = true;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+        #endregion
         public async Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId)
         {
             var days = await _unitOfWork.ItineraryDays.GetAllAsync(d => d.ItineraryId == itineraryId,

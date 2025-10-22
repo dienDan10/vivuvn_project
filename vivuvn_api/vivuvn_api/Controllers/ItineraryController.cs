@@ -54,5 +54,19 @@ namespace vivuvn_api.Controllers
 
             return Ok(response);
         }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteItinerary(int id)
+        {
+            var result = await _itineraryService.DeleteItineraryByIdAsync(id);
+
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+
+            return NoContent();
+        }
     }
 }

@@ -9,8 +9,9 @@ namespace vivuvn_api.Services.Interfaces
         Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId);
         Task<ItineraryDto> GetItineraryByIdAsync(int id);
         Task<CreateItineraryResponseDto> CreateItineraryAsync(int userId, CreateItineraryRequestDto request);
+        Task<bool> DeleteItineraryByIdAsync(int id);
         Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId);
 
         Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request);
-	}
+    }
 }
