@@ -210,7 +210,7 @@ def create_user_prompt(
         places_context += f"\nHiển thị {max_places_in_prompt}/{len(relevant_places)} địa điểm phù hợp nhất\n"
 
     # BUILD FINAL PROMPT (compact format)
-    special_reqs = f"Yêu cầu đặc biệt: {travel_request.special_requirements}\n" if travel_request.special_requirements else ""
+    special_reqs = f"Ưu tiên các địa điểm và khoảng thời gian thỏa mãn yêu cầu đặc biệt: {travel_request.special_requirements}\n" if travel_request.special_requirements else ""
 
     return f"""## NHIỆM VỤ
 Tạo lịch {duration} ngày cho {travel_request.destination}, CHỈ dùng địa điểm từ danh sách bên dưới.
