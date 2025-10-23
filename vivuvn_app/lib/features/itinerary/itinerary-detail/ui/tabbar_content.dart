@@ -15,22 +15,9 @@ class TabbarContent extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       children: const [
         // Tab 1 - Tổng quan
-        CustomScrollView(
-          slivers: [
-            PlaceList(),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: SizedBox(height: 5),
-            ),
-          ],
-        ),
+        PlaceList(),
         // Tab 2 - Lịch trình
         ScheduleTab(),
-        // Scaffold(
-        //   body: const Text('Lich trinh trong'),
-        //   floatingActionButton: const ButtonGenerateItinerary(),
-        //   floatingActionButtonLocation: ExpandableFab.location,
-        // ),
         // Tab 3 - Ngân sách
         BudgetTab(),
       ],

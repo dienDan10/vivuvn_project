@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../common/helper/app_constants.dart';
 import '../controller/itinerary_detail_controller.dart';
 import '../state/itinerary_detail_state.dart';
-import 'day_selector_persistent_header.dart';
+import 'budget_header_persistent.dart';
+import 'day_selector_persistent.dart';
 import 'hero_section.dart';
 import 'tabbar_content.dart';
 import 'tabbar_header.dart';
@@ -21,6 +22,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   late TabController _tabController;
+  bool _isHeroCollapsed = false;
 
   late ProviderSubscription<ItineraryDetailState> _itineraryListener;
 
@@ -55,12 +57,26 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeInOut,
         );
+
+        _isHeroCollapsed = true;
+      } else if (_tabController.indexIsChanging && _tabController.index == 0) {
+        // Reset when returning to Overview tab
+        _isHeroCollapsed = false;
       }
 
-      // Rebuild to show/hide DaySelectorBar
-      if (mounted) {
-        setState(() {});
-      }
+      // Listen to scroll position to prevent scrolling back up
+      _scrollController.addListener(() {
+        if (_tabController.index != 0 && _isHeroCollapsed) {
+          final collapsePoint =
+              appbarExpandedHeight -
+              (kToolbarHeight + MediaQuery.of(context).padding.top);
+
+          // Prevent scrolling above the collapse point
+          if (_scrollController.offset < collapsePoint) {
+            _scrollController.jumpTo(collapsePoint);
+          }
+        }
+      });
     });
   }
 
@@ -109,8 +125,9 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
               TabbarHeader(tabController: _tabController),
 
               // Add DaySelectorBar only when Schedule tab is active
-              if (_tabController.index == 1)
-                const DaySelectorPersistentHeader(),
+              if (_tabController.index == 1) const DaySelectorPersistent(),
+
+              if (_tabController.index == 2) const BudgetHeaderPersistent(),
             ],
             body: TabbarContent(tabController: _tabController),
           );
