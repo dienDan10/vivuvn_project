@@ -111,8 +111,8 @@ class PineconeDataLoader:
 
                     # Use service method instead of direct index access
                     success = await self.vector_service.upsert_vectors(
-                        vectors=batch,
-                        namespace=""  # Explicit default namespace
+                        vectors=batch
+                        # Uses PINECONE_DEFAULT_NAMESPACE from settings
                     )
 
                     if not success:

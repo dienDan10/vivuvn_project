@@ -33,9 +33,8 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm -rf /root/.cache/pip && \
     rm -rf /tmp/*
 
-# NOTE: ML model will be downloaded at runtime (first startup only)
-# This reduces image size by ~500MB-1GB
-# Model cache will be stored in mounted volume for persistence across container restarts
+# NOTE: Using Google Gemini embeddings (cloud API), no local models needed
+# This significantly reduces image size compared to local ML models
 
 # =============================================================================
 # Stage 2: Runtime - Minimal production image
@@ -69,16 +68,15 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# NOTE: Model cache NOT copied - will be downloaded at runtime into mounted volume
-# This approach allows:
-# 1. Smaller image size (~1.5-2GB instead of 2.5-3GB)
-# 2. Easy model updates (just delete volume)
-# 3. Shared cache across multiple containers
-# 4. Works across different machines (cloud deployment friendly)
+# NOTE: Using cloud-based Gemini embeddings, no local model cache needed
+# Benefits:
+# 1. Much smaller image size (~1GB vs 2.5-3GB with local models)
+# 2. No model download wait time on first startup
+# 3. Automatic model updates from Google
+# 4. Consistent performance across all deployments
 
 # Copy application code
 COPY --chown=vivuapp:vivuapp app/ /app/app/
-COPY --chown=vivuapp:vivuapp load_location_data.py /app/
 COPY --chown=vivuapp:vivuapp requirements.txt /app/
 
 # NOTE: Data directory should be mounted as volume, not copied into image
@@ -86,10 +84,10 @@ COPY --chown=vivuapp:vivuapp requirements.txt /app/
 # Uncomment only if you need data embedded in image (not recommended)
 # COPY --chown=vivuapp:vivuapp data/ /app/data/
 
-# Create directories for logs, temporary files, data, and model cache
+# Create directories for logs, temporary files, and data
 # These will be mounted as volumes at runtime
-RUN mkdir -p /app/logs /app/tmp /app/data /home/vivuapp/.cache && \
-    chown -R vivuapp:vivuapp /app /home/vivuapp
+RUN mkdir -p /app/logs /app/tmp /app/data && \
+    chown -R vivuapp:vivuapp /app
 
 # Switch to non-root user
 USER vivuapp
