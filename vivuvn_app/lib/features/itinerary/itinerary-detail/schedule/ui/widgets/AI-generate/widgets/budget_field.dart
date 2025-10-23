@@ -1,88 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../common/validator/validator.dart';
+import '../../../../controller/automically_generate_by_ai_controller.dart';
+import 'budget_text_field.dart';
+import 'conversion_info.dart';
+import 'currency_dropdown.dart';
 
-class BudgetField extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final String currency;
-  final ValueChanged<String?> onCurrencyChanged;
-  final String? convertedVnd;
+class BudgetField extends ConsumerStatefulWidget {
+  const BudgetField({super.key});
 
-  const BudgetField({
-    super.key,
-    required this.controller,
-    required this.focusNode,
-    required this.currency,
-    required this.onCurrencyChanged,
-    this.convertedVnd,
-  });
+  @override
+  ConsumerState<BudgetField> createState() => _BudgetFieldState();
+}
+
+class _BudgetFieldState extends ConsumerState<BudgetField> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = ref.read(automicallyGenerateByAiControllerProvider);
+    _controller = TextEditingController(
+      text: state.budget > 0 ? state.budget.toString() : '',
+    );
+    _focusNode = FocusNode();
+
+    _controller.addListener(() {
+      final text = _controller.text.replaceAll(',', '').trim();
+      final value = double.tryParse(text);
+      if (value != null) {
+        ref
+            .read(automicallyGenerateByAiControllerProvider.notifier)
+            .setBudget(value);
+      }
+    });
+
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) FocusScope.of(context).unfocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(final BuildContext context) {
+    final s = ref.watch(automicallyGenerateByAiControllerProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
-            Expanded(
-              child: TextFormField(
-                controller: controller,
-                focusNode: focusNode,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: const InputDecoration(
-                  labelText: 'Budget',
-                  hintText: 'e.g. 200 for USD or 4,800,000 for VND',
-                  helperText:
-                      'Enter total budget for the trip (total for all people)',
-                ),
-                validator: (final v) =>
-                    Validator.validateBudget(v, currency: currency),
-              ),
-            ),
-            const SizedBox(width: 12),
-            DropdownButton<String>(
-              value: currency,
-              items: const [
-                DropdownMenuItem(value: 'VND', child: Text('VND')),
-                DropdownMenuItem(value: 'USD', child: Text('USD')),
-              ],
-              onChanged: onCurrencyChanged,
-            ),
+            Expanded(child: BudgetTextField()),
+            SizedBox(width: 12),
+            CurrencyDropdown(),
           ],
         ),
-        if (currency == 'USD')
-          Padding(
-            padding: const EdgeInsets.only(top: 6.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '1 USD ≈ 24,000 VND (approx)',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                ),
-                if (convertedVnd != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      '≈ $convertedVnd VND',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+        if (s.currency == 'USD') const ConversionInfo(),
       ],
     );
   }

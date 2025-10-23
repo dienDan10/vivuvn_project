@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../model/interested_category.dart';
-
 class InterestFooter extends StatelessWidget {
   final bool canProceed;
-  final Set<InterestCategory> selectedInterests;
   final VoidCallback onCancel;
   final VoidCallback onNext;
   final String primaryLabel;
@@ -13,7 +10,6 @@ class InterestFooter extends StatelessWidget {
   const InterestFooter({
     super.key,
     required this.canProceed,
-    required this.selectedInterests,
     required this.onCancel,
     required this.onNext,
     this.primaryLabel = 'Next',
@@ -25,7 +21,7 @@ class InterestFooter extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: TextButton(onPressed: onCancel, child: const Text('Cancel')),
+          child: TextButton(onPressed: onCancel, child: const Text('Hủy')),
         ),
         const SizedBox(width: 12),
         Expanded(

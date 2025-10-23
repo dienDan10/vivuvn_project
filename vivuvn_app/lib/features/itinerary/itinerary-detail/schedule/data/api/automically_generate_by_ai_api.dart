@@ -15,8 +15,6 @@ class AutomaticallyGenerateByAi {
   AutomaticallyGenerateByAi(this._dio);
 
   /// POST /api/v1/itineraries/{itineraryId}/days/auto-generate
-  /// Return the raw response so caller can inspect returned body
-  /// Uses extended timeout (3 minutes) because AI generation can be slow
   Future<Response> generateItineraryByAi({
     required final GenerateItineraryByAiRequest request,
   }) async {
@@ -24,8 +22,8 @@ class AutomaticallyGenerateByAi {
       '/api/v1/itineraries/${request.itineraryId}/days/auto-generate',
       data: request.toJson(),
       options: Options(
-        receiveTimeout: const Duration(minutes: 5), // 300s for AI processing
-        sendTimeout: const Duration(minutes: 1),
+        receiveTimeout: const Duration(minutes: 5),
+        // sendTimeout: const Duration(minutes: 1),
       ),
     );
     return resp;

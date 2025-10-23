@@ -14,6 +14,9 @@ class AutomaticallyGenerateByAiState {
   final String? specialRequirements;
   // Whether server response included generated data
   final bool isGenerated;
+  // UI currency selection and derived converted value (USD -> VND)
+  final String currency;
+  final String? convertedVnd;
 
   AutomaticallyGenerateByAiState({
     this.isLoading = false,
@@ -26,6 +29,8 @@ class AutomaticallyGenerateByAiState {
     this.budget = 0.0,
     this.specialRequirements,
     this.isGenerated = false,
+    this.currency = 'VND',
+    this.convertedVnd,
   });
 
   AutomaticallyGenerateByAiState copyWith({
@@ -39,6 +44,8 @@ class AutomaticallyGenerateByAiState {
     final double? budget,
     final String? specialRequirements,
     final bool? isGenerated,
+    final String? currency,
+    final String? convertedVnd,
   }) {
     return AutomaticallyGenerateByAiState(
       isLoading: isLoading ?? this.isLoading,
@@ -51,6 +58,8 @@ class AutomaticallyGenerateByAiState {
       budget: budget ?? this.budget,
       specialRequirements: specialRequirements ?? this.specialRequirements,
       isGenerated: isGenerated ?? this.isGenerated,
+      currency: currency ?? this.currency,
+      convertedVnd: convertedVnd ?? this.convertedVnd,
     );
   }
 }

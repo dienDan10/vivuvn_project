@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../model/interested_category.dart';
+import '../../../../controller/automically_generate_by_ai_controller.dart';
 import 'interest_grid.dart';
 
-class InterestSelectionStep extends StatelessWidget {
-  final ScrollController scrollController;
-  final Set<InterestCategory> selectedInterests;
-  final void Function(InterestCategory) onToggle;
-  final int maxSelection;
-
-  const InterestSelectionStep({
-    super.key,
-    required this.scrollController,
-    required this.selectedInterests,
-    required this.onToggle,
-    required this.maxSelection,
-  });
+class InterestSelectionStep extends ConsumerWidget {
+  const InterestSelectionStep({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final maxSelection = ref.watch(
+      automicallyGenerateByAiControllerProvider.select(
+        (final s) => s.maxSelection,
+      ),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -37,13 +33,7 @@ class InterestSelectionStep extends StatelessWidget {
         const SizedBox(height: 30),
 
         // Grid
-        Expanded(
-          child: InterestGrid(
-            controller: scrollController,
-            selectedInterests: selectedInterests,
-            onToggle: onToggle,
-          ),
-        ),
+        const Expanded(child: InterestGrid()),
       ],
     );
   }

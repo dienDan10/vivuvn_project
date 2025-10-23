@@ -4,14 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../../../common/validator/validator.dart';
 import '../../../../controller/automically_generate_by_ai_controller.dart';
 
-class GroupSizeField extends ConsumerStatefulWidget {
-  const GroupSizeField({super.key});
+class BudgetTextField extends ConsumerStatefulWidget {
+  const BudgetTextField({super.key});
 
   @override
-  ConsumerState<GroupSizeField> createState() => _GroupSizeFieldState();
+  ConsumerState<BudgetTextField> createState() => _BudgetTextFieldState();
 }
 
-class _GroupSizeFieldState extends ConsumerState<GroupSizeField> {
+class _BudgetTextFieldState extends ConsumerState<BudgetTextField> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
 
@@ -19,15 +19,18 @@ class _GroupSizeFieldState extends ConsumerState<GroupSizeField> {
   void initState() {
     super.initState();
     final state = ref.read(automicallyGenerateByAiControllerProvider);
-    _controller = TextEditingController(text: state.groupSize.toString());
+    _controller = TextEditingController(
+      text: state.budget > 0 ? state.budget.toString() : '',
+    );
     _focusNode = FocusNode();
 
     _controller.addListener(() {
-      final n = int.tryParse(_controller.text);
-      if (n != null) {
+      final text = _controller.text.replaceAll(',', '').trim();
+      final value = double.tryParse(text);
+      if (value != null) {
         ref
             .read(automicallyGenerateByAiControllerProvider.notifier)
-            .setGroupSize(n);
+            .setBudget(value);
       }
     });
 
@@ -45,19 +48,20 @@ class _GroupSizeFieldState extends ConsumerState<GroupSizeField> {
 
   @override
   Widget build(final BuildContext context) {
+    final s = ref.watch(automicallyGenerateByAiControllerProvider);
+
     return TextFormField(
       controller: _controller,
       focusNode: _focusNode,
-      keyboardType: TextInputType.number,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: const InputDecoration(
-        labelText: 'Số người',
-        hintText: 'vd. 2 (số người tham gia chuyến đi, tối đa 6)',
-        helperText: 'Nhập số người tham gia (1-6)',
+        labelText: 'Nhập ngân sách...',
+        helperText: 'Tổng ngân sách cho chuyến đi',
         border: InputBorder.none,
         isDense: true,
         contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
       ),
-      validator: Validator.validateGroupSize,
+      validator: (final v) => Validator.validateBudget(v, currency: s.currency),
     );
   }
 }

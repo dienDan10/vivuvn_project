@@ -49,10 +49,35 @@ class AutomaticallyGenerateByAiController
 
   void setBudget(final double budget) {
     state = state.copyWith(budget: budget);
+    // Recompute convertedVnd whenever budget changes
+    _recomputeConvertedVnd(state.currency, budget);
   }
 
   void setSpecialRequirements(final String? note) {
     state = state.copyWith(specialRequirements: note);
+  }
+
+  void setCurrency(final String currency) {
+    state = state.copyWith(currency: currency);
+    _recomputeConvertedVnd(currency, state.budget);
+  }
+
+  void _recomputeConvertedVnd(final String currency, final double budget) {
+    if (currency != 'USD' || budget <= 0) {
+      state = state.copyWith(convertedVnd: null);
+      return;
+    }
+    // Fixed conversion rate used in UI; keep consistent with layout
+    const double usdToVndRate = 24000;
+    final vnd = (budget * usdToVndRate).round();
+    final formatted = _formatVnd(vnd);
+    state = state.copyWith(convertedVnd: formatted);
+  }
+
+  String _formatVnd(final int value) {
+    final s = value.toString();
+    final reg = RegExp(r'\B(?=(\d{3})+(?!\d))');
+    return s.replaceAllMapped(reg, (final m) => ',');
   }
 
   void nextStep() {
@@ -66,19 +91,7 @@ class AutomaticallyGenerateByAiController
   Future<void> submitGenerate() async {
     state = state.copyWith(isLoading: true, error: null, isGenerated: false);
 
-    int? itineraryId = state.itineraryId;
-    itineraryId ??= ref.read(
-      itineraryScheduleControllerProvider.select((final s) => s.itineraryId),
-    );
-
-    if (itineraryId == null) {
-      state = state.copyWith(
-        isLoading: false,
-        error:
-            'Itinerary ID not found. Please open this from an itinerary context.',
-      );
-      return;
-    }
+    final int itineraryId = state.itineraryId!;
 
     final api = ref.read(automaticallyGenerateByAiProvider);
     try {
@@ -89,23 +102,8 @@ class AutomaticallyGenerateByAiController
         budget: state.budget,
         specialRequirements: state.specialRequirements,
       );
-      final response = await api.generateItineraryByAi(request: request);
-      bool parsedHasData() {
-        final data = response.data;
-        if (data == null) return false;
-        if (data is Map) return data.isNotEmpty;
-        if (data is List) return data.isNotEmpty;
-        return true;
-      }
-
-      if (response.statusCode == 200 && parsedHasData()) {
-        state = state.copyWith(isGenerated: true);
-      } else {
-        state = state.copyWith(
-          error:
-              'Server accepted the request but did not return generated itinerary data. It may be processing in background.',
-        );
-      }
+      await api.generateItineraryByAi(request: request);
+      state = state.copyWith(isGenerated: true);
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
     } on ValidationException catch (e) {
