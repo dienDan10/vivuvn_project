@@ -101,8 +101,8 @@ namespace vivuvn_api.Services.Implementations
             {
                 Origin = itinerary.StartProvince.Name,
                 Destination = itinerary.DestinationProvince.Name,
-                StartDate = itinerary.StartDate,
-                EndDate = itinerary.EndDate,
+                StartDate = itinerary.StartDate.Date,
+                EndDate = itinerary.EndDate.Date,
                 Preferences = request.Preferences,
                 GroupSize = request.GroupSize,
                 Budget = request.Budget,
