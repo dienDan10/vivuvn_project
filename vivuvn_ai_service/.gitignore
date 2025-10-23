@@ -156,7 +156,6 @@ tmp/
 
 # AI Model cache
 .cache/
-models/
 
 # Data files (keep structure but ignore large data files)
 data/raw/*.csv

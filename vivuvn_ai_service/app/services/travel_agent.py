@@ -143,7 +143,7 @@ class TravelPlanningAgent:
             # Build comprehensive search query
             search_query = travel_request.destination
             if travel_request.preferences:
-                search_query += f" {' '.join(travel_request.preferences)}"
+                search_query += f" {' '.join(travel_request.preferences)} {travel_request.special_requirements}"
 
             logger.info(f"[Node 2/5] Searching: {search_query} (duration: {duration_days} days, top_k: {dynamic_top_k})")
 
