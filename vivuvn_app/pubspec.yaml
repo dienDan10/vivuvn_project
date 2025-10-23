@@ -52,6 +52,7 @@ dependencies:
   equatable: ^2.0.5
   google_sign_in: ^7.1.1
   syncfusion_flutter_charts: ^31.2.2
+  google_maps_flutter: ^2.13.1
 
 dev_dependencies:
   flutter_test:
