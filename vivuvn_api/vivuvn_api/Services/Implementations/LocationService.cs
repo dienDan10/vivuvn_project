@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using LinqKit;
-using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -11,7 +10,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)
@@ -89,18 +88,41 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<LocationDto>(location);
         }
 
-        private static Expression<Func<T, bool>> CombineFilters<T>(Expression<Func<T, bool>> first,
-            Expression<Func<T, bool>> second)
+        public async Task<IEnumerable<RestaurantDto>> GetRestaurantsByLocationIdAsync(int locationId)
         {
-            var parameter = Expression.Parameter(typeof(T));
-            var combined = Expression.Lambda<Func<T, bool>>(
-                Expression.AndAlso(
-                    Expression.Invoke(first, parameter),
-                    Expression.Invoke(second, parameter)
-                ),
-                parameter
-            );
-            return combined;
+            // Get location and validate
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId);
+            if (location is null) throw new KeyNotFoundException("Location not found");
+            if (!location.Latitude.HasValue || !location.Longitude.HasValue)
+            {
+                return [];
+            }
+
+            // Fetch nearby restaurants from Google Maps API
+            var request = new FetchGoogleRestaurantRequestDto
+            {
+                LocationRestriction = new LocationRestriction
+                {
+                    Circle = new Circle
+                    {
+                        Center = new DTOs.Request.LatLng
+                        {
+                            Latitude = location.Latitude.Value,
+                            Longitude = location.Longitude.Value
+                        }
+                    }
+                },
+            };
+
+            var response = await _placeService.FetchNearbyRestaurantsAsync(request);
+
+            if (response is null || response.Places is null || !response.Places.Any())
+            {
+                return [];
+            }
+
+            // Map Place objects to RestaurantDto using AutoMapper
+            return _mapper.Map<IEnumerable<RestaurantDto>>(response.Places);
         }
     }
 }

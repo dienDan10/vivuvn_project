@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Models;
 
@@ -37,6 +38,15 @@ namespace vivuvn_api.Mappings
 
             // Mapping For Search Location
             CreateMap<Location, SearchLocationDto>();
+
+            // Mapping For Restaurant (Google Places API to RestaurantDto)
+            CreateMap<Place, RestaurantDto>()
+                .ForMember(dest => dest.GooglePlaceId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName != null ? src.DisplayName.Text : string.Empty))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.FormattedAddress ?? string.Empty))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null))
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos != null ? src.Photos.Select(p => p.Name).ToList() : null));
 
             // Mapping For Budget
             CreateMap<Budget, BudgetDto>();

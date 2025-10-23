@@ -24,6 +24,11 @@ class HomeScreen extends ConsumerWidget {
                 },
                 child: const Text('Logout'),
               ),
+
+              ElevatedButton(
+                onPressed: () {},
+                child: const Text('Nearby Restaurant'),
+              ),
             ],
           ),
         ),
