@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import '../../../overview/ui/widgets/place_card_image.dart';
 
 class PlacePhotosSection extends StatelessWidget {
-  const PlacePhotosSection({super.key, required this.photos});
+  const PlacePhotosSection({
+    super.key,
+    required this.photos,
+    required this.locationId,
+  });
 
   final List<String> photos;
+  final int locationId;
 
   void _openImageGallery(final BuildContext context, final int initialIndex) {
     showDialog(
@@ -14,7 +19,7 @@ class PlacePhotosSection extends StatelessWidget {
       barrierDismissible: true, // ấn ra ngoài để thoát
       builder: (_) {
         return GestureDetector(
-          onTap: () => Navigator.pop(context), // tap ra vùng ngoài
+          onTap: () => Navigator.pop(context), // tap ra vùng ngoài để thoát
           child: Stack(
             children: [
               // Nền đen mờ
@@ -28,7 +33,7 @@ class PlacePhotosSection extends StatelessWidget {
                   itemBuilder: (final context, final index) {
                     final photoUrl = photos[index];
                     return Hero(
-                      tag: 'photo_$index',
+                      tag: 'photo_${locationId}_$index',
                       child: InteractiveViewer(
                         clipBehavior: Clip.none,
                         panEnabled: true,
@@ -83,7 +88,7 @@ class PlacePhotosSection extends StatelessWidget {
         itemBuilder: (final context, final index) => GestureDetector(
           onTap: () => _openImageGallery(context, index),
           child: Hero(
-            tag: 'photo_$index',
+            tag: 'photo_${locationId}_$index',
             child: PlaceCardImage(imageUrl: photos[index], size: 80),
           ),
         ),

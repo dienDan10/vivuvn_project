@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../model/location.dart';
-import 'place_description_section.dart';
+import 'place_action_button_direction.dart';
+import 'place_action_button_info.dart';
+import 'place_action_button_location.dart';
+import 'place_action_button_website.dart';
 import 'place_info_row.dart';
-import 'place_link_row.dart';
 import 'place_photos_section.dart';
 
 class PlaceCardDetails extends StatelessWidget {
@@ -19,9 +21,6 @@ class PlaceCardDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (location.description.isNotEmpty)
-            PlaceDescriptionSection(description: location.description),
-
           if (location.address.isNotEmpty)
             PlaceInfoRow(
               icon: Icons.location_on_outlined,
@@ -35,13 +34,34 @@ class PlaceCardDetails extends StatelessWidget {
               text:
                   '${location.rating} (${location.ratingCount ?? 0} đánh giá)',
             ),
-          if (location.websiteUri != null && location.websiteUri!.isNotEmpty)
-            PlaceLinkRow(url: location.websiteUri!),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
           if (location.photos.length > 1)
-            PlacePhotosSection(photos: location.photos),
+            PlacePhotosSection(
+              photos: location.photos,
+              locationId: location.id,
+            ),
+
+          const SizedBox(height: 16),
+
+          // ==== Các nút hành động ====
+          SizedBox(
+            height: 50,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              children: [
+                PlaceActionButtonInfo(location: location),
+                const SizedBox(width: 8),
+                const PlaceActionButtonLocation(),
+                const SizedBox(width: 8),
+                const PlaceActionButtonDirection(),
+                const SizedBox(width: 8),
+                const PlaceActionButtonWebsite(),
+              ],
+            ),
+          ),
         ],
       ),
     );
