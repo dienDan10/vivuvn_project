@@ -20,13 +20,13 @@ class InterestSelectionStep extends ConsumerWidget {
       children: [
         // Title and description
         const Text(
-          'Let us know \nwhat you\'re interested in!',
+          'Hãy chọn những sở thích của bạn',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Text(
-          'Choose up to $maxSelection categories to get the best suggestions.',
+          'Chọn tối đa $maxSelection danh mục để nhận được gợi ý tốt nhất.',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
         ),

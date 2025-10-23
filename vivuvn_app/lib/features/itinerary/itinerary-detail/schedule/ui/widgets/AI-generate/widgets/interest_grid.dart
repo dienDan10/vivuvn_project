@@ -70,7 +70,7 @@ class InterestGrid extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  interest.name,
+                  interest.vNameseName,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: isSelected
