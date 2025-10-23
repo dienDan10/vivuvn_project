@@ -31,6 +31,8 @@ services:
     container_name: vivuvn-ai-service
     env_file:
       - ../vivuvn_ai_service/.env.docker  # Fixed: correct path to env file
+    ports:
+      - "8000:8000"
     volumes:
       - model-cache:/home/vivuapp/.cache
     networks:
