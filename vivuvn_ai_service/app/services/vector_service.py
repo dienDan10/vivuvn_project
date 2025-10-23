@@ -131,24 +131,28 @@ class VectorService:
         return await self.search(
             vector=query_embedding,
             top_k=top_k,
-            namespace="",  # Default namespace where data is stored
+            namespace=settings.PINECONE_DEFAULT_NAMESPACE,  # Use configured namespace for travel data
             filter_dict=combined_filter if combined_filter else None,
             include_metadata=True
         )
 
-    async def upsert_vectors(self, vectors: List[Dict[str, Any]], namespace: str = "") -> bool:
+    async def upsert_vectors(self, vectors: List[Dict[str, Any]], namespace: Optional[str] = None) -> bool:
         """
         Upsert vectors to Pinecone index.
 
         Args:
             vectors: List of dicts with 'id', 'values', and 'metadata'
                      Format: [{"id": "...", "values": [...], "metadata": {...}}]
-            namespace: Pinecone namespace (default: "")
+            namespace: Pinecone namespace (default: uses PINECONE_DEFAULT_NAMESPACE from settings)
 
         Returns:
             True if successful, False otherwise
         """
         try:
+            # Use configured default namespace if not specified
+            if namespace is None:
+                namespace = settings.PINECONE_DEFAULT_NAMESPACE
+
             # Pinecone v6+ accepts dict format directly - no conversion needed
             await asyncio.to_thread(
                 self.index.upsert,
@@ -161,18 +165,22 @@ class VectorService:
             logger.error(f"Failed to upsert vectors to namespace '{namespace}': {e}")
             return False
 
-    async def delete_vectors(self, ids: List[str], namespace: str = "") -> bool:
+    async def delete_vectors(self, ids: List[str], namespace: Optional[str] = None) -> bool:
         """
         Delete vectors by IDs from Pinecone index.
-        
+
         Args:
             ids: List of vector IDs to delete
-            namespace: Pinecone namespace
-        
+            namespace: Pinecone namespace (default: uses PINECONE_DEFAULT_NAMESPACE from settings)
+
         Returns:
             True if successful, False otherwise
         """
         try:
+            # Use configured default namespace if not specified
+            if namespace is None:
+                namespace = settings.PINECONE_DEFAULT_NAMESPACE
+
             self.index.delete(ids=ids, namespace=namespace)
             return True
         except Exception as e:
@@ -217,7 +225,7 @@ class VectorService:
         self,
         vector: List[float],
         top_k: int = 10,
-        namespace: str = "",
+        namespace: Optional[str] = None,
         filter_dict: Optional[Dict[str, Any]] = None,
         include_metadata: bool = True
     ) -> List[Dict[str, Any]]:
@@ -227,7 +235,7 @@ class VectorService:
         Args:
             vector: Query embedding vector
             top_k: Number of results
-            namespace: Namespace to search (default: "")
+            namespace: Namespace to search (default: uses PINECONE_DEFAULT_NAMESPACE from settings)
             filter_dict: Metadata filters
             include_metadata: Include metadata in results
 
@@ -235,6 +243,10 @@ class VectorService:
             List of results with id, score, and metadata
         """
         try:
+            # Use configured default namespace if not specified
+            if namespace is None:
+                namespace = settings.PINECONE_DEFAULT_NAMESPACE
+
             # Run blocking Pinecone call in thread pool (async-safe)
             response = await asyncio.to_thread(
                 self.index.query,
@@ -348,7 +360,7 @@ class VectorService:
             await self.search(
                 vector=test_embedding,
                 top_k=1,
-                namespace="",  # Use default namespace
+                namespace=None,  # Use configured default namespace
                 include_metadata=False
             )
 

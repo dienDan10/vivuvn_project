@@ -148,7 +148,11 @@ class TravelPlanningAgent:
             logger.info(f"[Node 2/5] Searching: {search_query} (duration: {duration_days} days, top_k: {dynamic_top_k})")
 
             # Generate embedding and search with filters
-            query_embedding = self.embedding_service._generate_embedding(search_query)
+            # Use RETRIEVAL_QUERY task type for user queries (optimized for search)
+            query_embedding = self.embedding_service._generate_embedding(
+                search_query,
+                task_type=settings.EMBEDDING_TASK_TYPE_QUERY
+            )
             results = await self.vector_service.search_places(
                 query_embedding=query_embedding,
                 top_k=dynamic_top_k,  # Dynamic based on trip duration

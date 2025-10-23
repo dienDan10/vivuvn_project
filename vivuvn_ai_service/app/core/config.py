@@ -21,8 +21,12 @@ class Settings(BaseSettings):
     # DATABASE_URL: Optional[str] = None  # Commented out - using external MySQL
     
     # Embeddings Configuration
-    EMBEDDING_MODEL: str = "huyydangg/DEk21_hcmute_embedding"  # Vietnamese-specific embedding model
-    VECTOR_DIMENSION: int = 768  # Standard dimension for most transformer models
+    EMBEDDING_MODEL: str = "gemini-embedding-001"  # Google Gemini embedding model
+    VECTOR_DIMENSION: int = 768  # Optimized dimension (supports 128-3072, recommended: 768, 1536, 3072)
+
+    # Gemini Embedding Task Types (for optimization)
+    EMBEDDING_TASK_TYPE_DOCUMENT: str = "RETRIEVAL_DOCUMENT"  # For storing documents in vector DB
+    EMBEDDING_TASK_TYPE_QUERY: str = "RETRIEVAL_QUERY"       # For user search queries
 
     # Pinecone Configuration (Serverless)
     PINECONE_API_KEY: Optional[str] = None
@@ -34,7 +38,7 @@ class Settings(BaseSettings):
     PINECONE_INCLUDE_VALUES: bool = False  # Don't return vectors in query results
     PINECONE_SHOW_PROGRESS: bool = False   # Disable progress tracking in production
     PINECONE_METRIC: str = "cosine"        # Explicit similarity metric
-    PINECONE_DEFAULT_NAMESPACE: str = ""   # Default namespace (empty string)
+    PINECONE_DEFAULT_NAMESPACE: str = "travel_location"   # Namespace for travel/location data
 
     # Dynamic top_k Configuration (optimized for token efficiency)
     VECTOR_SEARCH_BASE_K: int = 8          # Baseline places for any search
