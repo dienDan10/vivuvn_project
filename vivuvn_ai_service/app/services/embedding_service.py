@@ -1,8 +1,10 @@
 """
-Embedding service for Vietnamese travel data with optimized chunking and minimal metadata.
+Embedding service for travel data with optimized chunking and minimal metadata.
 
 This service implements an optimized approach where Pinecone stores only search-essential
 metadata while full place data is stored separately and fetched after search.
+
+Uses Google Gemini embedding model (gemini-embedding-001) with task-specific optimization.
 """
 
 import structlog
@@ -15,9 +17,11 @@ except ImportError:
     RecursiveCharacterTextSplitter = None
 
 try:
-    from sentence_transformers import SentenceTransformer
+    from google import genai
+    from google.genai import types
 except ImportError:
-    SentenceTransformer = None
+    genai = None
+    types = None
 
 from app.core.config import settings
 
@@ -32,36 +36,40 @@ class EmbeddingServiceError(Exception):
 class EmbeddingService:
     """
     Service for generating embeddings with minimal metadata approach.
-    
+
     Architecture:
     - Pinecone = Search Index (minimal metadata only)
     - Separate Database/JSON = Full Data Store
-    
+
     Flow:
     1. User query → Pinecone → Get place_ids + minimal metadata
     2. Fetch full place details from database using place_ids
     3. Return complete results to user
+
+    Uses Google Gemini embedding model with task-specific optimization:
+    - RETRIEVAL_DOCUMENT: For storing documents in Pinecone
+    - RETRIEVAL_QUERY: For user search queries
     """
-    
+
     def __init__(self):
-        """Initialize embedding service with model and text splitter."""
+        """Initialize embedding service with Gemini client and text splitter."""
         logger.info("Initializing EmbeddingService...")
-        
+
         # Check dependencies
-        if not SentenceTransformer:
-            raise EmbeddingServiceError("sentence-transformers library not available")
+        if not genai:
+            raise EmbeddingServiceError("google-genai library not available")
         if not RecursiveCharacterTextSplitter:
             raise EmbeddingServiceError("langchain library not available")
-        
-        # Load Vietnamese embedding model
+
+        # Initialize Google Gemini client
         try:
-            logger.info(f"Loading {settings.EMBEDDING_MODEL} model...")
-            self.model = SentenceTransformer(settings.EMBEDDING_MODEL)
-            logger.info(f"Model loaded successfully ({settings.VECTOR_DIMENSION} dims)")
+            logger.info(f"Initializing Gemini client with model: {settings.EMBEDDING_MODEL}")
+            self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            logger.info(f"Gemini client initialized ({settings.VECTOR_DIMENSION} dims)")
         except Exception as e:
-            logger.error(f"Failed to load embedding model: {e}")
-            raise EmbeddingServiceError(f"Failed to load model: {e}")
-        
+            logger.error(f"Failed to initialize Gemini client: {e}")
+            raise EmbeddingServiceError(f"Failed to initialize Gemini: {e}")
+
         # Initialize LangChain text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1200,
@@ -70,7 +78,7 @@ class EmbeddingService:
             length_function=len,
             is_separator_regex=False
         )
-        
+
         logger.info("EmbeddingService initialized successfully")
     
     def process_place(self, place: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -197,31 +205,41 @@ class EmbeddingService:
         
         return "\n".join(part for part in embedding_parts if part)
     
-    def _generate_embedding(self, text: str) -> List[float]:
+    def _generate_embedding(self, text: str, task_type: Optional[str] = None) -> List[float]:
         """
-        Generate embedding using Vietnamese model (huyydangg/DEk21_hcmute_embedding).
+        Generate embedding using Google Gemini embedding model (gemini-embedding-001).
 
-        This model produces 768-dimensional embeddings optimized for Vietnamese text.
+        This model produces embeddings optimized for various tasks using task-specific configuration.
+        Default dimension is 768 (configurable from 128-3072).
 
         Args:
             text: Text to embed
+            task_type: Task type for optimization (RETRIEVAL_DOCUMENT, RETRIEVAL_QUERY, etc.)
+                      Defaults to RETRIEVAL_DOCUMENT if not specified.
 
         Returns:
-            List[float]: 768-dimensional embedding vector
+            List[float]: Embedding vector (dimension specified in settings)
 
         Raises:
             EmbeddingServiceError: If embedding generation fails
         """
         try:
-            # Generate embedding with normalization
-            embedding = self.model.encode(
-                text,
-                convert_to_tensor=False,
-                normalize_embeddings=True
+            # Use RETRIEVAL_DOCUMENT as default for backward compatibility
+            if task_type is None:
+                task_type = settings.EMBEDDING_TASK_TYPE_DOCUMENT
+
+            # Generate embedding with Gemini API
+            result = self.client.models.embed_content(
+                model=settings.EMBEDDING_MODEL,
+                contents=text,
+                config=types.EmbedContentConfig(
+                    output_dimensionality=settings.VECTOR_DIMENSION,
+                    task_type=task_type
+                )
             )
 
-            # Convert numpy array to list (required for Pinecone)
-            embedding_list = embedding.tolist()
+            # Extract embedding values from response
+            embedding_list = result.embeddings[0].values
 
             # Verify dimension matches configuration
             if len(embedding_list) != settings.VECTOR_DIMENSION:
@@ -236,8 +254,8 @@ class EmbeddingService:
         except EmbeddingServiceError:
             raise
         except Exception as e:
-            logger.error(f"Failed to generate embedding: {e}")
-            raise EmbeddingServiceError(f"Embedding generation failed: {e}")
+            logger.error(f"Failed to generate embedding with Gemini: {e}")
+            raise EmbeddingServiceError(f"Gemini embedding generation failed: {e}")
     
     def _create_minimal_metadata(
         self, 
@@ -297,17 +315,19 @@ class EmbeddingService:
     def get_embedding_stats(self) -> Dict[str, Any]:
         """
         Get embedding service statistics.
-        
+
         Returns:
             dict: Service statistics
         """
         return {
             "model_name": settings.EMBEDDING_MODEL,
             "vector_dimension": settings.VECTOR_DIMENSION,
+            "task_type_document": settings.EMBEDDING_TASK_TYPE_DOCUMENT,
+            "task_type_query": settings.EMBEDDING_TASK_TYPE_QUERY,
             "chunk_size": 1200,
             "chunk_overlap": 100,
             "min_chunk_length": 100,
-            "model_loaded": self.model is not None,
+            "client_initialized": self.client is not None,
             "splitter_configured": self.text_splitter is not None
         }
     

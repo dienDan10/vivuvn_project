@@ -15,10 +15,8 @@ langchain-google-genai==2.0.9
 langgraph==0.6.5
 
 # Google Gemini AI (modern unified SDK, replaces google-generativeai)
+# Includes embedding model support (gemini-embedding-001)
 google-genai==1.38.0
-
-# Vietnamese embedding model support
-sentence-transformers==5.1.0
 
 # =============================================================================
 # Vector Database

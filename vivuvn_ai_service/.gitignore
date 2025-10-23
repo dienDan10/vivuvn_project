@@ -165,4 +165,6 @@ data/processed/*.pkl
 data/processed/*.json
 
 # Keep sample data
-!data/sample_data.json
+Claude.md
+.claude
+/Secrets/

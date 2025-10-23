@@ -21,8 +21,12 @@ class Settings(BaseSettings):
     # DATABASE_URL: Optional[str] = None  # Commented out - using external MySQL
     
     # Embeddings Configuration
-    EMBEDDING_MODEL: str = "huyydangg/DEk21_hcmute_embedding"  # Vietnamese-specific embedding model
-    VECTOR_DIMENSION: int = 768  # Standard dimension for most transformer models
+    EMBEDDING_MODEL: str = "gemini-embedding-001"  # Google Gemini embedding model
+    VECTOR_DIMENSION: int = 768  # Optimized dimension (supports 128-3072, recommended: 768, 1536, 3072)
+
+    # Gemini Embedding Task Types (for optimization)
+    EMBEDDING_TASK_TYPE_DOCUMENT: str = "RETRIEVAL_DOCUMENT"  # For storing documents in vector DB
+    EMBEDDING_TASK_TYPE_QUERY: str = "RETRIEVAL_QUERY"       # For user search queries
 
     # Pinecone Configuration (Serverless)
     PINECONE_API_KEY: Optional[str] = None
@@ -34,14 +38,14 @@ class Settings(BaseSettings):
     PINECONE_INCLUDE_VALUES: bool = False  # Don't return vectors in query results
     PINECONE_SHOW_PROGRESS: bool = False   # Disable progress tracking in production
     PINECONE_METRIC: str = "cosine"        # Explicit similarity metric
-    PINECONE_DEFAULT_NAMESPACE: str = ""   # Default namespace (empty string)
+    PINECONE_DEFAULT_NAMESPACE: str = "travel_location"   # Namespace for travel/location data
 
-    # Dynamic top_k Configuration (optimizes search based on trip duration)
-    VECTOR_SEARCH_BASE_K: int = 8         # Baseline places for any search
+    # Dynamic top_k Configuration (optimized for token efficiency)
+    VECTOR_SEARCH_BASE_K: int = 8          # Baseline places for any search
     VECTOR_SEARCH_MIN_K: int = 8           # Minimum top_k (short trips)
-    VECTOR_SEARCH_MAX_K: int = 50           # Maximum top_k (prevent excessive fetches)
-    VECTOR_SEARCH_ACTIVITIES_PER_DAY: float = 3.5  # Expected activities per day
-    VECTOR_SEARCH_DIVERSITY_FACTOR: float = 2.0    # Fetch 2x for AI selection diversity
+    VECTOR_SEARCH_MAX_K: int = 35          # Maximum top_k (token-optimized, reduced from 50)
+    VECTOR_SEARCH_ACTIVITIES_PER_DAY: float = 3.0  # Activities per day (reduced from 3.5)
+    VECTOR_SEARCH_DIVERSITY_FACTOR: float = 1.5    # Diversity factor (reduced from 2.0 for efficiency)
 
     # AI Configuration (Updated to use google-genai v0.12+)
     GEMINI_API_KEY: Optional[str] = None
