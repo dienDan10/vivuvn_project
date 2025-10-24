@@ -49,16 +49,68 @@ namespace vivuvn_api.Services.Implementations
 
                 var response = await _httpClient.SendAsync(requestMessage);
 
-                //if (!response.IsSuccessStatusCode)
-                //{
-                //    // log the error
-                //    Console.WriteLine($"Error fetching nearby restaurants: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
-                //    Console.WriteLine($"Request Body: {jsonBody}");
-                //}
-
                 response.EnsureSuccessStatusCode();
 
                 var responseContent = await response.Content.ReadFromJsonAsync<FetchGoogleRestaurantResponseDto>();
+
+                // Fetch photo URLs for each place
+                if (responseContent?.Places != null)
+                {
+                    await FetchPlacesPhotosAsync(responseContent.Places);
+                }
+
+                return responseContent;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<FetchGoogleHotelResponseDto?> FetchNearbyHotelsAsync(Location location)
+        {
+            string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            var request = new FetchGoogleRestaurantRequestDto
+            {
+                IncludedTypes = new List<string> { "lodging" }, // Change to hotel/lodging type
+                LocationRestriction = new LocationRestriction
+                {
+                    Circle = new Circle
+                    {
+                        Center = new LatLng
+                        {
+                            Latitude = location.Latitude.Value,
+                            Longitude = location.Longitude.Value
+                        }
+                    }
+                },
+            };
+
+            // Serialize with options to ignore null values
+            var jsonOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var jsonBody = JsonSerializer.Serialize(request, jsonOptions);
+            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, "./v1/places:searchNearby")
+                {
+                    Content = content
+                };
+
+                requestMessage.Headers.Add("X-Goog-Api-Key", apiKey);
+                requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.location,places.googleMapsUri,places.priceLevel,places.photos");
+
+                var response = await _httpClient.SendAsync(requestMessage);
+
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadFromJsonAsync<FetchGoogleHotelResponseDto>();
 
                 // Fetch photo URLs for each place
                 if (responseContent?.Places != null)
