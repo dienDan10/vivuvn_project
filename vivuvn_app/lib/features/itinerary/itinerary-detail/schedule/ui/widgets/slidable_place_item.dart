@@ -31,6 +31,7 @@ class SlidablePlaceItem extends ConsumerWidget {
               await ref
                   .read(itineraryScheduleControllerProvider.notifier)
                   .deleteItem(dayId, item.itineraryItemId);
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Đã xóa ${item.location.name}')),
               );

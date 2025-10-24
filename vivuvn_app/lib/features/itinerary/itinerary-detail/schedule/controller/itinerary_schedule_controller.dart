@@ -110,7 +110,17 @@ class ItineraryScheduleController
     }
   }
 
-  // === Cập nhật item ===
+  // === State helper ===
+  void selectDay(final int index) {
+    if (index < 0 || index >= state.days.length) return;
+    final selectedDayId = state.days[index].id;
+
+    state = state.copyWith(selectedIndex: index, selectedDayId: selectedDayId);
+  }
+
+  void selectItem(final ItineraryItem item) =>
+      state = state.copyWith(selectedItem: item);
+
   Future<void> updateItem({
     required final int dayId,
     required final int itemId,
@@ -123,28 +133,36 @@ class ItineraryScheduleController
       await ref
           .read(itineraryScheduleServiceProvider)
           .updateItem(
-            itineraryId!,
-            dayId,
-            itemId,
+            itineraryId: itineraryId!,
+            dayId: dayId,
+            itemId: itemId,
             note: note,
             startTime: startTime,
             endTime: endTime,
           );
 
-      await fetchItemsByDay(dayId);
+      // Cập nhật trực tiếp trong state mà không gọi API lại
+      final updatedDays = state.days.map((final day) {
+        if (day.id == dayId) {
+          final updatedItems = day.items.map((final item) {
+            if (item.itineraryItemId == itemId) {
+              return item.copyWith(
+                note: note,
+                startTime: startTime,
+                endTime: endTime,
+              );
+            }
+            return item;
+          }).toList();
+          return day.copyWith(items: updatedItems);
+        }
+        return day;
+      }).toList();
+
+      state = state.copyWith(days: updatedDays);
+      // refresh lại danh sách
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
-
-  // === State helper ===
-  void selectDay(final int index) {
-    if (index < 0 || index >= state.days.length) return;
-    final selectedDayId = state.days[index].id;
-
-    state = state.copyWith(selectedIndex: index, selectedDayId: selectedDayId);
-  }
-
-  void selectItem(final ItineraryItem item) =>
-      state = state.copyWith(selectedItem: item);
 }

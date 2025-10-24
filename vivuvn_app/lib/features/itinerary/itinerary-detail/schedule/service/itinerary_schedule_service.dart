@@ -59,11 +59,11 @@ class ItineraryScheduleService {
     );
   }
 
-  /// Cập nhật item (note, time, ...)
-  Future<void> updateItem(
-    final int itineraryId,
-    final int dayId,
-    final int itemId, {
+  /// Cập nhật item (note, startTime, endTime)
+  Future<void> updateItem({
+    required final int itineraryId,
+    required final int dayId,
+    required final int itemId,
     final String? note,
     final TimeOfDay? startTime,
     final TimeOfDay? endTime,
