@@ -5,7 +5,7 @@ import '../../core/data/remote/network/network_service.dart';
 import '../../core/data/remote/token/token_service.dart';
 import 'auth_state.dart';
 
-class AuthController extends AutoDisposeNotifier<AuthState> {
+class AuthController extends Notifier<AuthState> {
   @override
   AuthState build() {
     return AuthState();
@@ -62,7 +62,6 @@ class AuthController extends AutoDisposeNotifier<AuthState> {
   }
 }
 
-final authControllerProvider =
-    AutoDisposeNotifierProvider<AuthController, AuthState>(
-      () => AuthController(),
-    );
+final authControllerProvider = NotifierProvider<AuthController, AuthState>(
+  () => AuthController(),
+);

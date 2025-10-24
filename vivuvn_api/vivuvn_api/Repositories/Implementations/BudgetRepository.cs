@@ -119,5 +119,11 @@ namespace vivuvn_api.Repositories.Implementations
             _context.Budgets.Update(budget);
             return item;
         }
+
+        public async Task<IEnumerable<BudgetType>> GetAllBudgetTypesAsync()
+        {
+            var budgetTypes = await _context.BudgetTypes.ToListAsync();
+            return budgetTypes;
+        }
     }
 }

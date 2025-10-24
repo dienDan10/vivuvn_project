@@ -17,6 +17,12 @@ const Login = lazy(() => import("./pages/Login"));
 const ControlPanelLayout = lazy(() =>
 	import("./layouts/control-panel/ControlPanelLayout")
 );
+const ProvinceLayout = lazy(() =>
+	import("./features/admin/province/ProvinceLayout")
+);
+const TravelerLayout = lazy(() =>
+	import("./features/admin/traveler/TravelerLayout")
+);
 
 const router = createBrowserRouter([
 	{
@@ -41,6 +47,24 @@ const router = createBrowserRouter([
 			</ProtectedRoute>
 		),
 		errorElement: <PageNotFound />,
+		children: [
+			{
+				path: "provinces",
+				element: (
+					<Suspense fallback={<SpinnerLarge />}>
+						<ProvinceLayout />
+					</Suspense>
+				),
+			},
+			{
+				path: "travelers",
+				element: (
+					<Suspense fallback={<SpinnerLarge />}>
+						<TravelerLayout />
+					</Suspense>
+				),
+			},
+		],
 	},
 	{
 		path: "*",

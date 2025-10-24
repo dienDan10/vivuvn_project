@@ -8,6 +8,7 @@ namespace vivuvn_api.Controllers
     [ApiController]
     public class AuthController(IAuthService _authService) : ControllerBase
     {
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {

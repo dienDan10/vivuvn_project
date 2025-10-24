@@ -49,12 +49,14 @@ class Validator {
   }) {
     if (value == null || value.trim().isEmpty) return 'Please enter a budget';
     final amount = double.tryParse(value.replaceAll(',', '').trim());
-    if (amount == null || amount <= 0)
+    if (amount == null || amount <= 0) {
       return 'Budget must be a positive number';
+    }
     // Optional: enforce minimum reasonable amount (e.g., 1)
     if (currency == 'USD' && amount < 1) return 'Budget must be at least 1 USD';
-    if (currency == 'VND' && amount < 1000)
+    if (currency == 'VND' && amount < 1000) {
       return 'Budget must be at least 1,000 VND';
+    }
     return null;
   }
 
@@ -110,6 +112,21 @@ class Validator {
     if (text == null || text.trim().isEmpty) return null; // optional
     if (containsSensitiveWords(text)) return 'Note contains prohibited words';
     if (text.length > 500) return 'Note is too long (max 500 chars)';
+    return null;
+  }
+
+  // Validate money that can be zero or positive (for estimated budget)
+  static String? moneyOrZero(
+    final String? value, {
+    final String fieldName = 'Số tiền',
+  }) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName must not be empty';
+    }
+    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    if (amount == null || amount < 0) {
+      return '$fieldName is not valid';
+    }
     return null;
   }
 }

@@ -6,7 +6,6 @@ import '../../ui/btn_ai_gen_itinerary.dart';
 import '../controller/itinerary_schedule_controller.dart';
 import 'widgets/add_hotel_expan.dart';
 import 'widgets/add_restaurant_expan.dart';
-import 'widgets/day_selector_bar.dart';
 import 'widgets/day_title.dart';
 import 'widgets/place_list_section.dart';
 import 'widgets/suggested_places_tile.dart';
@@ -51,27 +50,20 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
         : null;
 
     return Scaffold(
-      body: Column(
-        children: [
-          const DaySelectorBar(),
-          Expanded(
-            child: selectedDay == null
-                ? const Center(
-                    child: Text('Chưa có ngày nào trong lịch trình.'),
-                  )
-                : ListView(
-                    padding: EdgeInsets.zero,
-                    children: const [
-                      DayTitle(),
-                      PlaceListSection(),
-                      SuggestedPlacesTile(),
-                      AddHotelTile(),
-                      AddRestaurantTile(),
-                    ],
-                  ),
-          ),
-        ],
-      ),
+      body: selectedDay == null
+          ? const Center(child: Text('Chưa có ngày nào trong lịch trình.'))
+          : ListView(
+              padding: EdgeInsets.zero,
+              physics: const BouncingScrollPhysics(),
+              children: const [
+                DayTitle(),
+                PlaceListSection(),
+                SuggestedPlacesTile(),
+                AddHotelTile(),
+                AddRestaurantTile(),
+                SizedBox(height: 80), // Space for FAB
+              ],
+            ),
       floatingActionButton: const ButtonGenerateItinerary(),
       floatingActionButtonLocation: ExpandableFab.location,
     );

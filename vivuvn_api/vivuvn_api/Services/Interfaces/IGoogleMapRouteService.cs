@@ -5,6 +5,6 @@ namespace vivuvn_api.Services.Interfaces
 {
     public interface IGoogleMapRouteService
     {
-        Task<RouteInforResponseDto?> GetRouteInformationAsync(GetRouteInforRequestDto request);
+        Task<GetRouteInfoResponseDto?> GetRouteInformationAsync(ComputeRouteRequestDto request);
     }
 }

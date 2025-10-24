@@ -30,6 +30,9 @@ namespace vivuvn_api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BudgetId"));
 
+                    b.Property<decimal>("EstimatedBudget")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ItineraryId")
                         .HasColumnType("int");
 

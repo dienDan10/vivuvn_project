@@ -59,6 +59,42 @@ namespace vivuvn_api.Repositories.Implementations
             return await query.ToListAsync();
         }
 
+        public async Task<(IEnumerable<T> items, int totalCount)> GetPagedAsync(
+            Expression<Func<T, bool>>? filter = null,
+            string? includeProperties = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            int pageNumber = 1,
+            int pageSize = 10)
+        {
+            IQueryable<T> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            var items = await query.ToListAsync();
+
+            return (items, totalCount);
+        }
+
         public async Task<T?> GetByIdAsync(int id)
         {
             return await dbSet.FindAsync(id);
@@ -70,10 +106,15 @@ namespace vivuvn_api.Repositories.Implementations
 
             if (!string.IsNullOrEmpty(includeProperties))
             {
-                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries))
+                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(includeProperty);
                 }
+            }
+
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
             }
 
             return await query.FirstOrDefaultAsync(filter);

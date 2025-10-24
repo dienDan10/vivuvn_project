@@ -16,8 +16,6 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IItineraryRepository, ItineraryRepository>();
             services.AddScoped<IItineraryDayRepository, ItineraryDayRepository>();
             services.AddScoped<IBudgetRepository, BudgetRepository>();
-            services.AddScoped<IBudgetItemRepository, BudgetItemRepository>();
-            services.AddScoped<IBudgetTypeRepository, BudgetTypeRepository>();
             services.AddScoped<IProvinceRepository, ProvinceRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
             services.AddScoped<IFavoritePlaceRepository, FavoritePlaceRepository>();
@@ -41,6 +39,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IItineraryItemService, ItineraryItemService>();
             services.AddScoped<IBudgetService, BudgetService>();
             services.AddScoped<IAiClientService, AiClientService>();
+            services.AddScoped<IGoogleMapRouteService, GoogleMapRouteService>();
             return services;
         }
 
@@ -70,8 +69,6 @@ namespace vivuvn_api.Extensions
             services.AddHttpClient<IGoogleMapRouteService, GoogleMapRouteService>(httpClient =>
             {
                 httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:RouteUrl") ?? "");
-                httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                httpClient.DefaultRequestHeaders.Add("X-Goog-FieldMask", "routes.duration,routes.distanceMeters");
             });
 
             return services;

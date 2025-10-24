@@ -79,34 +79,30 @@ class _PlaceListState extends ConsumerState<PlaceList>
 
     // Hiển thị loading nếu đang tải lần đầu
     if (favouritePlacesState.isLoading && places.isEmpty) {
-      return const SliverFillRemaining(
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     // Hiển thị error nếu có
     if (favouritePlacesState.error != null && places.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              favouritePlacesState.error!,
+              style: TextStyle(
                 color: Theme.of(context).colorScheme.error,
+                fontSize: 14,
               ),
-              const SizedBox(height: 16),
-              Text(
-                favouritePlacesState.error!,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     }
@@ -115,16 +111,15 @@ class _PlaceListState extends ConsumerState<PlaceList>
     const extraItemsCount = 4;
     final totalItemCount = places.length + extraItemsCount;
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (final context, final index) => PlaceListItem(
-          index: index,
-          places: places,
-          isExpanded: _isExpanded,
-          iconRotationAnimation: _iconRotationAnimation,
-          onToggle: toggleExpanded,
-        ),
-        childCount: totalItemCount,
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 0.0),
+      itemCount: totalItemCount,
+      itemBuilder: (final context, final index) => PlaceListItem(
+        index: index,
+        places: places,
+        isExpanded: _isExpanded,
+        iconRotationAnimation: _iconRotationAnimation,
+        onToggle: toggleExpanded,
       ),
     );
   }
