@@ -31,6 +31,9 @@ namespace vivuvn_api.Data.DbInitializer
             // Add restaurant data
             AddRestaurantData();
 
+            // Add hotel data
+            AddHotelData();
+
         }
 
         private void InitializeRole()
@@ -249,6 +252,90 @@ namespace vivuvn_api.Data.DbInitializer
 
                 _context.SaveChanges();
             }
+
+
+        }
+
+        private void AddHotelData()
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "hotel_data.json");
+
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
+
+            var json = File.ReadAllText(filePath);
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            var hotelDataList = JsonSerializer.Deserialize<List<HotelData>>(json, options);
+
+            if (hotelDataList == null || hotelDataList.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var hotelData in hotelDataList)
+            {
+                // Find the location by GooglePlaceId
+                var location = _context.Locations
+                    .Include(l => l.NearbyHotels)
+                    .FirstOrDefault(l => l.GooglePlaceId == hotelData.LocationGooglePlaceId);
+
+                if (location == null)
+                {
+                    continue; // Skip if location not found
+                }
+
+                // Check if location already has hotels
+                if (location.NearbyHotels != null && location.NearbyHotels.Any())
+                {
+                    continue; // Skip if restaurants already exist for this location
+                }
+
+                // Add hotels to the location
+                location.NearbyHotels = new List<Hotel>();
+
+                foreach (var hotelItem in hotelData.Hotels)
+                {
+                    var hotel = new Hotel
+                    {
+                        GooglePlaceId = hotelItem.GooglePlaceId,
+                        Name = hotelItem.Name,
+                        Address = hotelItem.Address,
+                        Rating = hotelItem.Rating,
+                        UserRatingCount = hotelItem.UserRatingCount,
+                        Latitude = hotelItem.Latitude,
+                        Longitude = hotelItem.Longitude,
+                        GoogleMapsUri = hotelItem.GoogleMapsUri,
+                        PriceLevel = hotelItem.PriceLevel,
+                        Photos = new List<Photo>()
+                    };
+
+                    // Add photos if they exist
+                    if (hotelItem.Photos != null && hotelItem.Photos.Count > 0)
+                    {
+                        foreach (var photoUrl in hotelItem.Photos)
+                        {
+                            var photo = new Photo
+                            {
+                                PhotoUrl = photoUrl
+                            };
+                            hotel.Photos.Add(photo);
+                        }
+                    }
+
+                    location.NearbyHotels.Add(hotel);
+                }
+
+                _context.SaveChanges();
+            }
+
+
         }
     }
 }

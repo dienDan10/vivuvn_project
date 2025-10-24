@@ -133,7 +133,7 @@ namespace vivuvn_api.Services.Implementations
                 if (place.Photos != null && place.Photos.Any())
                 {
                     var photoUrlTasks = place.Photos
-                        .Take(1) // Limit to 3 photo to avoid too many requests
+                        .Take(3) // Limit to 3 photo to avoid too many requests
                         .Select(async photo =>
                         {
                             var photoUrl = await GetPhotoUrlAsync(photo.Name, 800, 800);

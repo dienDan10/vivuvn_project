@@ -41,5 +41,12 @@ namespace vivuvn_api.Controllers
             var restaurants = await _locationService.GetRestaurantsByLocationIdAsync(id);
             return Ok(restaurants);
         }
+
+        [HttpGet("{id}/hotels")]
+        public async Task<IActionResult> GetHotelsByLocationId(int id)
+        {
+            var hotels = await _locationService.GetHotelsByLocationIdAsync(id);
+            return Ok(hotels);
+        }
     }
 }
