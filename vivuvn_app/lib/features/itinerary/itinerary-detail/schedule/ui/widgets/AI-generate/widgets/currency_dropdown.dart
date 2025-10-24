@@ -9,9 +9,13 @@ class CurrencyDropdown extends ConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final ctrl = ref.read(automicallyGenerateByAiControllerProvider.notifier);
-    final s = ref.watch(automicallyGenerateByAiControllerProvider);
+    final stateCurrency = ref.watch(
+      automicallyGenerateByAiControllerProvider.select(
+        (final state) => state.currency,
+      ),
+    );
     return DropdownButton<String>(
-      value: s.currency,
+      value: stateCurrency,
       items: const [
         DropdownMenuItem(value: 'VND', child: Text('VND')),
         DropdownMenuItem(value: 'USD', child: Text('USD')),

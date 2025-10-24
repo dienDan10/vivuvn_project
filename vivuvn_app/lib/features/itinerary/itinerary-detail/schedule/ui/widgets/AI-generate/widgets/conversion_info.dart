@@ -8,7 +8,11 @@ class ConversionInfo extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final s = ref.watch(automicallyGenerateByAiControllerProvider);
+    final stateConvertedVnd = ref.watch(
+      automicallyGenerateByAiControllerProvider.select(
+        (final state) => state.convertedVnd,
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.only(top: 6.0),
       child: Column(
@@ -18,14 +22,16 @@ class ConversionInfo extends ConsumerWidget {
             '1 USD ≈ 24.000 VND (ước tính)',
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
-          if (s.convertedVnd != null)
+          if (stateConvertedVnd != null)
             Padding(
               padding: const EdgeInsets.only(top: 4.0),
               child: Text(
-                '≈ ${s.convertedVnd} VND',
+                '≈ $stateConvertedVnd VND',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

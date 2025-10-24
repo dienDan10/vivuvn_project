@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../common/validator/validator.dart';
+// validator moved to controller-level; no import needed here
 import '../../../../controller/automically_generate_by_ai_controller.dart';
 
 class BudgetTextField extends ConsumerStatefulWidget {
@@ -13,51 +13,44 @@ class BudgetTextField extends ConsumerStatefulWidget {
 
 class _BudgetTextFieldState extends ConsumerState<BudgetTextField> {
   late final TextEditingController _controller;
-  late final FocusNode _focusNode;
-  bool _isFormatting = false;
+  final bool _isFormatting = false;
+  bool _didInit = false;
 
   @override
-  void initState() {
-    super.initState();
-    final state = ref.read(automicallyGenerateByAiControllerProvider);
-    _controller = TextEditingController(
-      text: state.budget > 0 ? _formatBudget(state.budget) : '',
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didInit) return;
+    _didInit = true;
+
+    final stateBudget = ref.watch(
+      automicallyGenerateByAiControllerProvider.select((final s) => s.budget),
     );
-    _focusNode = FocusNode();
+    final ctrl = ref.read(automicallyGenerateByAiControllerProvider.notifier);
+    _controller = TextEditingController(
+      text: stateBudget > 0 ? ctrl.formatBudget(stateBudget) : '',
+    );
 
     _controller.addListener(() {
-      final text = _controller.text.replaceAll(',', '').trim();
-      final value = double.tryParse(text);
-      if (value != null) {
-        ref
-            .read(automicallyGenerateByAiControllerProvider.notifier)
-            .setBudget(value);
-      }
-    });
-
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) {
-        // When focus is lost, format the displayed value to avoid trailing .0
-        _formatControllerText();
-        FocusScope.of(context).unfocus();
-      }
+      if (_isFormatting) return;
+      // Delegate parsing/validation to the controller so widgets remain presentation-only
+      ref
+          .read(automicallyGenerateByAiControllerProvider.notifier)
+          .setBudgetFromString(_controller.text);
     });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(final BuildContext context) {
-    final s = ref.watch(automicallyGenerateByAiControllerProvider);
-
-    return TextFormField(
+    // Keep widget presentation-only; controller handles validation/state
+    return TextField(
       controller: _controller,
-      focusNode: _focusNode,
+      onTapOutside: (final event) => FocusScope.of(context).unfocus(),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: const InputDecoration(
         labelText: 'Nhập ngân sách...',
@@ -65,35 +58,7 @@ class _BudgetTextFieldState extends ConsumerState<BudgetTextField> {
         isDense: true,
         contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
       ),
-      validator: (final v) => Validator.validateBudget(v, currency: s.currency),
+      // Validation handled at controller/modal level; keep field presentation-only
     );
-  }
-
-  String _formatBudget(final double value) {
-    // Show as integer if there's no fractional part
-    if (value % 1 == 0) return value.toInt().toString();
-    // Otherwise, remove any trailing zeros while keeping decimals
-    var text = value.toString();
-    if (text.contains('.') && text.endsWith('0')) {
-      text = text.replaceFirst(RegExp(r'0+$'), '');
-      if (text.endsWith('.')) text = text.substring(0, text.length - 1);
-    }
-    return text;
-  }
-
-  void _formatControllerText() {
-    if (_isFormatting) return;
-    final raw = _controller.text.replaceAll(',', '').trim();
-    final value = double.tryParse(raw);
-    if (value == null) return;
-
-    final formatted = _formatBudget(value);
-    if (formatted == _controller.text) return;
-
-    _isFormatting = true;
-    // Update controller text and move cursor to end
-    _controller.text = formatted;
-    _controller.selection = TextSelection.collapsed(offset: formatted.length);
-    _isFormatting = false;
   }
 }

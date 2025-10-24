@@ -23,7 +23,8 @@ class AutomaticallyGenerateByAiState {
     this.error,
     this.itineraryId,
     this.selectedInterests = const {},
-    this.step = 1,
+    this.step = 0,
+
     this.maxSelection = 3,
     this.groupSize = 1,
     this.budget = 0.0,
@@ -46,6 +47,8 @@ class AutomaticallyGenerateByAiState {
     final bool? isGenerated,
     final String? currency,
     final String? convertedVnd,
+    final bool clearConvertedVnd =
+        false, // Add flag to explicitly clear convertedVnd
   }) {
     return AutomaticallyGenerateByAiState(
       isLoading: isLoading ?? this.isLoading,
@@ -59,7 +62,9 @@ class AutomaticallyGenerateByAiState {
       specialRequirements: specialRequirements ?? this.specialRequirements,
       isGenerated: isGenerated ?? this.isGenerated,
       currency: currency ?? this.currency,
-      convertedVnd: convertedVnd ?? this.convertedVnd,
+      convertedVnd: clearConvertedVnd
+          ? null
+          : (convertedVnd ?? this.convertedVnd),
     );
   }
 }

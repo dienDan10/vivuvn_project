@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../common/validator/validator.dart';
 import '../../../../controller/automically_generate_by_ai_controller.dart';
 
 class GroupSizeField extends ConsumerStatefulWidget {
@@ -13,51 +12,47 @@ class GroupSizeField extends ConsumerStatefulWidget {
 
 class _GroupSizeFieldState extends ConsumerState<GroupSizeField> {
   late final TextEditingController _controller;
-  late final FocusNode _focusNode;
-
+  bool _didInit = false;
   @override
-  void initState() {
-    super.initState();
-    final state = ref.read(automicallyGenerateByAiControllerProvider);
-    _controller = TextEditingController(text: state.groupSize.toString());
-    _focusNode = FocusNode();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didInit) return;
+    _didInit = true;
+    final stateGroupSize = ref.watch(
+      automicallyGenerateByAiControllerProvider.select(
+        (final state) => state.groupSize,
+      ),
+    );
+    final ctrl = ref.read(automicallyGenerateByAiControllerProvider.notifier);
+    _controller = TextEditingController(
+      text: ctrl.formatGroupSize(stateGroupSize),
+    );
 
     _controller.addListener(() {
-      final n = int.tryParse(_controller.text);
-      if (n != null) {
-        ref
-            .read(automicallyGenerateByAiControllerProvider.notifier)
-            .setGroupSize(n);
-      }
-    });
-
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) FocusScope.of(context).unfocus();
+      ctrl.setGroupSizeFromString(_controller.text);
     });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(final BuildContext context) {
-    return TextFormField(
+    return TextField(
       controller: _controller,
-      focusNode: _focusNode,
+      onTapOutside: (final event) => FocusScope.of(context).unfocus(),
       keyboardType: TextInputType.number,
       decoration: const InputDecoration(
         labelText: 'Số người',
-        hintText: 'vd. 2 (số người tham gia chuyến đi, tối đa 6)',
-        helperText: 'Nhập số người tham gia (1-6)',
+        hintText: 'vd. 2 (số người tham gia chuyến đi, tối đa 10)',
+        helperText: 'Nhập số người tham gia (1-10)',
         border: InputBorder.none,
         isDense: true,
         contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
       ),
-      validator: Validator.validateGroupSize,
     );
   }
 }

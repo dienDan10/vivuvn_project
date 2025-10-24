@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../../common/validator/validator.dart';
+// Validator moved to controller/modal level; no import needed here
 import '../../../../controller/automically_generate_by_ai_controller.dart';
 
 class NoteField extends ConsumerStatefulWidget {
@@ -13,38 +13,47 @@ class NoteField extends ConsumerStatefulWidget {
 
 class _NoteFieldState extends ConsumerState<NoteField> {
   late final TextEditingController _controller;
-  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-    final state = ref.read(automicallyGenerateByAiControllerProvider);
-    _controller = TextEditingController(text: state.specialRequirements ?? '');
-    _focusNode = FocusNode();
+    // Do not access inherited providers in initState. Initialization that
+    // depends on providers is done in didChangeDependencies below.
+  }
+
+  bool _didInit = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didInit) return;
+    _didInit = true;
+
+    final stateSpecialRequirements = ref.watch(
+      automicallyGenerateByAiControllerProvider.select(
+        (final state) => state.specialRequirements,
+      ),
+    );
+    _controller = TextEditingController(text: stateSpecialRequirements ?? '');
 
     _controller.addListener(() {
       ref
           .read(automicallyGenerateByAiControllerProvider.notifier)
           .setSpecialRequirements(_controller.text.trim());
     });
-
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) FocusScope.of(context).unfocus();
-    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(final BuildContext context) {
-    return TextFormField(
+    return TextField(
       controller: _controller,
-      focusNode: _focusNode,
+      onTapOutside: (final event) => FocusScope.of(context).unfocus(),
       keyboardType: TextInputType.multiline,
       maxLines: 3,
       decoration: const InputDecoration(
@@ -55,7 +64,6 @@ class _NoteFieldState extends ConsumerState<NoteField> {
         isDense: true,
         contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
       ),
-      validator: Validator.validateNote,
     );
   }
 }

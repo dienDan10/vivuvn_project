@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
-import '../schedule/ui/widgets/AI-generate/generate_ai_modal.dart';
+import '../schedule/ui/widgets/AI-generate/gen_ai_modal.dart';
 
 class ButtonGenerateItinerary extends StatefulWidget {
   const ButtonGenerateItinerary({super.key});
@@ -18,10 +18,11 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
+      enableDrag: false,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (final context) => const InterestSelectionScreen(),
+      builder: (final context) => const GenAiModal(),
     );
   }
 

@@ -15,16 +15,20 @@ class BudgetField extends ConsumerStatefulWidget {
 
 class _BudgetFieldState extends ConsumerState<BudgetField> {
   late final TextEditingController _controller;
-  late final FocusNode _focusNode;
+  bool _didInit = false;
 
   @override
-  void initState() {
-    super.initState();
-    final state = ref.read(automicallyGenerateByAiControllerProvider);
-    _controller = TextEditingController(
-      text: state.budget > 0 ? state.budget.toString() : '',
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didInit) return;
+    _didInit = true;
+
+    final stateBudget = ref.watch(
+      automicallyGenerateByAiControllerProvider.select((final s) => s.budget),
     );
-    _focusNode = FocusNode();
+    _controller = TextEditingController(
+      text: stateBudget > 0 ? stateBudget.toString() : '',
+    );
 
     _controller.addListener(() {
       final text = _controller.text.replaceAll(',', '').trim();
@@ -35,22 +39,19 @@ class _BudgetFieldState extends ConsumerState<BudgetField> {
             .setBudget(value);
       }
     });
-
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) FocusScope.of(context).unfocus();
-    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(final BuildContext context) {
-    final s = ref.watch(automicallyGenerateByAiControllerProvider);
+    final stateCurrency = ref.watch(
+      automicallyGenerateByAiControllerProvider.select((final s) => s.currency),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +63,7 @@ class _BudgetFieldState extends ConsumerState<BudgetField> {
             CurrencyDropdown(),
           ],
         ),
-        if (s.currency == 'USD') const ConversionInfo(),
+        if (stateCurrency == 'USD') const ConversionInfo(),
       ],
     );
   }
