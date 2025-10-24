@@ -28,6 +28,9 @@ namespace vivuvn_api.Data.DbInitializer
             // Add locations data
             AddLocationData();
 
+            // Add restaurant data
+            AddRestaurantData();
+
         }
 
         private void InitializeRole()
@@ -164,6 +167,86 @@ namespace vivuvn_api.Data.DbInitializer
 
                     _context.Locations.Add(location);
                 }
+                _context.SaveChanges();
+            }
+        }
+
+        private void AddRestaurantData()
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurant_data.json");
+
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
+
+            var json = File.ReadAllText(filePath);
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            var restaurantDataList = JsonSerializer.Deserialize<List<RestaurantData>>(json, options);
+
+            if (restaurantDataList == null || restaurantDataList.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var restaurantData in restaurantDataList)
+            {
+                // Find the location by GooglePlaceId
+                var location = _context.Locations
+                    .Include(l => l.NearbyRestaurants)
+                    .FirstOrDefault(l => l.GooglePlaceId == restaurantData.LocationGooglePlaceId);
+
+                if (location == null)
+                {
+                    continue; // Skip if location not found
+                }
+
+                // Check if location already has restaurants
+                if (location.NearbyRestaurants != null && location.NearbyRestaurants.Any())
+                {
+                    continue; // Skip if restaurants already exist for this location
+                }
+
+                // Add restaurants to the location
+                location.NearbyRestaurants = new List<Restaurant>();
+
+                foreach (var restaurantItem in restaurantData.Restaurants)
+                {
+                    var restaurant = new Restaurant
+                    {
+                        GooglePlaceId = restaurantItem.GooglePlaceId,
+                        Name = restaurantItem.Name,
+                        Address = restaurantItem.Address,
+                        Rating = restaurantItem.Rating,
+                        UserRatingCount = restaurantItem.UserRatingCount,
+                        Latitude = restaurantItem.Latitude,
+                        Longitude = restaurantItem.Longitude,
+                        GoogleMapsUri = restaurantItem.GoogleMapsUri,
+                        PriceLevel = restaurantItem.PriceLevel,
+                        Photos = new List<Photo>()
+                    };
+
+                    // Add photos if they exist
+                    if (restaurantItem.Photos != null && restaurantItem.Photos.Count > 0)
+                    {
+                        foreach (var photoUrl in restaurantItem.Photos)
+                        {
+                            var photo = new Photo
+                            {
+                                PhotoUrl = photoUrl
+                            };
+                            restaurant.Photos.Add(photo);
+                        }
+                    }
+
+                    location.NearbyRestaurants.Add(restaurant);
+                }
+
                 _context.SaveChanges();
             }
         }

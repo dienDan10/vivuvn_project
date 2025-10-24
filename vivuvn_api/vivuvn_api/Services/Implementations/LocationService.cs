@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using LinqKit;
+using System.Text.Json;
+using vivuvn_api.Data.DbInitializer;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -123,17 +125,55 @@ namespace vivuvn_api.Services.Implementations
             await _unitOfWork.SaveChangesAsync();
 
             // save restaurant to json file
+            await SaveRestaurantsToJsonFile(location.GooglePlaceId ?? "", newRestaurants);
 
             return _mapper.Map<IEnumerable<RestaurantDto>>(newRestaurants);
         }
 
-        private async Task SaveRestaurantsToJsonFile(IEnumerable<Restaurant> restaurants)
+        private async Task SaveRestaurantsToJsonFile(string locationPlaceId, IEnumerable<Restaurant> restaurants)
         {
             var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurant_data.json");
-            if (!File.Exists(filePath))
+
+            // Read existing data from file
+            List<RestaurantData> allRestaurantData = [];
+
+            if (File.Exists(filePath))
             {
-                return;
+                var existingJson = await File.ReadAllTextAsync(filePath);
+                if (!string.IsNullOrWhiteSpace(existingJson))
+                {
+                    allRestaurantData = JsonSerializer.Deserialize<List<RestaurantData>>(existingJson) ?? [];
+                }
             }
+
+            // Create new restaurant data entry
+            var restaurantData = new RestaurantData
+            {
+                LocationGooglePlaceId = locationPlaceId,
+                Restaurants = restaurants.Select(r => new RestaurantDataItem
+                {
+                    GooglePlaceId = r.GooglePlaceId,
+                    Name = r.Name,
+                    Address = r.Address,
+                    Rating = r.Rating,
+                    UserRatingCount = r.UserRatingCount,
+                    Latitude = r.Latitude,
+                    Longitude = r.Longitude,
+                    GoogleMapsUri = r.GoogleMapsUri,
+                    PriceLevel = r.PriceLevel,
+                    Photos = r.Photos.Select(p => p.PhotoUrl).ToList()
+                }).ToList()
+            };
+
+            // Remove existing entry for this location if it exists
+            allRestaurantData.RemoveAll(rd => rd.LocationGooglePlaceId == locationPlaceId);
+
+            // Add new entry
+            allRestaurantData.Add(restaurantData);
+
+            // Write updated data back to file
+            var json = JsonSerializer.Serialize(allRestaurantData, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(filePath, json);
         }
     }
 }

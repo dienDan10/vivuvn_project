@@ -75,6 +75,15 @@ namespace vivuvn_api.Data
             modelBuilder.Entity<Location>()
                 .HasIndex(l => l.NameNormalized);
 
+            modelBuilder.Entity<Location>()
+                .HasIndex(l => l.GooglePlaceId);
+
+            modelBuilder.Entity<Restaurant>()
+                .HasIndex(r => r.GooglePlaceId);
+
+            modelBuilder.Entity<Hotel>()
+                .HasIndex(h => h.GooglePlaceId);
+
             modelBuilder.Entity<Province>()
                 .HasIndex(p => p.NameNormalized)
                 .IsUnique();
