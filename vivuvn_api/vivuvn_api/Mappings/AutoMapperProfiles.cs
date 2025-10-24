@@ -34,13 +34,14 @@ namespace vivuvn_api.Mappings
             // Mapping For Location
             CreateMap<Location, LocationDto>()
                 .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province.Name))
-                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.LocationPhotos.Select(p => p.PhotoUrl).ToList()));
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos.Select(p => p.PhotoUrl).ToList()));
 
             // Mapping For Search Location
             CreateMap<Location, SearchLocationDto>();
 
             // Mapping For Restaurant (Google Places API to RestaurantDto)
             CreateMap<Place, RestaurantDto>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.GooglePlaceId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName != null ? src.DisplayName.Text : string.Empty))
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.FormattedAddress ?? string.Empty))

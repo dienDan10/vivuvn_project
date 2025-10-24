@@ -122,7 +122,9 @@ namespace vivuvn_api.Services.Implementations
             }
 
             // Map Place objects to RestaurantDto using AutoMapper
-            return _mapper.Map<IEnumerable<RestaurantDto>>(response.Places);
+            var restaurantDtos = _mapper.Map<IEnumerable<RestaurantDto>>(response.Places);
+
+            return restaurantDtos;
         }
     }
 }

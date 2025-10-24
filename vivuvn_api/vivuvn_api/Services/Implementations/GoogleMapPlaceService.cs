@@ -33,13 +33,6 @@ namespace vivuvn_api.Services.Implementations
 
                 var response = await _httpClient.SendAsync(requestMessage);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    // log the error
-                    Console.WriteLine($"Error fetching nearby restaurants: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
-                    Console.WriteLine($"Request Body: {jsonBody}");
-                }
-
                 response.EnsureSuccessStatusCode();
 
                 var responseContent = await response.Content.ReadFromJsonAsync<FetchGoogleRestaurantResponseDto>();
@@ -47,29 +40,7 @@ namespace vivuvn_api.Services.Implementations
                 // Fetch photo URLs for each place
                 if (responseContent?.Places != null)
                 {
-                    foreach (var place in responseContent.Places)
-                    {
-                        if (place.Photos != null && place.Photos.Any())
-                        {
-                            var photoUrlTasks = place.Photos
-                                .Take(1) // Limit to 1 photo to avoid too many requests
-                                .Select(async photo =>
-                                {
-                                    var photoUrl = await GetPhotoUrlAsync(photo.Name, 800, 800);
-                                    return photoUrl;
-                                })
-                                .ToList();
-
-                            var photoUrls = await Task.WhenAll(photoUrlTasks);
-
-                            // Replace photo names with actual URLs
-                            place.Photos.Clear();
-                            foreach (var photoUrl in photoUrls.Where(url => !string.IsNullOrEmpty(url)))
-                            {
-                                place.Photos.Add(new Photo { Name = photoUrl! });
-                            }
-                        }
-                    }
+                    await FetchPlacesPhotosAsync(responseContent.Places);
                 }
 
                 return responseContent;
@@ -77,6 +48,33 @@ namespace vivuvn_api.Services.Implementations
             catch (Exception)
             {
                 return null;
+            }
+        }
+
+        private async Task FetchPlacesPhotosAsync(IEnumerable<Place> places)
+        {
+            foreach (var place in places)
+            {
+                if (place.Photos != null && place.Photos.Any())
+                {
+                    var photoUrlTasks = place.Photos
+                        .Take(1) // Limit to 3 photo to avoid too many requests
+                        .Select(async photo =>
+                        {
+                            var photoUrl = await GetPhotoUrlAsync(photo.Name, 800, 800);
+                            return photoUrl;
+                        })
+                        .ToList();
+
+                    var photoUrls = await Task.WhenAll(photoUrlTasks);
+
+                    // Replace photo names with actual URLs
+                    place.Photos.Clear();
+                    foreach (var photoUrl in photoUrls.Where(url => !string.IsNullOrEmpty(url)))
+                    {
+                        place.Photos.Add(new Photo { Name = photoUrl! });
+                    }
+                }
             }
         }
 

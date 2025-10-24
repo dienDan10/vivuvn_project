@@ -16,7 +16,6 @@ namespace vivuvn_api.Data
 
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Location> Locations { get; set; }
-        public DbSet<LocationPhoto> LocationPhotos { get; set; }
 
         public DbSet<Itinerary> Itineraries { get; set; }
         public DbSet<ItineraryDay> ItineraryDays { get; set; }
@@ -34,20 +33,6 @@ namespace vivuvn_api.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            //// Break the cascade path for ItineraryDayCost to ItineraryDay
-            //modelBuilder.Entity<ItineraryDayCost>()
-            //    .HasOne(idc => idc.ItineraryDay)
-            //    .WithMany(id => id.Costs)
-            //    .HasForeignKey(idc => idc.ItineraryDayId)
-            //    .OnDelete(DeleteBehavior.NoAction);
-
-            //// Break the cascade path for ItineraryDayCost to BudgetItem
-            //modelBuilder.Entity<ItineraryDayCost>()
-            //    .HasOne(idc => idc.BudgetItem)
-            //    .WithMany()  // Assuming BudgetItem doesn't have a navigation property back to ItineraryDayCost
-            //    .HasForeignKey(idc => idc.BudgetItemId)
-            //    .OnDelete(DeleteBehavior.NoAction);
 
             // Composite Keys
             modelBuilder.Entity<UserRole>()
@@ -112,6 +97,36 @@ namespace vivuvn_api.Data
                 .WithMany()
                 .HasForeignKey(i => i.DestinationProvinceId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Photo>()
+               .HasOne(p => p.Restaurant)
+               .WithMany(r => r.Photos)
+               .HasForeignKey(p => p.RestaurantId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.Location)
+                .WithMany(l => l.Photos)
+                .HasForeignKey(p => p.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.Hotel)
+                .WithMany(h => h.Photos)
+                .HasForeignKey(p => p.HotelId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Location - Hotel
+            modelBuilder.Entity<Location>()
+                .HasMany(l => l.NearbyHotels)
+                .WithMany(h => h.NearbyLocations)
+                .UsingEntity(j => j.ToTable("LocationHotel"));
+
+            // Location - Restaurant
+            modelBuilder.Entity<Location>()
+                .HasMany(l => l.NearbyRestaurants)
+                .WithMany(r => r.NearbyLocations)
+                .UsingEntity(j => j.ToTable("LocationRestaurant"));
         }
     }
 }

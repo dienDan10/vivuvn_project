@@ -126,25 +126,24 @@ namespace vivuvn_api.Data.DbInitializer
                         WebsiteUri = locationData.WebsiteUri,
                         DeleteFlag = false,
                         ProvinceId = province.Id,
-                        LocationPhotos = new List<LocationPhoto>(),
+                        Photos = new List<Photo>(),
                     };
 
                     if (locationData.Pictures != null && locationData.Pictures.Count > 0)
                     {
                         foreach (var pictureUrl in locationData.Pictures)
                         {
-                            var locationPhoto = new LocationPhoto
+                            var photo = new Photo
                             {
                                 PhotoUrl = pictureUrl,
                             };
-                            location.LocationPhotos.Add(locationPhoto);
+                            location.Photos.Add(photo);
                         }
                     }
 
                     _context.Locations.Add(location);
-                    _context.SaveChanges();
-
                 }
+                _context.SaveChanges();
             }
 
         }
