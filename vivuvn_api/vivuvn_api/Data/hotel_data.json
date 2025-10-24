@@ -1,1 +1,167 @@
-[]
+[
+  {
+    "LocationGooglePlaceId": "ChIJJ2JpFQCrNTERqi11c3UpJjg",
+    "Hotels": [
+      {
+        "GooglePlaceId": "ChIJMRpiu6ysNTERYNlM-EHSuQY",
+        "Name": "JW Marriott Hotel Hanoi",
+        "Address": "No 8 Do Duc Duc Road Tu Liem Ward, M\u1EC5 Tr\u00EC, Hanoi, H\u00E0 N\u1ED9i 100000, Vi\u1EC7t Nam",
+        "Rating": 4.7,
+        "UserRatingCount": 10929,
+        "Latitude": 21.007006,
+        "Longitude": 105.7831221,
+        "GoogleMapsUri": "https://maps.google.com/?cid=484649615699532128\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqFIah4Q4zMYLzMmoEI1MrtkDLycsTomgMpea-0JqmFjPRwwEsh9PnGtXYSQBsiHloKvG8pqW993lhRuzR9n9KgvVINqaK5dAQs=s4800-w480-h320",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDydbuJfiqYbcMOjej0Prw1UPsY1e_aTzq1VTblLfGLBERro0YHejPj6Vl6U_maV-R5aFK2i0NY79Vn-esuXx2FjtVeE57OoudVsjXC_R1ZsXoZMEhyHaQGJgEgJsuGgLP1hnZBps7FWUngW-g=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/places/ANXAkqEIIfB2BovKF4sUfOowd0l-Fqj4rhjKzJv8KBn_YV_WzlQn53fQlnUjQQniY_eWopm5xaferTthAuPDq599SCf-1FcbqZglRpU=s4800-w480-h320"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJne3U7GyrNTERehxJ0VO9C6o",
+        "Name": "Lotte Hotel Hanoi",
+        "Address": "54 P. Li\u1EC5u Giai, C\u1ED1ng V\u1ECB, Ba \u0110\u00ECnh, H\u00E0 N\u1ED9i 100000, Vi\u1EC7t Nam",
+        "Rating": 4.6,
+        "UserRatingCount": 3884,
+        "Latitude": 21.031876099999998,
+        "Longitude": 105.81230319999999,
+        "GoogleMapsUri": "https://maps.google.com/?cid=12253095378882731130\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqHbfjmxWi76Qcfe005M38axT_e3UIsjD97dG0VRBZo41YftxBo0L58uYHFZgzyW9OdH-DyDGt54XpbXdqDOCrcpUIYQ2eE09wk=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/places/ANXAkqGFHygDRIiPcxVe46faizsQ62ov1GbOPxlaQXWzTgdC5zWvwg1wGBImDpadzgSnIB4XZbSKVDxD--C-8YH1OurrX_Lj_v7hxUA=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDwkY7HmLHSC-z4lhL8GOEGeorVIyyIHe2B1s-MfB3i_-jYu9AdvFi_eMFmp6Oo5-dLzAVQ4oVOIWmWrvmLv5JEi5hHUkEpOcoRF74kGzDt0uTvklQKbTbp39xKyRCyQVMWQLU4SQvBsOwgOVg=s4800-w800-h800"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJ2ehlkZOrNTERzL1Vpx8rlfM",
+        "Name": "Meli\u00E1 Hanoi",
+        "Address": "44 P. L\u00FD Th\u01B0\u1EDDng Ki\u1EC7t, Tr\u1EA7n H\u01B0ng \u0110\u1EA1o, Ho\u00E0n Ki\u1EBFm, H\u00E0 N\u1ED9i, Vi\u1EC7t Nam",
+        "Rating": 4.6,
+        "UserRatingCount": 7105,
+        "Latitude": 21.024347,
+        "Longitude": 105.84862319999999,
+        "GoogleMapsUri": "https://maps.google.com/?cid=17551982537697770956\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqE0J7bAqMtxnAZVoLT-xnCJes__XECDyfW31Q_ETmkA-XzIYkFmqetwewcdbYkCsnH1_pawsU--7xmIzDfTGFKrWq1-qSK_Ve0=s4800-w800-h533",
+          "https://lh3.googleusercontent.com/places/ANXAkqFWhqoc0fIrIOTdvWESNhC1UZIUq6zCH4CJGYoT2lz7PUdw81fG7yqriTn9Kaqv0UZkv5uqJ8wtHZx4SXJBRWlYj1u9vl58RJg=s4800-w800-h785",
+          "https://lh3.googleusercontent.com/places/ANXAkqGAREQ8ElNMuDwZTSZkVY8l8stfaubm3TY0pqt5g1MhtlDPTWfJYP_NRNu9CM-WFiMV-ymouYNm-U_1daCnAbPTf8VUmo_6OPI=s4800-w800-h800"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJs3U8x1WqNTERVlbCclf0IWY",
+        "Name": "Sheraton Hanoi Hotel",
+        "Address": "K5 Nghi Tam 11 Xuan Dieu Road, Tay Ho Ward, Qu\u1EA3ng An, H\u00E0 N\u1ED9i, Vi\u1EC7t Nam",
+        "Rating": 4.5,
+        "UserRatingCount": 4564,
+        "Latitude": 21.0611477,
+        "Longitude": 105.8317761,
+        "GoogleMapsUri": "https://maps.google.com/?cid=7359431922524771926\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqGmR0Q-d9rb6704irSF-RayJRAM0TOIkobnShlaFFGFfopLN2gaTDXjivtcT7Ia9zLT0DSJzqUBPXJmhVC42qsPMZmMNrBVDyE=s4800-w800-h752",
+          "https://lh3.googleusercontent.com/places/ANXAkqE8Dq7D3N-aJRddlqM6MP7KBce3MubAYXNVVdYTfab0s_RVSzjJoxD32tCMpBLwVa5iUUVvWQppsHEJo7Es45E7Q7yY5SflSPc=s4800-w480-h320",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDwnzA-obeT1-YXpya8OMEl6ZpKiIiIvxOq5rXEiJ69WapU-agRgZiYNRKhgE-Fn64DavLqwFknU9u2MzKiogc9vi88bV8_Qsj3A5us5RoJyAdrEHgWCpG_vUkrEswq1fqNP5YlJRDuIZ2H3og=s4800-w680-h450"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJTbX4mOurNTERJV-mNCKY1pA",
+        "Name": "Sofitel Legend Metropole Hanoi",
+        "Address": "15 P. Ng\u00F4 Quy\u1EC1n, Tr\u00E0ng Ti\u1EC1n, Ho\u00E0n Ki\u1EBFm, H\u00E0 N\u1ED9i 100000, Vi\u1EC7t Nam",
+        "Rating": 4.7,
+        "UserRatingCount": 5657,
+        "Latitude": 21.025412499999998,
+        "Longitude": 105.856375,
+        "GoogleMapsUri": "https://maps.google.com/?cid=10436696459157331749\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqGUDxyLyze5nHSbFwxI9E6ZaqCFYpCRZAI_iQkI2oP0sN6zJ7bZ0nqbyuplfpUp1TlziwqXsAZMuc-q4ZnkO9RgKLMmOR6b_XU=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/places/ANXAkqEdH0N_fUuhKbVmuHKchErAppiZtIbDa9abHKCF1cZjnabDWLj0I6i5a16NS1NDredEjtGhDDhnwcbn7fK-SLcJpX3JhI4xAqg=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDzSt0WPc3avUsco6b77SSXcTcd0WCs8aF4VjO5P-dtC4DSS58eTsSKSCO3bj3DDLW7jpzJtK1mtTpvJHZrMw2r-MkAkk928ek70C9rMZ4uD1gt4wNVW6_wPVvxR0HdTwVJKiCDntYUhb1lToLI=s4800-w800-h800"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJjU_PBFWqNTERbWlO_rdeNTg",
+        "Name": "InterContinental H\u00E0 N\u1ED9i Westlake",
+        "Address": "05 P. T\u1EEB Hoa, Qu\u1EA3ng An, T\u00E2y H\u1ED3, H\u00E0 N\u1ED9i, Vi\u1EC7t Nam",
+        "Rating": 4.7,
+        "UserRatingCount": 6081,
+        "Latitude": 21.058365,
+        "Longitude": 105.8315408,
+        "GoogleMapsUri": "https://maps.google.com/?cid=4050247584228206957\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqHZXZDnnvxsti1P7Rj_7WXmgwXKRjRi0bs1_dGD-f8kkLzqJnvdJrOg-QUVcpYzwyhbR3XJIgN6-elLv7jczIF4uZtffWGkbNM=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/places/ANXAkqGQYWpa4FnCM0fNPJbzFngZ8FbitDKssgxL98TtlCmHoT6RVpccUszYGPk15u4bOP3-IziquR88ZNDUSCUIgaL0bQmd3rsYjeo=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDwWcjSUc0xdukBXGlafmvVkV8mhb1kz8VZFiGhf55B5_CzDqc7tQ_9lFriLOpMiylZqoGjhBmqFCFlMo-37Z3S6kvt_ync545iPHQQoW4657ZaMrrEfzNqy_v7C3gKCj0VYj-9ZsFyueFtwRRM=s4800-w800-h800"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJuWgtHGerNTERFwPXwrD4S80",
+        "Name": "CIPUTRA H\u00C0 N\u1ED8I",
+        "Address": "\u0110. V\u00F5 Ch\u00ED C\u00F4ng, Ph\u00FA Th\u01B0\u1EE3ng, T\u00E2y H\u1ED3, H\u00E0 N\u1ED9i 100000, Vi\u1EC7t Nam",
+        "Rating": 4.8,
+        "UserRatingCount": 42,
+        "Latitude": 21.0752722,
+        "Longitude": 105.8101133,
+        "GoogleMapsUri": "https://maps.google.com/?cid=14793190839095329559\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/place-photos/AEkURDy7s9DYrV831RWeUIkLeYqy_PYYyfN2PFZnNpdXplyq_Z9wE-Xef1mdxHQj8mpuQxIxzJZ7sSh54Ko_XZTn7b2xNvbDdgBoYmUSwIfNULesig3SBDTJXKF8aaXYblxyrtY8mEJRvEPTuqBtaQ=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDy2Ee1oVmpZJMXI3H011YxZCmWg2Wy15sIsySpgKiFo22qOPxsd3onWr3beFzYldfKvK7yXtGAHrd5Ei5i83-9rPZeMewJ-2KImQA8_HWvAeuhVFDh1K8UVCpHKhoqleJzp1Uc8ErtHEQ_Hg7dPI2aS0Q=s4800-w800-h672",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDxdZHU_PDp5vj1PSFIfsom42spShua3RSnvMn-ZK-HPVnEeid7BHaL1BjF9rbWMiY8letBbGhsGId1euYvaM3ge77PUFwKzDkJ2WhuSdI4VX9lv-yCPZ95Sv-FTfuAnuUMQBYXX4C1h5OuNS1gP14C7rg=s4800-w800-h514"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJp0Ztq8NVNDERmK91hduKS5c",
+        "Name": "Sheraton Hanoi West",
+        "Address": "36 Le Duc Tho Street Tu Liem Ward, M\u1EF9 \u0110\u00ECnh, Hanoi, H\u00E0 N\u1ED9i 10000, Vi\u1EC7t Nam",
+        "Rating": 4.5,
+        "UserRatingCount": 1264,
+        "Latitude": 21.0271403,
+        "Longitude": 105.76735099999999,
+        "GoogleMapsUri": "https://maps.google.com/?cid=10901959998421970840\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqFiEQlhxs3z6JyCP4D5aIvYc3m8CCfhOeQfNX_DzMHHIgCsOaQkrT2oMjO8cfWgHXR_iXrVGPYxedIf0CPzwMxVNZ3rpKD6Skg=s4800-w480-h320",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDyz-2j9j07Zgi9qRCVuyj9dzwpQkc-b6f6zMaeOb3sqb_lwYgyYUn4nacnv2EIFi1qpyZYzQ8eOuitt4_LiI79wK6VW38ZxnlFnR2Ftex9dMlzHFYMOVUowGmW2eRhlNzGiUcYZTesuxsF0HAE=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDwq_9TeWjb4UxaeDGEtxtb59RzSx2gDcCTFSqOKs6VjrRhzVUlJyd8p33p40JcKc276SW2EctQUZOvEIdlSwNlRLS2Kzo2T2eWKloDKpYtdyOUSgBENw-qLakPSKpZ5xvvsT68U9pBocex-Vw=s4800-w800-h800"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJ2WE4y_isNTERShwadVpglNI",
+        "Name": "Kh\u00E1ch s\u1EA1n M\u01B0\u1EDDng Thanh Grand H\u00E0 N\u1ED9i",
+        "Address": "L\u00F4 CC2, Khu \u0111\u00F4 th\u1ECB B\u1EAFc Linh \u0110\u00E0m, Ho\u00E0ng Mai, H\u00E0 N\u1ED9i, Vi\u1EC7t Nam",
+        "Rating": 4,
+        "UserRatingCount": 2545,
+        "Latitude": 20.9695404,
+        "Longitude": 105.8269658,
+        "GoogleMapsUri": "https://maps.google.com/?cid=15173858986146012234\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqHcaHXSguZlhpCoFqr7Qm_MyRCi8SZIBlaC26UBtonHXTPOQgrvjOtyWbdZQFPhrvzT4suguTmgm-Fq7HI6-8IibvQ5FZ5UNk0=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDzk4eKgxeCALPg85CRfi07QMrTyr9ak0263E4PTIGDcqfKzxZPeg9LDbgfCQmfQ0BHNS1cnBORDIsFDngSjB4CRcFNLhv-0sV9xIY9DExSW_-9Gy1mLF2SairpwVMVUwOsoDprNwGmJclaaayM=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDziGIknY-kcuq4bweGC5BpR3C8g0xVOdQvYXFQCpYc4LGE0mmriq_7OpOmDVPpP08DpFWECra3gUQR4F5oQDsDa-KkLr2FnWdq4ajFA28C1V53TwoUqBPQZYZswNRM2SgOL5qgyM3Ijb9H9Wfs=s4800-w800-h704"
+        ]
+      },
+      {
+        "GooglePlaceId": "ChIJ06cj-WmrNTERHbuOiutGSAw",
+        "Name": "Kh\u00E1ch s\u1EA1n H\u00E0 N\u1ED9i Daewoo",
+        "Address": "360 P. Kim M\u00E3, Ng\u1ECDc Kh\u00E1nh, Ba \u0110\u00ECnh, H\u00E0 N\u1ED9i 10000, Vi\u1EC7t Nam",
+        "Rating": 4.4,
+        "UserRatingCount": 6086,
+        "Latitude": 21.030832,
+        "Longitude": 105.8117912,
+        "GoogleMapsUri": "https://maps.google.com/?cid=885035304234171165\u0026g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+        "PriceLevel": null,
+        "Photos": [
+          "https://lh3.googleusercontent.com/places/ANXAkqHxeLmALmYbrNjU5GSML15ejhAuYrAvYve076WeG5iUT9KVa2qUk_bdcN1cQkFPlA0JhaWTEGSsPac70LXr9kZcl8Ov6KLF79Y=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/places/ANXAkqFlmoDnGOf_js3lYxmKH2XRPJb1fBsItnrVyzDB4v2KGnA5im5qhCWw45TdSZcofs2f9ZNRIQlQGK0giNlwkXJ8iDk7AQF_ATY=s4800-w800-h800",
+          "https://lh3.googleusercontent.com/place-photos/AEkURDxmiBbW9F16fXamyNNeiPogKwSfH02jVSsH2ohNGZbfhRqPagGCyIUG09QoFchqiWK-U4uD393-QoWNxecGrShfzPGVRdvxUIA2sdz_HbRskT6HSISxlF6TcPFC5kUxVH3rIOARefEBtb9in1M=s4800-w800-h800"
+        ]
+      }
+    ]
+  }
+]
