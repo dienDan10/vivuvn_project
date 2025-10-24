@@ -20,19 +20,28 @@ class StatisticsModal extends ConsumerStatefulWidget {
 }
 
 class _StatisticsModalState extends ConsumerState<StatisticsModal> {
-  bool _showByType = true;
+  bool _showByType = false; // Thay đổi mặc định sang "theo ngày"
   String? _selectedKey;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
+    // Load data first
+    final itineraryId = ref.read(budgetControllerProvider).itineraryId;
+    if (itineraryId != null) {
+      ref.read(budgetControllerProvider.notifier).loadBudgetTypes(itineraryId);
+    }
+
+    // Delay initialization flag to ensure layout is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final itineraryId = ref.read(budgetControllerProvider).itineraryId;
-      if (itineraryId != null) {
-        ref
-            .read(budgetControllerProvider.notifier)
-            .loadBudgetTypes(itineraryId);
-      }
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+          });
+        }
+      });
     });
   }
 
@@ -103,16 +112,24 @@ class _StatisticsModalState extends ConsumerState<StatisticsModal> {
           Expanded(
             child: chartData.isEmpty
                 ? const StatisticsEmptyState()
-                : StatisticsChart(
-                    chartData: chartData,
-                    selectedKey: _selectedKey,
-                    showByType: _showByType,
-                    onBarTap: (final tappedKey) {
-                      setState(() {
-                        _selectedKey = _selectedKey == tappedKey
-                            ? null
-                            : tappedKey;
-                      });
+                : LayoutBuilder(
+                    builder: (final context, final constraints) {
+                      return SizedBox(
+                        height: constraints.maxHeight,
+                        child: StatisticsChart(
+                          key: ValueKey('chart_${_showByType}_$_isInitialized'),
+                          chartData: chartData,
+                          selectedKey: _selectedKey,
+                          showByType: _showByType,
+                          onBarTap: (final tappedKey) {
+                            setState(() {
+                              _selectedKey = _selectedKey == tappedKey
+                                  ? null
+                                  : tappedKey;
+                            });
+                          },
+                        ),
+                      );
                     },
                   ),
           ),

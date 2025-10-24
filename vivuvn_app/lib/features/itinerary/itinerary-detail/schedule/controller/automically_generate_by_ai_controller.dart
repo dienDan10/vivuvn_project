@@ -11,6 +11,12 @@ import '../state/automically_generate_by_ai_state.dart';
 import 'itinerary_schedule_controller.dart';
 import 'validate_and_submit_result.dart';
 
+// Provider used to request a tab switch from the AI modal flow. When the
+// controller completes generation successfully it will set this to the target
+// tab index (e.g. 0 for overview). UI that owns the TabController should
+// listen to this provider and perform the animateTo call.
+final aiTabSwitchProvider = StateProvider<int?>((final ref) => null);
+
 final automicallyGenerateByAiControllerProvider =
     AutoDisposeNotifierProvider<
       AutomaticallyGenerateByAiController,
@@ -217,7 +223,11 @@ class AutomaticallyGenerateByAiController
       // perform submission
       await submitGenerate();
 
-      if (state.isGenerated) return ValidateAndSubmitResult.submittedSuccess();
+      if (state.isGenerated) {
+        // Request UI to switch to overview tab (index 0)
+        ref.read(aiTabSwitchProvider.notifier).state = 0;
+        return ValidateAndSubmitResult.submittedSuccess();
+      }
       return ValidateAndSubmitResult.submittedError(
         state.error ?? 'Không thể tạo lịch trình',
       );
