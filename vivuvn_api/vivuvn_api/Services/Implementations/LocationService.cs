@@ -91,11 +91,17 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<RestaurantDto>> GetRestaurantsByLocationIdAsync(int locationId)
         {
             // Get location and validate
-            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId);
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyRestaurants,NearbyRestaurants.Photos");
             if (location is null) throw new KeyNotFoundException("Location not found");
             if (!location.Latitude.HasValue || !location.Longitude.HasValue)
             {
                 return [];
+            }
+
+            if (location.NearbyRestaurants is not null && location.NearbyRestaurants.Any())
+            {
+                // Return cached restaurants
+                return _mapper.Map<IEnumerable<RestaurantDto>>(location.NearbyRestaurants);
             }
 
             // Fetch nearby restaurants from Google Maps API
@@ -123,6 +129,9 @@ namespace vivuvn_api.Services.Implementations
 
             // Map Place objects to RestaurantDto using AutoMapper
             var restaurantDtos = _mapper.Map<IEnumerable<RestaurantDto>>(response.Places);
+
+            // add restaurant to location's NearbyRestaurants and save to database
+
 
             return restaurantDtos;
         }
