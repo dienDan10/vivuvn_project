@@ -17,39 +17,58 @@ namespace vivuvn_api.Data.DbInitializer
             }
 
             // create roles if they are not created
-            if (!_context.Roles.Any())
-            {
-                _context.Roles.AddRange(
-                    new Role { Name = Constants.Role_Admin },
-                    new Role { Name = Constants.Role_Operator },
-                    new Role { Name = Constants.Role_Traveler });
-                _context.SaveChanges();
-            }
+            InitializeRole();
 
             // Add a default admin user if not exists
-            if (!_context.Users.Any(u => u.UserRoles.Any(ur => ur.Role.Name == Constants.Role_Admin)))
+            AddDefaultUser();
+
+            // Add budget types
+            AddBudgetType();
+
+            // Add locations data
+            AddLocationData();
+
+        }
+
+        private void InitializeRole()
+        {
+            if (_context.Roles.Any()) return;
+
+            _context.Roles.AddRange(
+                new Role { Name = Constants.Role_Admin },
+                new Role { Name = Constants.Role_Operator },
+                new Role { Name = Constants.Role_Traveler });
+            _context.SaveChanges();
+
+        }
+
+        private void AddDefaultUser()
+        {
+            if (_context.Users.Any(u => u.UserRoles.Any(ur => ur.Role.Name == Constants.Role_Admin))) return;
+
+            var adminUser = new User
             {
-                var adminUser = new User
-                {
-                    Email = "admin@gmail.com",
-                    Username = "Admin Desu!",
-                    IsEmailVerified = true,
-                    LockoutEnd = null,
-                    UserRoles = new List<UserRole>
+                Email = "admin@gmail.com",
+                Username = "Admin Desu!",
+                IsEmailVerified = true,
+                LockoutEnd = null,
+                UserRoles = new List<UserRole>
                     {
                         new UserRole { RoleId = _context.Roles.Single(r => r.Name == Constants.Role_Admin).Id }
                     }
-                };
-                var hashedPassword = new PasswordHasher<User>().HashPassword(adminUser, "admin@123");
-                adminUser.PasswordHash = hashedPassword;
-                _context.Users.Add(adminUser);
-                _context.SaveChanges();
-            }
+            };
+            var hashedPassword = new PasswordHasher<User>().HashPassword(adminUser, "admin@123");
+            adminUser.PasswordHash = hashedPassword;
+            _context.Users.Add(adminUser);
+            _context.SaveChanges();
 
-            // Add budget types
-            if (!_context.BudgetTypes.Any())
-            {
-                var budgetTypes = new List<BudgetType>
+        }
+
+        private void AddBudgetType()
+        {
+            if (_context.BudgetTypes.Any()) return;
+
+            var budgetTypes = new List<BudgetType>
                 {
                     new BudgetType { Name = Constants.BudgetType_Flights },
                     new BudgetType { Name = Constants.BudgetType_Lodging },
@@ -64,11 +83,13 @@ namespace vivuvn_api.Data.DbInitializer
                     new BudgetType { Name = Constants.BudgetType_Groceries },
                     new BudgetType { Name = Constants.BudgetType_Other },
                 };
-                _context.BudgetTypes.AddRange(budgetTypes);
-                _context.SaveChanges();
-            }
+            _context.BudgetTypes.AddRange(budgetTypes);
+            _context.SaveChanges();
 
-            // Add locations data
+        }
+
+        private void AddLocationData()
+        {
             if (_context.Locations.Any()) return;
 
             var filePath = Path.Combine(_env.ContentRootPath, "Data", "location_data.json");
@@ -145,7 +166,6 @@ namespace vivuvn_api.Data.DbInitializer
                 }
                 _context.SaveChanges();
             }
-
         }
     }
 }

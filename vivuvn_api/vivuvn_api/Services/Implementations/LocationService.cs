@@ -10,7 +10,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IWebHostEnvironment _env) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)
@@ -91,36 +91,21 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<RestaurantDto>> GetRestaurantsByLocationIdAsync(int locationId)
         {
             // Get location and validate
-            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyRestaurants,NearbyRestaurants.Photos");
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyRestaurants,NearbyRestaurants.Photos", tracked: true);
             if (location is null) throw new KeyNotFoundException("Location not found");
             if (!location.Latitude.HasValue || !location.Longitude.HasValue)
             {
                 return [];
             }
 
+            // return restaurants if db contains restaurants
             if (location.NearbyRestaurants is not null && location.NearbyRestaurants.Any())
             {
-                // Return cached restaurants
                 return _mapper.Map<IEnumerable<RestaurantDto>>(location.NearbyRestaurants);
             }
 
             // Fetch nearby restaurants from Google Maps API
-            var request = new FetchGoogleRestaurantRequestDto
-            {
-                LocationRestriction = new LocationRestriction
-                {
-                    Circle = new Circle
-                    {
-                        Center = new DTOs.Request.LatLng
-                        {
-                            Latitude = location.Latitude.Value,
-                            Longitude = location.Longitude.Value
-                        }
-                    }
-                },
-            };
-
-            var response = await _placeService.FetchNearbyRestaurantsAsync(request);
+            var response = await _placeService.FetchNearbyRestaurantsAsync(location);
 
             if (response is null || response.Places is null || !response.Places.Any())
             {
@@ -131,9 +116,24 @@ namespace vivuvn_api.Services.Implementations
             var restaurantDtos = _mapper.Map<IEnumerable<RestaurantDto>>(response.Places);
 
             // add restaurant to location's NearbyRestaurants and save to database
+            var newRestaurants = _mapper.Map<IEnumerable<Restaurant>>(restaurantDtos);
 
+            location.NearbyRestaurants = [.. newRestaurants];
 
-            return restaurantDtos;
+            await _unitOfWork.SaveChangesAsync();
+
+            // save restaurant to json file
+
+            return _mapper.Map<IEnumerable<RestaurantDto>>(newRestaurants);
+        }
+
+        private async Task SaveRestaurantsToJsonFile(IEnumerable<Restaurant> restaurants)
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurant_data.json");
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
         }
     }
 }

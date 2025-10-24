@@ -2,15 +2,31 @@
 using System.Text.Json;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
+using vivuvn_api.Models;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
     public class GoogleMapPlaceService(HttpClient _httpClient, IConfiguration _config) : IGoogleMapPlaceService
     {
-        public async Task<FetchGoogleRestaurantResponseDto?> FetchNearbyRestaurantsAsync(FetchGoogleRestaurantRequestDto request)
+        public async Task<FetchGoogleRestaurantResponseDto?> FetchNearbyRestaurantsAsync(Location location)
         {
             string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            var request = new FetchGoogleRestaurantRequestDto
+            {
+                LocationRestriction = new LocationRestriction
+                {
+                    Circle = new Circle
+                    {
+                        Center = new LatLng
+                        {
+                            Latitude = location.Latitude.Value,
+                            Longitude = location.Longitude.Value
+                        }
+                    }
+                },
+            };
 
             // Serialize with options to ignore null values
             var jsonOptions = new JsonSerializerOptions
@@ -32,6 +48,13 @@ namespace vivuvn_api.Services.Implementations
                 requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.location,places.googleMapsUri,places.priceLevel,places.photos");
 
                 var response = await _httpClient.SendAsync(requestMessage);
+
+                //if (!response.IsSuccessStatusCode)
+                //{
+                //    // log the error
+                //    Console.WriteLine($"Error fetching nearby restaurants: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
+                //    Console.WriteLine($"Request Body: {jsonBody}");
+                //}
 
                 response.EnsureSuccessStatusCode();
 
@@ -72,7 +95,7 @@ namespace vivuvn_api.Services.Implementations
                     place.Photos.Clear();
                     foreach (var photoUrl in photoUrls.Where(url => !string.IsNullOrEmpty(url)))
                     {
-                        place.Photos.Add(new Photo { Name = photoUrl! });
+                        place.Photos.Add(new DTOs.Response.Photo { Name = photoUrl! });
                     }
                 }
             }
