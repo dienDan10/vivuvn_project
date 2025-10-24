@@ -10,5 +10,6 @@ namespace vivuvn_api.Services.Interfaces
         Task<PaginatedResponseDto<LocationDto>> GetAllLocationsAsync(GetAllLocationsRequestDto requestDto);
         Task<LocationDto> GetLocationByIdAsync(int id);
         Task<IEnumerable<RestaurantDto>> GetRestaurantsByLocationIdAsync(int locationId);
+        Task<IEnumerable<HotelDto>> GetHotelsByLocationIdAsync(int locationId);
     }
 }
