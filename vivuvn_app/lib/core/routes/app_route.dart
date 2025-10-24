@@ -9,6 +9,7 @@ import '../../screens/home_screen.dart';
 import '../../screens/itinerary_detail_screen.dart';
 import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
+import '../../screens/nearby_restaurant_screen.dart';
 import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
@@ -74,6 +75,11 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           final itineraryId = state.pathParameters['id']!;
           return ItineraryDetailScreen(itineraryId: int.parse(itineraryId));
         },
+      ),
+
+      GoRoute(
+        path: nearbyRestaurantRoute,
+        builder: (final context, final state) => const NearbyRestaurantScreen(),
       ),
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
