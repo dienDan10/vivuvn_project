@@ -61,12 +61,12 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
                   )
                 : ListView(
                     padding: EdgeInsets.zero,
-                    children: [
-                      const DayTitle(),
-                      PlaceListSection(dayId: selectedDay.id),
-                      SuggestedPlacesTile(dayId: selectedDay.id),
-                      AddHotelTile(dayId: selectedDay.id),
-                      AddRestaurantTile(dayId: selectedDay.id),
+                    children: const [
+                      DayTitle(),
+                      PlaceListSection(),
+                      SuggestedPlacesTile(),
+                      AddHotelTile(),
+                      AddRestaurantTile(),
                     ],
                   ),
           ),

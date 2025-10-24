@@ -7,13 +7,8 @@ import 'search_location_field.dart';
 
 class AddPlaceBottomSheet extends ConsumerWidget {
   final String type;
-  final int dayId;
 
-  const AddPlaceBottomSheet({
-    super.key,
-    required this.dayId,
-    this.type = 'place',
-  });
+  const AddPlaceBottomSheet({super.key, this.type = 'place'});
 
   String _getHintText() {
     switch (type) {
@@ -37,7 +32,7 @@ class AddPlaceBottomSheet extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Thanh nhỏ ở đầu để người dùng biết có thể kéo
+            // Thanh kéo nhỏ ở đầu sheet
             Container(
               width: 40,
               height: 4,
@@ -54,7 +49,21 @@ class AddPlaceBottomSheet extends ConsumerWidget {
                   final messenger = ScaffoldMessenger.of(context);
                   final navigator = Navigator.of(context);
 
-                  // Gọi controller chỉ với dayId
+                  // Lấy dayId hiện tại từ controller
+                  final dayId = ref.read(
+                    itineraryScheduleControllerProvider.select(
+                      (final s) => s.selectedDayId,
+                    ),
+                  );
+
+                  if (dayId == null) {
+                    messenger.showSnackBar(
+                      const SnackBar(content: Text('Chưa chọn ngày nào')),
+                    );
+                    return;
+                  }
+
+                  // Gọi controller để thêm địa điểm
                   await ref
                       .read(itineraryScheduleControllerProvider.notifier)
                       .addItemToDay(dayId, location.id);

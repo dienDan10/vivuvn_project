@@ -1,4 +1,5 @@
 import '../model/itinerary_day.dart';
+import '../model/itinerary_item.dart';
 
 class ItineraryScheduleState {
   final int? itineraryId;
@@ -6,6 +7,8 @@ class ItineraryScheduleState {
   final String? error;
   final List<ItineraryDay> days;
   final int selectedIndex;
+  final ItineraryItem? selectedItem;
+  final int? selectedDayId;
 
   ItineraryScheduleState({
     this.itineraryId,
@@ -13,6 +16,8 @@ class ItineraryScheduleState {
     this.error,
     this.days = const [],
     this.selectedIndex = 0,
+    this.selectedItem,
+    this.selectedDayId,
   });
 
   ItineraryScheduleState copyWith({
@@ -21,6 +26,8 @@ class ItineraryScheduleState {
     final String? error,
     final List<ItineraryDay>? days,
     final int? selectedIndex,
+    final ItineraryItem? selectedItem,
+    final int? selectedDayId,
   }) {
     return ItineraryScheduleState(
       itineraryId: itineraryId ?? this.itineraryId,
@@ -28,6 +35,8 @@ class ItineraryScheduleState {
       error: error ?? this.error,
       days: days ?? this.days,
       selectedIndex: selectedIndex ?? this.selectedIndex,
+      selectedItem: selectedItem ?? this.selectedItem,
+      selectedDayId: selectedDayId ?? this.selectedDayId,
     );
   }
 }

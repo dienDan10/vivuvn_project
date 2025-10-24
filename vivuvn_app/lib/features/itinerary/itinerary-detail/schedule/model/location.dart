@@ -21,7 +21,7 @@ class Location {
     required this.photos,
   });
 
-  factory Location.fromJson(Map<String, dynamic> json) {
+  factory Location.fromJson(final Map<String, dynamic> json) {
     return Location(
       id: json['id'] is int ? json['id'] : 0,
       name: json['name']?.toString() ?? '',
@@ -31,13 +31,28 @@ class Location {
       rating: (json['rating'] != null)
           ? (json['rating'] as num).toDouble()
           : 0.0,
-      ratingCount:
-          json['ratingCount'] is int ? json['ratingCount'] as int : null,
+      ratingCount: json['ratingCount'] is int
+          ? json['ratingCount'] as int
+          : null,
       websiteUri: json['websiteUri']?.toString(),
-      photos: (json['photos'] as List?)
-              ?.whereType<String>()
-              .toList() ??
+      photos:
+          (json['photos'] as List?)?.map((final e) => e.toString()).toList() ??
           [],
     );
+  }
+
+  /// ✅ Thêm hàm này để hỗ trợ chuyển Location -> JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'provinceName': provinceName,
+      'description': description,
+      'address': address,
+      'rating': rating,
+      'ratingCount': ratingCount,
+      'websiteUri': websiteUri,
+      'photos': photos,
+    };
   }
 }

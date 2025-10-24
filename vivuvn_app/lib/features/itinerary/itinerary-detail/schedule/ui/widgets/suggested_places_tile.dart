@@ -6,9 +6,7 @@ import 'add_place_bottom_sheet.dart';
 import 'suggested_place_item.dart';
 
 class SuggestedPlacesTile extends ConsumerWidget {
-  final int dayId;
-
-  const SuggestedPlacesTile({super.key, required this.dayId});
+  const SuggestedPlacesTile({super.key});
 
   void _openAddPlaceSheet(final BuildContext context, final WidgetRef ref) {
     showModalBottomSheet(
@@ -17,9 +15,9 @@ class SuggestedPlacesTile extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => FractionallySizedBox(
+      builder: (_) => const FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(type: 'place', dayId: dayId),
+        child: AddPlaceBottomSheet(type: 'place'),
       ),
     );
   }

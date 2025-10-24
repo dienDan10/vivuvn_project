@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controller/location_controller.dart';
-import 'widgets/location_appbar.dart';
-import 'widgets/location_info_tab.dart';
-import 'widgets/location_overview_tab.dart';
-import 'widgets/location_photos_tab.dart';
+import 'wiget/location_appbar.dart';
+import 'wiget/location_info_tab.dart';
+import 'wiget/location_overview_tab.dart';
+import 'wiget/location_photos_tab.dart';
 
 class LocationDetailScreen extends ConsumerStatefulWidget {
   final int locationId;
