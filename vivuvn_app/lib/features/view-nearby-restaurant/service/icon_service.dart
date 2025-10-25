@@ -3,15 +3,19 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'iicon_service.dart';
 
 class IconService implements IIconService {
   @override
-  Future<BitmapDescriptor> createCustomMarkerBitmap(final String path) async {
+  Future<BitmapDescriptor> createCustomMarkerBitmap(
+    final String path, {
+    final double size = 48.0,
+  }) async {
     return await BitmapDescriptor.asset(
-      const ImageConfiguration(size: Size(48, 48)),
+      ImageConfiguration(size: Size(size, size)),
       path,
     );
   }
@@ -43,3 +47,7 @@ class IconService implements IIconService {
     return byteData!.buffer.asUint8List();
   }
 }
+
+final iconServiceProvider = Provider.autoDispose<IIconService>((final ref) {
+  return IconService();
+});

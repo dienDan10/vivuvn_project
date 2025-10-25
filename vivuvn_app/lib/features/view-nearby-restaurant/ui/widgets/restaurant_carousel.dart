@@ -15,6 +15,15 @@ class RestaurantCarousel extends ConsumerStatefulWidget {
 class _RestaurantCarouselState extends ConsumerState<RestaurantCarousel> {
   CarouselSliderController carouselController = CarouselSliderController();
 
+  void _onCarouselPageChanged(
+    final int index,
+    final CarouselPageChangedReason reason,
+  ) {
+    ref
+        .read(restaurantControllerProvider.notifier)
+        .setCurrentRestaurantIndex(index);
+  }
+
   @override
   Widget build(final BuildContext context) {
     final restaurants = ref.watch(
@@ -37,6 +46,7 @@ class _RestaurantCarouselState extends ConsumerState<RestaurantCarousel> {
           enableInfiniteScroll: false,
           viewportFraction: 0.9,
           enlargeFactor: 0.2,
+          onPageChanged: _onCarouselPageChanged,
         ),
         itemCount: restaurants.length,
         itemBuilder:
