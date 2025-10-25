@@ -68,7 +68,7 @@ namespace vivuvn_api.Services.Implementations
                 orderBy: orderBy,
                 pageNumber: requestDto.PageNumber,
                 pageSize: requestDto.PageSize,
-                includeProperties: "LocationPhotos,Province"
+                includeProperties: "Photos,Province"
             );
 
             var locationDtos = _mapper.Map<IEnumerable<LocationDto>>(items);
@@ -86,7 +86,7 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<LocationDto> GetLocationByIdAsync(int id)
         {
-            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "LocationPhotos");
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "Photos");
             return _mapper.Map<LocationDto>(location);
         }
 
