@@ -44,6 +44,7 @@
             // Replace Google services settings
             ReplaceIfContains("GoogleMapService:ApiKey", "GOOGLE_MAPS_API_KEY");
             ReplaceIfContains("GoogleMapService:RouteUrl", "GOOGLE_MAPS_ROUTE_URL");
+            ReplaceIfContains("GoogleMapService:PlaceUrl", "GOOGLE_MAPS_PLACE_URL");
             ReplaceIfContains("GoogleOAuth:ClientId", "GOOGLE_OAUTH_CLIENT_ID");
 
         }

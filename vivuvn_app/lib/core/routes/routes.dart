@@ -12,3 +12,6 @@ const String itineraryRoute = '/itineraries';
 const String itineraryDetailRoute = '/itineraries/:id';
 String createItineraryDetailRoute(final int id) => '/itineraries/$id';
 const String locationDetailRoute = '/location/:id';
+
+// restaurants routes
+const String nearbyRestaurantRoute = '/nearby-restaurants';

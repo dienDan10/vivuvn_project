@@ -40,6 +40,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IBudgetService, BudgetService>();
             services.AddScoped<IAiClientService, AiClientService>();
             services.AddScoped<IGoogleMapRouteService, GoogleMapRouteService>();
+            services.AddScoped<IGoogleMapPlaceService, GoogleMapPlaceService>();
             return services;
         }
 
@@ -65,10 +66,16 @@ namespace vivuvn_api.Extensions
                 httpClient.BaseAddress = new Uri(configuration.GetValue<string>("AiService:BaseUrl") ?? "");
             });
 
-            // Google Map Client
+            // Google Route Client
             services.AddHttpClient<IGoogleMapRouteService, GoogleMapRouteService>(httpClient =>
             {
                 httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:RouteUrl") ?? "");
+            });
+
+            // Google Place Client
+            services.AddHttpClient<IGoogleMapPlaceService, GoogleMapPlaceService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:PlaceUrl") ?? "");
             });
 
             return services;

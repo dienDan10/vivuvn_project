@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LinqKit;
-using System.Linq.Expressions;
+using System.Text.Json;
+using vivuvn_api.Data.DbInitializer;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -11,7 +12,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IWebHostEnvironment _env) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)
@@ -89,18 +90,176 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<LocationDto>(location);
         }
 
-        private static Expression<Func<T, bool>> CombineFilters<T>(Expression<Func<T, bool>> first,
-            Expression<Func<T, bool>> second)
+        public async Task<IEnumerable<RestaurantDto>> GetRestaurantsByLocationIdAsync(int locationId)
         {
-            var parameter = Expression.Parameter(typeof(T));
-            var combined = Expression.Lambda<Func<T, bool>>(
-                Expression.AndAlso(
-                    Expression.Invoke(first, parameter),
-                    Expression.Invoke(second, parameter)
-                ),
-                parameter
-            );
-            return combined;
+            // Get location and validate
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyRestaurants,NearbyRestaurants.Photos", tracked: true);
+            if (location is null) throw new KeyNotFoundException("Location not found");
+            if (!location.Latitude.HasValue || !location.Longitude.HasValue)
+            {
+                return [];
+            }
+
+            // return restaurants if db contains restaurants
+            if (location.NearbyRestaurants is not null && location.NearbyRestaurants.Any())
+            {
+                return _mapper.Map<IEnumerable<RestaurantDto>>(location.NearbyRestaurants);
+            }
+
+            // Fetch nearby restaurants from Google Maps API
+            var response = await _placeService.FetchNearbyRestaurantsAsync(location);
+
+            if (response is null || response.Places is null || !response.Places.Any())
+            {
+                return [];
+            }
+
+            // Map Place objects to RestaurantDto using AutoMapper
+            var restaurantDtos = _mapper.Map<IEnumerable<RestaurantDto>>(response.Places);
+
+            // add restaurant to location's NearbyRestaurants and save to database
+            var newRestaurants = _mapper.Map<IEnumerable<Restaurant>>(restaurantDtos);
+
+            location.NearbyRestaurants = [.. newRestaurants];
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // save restaurant to json file
+            await SaveRestaurantsToJsonFile(location.GooglePlaceId ?? "", newRestaurants);
+
+            return _mapper.Map<IEnumerable<RestaurantDto>>(newRestaurants);
+        }
+
+        public async Task<IEnumerable<HotelDto>> GetHotelsByLocationIdAsync(int locationId)
+        {
+            // Get location and validate
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyHotels,NearbyHotels.Photos", tracked: true);
+            if (location is null) throw new KeyNotFoundException("Location not found");
+            if (!location.Latitude.HasValue || !location.Longitude.HasValue)
+            {
+                return [];
+            }
+
+            // return hotels if db contains hotels
+            if (location.NearbyHotels is not null && location.NearbyHotels.Any())
+            {
+                return _mapper.Map<IEnumerable<HotelDto>>(location.NearbyHotels);
+            }
+
+            // Fetch nearby hotels from Google Maps API
+            var response = await _placeService.FetchNearbyHotelsAsync(location);
+
+            if (response is null || response.Places is null || !response.Places.Any())
+            {
+                return [];
+            }
+
+            // Map Place objects to HotelDto using AutoMapper
+            var hotelDtos = _mapper.Map<IEnumerable<HotelDto>>(response.Places);
+
+            // add hotel to location's NearbyHotels and save to database
+            var newHotels = _mapper.Map<IEnumerable<Hotel>>(hotelDtos);
+
+            location.NearbyHotels = [.. newHotels];
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // save hotel to json file
+            await SaveHotelsToJsonFile(location.GooglePlaceId ?? "", newHotels);
+
+            return _mapper.Map<IEnumerable<HotelDto>>(newHotels);
+        }
+
+        private async Task SaveRestaurantsToJsonFile(string locationPlaceId, IEnumerable<Restaurant> restaurants)
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurant_data.json");
+
+            // Read existing data from file
+            List<RestaurantData> allRestaurantData = [];
+
+            if (File.Exists(filePath))
+            {
+                var existingJson = await File.ReadAllTextAsync(filePath);
+                if (!string.IsNullOrWhiteSpace(existingJson))
+                {
+                    allRestaurantData = JsonSerializer.Deserialize<List<RestaurantData>>(existingJson) ?? [];
+                }
+            }
+
+            // Create new restaurant data entry
+            var restaurantData = new RestaurantData
+            {
+                LocationGooglePlaceId = locationPlaceId,
+                Restaurants = restaurants.Select(r => new RestaurantDataItem
+                {
+                    GooglePlaceId = r.GooglePlaceId,
+                    Name = r.Name,
+                    Address = r.Address,
+                    Rating = r.Rating,
+                    UserRatingCount = r.UserRatingCount,
+                    Latitude = r.Latitude,
+                    Longitude = r.Longitude,
+                    GoogleMapsUri = r.GoogleMapsUri,
+                    PriceLevel = r.PriceLevel,
+                    Photos = r.Photos.Select(p => p.PhotoUrl).ToList()
+                }).ToList()
+            };
+
+            // Remove existing entry for this location if it exists
+            allRestaurantData.RemoveAll(rd => rd.LocationGooglePlaceId == locationPlaceId);
+
+            // Add new entry
+            allRestaurantData.Add(restaurantData);
+
+            // Write updated data back to file
+            var json = JsonSerializer.Serialize(allRestaurantData, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(filePath, json);
+        }
+
+        private async Task SaveHotelsToJsonFile(string locationPlaceId, IEnumerable<Hotel> hotels)
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "hotel_data.json");
+
+            // Read existing data from file
+            List<HotelData> allHotelData = [];
+
+            if (File.Exists(filePath))
+            {
+                var existingJson = await File.ReadAllTextAsync(filePath);
+                if (!string.IsNullOrWhiteSpace(existingJson))
+                {
+                    allHotelData = JsonSerializer.Deserialize<List<HotelData>>(existingJson) ?? [];
+                }
+            }
+
+            // Create new hotel data entry
+            var hotelData = new HotelData
+            {
+                LocationGooglePlaceId = locationPlaceId,
+                Hotels = hotels.Select(h => new HotelDataItem
+                {
+                    GooglePlaceId = h.GooglePlaceId,
+                    Name = h.Name,
+                    Address = h.Address,
+                    Rating = h.Rating,
+                    UserRatingCount = h.UserRatingCount,
+                    Latitude = h.Latitude,
+                    Longitude = h.Longitude,
+                    GoogleMapsUri = h.GoogleMapsUri,
+                    PriceLevel = h.PriceLevel,
+                    Photos = h.Photos.Select(p => p.PhotoUrl).ToList()
+                }).ToList()
+            };
+
+            // Remove existing entry for this location if it exists
+            allHotelData.RemoveAll(rd => rd.LocationGooglePlaceId == locationPlaceId);
+
+            // Add new entry
+            allHotelData.Add(hotelData);
+
+            // Write updated data back to file
+            var json = JsonSerializer.Serialize(allHotelData, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(filePath, json);
         }
     }
 }

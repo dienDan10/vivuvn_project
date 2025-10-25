@@ -23,7 +23,7 @@ class PlacePhotosSection extends StatelessWidget {
           child: Stack(
             children: [
               // Nền đen mờ
-              Container(color: Colors.black.withOpacity(0.95)),
+              Container(color: Colors.black.withValues(alpha: 0.95)),
 
               // PageView ảnh (vuốt trái/phải)
               Center(

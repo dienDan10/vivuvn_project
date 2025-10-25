@@ -1,4 +1,4 @@
-﻿namespace vivuvn_api.Data
+﻿namespace vivuvn_api.Data.DbInitializer
 {
     public class ProvinceData
     {

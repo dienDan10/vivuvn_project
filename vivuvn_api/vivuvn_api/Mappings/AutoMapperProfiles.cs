@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Models;
 
@@ -33,10 +34,47 @@ namespace vivuvn_api.Mappings
             // Mapping For Location
             CreateMap<Location, LocationDto>()
                 .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province.Name))
-                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.LocationPhotos.Select(p => p.PhotoUrl).ToList()));
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos.Select(p => p.PhotoUrl).ToList()));
 
             // Mapping For Search Location
             CreateMap<Location, SearchLocationDto>();
+
+            // Mapping For Restaurant (Restaurant from DB to RestaurantDto)
+            CreateMap<Restaurant, RestaurantDto>()
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos.Select(p => p.PhotoUrl).ToList()));
+
+            // Mapping For RestaurantDto (from dto to restaurant entity)
+            CreateMap<RestaurantDto, Restaurant>()
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos.Select(p => new Models.Photo { PhotoUrl = p }).ToList()));
+
+            // Mapping For Restaurant (Google Places API to RestaurantDto)
+            CreateMap<Place, RestaurantDto>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.GooglePlaceId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName != null ? src.DisplayName.Text : string.Empty))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.FormattedAddress ?? string.Empty))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null))
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos != null ? src.Photos.Select(p => p.Name).ToList() : null));
+
+
+            // Mapping For Hotel (Hotel from DB to HotelDto)
+            CreateMap<Hotel, HotelDto>()
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos.Select(p => p.PhotoUrl).ToList()));
+
+            // Mapping For HotelDto (from dto to hotel entity)
+            CreateMap<HotelDto, Hotel>()
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos.Select(p => new Models.Photo { PhotoUrl = p }).ToList()));
+
+            // Mapping For Hotel (Google Places API to HotelDto)
+            CreateMap<Place, HotelDto>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.GooglePlaceId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName != null ? src.DisplayName.Text : string.Empty))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.FormattedAddress ?? string.Empty))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null))
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos != null ? src.Photos.Select(p => p.Name).ToList() : null));
 
             // Mapping For Budget
             CreateMap<Budget, BudgetDto>();

@@ -139,7 +139,7 @@ class _StatisticsBarItem extends StatelessWidget {
                                 BoxShadow(
                                   color: const Color(
                                     0xFF5B7FFF,
-                                  ).withOpacity(0.3),
+                                  ).withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),

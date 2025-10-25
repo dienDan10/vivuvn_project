@@ -137,6 +137,19 @@ namespace vivuvn_api.Services.Implementations
             await _unitOfWork.SaveChangesAsync();
         }
 
+        public async Task<bool> UpdateItineraryNameAsync(int itineraryId, string newName)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.Name = newName;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
         #endregion
         public async Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId)
         {
