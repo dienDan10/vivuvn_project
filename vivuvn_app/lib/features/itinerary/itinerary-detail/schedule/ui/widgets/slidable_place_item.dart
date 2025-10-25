@@ -8,7 +8,6 @@ import 'schedule_place_card.dart';
 
 class SlidablePlaceItem extends ConsumerWidget {
   final ItineraryItem item;
-  //pass cai nay xuong ca item va dayid
   final int dayId;
   final int index;
 
@@ -22,7 +21,7 @@ class SlidablePlaceItem extends ConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     return Slidable(
-      key: ValueKey(item.location.id),
+      key: ValueKey('${dayId}_${item.itineraryItemId}'),
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
         extentRatio: 0.18,
@@ -44,7 +43,11 @@ class SlidablePlaceItem extends ConsumerWidget {
           ),
         ],
       ),
-      child: SchedulePlaceCard(index: index, location: item.location),
+      child: SchedulePlaceCard(
+        dayId: dayId,
+        index: index,
+        location: item.location,
+      ),
     );
   }
 }

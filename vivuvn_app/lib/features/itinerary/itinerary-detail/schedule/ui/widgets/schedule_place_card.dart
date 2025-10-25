@@ -9,18 +9,23 @@ import 'place_card_header.dart';
 class SchedulePlaceCard extends ConsumerWidget {
   const SchedulePlaceCard({
     super.key,
+    required this.dayId,
     required this.index,
     required this.location,
-    //them itemid
   });
 
+  final int dayId;
   final int index;
   final Location location;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final expandState = ref.watch(placeExpandControllerProvider(index));
-    final controller = ref.read(placeExpandControllerProvider(index).notifier);
+    final expandState = ref.watch(
+      placeExpandControllerProvider((dayId, index)),
+    );
+    final controller = ref.read(
+      placeExpandControllerProvider((dayId, index)).notifier,
+    );
 
     return GestureDetector(
       onTap: controller.toggleExpand,
@@ -29,9 +34,6 @@ class SchedulePlaceCard extends ConsumerWidget {
         curve: Curves.easeInOut,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 1),
         padding: const EdgeInsets.all(12),
-
-        decoration: null,
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
