@@ -3,29 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../controller/itinerary_schedule_controller.dart';
-import '../../model/itinerary_day.dart';
-import '../../model/itinerary_item.dart';
 
 class PlaceTimeEditor extends ConsumerWidget {
-  const PlaceTimeEditor({
-    super.key,
-    required this.currentDay,
-    required this.currentItem,
-  });
+  const PlaceTimeEditor({super.key, required this.dayId, required this.itemId});
 
-  final ItineraryDay? currentDay;
-  final ItineraryItem? currentItem;
+  final int dayId;
+  final int itemId;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    if (currentDay == null || currentItem == null) return const SizedBox();
+    final state = ref.watch(itineraryScheduleControllerProvider);
+    final currentDay = state.days.firstWhere(
+      (final d) => d.id == dayId,
+      orElse: () => throw Exception('Day not found'),
+    );
+    final currentItem = currentDay.items.firstWhere(
+      (final i) => i.itineraryItemId == itemId,
+      orElse: () => throw Exception('Item not found'),
+    );
 
     return InkWell(
       onTap: () async {
         TimeOfDay start =
-            currentItem!.startTime ?? const TimeOfDay(hour: 8, minute: 0);
+            currentItem.startTime ?? const TimeOfDay(hour: 8, minute: 0);
         TimeOfDay end =
-            currentItem!.endTime ?? const TimeOfDay(hour: 9, minute: 0);
+            currentItem.endTime ?? const TimeOfDay(hour: 9, minute: 0);
         final format = NumberFormat('00');
 
         await showDialog(
@@ -79,8 +81,8 @@ class PlaceTimeEditor extends ConsumerWidget {
                       await ref
                           .read(itineraryScheduleControllerProvider.notifier)
                           .updateItem(
-                            dayId: currentDay!.id,
-                            itemId: currentItem!.itineraryItemId,
+                            dayId: dayId,
+                            itemId: itemId,
                             startTime: start,
                             endTime: end,
                           );

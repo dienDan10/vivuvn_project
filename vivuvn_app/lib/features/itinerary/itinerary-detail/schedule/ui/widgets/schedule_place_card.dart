@@ -11,11 +11,13 @@ class SchedulePlaceCard extends ConsumerWidget {
     super.key,
     required this.dayId,
     required this.index,
+    required this.itemId,
     required this.location,
   });
 
   final int dayId;
   final int index;
+  final int itemId;
   final Location location;
 
   @override
@@ -37,10 +39,14 @@ class SchedulePlaceCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PlaceCardHeader(location: location),
+            PlaceCardHeader(dayId: dayId, itemId: itemId, location: location),
             if (expandState.isExpanded) ...[
               const SizedBox(height: 12),
-              PlaceCardDetails(location: location),
+              PlaceCardDetails(
+                dayId: dayId,
+                itemId: itemId,
+                location: location,
+              ),
             ],
           ],
         ),

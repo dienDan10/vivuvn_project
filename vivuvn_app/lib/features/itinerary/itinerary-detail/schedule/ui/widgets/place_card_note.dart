@@ -6,8 +6,15 @@ import '../../controller/itinerary_schedule_controller.dart';
 import '../../model/location.dart';
 
 class PlaceCardNote extends ConsumerStatefulWidget {
-  const PlaceCardNote({super.key, required this.location});
+  const PlaceCardNote({
+    super.key,
+    required this.dayId,
+    required this.itemId,
+    required this.location,
+  });
 
+  final int dayId;
+  final int itemId;
   final Location location;
 
   @override
@@ -20,81 +27,52 @@ class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final state = ref.read(itineraryScheduleControllerProvider);
-      final currentDay = state.days.firstWhereOrNull(
-        (final d) => d.id == state.selectedDayId,
-      );
-      final currentItem = currentDay?.items.firstWhereOrNull(
-        (final i) => i.location.id == widget.location.id,
-      );
-      if (mounted) setState(() => note = currentItem?.note);
-    });
+    final state = ref.read(itineraryScheduleControllerProvider);
+    final currentDay = state.days.firstWhereOrNull(
+      (final d) => d.id == widget.dayId,
+    );
+    final currentItem = currentDay?.items.firstWhereOrNull(
+      (final i) => i.itineraryItemId == widget.itemId,
+    );
+    note = currentItem?.note;
   }
 
   Future<void> _editNote() async {
     final controllerText = TextEditingController(text: note ?? '');
     final newNote = await showDialog<String>(
       context: context,
-      builder: (final context) {
-        return AlertDialog(
-          title: const Text('Ghi chú'),
-          content: TextField(
-            controller: controllerText,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              hintText: 'Nhập ghi chú cho địa điểm này...',
-              border: OutlineInputBorder(),
-            ),
+      builder: (final context) => AlertDialog(
+        title: const Text('Ghi chú'),
+        content: TextField(
+          controller: controllerText,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Nhập ghi chú...',
+            border: OutlineInputBorder(),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () =>
-                  Navigator.pop(context, controllerText.text.trim()),
-              child: const Text('Lưu'),
-            ),
-          ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controllerText.text.trim()),
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
     );
 
     if (newNote != null) {
-      final currentDay = ref
-          .read(itineraryScheduleControllerProvider)
-          .days
-          .firstWhereOrNull(
-            (final d) =>
-                d.id ==
-                ref.read(itineraryScheduleControllerProvider).selectedDayId,
-          );
-
-      final currentItem = currentDay?.items.firstWhereOrNull(
-        (final i) => i.location.id == widget.location.id,
-      );
-
-      if (currentItem == null || currentDay == null) return;
-
       await ref
           .read(itineraryScheduleControllerProvider.notifier)
           .updateItem(
-            dayId: currentDay.id,
-            itemId: currentItem.itineraryItemId,
+            dayId: widget.dayId,
+            itemId: widget.itemId,
             note: newNote,
           );
-
-      if (mounted) {
-        setState(() => note = newNote.isEmpty ? null : newNote);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã lưu ghi chú thành công!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+      setState(() => note = newNote);
     }
   }
 
@@ -106,33 +84,16 @@ class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
             icon: const Icon(Icons.note_add_outlined, size: 20),
             label: const Text('Thêm ghi chú'),
           )
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(Icons.note_alt_outlined, size: 18, color: Colors.grey),
-                  SizedBox(width: 6),
-                  Text(
-                    'Ghi chú:',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                  ),
-                ],
+        : GestureDetector(
+            onTap: _editNote,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
               ),
-              const SizedBox(height: 4),
-              GestureDetector(
-                onTap: _editNote,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(note!, style: const TextStyle(fontSize: 14)),
-                ),
-              ),
-            ],
+              child: Text(note!),
+            ),
           );
   }
 }

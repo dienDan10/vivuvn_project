@@ -46,6 +46,7 @@ class SlidablePlaceItem extends ConsumerWidget {
       child: SchedulePlaceCard(
         dayId: dayId,
         index: index,
+        itemId: item.itineraryItemId,
         location: item.location,
       ),
     );

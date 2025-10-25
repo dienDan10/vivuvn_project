@@ -8,8 +8,15 @@ import 'place_info_section.dart';
 import 'place_photos_section.dart';
 
 class PlaceCardDetails extends ConsumerStatefulWidget {
-  const PlaceCardDetails({super.key, required this.location});
+  const PlaceCardDetails({
+    super.key,
+    required this.dayId,
+    required this.itemId,
+    required this.location,
+  });
 
+  final int dayId;
+  final int itemId;
   final Location location;
 
   @override
@@ -25,7 +32,11 @@ class _PlaceCardDetailsState extends ConsumerState<PlaceCardDetails> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PlaceCardNote(location: widget.location),
+          PlaceCardNote(
+            dayId: widget.dayId,
+            itemId: widget.itemId,
+            location: widget.location,
+          ),
           const SizedBox(height: 8),
           PlaceInfoSection(location: widget.location),
           if (widget.location.photos.length > 1) ...[
