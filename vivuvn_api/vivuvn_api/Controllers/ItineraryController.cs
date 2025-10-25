@@ -88,5 +88,17 @@ namespace vivuvn_api.Controllers
             }
             return Ok();
         }
+
+        [HttpPut("{id}/group-size")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryGroupSize(int id, [FromBody] UpdateItineraryGroupSizeRequestDto request)
+        {
+            var result = await _itineraryService.UpdateItineraryGroupSizeAsync(id, request.GroupSize);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
     }
 }

@@ -13,6 +13,7 @@ namespace vivuvn_api.Services.Interfaces
         Task UpdateItineraryDatesAsync(int id, UpdateItineraryDatesRequestDto request);
         Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId);
         public Task<bool> UpdateItineraryNameAsync(int itineraryId, string newName);
+        public Task<bool> UpdateItineraryGroupSizeAsync(int itineraryId, int newGroupSize);
 
         Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request);
     }

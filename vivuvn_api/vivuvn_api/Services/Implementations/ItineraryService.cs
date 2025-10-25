@@ -150,11 +150,25 @@ namespace vivuvn_api.Services.Implementations
             return true;
         }
 
+        public async Task<bool> UpdateItineraryGroupSizeAsync(int itineraryId, int newGroupSize)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.GroupSize = newGroupSize;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
         #endregion
+
         public async Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId)
         {
             var days = await _unitOfWork.ItineraryDays.GetAllAsync(d => d.ItineraryId == itineraryId,
-                includeProperties: "Items,Items.Location,Items.Location.LocationPhotos,Items.Location.Province");
+                includeProperties: "Items,Items.Location,Items.Location.Photos,Items.Location.Province");
 
             if (days is null) return [];
             return _mapper.Map<IEnumerable<ItineraryDayDto>>(days);

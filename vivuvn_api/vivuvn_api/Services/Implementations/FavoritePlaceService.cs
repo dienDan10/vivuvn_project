@@ -37,7 +37,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<FavoritePlaceDto>> GetFavoritePlacesByItineraryIdAsync(int itineraryId)
         {
             var favoritePlaces = await _unitOfWork.FavoritePlaces
-                .GetAllAsync(fp => fp.ItineraryId == itineraryId, includeProperties: "Location,Location.LocationPhotos,Location.Province");
+                .GetAllAsync(fp => fp.ItineraryId == itineraryId, includeProperties: "Location,Location.Photos,Location.Province");
             return _mapper.Map<IEnumerable<FavoritePlaceDto>>(favoritePlaces);
         }
     }

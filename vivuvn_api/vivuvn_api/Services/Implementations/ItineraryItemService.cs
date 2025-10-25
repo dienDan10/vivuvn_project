@@ -45,7 +45,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<ItineraryItemDto>> GetItemsByDayIdAsync(int dayId)
         {
             var items = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == dayId,
-                includeProperties: "Location,Location.LocationPhotos,Location.Province",
+                includeProperties: "Location,Location.Photos,Location.Province",
                 orderBy: q => q.OrderBy(i => i.OrderIndex));
 
             return _mapper.Map<IEnumerable<ItineraryItemDto>>(items);
