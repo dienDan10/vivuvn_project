@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/itinerary_detail_controller.dart';
 import '../controller/favourite_places_controller.dart';
-import 'widgets/group_size_card.dart';
 import 'widgets/place_list_item.dart';
-import 'widgets/transportation_card.dart';
 
 class PlaceList extends ConsumerStatefulWidget {
   const PlaceList({super.key});
@@ -112,15 +110,15 @@ class _PlaceListState extends ConsumerState<PlaceList>
     // Calculate total items: group_size(1) + transportation(1) + header(1) + places(n) + spacing(1) + button(1) + bottom(1)
     const extraItemsCount = 6;
     final totalItemCount = places.length + extraItemsCount;
-        // First item: Group Size Card
-        if (index == 0) {
-          return const GroupSizeCard();
-        }
+    // // First item: Group Size Card
+    // if (index == 0) {
+    //   return const GroupSizeCard();
+    // }
 
-        // Second item: Transportation Card
-        if (index == 1) {
-          return const TransportationCard();
-        }
+    // // Second item: Transportation Card
+    // if (index == 1) {
+    //   return const TransportationCard();
+    // }
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 0.0),
