@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../budget/ui/budget_tab.dart';
-import '../overview/ui/place_list.dart';
+import '../overview/ui/overview_tab_layout.dart';
 import '../schedule/ui/schedule_tab.dart';
 
 class TabbarContent extends StatelessWidget {
@@ -15,7 +15,7 @@ class TabbarContent extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       children: const [
         // Tab 1 - Tổng quan
-        PlaceList(),
+        OverviewTabLayout(),
         // Tab 2 - Lịch trình
         ScheduleTab(),
         // Tab 3 - Ngân sách
