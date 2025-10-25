@@ -51,6 +51,10 @@ class RestaurantController extends AutoDisposeNotifier<NearbyRestaurantState> {
         position: LatLng(restaurant.latitude!, restaurant.longitude!),
         icon: restaurantIcon,
         infoWindow: InfoWindow(title: restaurant.name),
+        onTap: () {
+          final index = restaurants.indexOf(restaurant);
+          setCurrentRestaurantIndex(index);
+        },
       );
     }).toList();
 

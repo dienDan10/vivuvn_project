@@ -8,7 +8,7 @@ namespace vivuvn_api.DTOs.Request
         public List<string> IncludedTypes { get; set; } = new() { "restaurant" };
 
         [JsonPropertyName("maxResultCount")]
-        public int MaxResultCount { get; set; } = 10;
+        public int MaxResultCount { get; set; } = 15;
 
         [JsonPropertyName("locationRestriction")]
         public LocationRestriction LocationRestriction { get; set; } = new();

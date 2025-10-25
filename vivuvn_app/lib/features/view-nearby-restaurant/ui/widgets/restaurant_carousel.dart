@@ -34,6 +34,16 @@ class _RestaurantCarouselState extends ConsumerState<RestaurantCarousel> {
       return const SizedBox.shrink();
     }
 
+    ref.listen(
+      restaurantControllerProvider.select(
+        (final state) => state.currentRestaurantIndex,
+      ),
+      (final prev, final next) async {
+        if (prev == next) return;
+        await carouselController.animateToPage(next);
+      },
+    );
+
     return Positioned(
       bottom: 40,
       left: 0,
