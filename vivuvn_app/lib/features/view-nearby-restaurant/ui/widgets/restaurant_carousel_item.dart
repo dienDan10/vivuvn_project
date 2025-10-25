@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../model/restaurant.dart';
+import 'btn_add_to_itinerary.dart';
 import 'btn_open_map.dart';
 import 'restaurant_detail_modal.dart';
 
@@ -135,7 +136,7 @@ class RestaurantCarouselItem extends StatelessWidget {
                             child: Text(
                               restaurant.address,
                               style: const TextStyle(fontSize: 14),
-                              maxLines: 3,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -155,6 +156,11 @@ class RestaurantCarouselItem extends StatelessWidget {
                 children: [
                   // Map Button
                   ButtonOpenMap(mapUrl: restaurant.googleMapsUri ?? ''),
+
+                  const SizedBox(width: 12),
+
+                  // Add to Itinerary Button
+                  const ButtonAddToItinerary(),
                 ],
               ),
             ),

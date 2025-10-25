@@ -1,6 +1,12 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../common/helper/app_constants.dart';
 import '../../model/restaurant.dart';
+import 'btn_add_to_itinerary.dart';
+import 'btn_open_map.dart';
 
 class RestaurantDetailModal extends StatelessWidget {
   final Restaurant restaurant;
@@ -8,6 +14,9 @@ class RestaurantDetailModal extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final priceLevel = restaurant.priceLevel;
+    final priceLevelString = priceLevelIndicators[priceLevel] ?? 'Unknown';
+
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.5,
@@ -18,93 +27,160 @@ class RestaurantDetailModal extends StatelessWidget {
         child: ListView(
           controller: scrollController,
           children: [
+            // Title and close button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
                     restaurant.name,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                 ),
               ],
             ),
+
+            // Restaurant Images
             const SizedBox(height: 16),
             if (restaurant.photos.isNotEmpty)
-              SizedBox(
-                height: 200,
-                child: PageView.builder(
-                  itemCount: restaurant.photos.length,
-                  itemBuilder: (final context, final index) => ClipRRect(
+              CarouselSlider.builder(
+                itemCount: restaurant.photos.length,
+                itemBuilder: (final context, final itemIndex, _) {
+                  return ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      restaurant.photos[index],
+                    child: FadeInImage.assetNetwork(
+                      placeholder: 'assets/images/image-placeholder.jpeg',
+                      image: restaurant.photos.isNotEmpty
+                          ? restaurant.photos[itemIndex]
+                          : 'assets/images/image-placeholder.jpeg',
+                      width: double.infinity,
+                      height: 200,
                       fit: BoxFit.cover,
+                      imageErrorBuilder:
+                          (final context, final error, final stackTrace) {
+                            return Image.asset(
+                              'assets/images/image-placeholder.jpeg',
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            );
+                          },
                     ),
-                  ),
+                  );
+                },
+                options: CarouselOptions(
+                  height: 200,
+                  enlargeCenterPage: true,
+                  enableInfiniteScroll: true,
+                  viewportFraction: 0.9,
+                  enlargeFactor: 0.2,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 3),
+                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
                 ),
               ),
+
             const SizedBox(height: 16),
+            // Restaurant Details
+            // Rating row
             Row(
               children: [
-                const Icon(Icons.star, color: Colors.amber, size: 20),
-                const SizedBox(width: 4),
+                // Star Icon
+                const Icon(Icons.star, color: Colors.orangeAccent, size: 20),
+                const SizedBox(width: 10),
+                // Rating Text
                 Text(
                   '${restaurant.rating}',
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orangeAccent,
                   ),
                 ),
+                // Rating count
+                const SizedBox(width: 4),
+                Text('(${restaurant.userRatingCount})'),
+
+                // google image
                 const SizedBox(width: 8),
-                Text(
-                  '(${restaurant.userRatingCount} reviews)',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                SvgPicture.asset(
+                  'assets/images/google.svg',
+                  width: 16,
+                  height: 16,
                 ),
               ],
             ),
             const SizedBox(height: 12),
+
+            // Address row
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on, color: Colors.red, size: 20),
-                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: SvgPicture.asset(
+                    'assets/icons/restaurant.svg',
+                    width: 20,
+                    height: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     restaurant.address,
                     style: const TextStyle(fontSize: 14),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
+
+            // Price Level row
             Row(
               children: [
                 const Icon(Icons.attach_money, color: Colors.green, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  restaurant.priceLevel ?? 'N/A',
-                  style: const TextStyle(fontSize: 14),
+                RichText(
+                  text: TextSpan(
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    children: [
+                      const TextSpan(text: 'Price Level: '),
+                      TextSpan(
+                        text: priceLevelString,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.italic,
+                          color: restaurant.getPriceLevelColor(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close),
-              label: const Text('Close'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+
+            // Action Buttons
+            Row(
+              children: [
+                // Map Button
+                ButtonOpenMap(mapUrl: restaurant.googleMapsUri ?? ''),
+
+                const SizedBox(width: 12),
+
+                // Add to Itinerary Button
+                const ButtonAddToItinerary(),
+              ],
             ),
           ],
         ),

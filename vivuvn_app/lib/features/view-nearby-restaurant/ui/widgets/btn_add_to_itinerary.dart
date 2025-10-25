@@ -1,42 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-class ButtonOpenMap extends StatelessWidget {
-  final String mapUrl;
-  const ButtonOpenMap({super.key, required this.mapUrl});
-
-  Future<void> _openMap() async {
-    if (mapUrl.isEmpty) {
-      return;
-    }
-
-    final Uri url = Uri.parse(mapUrl);
-
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    }
-  }
+class ButtonAddToItinerary extends StatelessWidget {
+  const ButtonAddToItinerary({super.key});
 
   @override
   Widget build(final BuildContext context) {
     return InkWell(
-      onTap: _openMap,
+      onTap: () {},
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.tertiaryFixed,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           children: [
             // Icons
             SvgPicture.asset(
-              'assets/icons/marker.svg',
+              'assets/icons/add.svg',
               width: 20,
               height: 20,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
+              colorFilter: ColorFilter.mode(
+                Theme.of(context).colorScheme.onTertiaryFixed,
                 BlendMode.srcIn,
               ),
             ),
@@ -44,10 +30,10 @@ class ButtonOpenMap extends StatelessWidget {
             const SizedBox(width: 4),
 
             // Text
-            const Text(
-              'Bản đồ',
+            Text(
+              'Thêm vào hành trình',
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onTertiaryFixed,
                 fontWeight: FontWeight.w600,
               ),
             ),

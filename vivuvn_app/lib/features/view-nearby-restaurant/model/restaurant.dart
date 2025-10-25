@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+
 class Restaurant {
   final int id;
   final String name;
@@ -27,6 +29,21 @@ class Restaurant {
     this.priceLevel,
     this.photos = const [],
   });
+
+  Color getPriceLevelColor() {
+    switch (priceLevel) {
+      case 'PRICE_LEVEL_FREE':
+      case 'PRICE_LEVEL_INEXPENSIVE':
+        return Colors.green;
+      case 'PRICE_LEVEL_MODERATE':
+        return Colors.orange;
+      case 'PRICE_LEVEL_EXPENSIVE':
+      case 'PRICE_LEVEL_VERY_EXPENSIVE':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
