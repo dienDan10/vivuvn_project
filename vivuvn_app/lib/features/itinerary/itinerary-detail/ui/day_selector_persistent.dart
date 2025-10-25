@@ -10,8 +10,8 @@ class DaySelectorPersistent extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       automaticallyImplyLeading: false,
-      toolbarHeight: 10.0,
-      expandedHeight: 10.0,
+      toolbarHeight: 20.0,
+      expandedHeight: 20.0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       flexibleSpace: const FlexibleSpaceBar(background: DaySelectorBar()),
     );

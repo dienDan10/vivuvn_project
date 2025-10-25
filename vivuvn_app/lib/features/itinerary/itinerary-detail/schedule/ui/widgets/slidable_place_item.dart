@@ -8,6 +8,7 @@ import 'schedule_place_card.dart';
 
 class SlidablePlaceItem extends ConsumerWidget {
   final ItineraryItem item;
+  //pass cai nay xuong ca item va dayid
   final int dayId;
   final int index;
 

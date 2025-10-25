@@ -11,6 +11,7 @@ class SchedulePlaceCard extends ConsumerWidget {
     super.key,
     required this.index,
     required this.location,
+    //them itemid
   });
 
   final int index;

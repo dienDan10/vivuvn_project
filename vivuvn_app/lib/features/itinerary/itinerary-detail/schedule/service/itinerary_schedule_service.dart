@@ -81,4 +81,17 @@ class ItineraryScheduleService {
       request: request,
     );
   }
+
+  /// Update dates
+  Future<void> updateItineraryDates({
+    required final int itineraryId,
+    required final DateTime startDate,
+    required final DateTime endDate,
+  }) async {
+    await _api.updateItineraryDates(
+      itineraryId: itineraryId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
 }

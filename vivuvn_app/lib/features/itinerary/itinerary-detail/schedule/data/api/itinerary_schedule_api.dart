@@ -72,4 +72,17 @@ class ItineraryScheduleApi {
       data: request.toJson(),
     );
   }
+
+  /// PUT: Cập nhật startDate / endDate
+  Future<void> updateItineraryDates({
+    required final int itineraryId,
+    required final DateTime startDate,
+    required final DateTime endDate,
+  }) async {
+    final request = {
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
+    };
+    await _dio.put('/api/v1/itineraries/$itineraryId/dates', data: request);
+  }
 }

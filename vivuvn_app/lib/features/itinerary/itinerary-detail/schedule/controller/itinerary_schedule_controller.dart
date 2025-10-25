@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/itinerary_detail_controller.dart';
 import '../model/itinerary_day.dart';
-import '../model/itinerary_item.dart';
 import '../service/itinerary_schedule_service.dart';
 import '../state/itinerary_schedule_state.dart';
 
@@ -118,9 +117,6 @@ class ItineraryScheduleController
     state = state.copyWith(selectedIndex: index, selectedDayId: selectedDayId);
   }
 
-  void selectItem(final ItineraryItem item) =>
-      state = state.copyWith(selectedItem: item);
-
   Future<void> updateItem({
     required final int dayId,
     required final int itemId,
@@ -163,6 +159,26 @@ class ItineraryScheduleController
       // refresh lại danh sách
     } catch (e) {
       state = state.copyWith(error: e.toString());
+    }
+  }
+
+  Future<void> updateDates(final DateTime start, final DateTime end) async {
+    if (itineraryId == null) return;
+    state = state.copyWith(isLoading: true);
+
+    try {
+      await ref
+          .read(itineraryScheduleServiceProvider)
+          .updateItineraryDates(
+            itineraryId: itineraryId!,
+            startDate: start,
+            endDate: end,
+          );
+
+      // load lại days
+      await fetchDays();
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
     }
   }
 }
