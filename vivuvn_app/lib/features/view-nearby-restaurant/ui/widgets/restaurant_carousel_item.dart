@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 
 import '../../model/restaurant.dart';
+import 'restaurant_detail_modal.dart';
 
 class RestaurantCarouselItem extends StatelessWidget {
   final Restaurant restaurant;
   const RestaurantCarouselItem({super.key, required this.restaurant});
 
+  void _showDetailsModel(final BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (final context) => RestaurantDetailModal(restaurant: restaurant),
+    );
+  }
+
   @override
   Widget build(final BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => _showDetailsModel(context),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(8),

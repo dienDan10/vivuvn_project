@@ -12,7 +12,7 @@ class Restaurant {
   final double? longitude;
   final String? googleMapsUri;
   final String? priceLevel;
-  final List<String>? photos;
+  final List<String> photos;
 
   Restaurant({
     required this.id,
@@ -25,7 +25,7 @@ class Restaurant {
     this.longitude,
     this.googleMapsUri,
     this.priceLevel,
-    this.photos,
+    this.photos = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -68,7 +68,7 @@ class Restaurant {
           : null,
       photos: map['photos'] != null
           ? List<String>.from(map['photos'] as List<dynamic>)
-          : null,
+          : const [],
     );
   }
 
