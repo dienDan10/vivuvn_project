@@ -47,25 +47,25 @@ class Validator {
     final String? value, {
     final String currency = 'VND',
   }) {
-    if (value == null || value.trim().isEmpty) return 'Please enter a budget';
+    if (value == null || value.trim().isEmpty) return 'Xin hãy nhập ngân sách';
     final amount = double.tryParse(value.replaceAll(',', '').trim());
-    if (amount == null || amount <= 0) {
-      return 'Budget must be a positive number';
-    }
+    if (amount == null || amount <= 0) return 'Ngân sách phải là một số dương';
     // Optional: enforce minimum reasonable amount (e.g., 1)
-    if (currency == 'USD' && amount < 1) return 'Budget must be at least 1 USD';
+    if (currency == 'USD' && amount < 1) return 'Ngân sách phải ít nhất 1 USD';
     if (currency == 'VND' && amount < 1000) {
-      return 'Budget must be at least 1,000 VND';
+      return 'Ngân sách phải ít nhất 1,000 VND';
     }
     return null;
   }
 
   // Validate group size (integer between 1 and 6)
   static String? validateGroupSize(final String? value) {
-    if (value == null || value.trim().isEmpty) return 'Please enter group size';
+    if (value == null || value.trim().isEmpty) {
+      return 'Xin hãy nhập số lượng nhóm';
+    }
     final n = int.tryParse(value.trim());
-    if (n == null) return 'Group size must be a number';
-    if (n < 1 || n > 6) return 'Group size must be between 1 and 6';
+    if (n == null) return 'Số lượng nhóm phải là một số';
+    if (n < 1 || n > 10) return 'Số lượng nhóm phải từ 1 đến 10';
     return null;
   }
 
@@ -110,8 +110,8 @@ class Validator {
 
   static String? validateNote(final String? text) {
     if (text == null || text.trim().isEmpty) return null; // optional
-    if (containsSensitiveWords(text)) return 'Note contains prohibited words';
-    if (text.length > 500) return 'Note is too long (max 500 chars)';
+    if (containsSensitiveWords(text)) return 'Ghi chú chứa từ cấm';
+    if (text.length > 500) return 'Ghi chú quá dài (tối đa 500 ký tự)';
     return null;
   }
 
@@ -121,11 +121,11 @@ class Validator {
     final String fieldName = 'Số tiền',
   }) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName must not be empty';
+      return '$fieldName không được để trống';
     }
     final amount = double.tryParse(value.replaceAll(',', '').trim());
     if (amount == null || amount < 0) {
-      return '$fieldName is not valid';
+      return '$fieldName không hợp lệ';
     }
     return null;
   }

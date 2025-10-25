@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../common/helper/app_constants.dart';
 import '../controller/itinerary_detail_controller.dart';
+import '../schedule/controller/automically_generate_by_ai_controller.dart';
 import '../state/itinerary_detail_state.dart';
 import 'budget_header_persistent.dart';
 import 'day_selector_persistent.dart';
@@ -32,6 +33,27 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     _tabController = TabController(length: 3, vsync: this);
     _registerScrollListener();
     _setupItineraryListener();
+    _setupAiTabSwitchListener();
+  }
+
+  void _setupAiTabSwitchListener() {
+    // Listen for tab switch requests from AI generation flow.
+    // When controller sets aiTabSwitchProvider to 0, animate to PlaceList tab
+    // and reload itinerary data.
+    ref.listenManual<int?>(aiTabSwitchProvider, (final previous, final next) {
+      if (next != null) {
+        // Animate to requested tab (0 = PlaceList)
+        _tabController.animateTo(next);
+
+        // Reload itinerary detail to fetch updated data after generation
+        ref
+            .read(itineraryDetailControllerProvider.notifier)
+            .fetchItineraryDetail();
+
+        // Clear the request so future requests can be issued
+        ref.read(aiTabSwitchProvider.notifier).state = null;
+      }
+    });
   }
 
   void _setupItineraryListener() {

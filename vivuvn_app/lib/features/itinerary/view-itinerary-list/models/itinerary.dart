@@ -4,6 +4,8 @@ class Itinerary {
   final String imageUrl;
   final DateTime startDate;
   final DateTime endDate;
+  final int groupSize;
+  final String transportationVehicle;
 
   Itinerary({
     required this.id,
@@ -11,6 +13,8 @@ class Itinerary {
     required this.imageUrl,
     required this.startDate,
     required this.endDate,
+    required this.groupSize,
+    this.transportationVehicle = '',
   });
 
   factory Itinerary.fromJson(final Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class Itinerary {
       imageUrl: json['imageUrl'] ?? 'assets/images/images-placeholder.jpeg',
       startDate: DateTime.parse(json['startDate'] as String),
       endDate: DateTime.parse(json['endDate'] as String),
+      groupSize: json['groupSize'] as int? ?? 0,
+      transportationVehicle: json['transportationVehicle'] ?? '',
     );
   }
 }
