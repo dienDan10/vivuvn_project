@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 
 class TransportSection extends ConsumerWidget {
-  const TransportSection({super.key, this.index});
+  final int index; // index của item trong ngày
 
-  final int? index;
+  const TransportSection({super.key, required this.index});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -16,79 +16,56 @@ class TransportSection extends ConsumerWidget {
         ? state.days[state.selectedIndex]
         : null;
 
-    if (selectedDay == null || selectedDay.items.isEmpty) {
-      return const SizedBox.shrink();
+    if (selectedDay == null) return const SizedBox();
+    if (index >= selectedDay.items.length - 1) return const SizedBox();
+
+    final nextItem = selectedDay.items[index + 1];
+
+    // Chọn icon theo vehicle
+    IconData vehicleIcon;
+    Color iconColor;
+    switch (nextItem.transportationVehicle?.toUpperCase()) {
+      case 'DRIVE':
+        vehicleIcon = Icons.directions_car;
+        iconColor = Colors.blue;
+        break;
+      case 'WALK':
+        vehicleIcon = Icons.directions_walk;
+        iconColor = Colors.green;
+        break;
+      case 'FLIGHT':
+        vehicleIcon = Icons.flight;
+        iconColor = Colors.red;
+        break;
+      case 'BIKE':
+        vehicleIcon = Icons.directions_bike;
+        iconColor = Colors.orange;
+        break;
+      default:
+        vehicleIcon = Icons.directions;
+        iconColor = Colors.grey;
     }
 
-    final currentItemIndex = index ?? 0;
-    if (currentItemIndex >= selectedDay.items.length - 1) {
-      return const SizedBox.shrink();
-    }
+    // Duration (giây → phút)
+    final durationText = nextItem.transportationDuration != null
+        ? '${(nextItem.transportationDuration! / 60).ceil()} phút'
+        : '-';
 
-    final currentItem = selectedDay.items[currentItemIndex];
-    final transport = currentItem.transportationVehicle ?? 'WALK';
-    final distance = currentItem.transportationDistance ?? 0;
-    final duration = currentItem.transportationDuration ?? 0;
+    // Distance (mét → km)
+    final distanceText = nextItem.transportationDistance != null
+        ? '${(nextItem.transportationDistance! / 1000).toStringAsFixed(1)} km'
+        : '-';
 
-    // Định dạng dữ liệu hiển thị
-    final vehicleIcon = _getVehicleIcon(transport);
-    final vehicleLabel = _getVehicleLabel(transport);
-    final distanceKm = distance >= 1000
-        ? '${(distance / 1000).toStringAsFixed(1)} km'
-        : '$distance m';
-    final durationMin = '${(duration / 60).round()} phút';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2, left: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Căn chỉnh icon với text
-          Transform.translate(
-            offset: const Offset(0, -5),
-            child: Text(vehicleIcon, style: const TextStyle(fontSize: 22)),
-          ),
-          const SizedBox(width: 6),
-          // Nội dung mô tả hành trình
-          Expanded(
-            child: Text(
-              '$vehicleLabel • $distanceKm • $durationMin',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      children: [
+        Icon(vehicleIcon, color: iconColor, size: 20),
+        const SizedBox(width: 6),
+        Text(durationText, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(width: 6),
+        const Text('–', style: TextStyle(color: Colors.grey)),
+        const SizedBox(width: 6),
+        Text(distanceText, style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
     );
-  }
-
-  //neu co nhieu loai phuong tien
-  String _getVehicleIcon(final String transport) {
-    switch (transport.toUpperCase()) {
-      case 'DRIVE':
-        return '🚗';
-      case 'WALK':
-        return '🚶‍♂️';
-      case 'BIKE':
-        return '🚴‍♂️';
-      default:
-        return '🚗';
-    }
-  }
-
-  String _getVehicleLabel(final String transport) {
-    switch (transport.toUpperCase()) {
-      case 'DRIVE':
-        return 'Drive';
-      case 'WALK':
-        return 'Walk';
-      case 'BIKE':
-        return 'Bike';
-      default:
-        return 'Drive';
-    }
   }
 }

@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/itinerary_schedule_api.dart';
 import '../data/dto/add_item_to_day_request.dart';
+import '../data/dto/update_item_request.dart';
 import '../model/itinerary_day.dart';
 import '../model/itinerary_item.dart';
 
@@ -54,6 +56,42 @@ class ItineraryScheduleService {
       itineraryId: itineraryId,
       dayId: dayId,
       itemId: itemId,
+    );
+  }
+
+  /// Cập nhật item (note, startTime, endTime)
+  Future<void> updateItem({
+    required final int itineraryId,
+    required final int dayId,
+    required final int itemId,
+    final String? note,
+    final TimeOfDay? startTime,
+    final TimeOfDay? endTime,
+  }) async {
+    final request = UpdateItemRequest(
+      note: note,
+      startTime: startTime,
+      endTime: endTime,
+    );
+
+    await _api.updateItem(
+      itineraryId: itineraryId,
+      dayId: dayId,
+      itemId: itemId,
+      request: request,
+    );
+  }
+
+  /// Update dates
+  Future<void> updateItineraryDates({
+    required final int itineraryId,
+    required final DateTime startDate,
+    required final DateTime endDate,
+  }) async {
+    await _api.updateItineraryDates(
+      itineraryId: itineraryId,
+      startDate: startDate,
+      endDate: endDate,
     );
   }
 }

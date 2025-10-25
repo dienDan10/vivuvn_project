@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
+import '../../features/itinerary/itinerary-detail/schedule/location/ui/location_detail_screen.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_detail_screen.dart';
@@ -75,6 +76,15 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           return ItineraryDetailScreen(itineraryId: int.parse(itineraryId));
         },
       ),
+
+      GoRoute(
+        path: locationDetailRoute,
+        builder: (final context, final state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return LocationDetailScreen(locationId: id);
+        },
+      ),
+
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
         builder:

@@ -129,7 +129,10 @@ namespace vivuvn_api.Services.Implementations
                 item.EstimateDuration = duration.Value.TotalMinutes;
             }
 
+            _unitOfWork.ItineraryItems.Update(item);
+
             await _unitOfWork.SaveChangesAsync();
+
             return _mapper.Map<ItineraryItemDto>(item);
         }
 

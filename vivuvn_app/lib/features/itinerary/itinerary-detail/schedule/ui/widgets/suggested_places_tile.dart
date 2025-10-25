@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../controller/itinerary_detail_controller.dart';
 import '../schedule_data.dart';
 import 'add_place_bottom_sheet.dart';
 import 'suggested_place_item.dart';
 
 class SuggestedPlacesTile extends ConsumerWidget {
-  final int dayId;
-
-  const SuggestedPlacesTile({super.key, required this.dayId});
+  const SuggestedPlacesTile({super.key});
 
   void _openAddPlaceSheet(final BuildContext context, final WidgetRef ref) {
-    final itineraryId = ref.read(itineraryDetailControllerProvider).itineraryId;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => FractionallySizedBox(
+      builder: (_) => const FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(type: 'place', dayId: dayId),
+        child: AddPlaceBottomSheet(type: 'place'),
       ),
     );
   }

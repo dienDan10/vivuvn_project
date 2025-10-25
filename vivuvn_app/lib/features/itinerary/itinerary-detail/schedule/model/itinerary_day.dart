@@ -25,4 +25,19 @@ class ItineraryDay {
           [],
     );
   }
+
+  // ==== Thêm copyWith ====
+  ItineraryDay copyWith({
+    final int? id,
+    final int? dayNumber,
+    final DateTime? date,
+    final List<ItineraryItem>? items,
+  }) {
+    return ItineraryDay(
+      id: id ?? this.id,
+      dayNumber: dayNumber ?? this.dayNumber,
+      date: date ?? this.date,
+      items: items ?? this.items,
+    );
+  }
 }

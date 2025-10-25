@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../model/location.dart';
-import 'place_description_section.dart';
-import 'place_info_row.dart';
-import 'place_link_row.dart';
+import 'place_action_buttons_section.dart';
+import 'place_card_note.dart';
+import 'place_info_section.dart';
 import 'place_photos_section.dart';
 
-class PlaceCardDetails extends StatelessWidget {
-  const PlaceCardDetails({super.key, required this.location});
+class PlaceCardDetails extends ConsumerStatefulWidget {
+  const PlaceCardDetails({
+    super.key,
+    required this.dayId,
+    required this.itemId,
+    required this.location,
+  });
 
+  final int dayId;
+  final int itemId;
   final Location location;
 
+  @override
+  ConsumerState<PlaceCardDetails> createState() => _PlaceCardDetailsState();
+}
+
+class _PlaceCardDetailsState extends ConsumerState<PlaceCardDetails> {
   @override
   Widget build(final BuildContext context) {
     return GestureDetector(
@@ -19,29 +32,23 @@ class PlaceCardDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (location.description.isNotEmpty)
-            PlaceDescriptionSection(description: location.description),
-
-          if (location.address.isNotEmpty)
-            PlaceInfoRow(
-              icon: Icons.location_on_outlined,
-              text: location.address,
-            ),
-          if (location.provinceName.isNotEmpty)
-            PlaceInfoRow(icon: Icons.map_outlined, text: location.provinceName),
-          if (location.rating > 0)
-            PlaceInfoRow(
-              icon: Icons.star_rate_rounded,
-              text:
-                  '${location.rating} (${location.ratingCount ?? 0} đánh giá)',
-            ),
-          if (location.websiteUri != null && location.websiteUri!.isNotEmpty)
-            PlaceLinkRow(url: location.websiteUri!),
-
+          PlaceCardNote(
+            dayId: widget.dayId,
+            itemId: widget.itemId,
+            location: widget.location,
+          ),
           const SizedBox(height: 8),
-
-          if (location.photos.length > 1)
-            PlacePhotosSection(photos: location.photos),
+          PlaceInfoSection(location: widget.location),
+          if (widget.location.photos.length > 1) ...[
+            const SizedBox(height: 12),
+            PlacePhotosSection(
+              photos: widget.location.photos,
+              locationId: widget.location.id,
+            ),
+          ],
+          const SizedBox(height: 16),
+          PlaceActionButtonsSection(location: widget.location),
+          const SizedBox(height: 16),
         ],
       ),
     );

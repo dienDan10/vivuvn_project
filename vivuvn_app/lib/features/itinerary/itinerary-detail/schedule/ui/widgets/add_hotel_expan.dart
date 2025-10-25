@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../controller/itinerary_detail_controller.dart';
 import 'add_place_bottom_sheet.dart';
 import 'add_place_button.dart';
 
 class AddHotelTile extends ConsumerWidget {
-  final int dayId;
-
-  const AddHotelTile({super.key, required this.dayId});
+  const AddHotelTile({super.key});
 
   void _openAddHotelSheet(final BuildContext context, final WidgetRef ref) {
-    final itineraryId = ref.read(itineraryDetailControllerProvider).itineraryId;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => FractionallySizedBox(
+      builder: (_) => const FractionallySizedBox(
         heightFactor: 0.8,
-        child: AddPlaceBottomSheet(type: 'hotel', dayId: dayId),
+        child: AddPlaceBottomSheet(type: 'hotel'),
       ),
     );
   }
@@ -33,7 +28,6 @@ class AddHotelTile extends ConsumerWidget {
       childrenPadding: const EdgeInsets.symmetric(vertical: 8),
       children: [
         AddPlaceButton(
-          dayId: dayId,
           label: 'Thêm nơi lưu trú',
           onPressed: () => _openAddHotelSheet(context, ref),
         ),

@@ -5,6 +5,7 @@ import '../../../../../../core/data/remote/network/network_service.dart';
 import '../dto/add_item_to_day_request.dart';
 import '../dto/get_items_by_day_response.dart';
 import '../dto/get_itinerary_days_response.dart';
+import '../dto/update_item_request.dart';
 
 final itineraryScheduleApiProvider = Provider.autoDispose<ItineraryScheduleApi>(
   (final ref) {
@@ -57,5 +58,31 @@ class ItineraryScheduleApi {
     await _dio.delete(
       '/api/v1/itineraries/$itineraryId/days/$dayId/items/$itemId',
     );
+  }
+
+  /// PUT: Cập nhật item trong ngày
+  Future<void> updateItem({
+    required final int itineraryId,
+    required final int dayId,
+    required final int itemId,
+    required final UpdateItemRequest request,
+  }) async {
+    await _dio.put(
+      '/api/v1/itineraries/$itineraryId/days/$dayId/items/$itemId',
+      data: request.toJson(),
+    );
+  }
+
+  /// PUT: Cập nhật startDate / endDate
+  Future<void> updateItineraryDates({
+    required final int itineraryId,
+    required final DateTime startDate,
+    required final DateTime endDate,
+  }) async {
+    final request = {
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
+    };
+    await _dio.put('/api/v1/itineraries/$itineraryId/dates', data: request);
   }
 }

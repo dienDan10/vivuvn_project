@@ -55,13 +55,13 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
           : ListView(
               padding: EdgeInsets.zero,
               physics: const BouncingScrollPhysics(),
-              children: [
-                const DayTitle(),
-                PlaceListSection(dayId: selectedDay.id),
-                SuggestedPlacesTile(dayId: selectedDay.id),
-                AddHotelTile(dayId: selectedDay.id),
-                AddRestaurantTile(dayId: selectedDay.id),
-                const SizedBox(height: 80), // Space for FAB
+              children: const [
+                DayTitle(),
+                PlaceListSection(),
+                SuggestedPlacesTile(),
+                AddHotelTile(),
+                AddRestaurantTile(),
+                SizedBox(height: 80), // Space for FAB
               ],
             ),
       floatingActionButton: const ButtonGenerateItinerary(),
