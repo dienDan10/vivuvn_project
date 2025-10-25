@@ -37,9 +37,9 @@ class PlaceListSection extends ConsumerWidget {
             index: entry.key,
           ),
           if (entry.key != items.length - 1)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
-              child: TransportSection(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: TransportSection(index: entry.key),
             ),
         ],
         const SizedBox(height: 8),

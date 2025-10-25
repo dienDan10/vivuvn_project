@@ -11,8 +11,8 @@ class ItineraryItem {
   final TimeOfDay? startTime;
   final TimeOfDay? endTime;
   final String? transportationVehicle;
-  final int? transportationDuration;
-  final int? transportationDistance;
+  final double? transportationDuration;
+  final double? transportationDistance;
 
   ItineraryItem({
     required this.itineraryItemId,
@@ -27,19 +27,15 @@ class ItineraryItem {
     this.transportationDistance,
   });
 
-  /// Parse từ JSON (string -> TimeOfDay)
   factory ItineraryItem.fromJson(final Map<String, dynamic> json) {
     TimeOfDay? parseTime(final dynamic timeValue) {
       if (timeValue == null) return null;
-      final timeString = timeValue.toString();
-
-      // Xử lý chuỗi dạng "11:14:00" hoặc "11:14"
-      final parts = timeString.split(':');
+      final parts = timeValue.toString().split(':');
       if (parts.length < 2) return null;
-
-      final hour = int.tryParse(parts[0]) ?? 0;
-      final minute = int.tryParse(parts[1]) ?? 0;
-      return TimeOfDay(hour: hour, minute: minute);
+      return TimeOfDay(
+        hour: int.tryParse(parts[0]) ?? 0,
+        minute: int.tryParse(parts[1]) ?? 0,
+      );
     }
 
     return ItineraryItem(
@@ -51,32 +47,11 @@ class ItineraryItem {
       startTime: parseTime(json['startTime']),
       endTime: parseTime(json['endTime']),
       transportationVehicle: json['transportationVehicle'] as String?,
-      transportationDuration: json['transportationDuration'] as int?,
-      transportationDistance: json['transportationDistance'] as int?,
+      transportationDuration: (json['transportationDuration'] as num?)
+          ?.toDouble(),
+      transportationDistance: (json['transportationDistance'] as num?)
+          ?.toDouble(),
     );
-  }
-
-  /// Convert sang JSON (TimeOfDay -> ISO string)
-  Map<String, dynamic> toJson() {
-    String? formatTime(final TimeOfDay? time) {
-      if (time == null) return null;
-      final now = DateTime.now();
-      final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-      return dt.toIso8601String();
-    }
-
-    return {
-      'itineraryItemId': itineraryItemId,
-      'orderIndex': orderIndex,
-      'location': location.toJson(),
-      'note': note,
-      'estimateDuration': estimateDuration,
-      'startTime': formatTime(startTime),
-      'endTime': formatTime(endTime),
-      'transportationVehicle': transportationVehicle,
-      'transportationDuration': transportationDuration,
-      'transportationDistance': transportationDistance,
-    };
   }
 
   ItineraryItem copyWith({
@@ -88,8 +63,8 @@ class ItineraryItem {
     final TimeOfDay? startTime,
     final TimeOfDay? endTime,
     final String? transportationVehicle,
-    final int? transportationDuration,
-    final int? transportationDistance,
+    final double? transportationDuration,
+    final double? transportationDistance,
   }) {
     return ItineraryItem(
       itineraryItemId: itineraryItemId ?? this.itineraryItemId,
