@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ui/widgets/place_action_button_direction.dart';
+import '../../ui/widgets/place_action_button_location.dart';
+import '../../ui/widgets/place_action_button_website.dart';
 import '../controller/location_controller.dart';
-import 'wiget/location_appbar.dart';
-import 'wiget/location_info_tab.dart';
-import 'wiget/location_overview_tab.dart';
-import 'wiget/location_photos_tab.dart';
+import 'wiget/location_address_row.dart';
+import 'wiget/location_description.dart';
+import 'wiget/location_image_slider.dart';
+import 'wiget/location_rating_section.dart';
 
 class LocationDetailScreen extends ConsumerStatefulWidget {
   final int locationId;
@@ -16,22 +21,29 @@ class LocationDetailScreen extends ConsumerStatefulWidget {
       _LocationDetailScreenState();
 }
 
-class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final ScrollController _scrollController = ScrollController();
-  bool _showTitle = false;
+class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+  Timer? _autoSlideTimer;
+
+  void _startAutoSlide(final int itemCount) {
+    _autoSlideTimer?.cancel();
+    if (itemCount > 1) {
+      _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+        _currentIndex = (_currentIndex + 1) % itemCount;
+        _pageController.animateToPage(
+          _currentIndex,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        );
+        setState(() {});
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-
-    _scrollController.addListener(() {
-      final newShowTitle = _scrollController.offset > 100;
-      if (newShowTitle != _showTitle) setState(() => _showTitle = newShowTitle);
-    });
-
     Future.microtask(() {
       ref
           .read(locationControllerProvider.notifier)
@@ -41,8 +53,8 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen>
 
   @override
   void dispose() {
-    _scrollController.dispose();
-    _tabController.dispose();
+    _autoSlideTimer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -54,9 +66,7 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen>
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (state.error != null) {
-      return Scaffold(
-        body: Center(child: Text(state.error ?? 'Đã xảy ra lỗi')),
-      );
+      return Scaffold(body: Center(child: Text(state.error!)));
     }
 
     final location = state.detail;
@@ -64,22 +74,68 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen>
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final photos = location.photos;
+    _startAutoSlide(photos.length);
+
     return Scaffold(
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (_, final __) => [
-          LocationAppBar(
-            location: location,
-            showTitle: _showTitle,
-            tabController: _tabController,
-          ),
-        ],
-        body: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LocationOverviewTab(location: location),
-            LocationPhotosTab(location: location),
-            LocationInfoTab(location: location),
+            LocationImageSlider(
+              photos: photos,
+              currentIndex: _currentIndex,
+              controller: _pageController,
+              onBackPressed: () => Navigator.pop(context),
+            ),
+            const SizedBox(height: 20),
+
+            /// Tên địa điểm
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                location.name,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  height: 1.3,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            /// Rating section
+            LocationRatingSection(
+              rating: location.rating,
+              ratingCount: location.ratingCount,
+            ),
+            const SizedBox(height: 10),
+
+            /// Địa chỉ
+            LocationAddressRow(address: location.address),
+            const SizedBox(height: 20),
+
+            /// Nút hành động
+            const SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  PlaceActionButtonDirection(),
+                  SizedBox(width: 16),
+                  PlaceActionButtonLocation(),
+                  SizedBox(width: 16),
+                  PlaceActionButtonWebsite(),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            /// Mô tả
+            LocationDescription(description: location.description),
+            const SizedBox(height: 40),
           ],
         ),
       ),
