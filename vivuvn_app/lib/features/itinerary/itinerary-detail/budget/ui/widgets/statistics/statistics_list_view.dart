@@ -66,7 +66,7 @@ class _StatisticsListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF5B7FFF).withOpacity(0.1)
+              ? const Color(0xFF5B7FFF).withValues(alpha: 0.1)
               : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(

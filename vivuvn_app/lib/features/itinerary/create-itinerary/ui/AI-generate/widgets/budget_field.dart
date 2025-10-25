@@ -65,7 +65,7 @@ class BudgetField extends StatelessWidget {
                     fontSize: 12,
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.6),
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 if (convertedVnd != null)
