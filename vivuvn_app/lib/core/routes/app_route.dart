@@ -10,6 +10,7 @@ import '../../screens/home_screen.dart';
 import '../../screens/itinerary_detail_screen.dart';
 import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
+import '../../screens/nearby_hotel_screen.dart';
 import '../../screens/nearby_restaurant_screen.dart';
 import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
@@ -85,9 +86,15 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           return LocationDetailScreen(locationId: id);
         },
       ),
+
       GoRoute(
         path: nearbyRestaurantRoute,
         builder: (final context, final state) => const NearbyRestaurantScreen(),
+      ),
+
+      GoRoute(
+        path: nearbyHotelRoute,
+        builder: (final context, final state) => const NearbyHotelScreen(),
       ),
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
