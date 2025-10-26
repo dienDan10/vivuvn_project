@@ -21,6 +21,9 @@ namespace vivuvn_api.Data
         public DbSet<ItineraryDay> ItineraryDays { get; set; }
         public DbSet<ItineraryItem> ItineraryItems { get; set; }
         public DbSet<FavoritePlace> FavoritePlaces { get; set; }
+        public DbSet<ItineraryHotel> ItineraryHotels { get; set; }
+        public DbSet<ItineraryRestaurant> ItineraryRestaurants { get; set; }
+
 
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<BudgetItem> BudgetItems { get; set; }
@@ -94,6 +97,27 @@ namespace vivuvn_api.Data
             modelBuilder.Entity<ExternalService>()
                 .HasIndex(es => es.ServiceTypeId);
 
+            //Indexes for ItineraryHotel and ItineraryRestaurant
+            modelBuilder.Entity<ItineraryHotel>()
+                .HasIndex(ih => ih.ItineraryId);
+
+            modelBuilder.Entity<ItineraryHotel>()
+                .HasIndex(ih => ih.HotelId);
+
+            modelBuilder.Entity<ItineraryHotel>()
+                .HasIndex(ih => ih.BudgetItemId)
+                .IsUnique();
+
+            modelBuilder.Entity<ItineraryRestaurant>()
+                .HasIndex(ir => ir.ItineraryId);
+
+            modelBuilder.Entity<ItineraryRestaurant>()
+                .HasIndex(ir => ir.RestaurantId);
+
+            modelBuilder.Entity<ItineraryRestaurant>()
+                .HasIndex(ir => ir.BudgetItemId)
+                .IsUnique();
+
             // Relationship configurations
             modelBuilder.Entity<Itinerary>()
                 .HasOne(i => i.StartProvince)
@@ -136,6 +160,45 @@ namespace vivuvn_api.Data
                 .HasMany(l => l.NearbyRestaurants)
                 .WithMany(r => r.NearbyLocations)
                 .UsingEntity(j => j.ToTable("LocationRestaurant"));
+
+            // ItineraryHotel - BudgetItem (One-to-One)
+            modelBuilder.Entity<ItineraryHotel>()
+                .HasOne(ih => ih.BudgetItem)
+                .WithOne(bi => bi.ItineraryHotel)
+                .HasForeignKey<ItineraryHotel>(ih => ih.BudgetItemId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ItineraryHotel>()
+                .HasOne(ih => ih.Itinerary)
+                .WithMany(i => i.Hotels)
+                .HasForeignKey(ih => ih.ItineraryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ItineraryHotel>()
+                .HasOne(ih => ih.Hotel)
+                .WithMany()
+                .HasForeignKey(ih => ih.HotelId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't delete Hotel entity
+
+            // ItineraryRestaurant - BudgetItem (One-to-One)
+            modelBuilder.Entity<ItineraryRestaurant>()
+                .HasOne(ir => ir.BudgetItem)
+                .WithOne(bi => bi.ItineraryRestaurant)
+                .HasForeignKey<ItineraryRestaurant>(ir => ir.BudgetItemId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ItineraryRestaurant>()
+                .HasOne(ir => ir.Itinerary)
+                .WithMany(i => i.Restaurants)
+                .HasForeignKey(ir => ir.ItineraryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ItineraryRestaurant>()
+                .HasOne(ir => ir.Restaurant)
+                .WithMany()
+                .HasForeignKey(ir => ir.RestaurantId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't delete Restaurant entity
+
         }
     }
 }
