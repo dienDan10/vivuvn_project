@@ -10,7 +10,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IWebHostEnvironment _env, IJsonService _jsonService) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IJsonService _jsonService) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)

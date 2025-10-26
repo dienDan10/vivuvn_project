@@ -98,5 +98,74 @@ namespace vivuvn_api.Services.Implementations
             var json = JsonSerializer.Serialize(allRestaurantData, new JsonSerializerOptions { WriteIndented = true });
             await File.WriteAllTextAsync(filePath, json);
         }
+
+        public async Task SaveSingleRestaurantToJsonFile(Restaurant restaurant)
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurants.json");
+            List<RestaurantDataItem> allRestaurants = [];
+            if (File.Exists(filePath))
+            {
+                var existingJson = await File.ReadAllTextAsync(filePath);
+                if (!string.IsNullOrWhiteSpace(existingJson))
+                {
+                    allRestaurants = JsonSerializer.Deserialize<List<RestaurantDataItem>>(existingJson) ?? [];
+                }
+            }
+            // Remove existing restaurant if it exists
+            allRestaurants.RemoveAll(r => r.GooglePlaceId == restaurant.GooglePlaceId);
+            // Add new restaurant
+            var restaurantDataItem = new RestaurantDataItem
+            {
+                GooglePlaceId = restaurant.GooglePlaceId ?? "",
+                Name = restaurant.Name,
+                Address = restaurant.Address,
+                Rating = restaurant.Rating,
+                UserRatingCount = restaurant.UserRatingCount,
+                Latitude = restaurant.Latitude,
+                Longitude = restaurant.Longitude,
+                GoogleMapsUri = restaurant.GoogleMapsUri,
+                PriceLevel = restaurant.PriceLevel,
+                Photos = restaurant.Photos.Select(p => p.PhotoUrl).ToList()
+            };
+            allRestaurants.Add(restaurantDataItem);
+            // Write updated data back to file
+            var json = JsonSerializer.Serialize(allRestaurants, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(filePath, json);
+        }
+
+        public async Task SaveSingleHotelToJsonFile(Hotel hotel)
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "hotels.json");
+            List<HotelDataItem> allHotels = [];
+            if (File.Exists(filePath))
+            {
+                var existingJson = await File.ReadAllTextAsync(filePath);
+                if (!string.IsNullOrWhiteSpace(existingJson))
+                {
+                    allHotels = JsonSerializer.Deserialize<List<HotelDataItem>>(existingJson) ?? [];
+                }
+            }
+
+            // Remove existing hotel if it exists
+            allHotels.RemoveAll(h => h.GooglePlaceId == hotel.GooglePlaceId);
+            // Add new hotel
+            var hotelDataItem = new HotelDataItem
+            {
+                GooglePlaceId = hotel.GooglePlaceId ?? "",
+                Name = hotel.Name,
+                Address = hotel.Address,
+                Rating = hotel.Rating,
+                UserRatingCount = hotel.UserRatingCount,
+                Latitude = hotel.Latitude,
+                Longitude = hotel.Longitude,
+                GoogleMapsUri = hotel.GoogleMapsUri,
+                PriceLevel = hotel.PriceLevel,
+                Photos = hotel.Photos.Select(p => p.PhotoUrl).ToList()
+            };
+            allHotels.Add(hotelDataItem);
+            // Write updated data back to file
+            var json = JsonSerializer.Serialize(allHotels, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(filePath, json);
+        }
     }
 }

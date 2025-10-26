@@ -6,7 +6,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryRestaurantService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper) : IitineraryRestaurantService
+    public class ItineraryRestaurantService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper, IJsonService _jsonService) : IitineraryRestaurantService
     {
         public async Task AddRestaurantToItineraryFromSuggestionAsync(int itineraryId, AddRestaurantToItineraryFromSuggestionDto request)
         {
@@ -62,6 +62,9 @@ namespace vivuvn_api.Services.Implementations
             };
             await _unitOfWork.ItineraryRestaurants.AddAsync(itineraryRestaurant);
             await _unitOfWork.SaveChangesAsync();
+
+            // save restaurant data to json file for caching
+            await _jsonService.SaveSingleRestaurantToJsonFile(newRestaurant);
         }
 
     }

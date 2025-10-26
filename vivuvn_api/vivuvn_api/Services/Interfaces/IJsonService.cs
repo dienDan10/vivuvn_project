@@ -6,5 +6,7 @@ namespace vivuvn_api.Services.Interfaces
     {
         Task SaveHotelsToJsonFile(string locationPlaceId, IEnumerable<Hotel> hotels);
         Task SaveRestaurantsToJsonFile(string locationPlaceId, IEnumerable<Restaurant> restaurants);
+        Task SaveSingleRestaurantToJsonFile(Restaurant restaurant);
+        Task SaveSingleHotelToJsonFile(Hotel hotel);
     }
 }

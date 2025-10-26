@@ -24,6 +24,10 @@ namespace vivuvn_api.Data
         public DbSet<ItineraryHotel> ItineraryHotels { get; set; }
         public DbSet<ItineraryRestaurant> ItineraryRestaurants { get; set; }
 
+        public DbSet<Photo> Photos { get; set; }
+        public DbSet<Restaurant> Restaurants { get; set; }
+        public DbSet<Hotel> Hotels { get; set; }
+
 
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<BudgetItem> BudgetItems { get; set; }
