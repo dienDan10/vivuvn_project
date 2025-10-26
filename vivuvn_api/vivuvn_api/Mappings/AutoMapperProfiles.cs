@@ -39,6 +39,11 @@ namespace vivuvn_api.Mappings
             // Mapping For Search Location
             CreateMap<Location, SearchLocationDto>();
 
+            // Mapping For Search Place from Google
+            CreateMap<SimplifiedPlace, SearchPlaceDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName != null ? src.DisplayName.Text : string.Empty))
+                .ForMember(dest => dest.FormattedAddress, opt => opt.MapFrom(src => src.FormattedAddress ?? string.Empty));
+
             // Mapping For Restaurant (Restaurant from DB to RestaurantDto)
             CreateMap<Restaurant, RestaurantDto>()
                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos.Select(p => p.PhotoUrl).ToList()));

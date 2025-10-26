@@ -5,10 +5,10 @@ namespace vivuvn_api.DTOs.Request
     public class FetchGoogleHotelRequestDto
     {
         [JsonPropertyName("includedTypes")]
-        public List<string> IncludedTypes { get; set; } = new() { "restaurant" };
+        public List<string> IncludedTypes { get; set; } = new() { "lodging", "hotel", "resort_hotel", "motel", "guest_house", "hostel" };
 
         [JsonPropertyName("maxResultCount")]
-        public int MaxResultCount { get; set; } = 15;
+        public int MaxResultCount { get; set; } = 20;
 
         [JsonPropertyName("locationRestriction")]
         public LocationRestriction LocationRestriction { get; set; } = new();

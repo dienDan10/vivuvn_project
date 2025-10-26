@@ -170,6 +170,14 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<IEnumerable<HotelDto>>(newHotels);
         }
 
+        public async Task<IEnumerable<SearchPlaceDto>> SearchRestaurantsByTextAsync(string textQuery, string? provinceName = null)
+        {
+            var response = await _placeService.SearchRestaurantsByTextAsync(textQuery, provinceName);
+            if (response is null || !response.Places.Any()) return [];
+
+            return _mapper.Map<IEnumerable<SearchPlaceDto>>(response.Places);
+        }
+
         private async Task SaveRestaurantsToJsonFile(string locationPlaceId, IEnumerable<Restaurant> restaurants)
         {
             var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurant_data.json");
