@@ -27,7 +27,6 @@ namespace vivuvn_api.Mappings
             // Mapping For Itinerary Day
             CreateMap<ItineraryDay, ItineraryDayDto>();
 
-
             // Mapping For Itinerary Item
             CreateMap<ItineraryItem, ItineraryItemDto>();
 
@@ -101,6 +100,12 @@ namespace vivuvn_api.Mappings
 
             // Mapping for Favorite Place
             CreateMap<FavoritePlace, FavoritePlaceDto>();
+
+            // Mapping for Itinerary Hotel
+            CreateMap<ItineraryHotel, ItineraryHotelDto>();
+
+            // Mapping for Itinerary Restaurant
+            CreateMap<ItineraryRestaurant, ItineraryRestaurantDto>();
 
             // Mapping for AI Generated Itinerary to Database Models
             // Map TravelItinerary to Itinerary (updates existing itinerary)

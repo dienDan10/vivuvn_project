@@ -10,6 +10,8 @@
         IProvinceRepository Provinces { get; }
         ILocationRepository Locations { get; }
         IFavoritePlaceRepository FavoritePlaces { get; }
+        IItineraryHotelRepository ItineraryHotels { get; }
+        IItineraryRestaurantRepository ItineraryRestaurants { get; }
 
         Task SaveChangesAsync();
 
