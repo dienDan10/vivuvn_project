@@ -47,6 +47,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IAiClientService, AiClientService>();
             services.AddScoped<IGoogleMapRouteService, GoogleMapRouteService>();
             services.AddScoped<IGoogleMapPlaceService, GoogleMapPlaceService>();
+            services.AddScoped<IJsonService, JsonService>();
             return services;
         }
 
