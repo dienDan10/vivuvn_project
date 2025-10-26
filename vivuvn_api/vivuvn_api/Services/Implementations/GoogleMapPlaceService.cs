@@ -131,7 +131,7 @@ namespace vivuvn_api.Services.Implementations
 
             var fullQuery = string.IsNullOrEmpty(provinceName)
                 ? searchText
-                : $"{searchText} ở {provinceName}, Việt Nam";
+                : $"{searchText} in {provinceName}, Việt Nam";
 
             var request = new SearchGooglePlaceTextRequestDto
             {
@@ -177,7 +177,7 @@ namespace vivuvn_api.Services.Implementations
 
             var fullQuery = string.IsNullOrEmpty(provinceName)
                 ? searchText
-                : $"{searchText} ở {provinceName}, Việt Nam";
+                : $"{searchText} in {provinceName}, Việt Nam";
 
             var request = new SearchGooglePlaceTextRequestDto
             {
