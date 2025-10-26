@@ -9,12 +9,20 @@ namespace vivuvn_api.Controllers
     [ApiController]
     public class ItineraryRestaurantController(IitineraryRestaurantService _itineraryRestaurantService) : ControllerBase
     {
-        [HttpPost]
+        [HttpPost("suggestions")]
         [Authorize]
         public async Task<IActionResult> AddRestaurantToItineraryFromSuggestion(int itineraryId, [FromBody] AddRestaurantToItineraryFromSuggestionDto request)
         {
             await _itineraryRestaurantService.AddRestaurantToItineraryFromSuggestionAsync(itineraryId, request);
 
+            return Ok(new { message = "Restaurant added to itinerary successfully." });
+        }
+
+        [HttpPost("search")]
+        [Authorize]
+        public async Task<IActionResult> AddRestaurantToItineraryFromSearch(int itineraryId, [FromBody] AddRestaurantToItineraryFromSearch request)
+        {
+            await _itineraryRestaurantService.AddRestaurantToItineraryFromSearchAsync(itineraryId, request);
             return Ok(new { message = "Restaurant added to itinerary successfully." });
         }
     }

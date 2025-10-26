@@ -217,6 +217,39 @@ namespace vivuvn_api.Services.Implementations
             }
         }
 
+
+        public async Task<Place?> FetchPlaceDetailsByIdAsync(string placeId)
+        {
+            string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            try
+            {
+                var requestUrl = $"./v1/places/{placeId}";
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                requestMessage.Headers.Add("X-Goog-Api-Key", apiKey);
+                requestMessage.Headers.Add("X-Goog-FieldMask", "id,displayName,formattedAddress,rating,userRatingCount,location,googleMapsUri,priceLevel,photos");
+
+                var response = await _httpClient.SendAsync(requestMessage);
+
+                response.EnsureSuccessStatusCode();
+
+                var place = await response.Content.ReadFromJsonAsync<Place>();
+
+                // Fetch photo URLs for the place
+                if (place?.Photos != null && place.Photos.Any())
+                {
+                    await FetchPlacesPhotosAsync(new[] { place });
+                }
+
+                return place;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         private async Task FetchPlacesPhotosAsync(IEnumerable<Place> places)
         {
             foreach (var place in places)
