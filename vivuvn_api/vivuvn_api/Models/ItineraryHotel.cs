@@ -16,8 +16,8 @@ namespace vivuvn_api.Models
 
         public decimal? Cost { get; set; }
 
-        public DateOnly CheckIn { get; set; }
-        public DateOnly CheckOut { get; set; }
+        public DateOnly? CheckIn { get; set; }
+        public DateOnly? CheckOut { get; set; }
 
         public string? Notes { get; set; }
 
