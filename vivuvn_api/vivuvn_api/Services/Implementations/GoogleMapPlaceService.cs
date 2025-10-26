@@ -131,7 +131,7 @@ namespace vivuvn_api.Services.Implementations
 
             var fullQuery = string.IsNullOrEmpty(provinceName)
                 ? searchText
-                : $"{searchText} in {provinceName}, Việt Nam";
+                : $"{searchText} ở {provinceName}, Việt Nam";
 
             var request = new SearchGooglePlaceTextRequestDto
             {
@@ -159,11 +159,51 @@ namespace vivuvn_api.Services.Implementations
 
                 var response = await _httpClient.SendAsync(requestMessage);
 
-                if (!response.IsSuccessStatusCode)
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadFromJsonAsync<FetchGooglePlaceSimplifiedResponseDto>();
+
+                return responseContent;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<FetchGooglePlaceSimplifiedResponseDto?> SearchHotelsByTextAsync(string searchText, string? provinceName = null)
+        {
+            string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            var fullQuery = string.IsNullOrEmpty(provinceName)
+                ? searchText
+                : $"{searchText} ở {provinceName}, Việt Nam";
+
+            var request = new SearchGooglePlaceTextRequestDto
+            {
+                TextQuery = fullQuery,
+                IncludedType = "hotel"
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var jsonBody = JsonSerializer.Serialize(request, jsonOptions);
+            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, "./v1/places:searchText")
                 {
-                    Console.WriteLine($"Error fetching places by text: {response.StatusCode}");
-                    Console.WriteLine($"Error details: {await response.Content.ReadAsStringAsync()}");
-                }
+                    Content = content
+                };
+
+                requestMessage.Headers.Add("X-Goog-Api-Key", apiKey);
+                requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress");
+
+                var response = await _httpClient.SendAsync(requestMessage);
 
                 response.EnsureSuccessStatusCode();
 
