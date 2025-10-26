@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
@@ -10,7 +11,7 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task AddRestaurantToItineraryFromSuggestionAsync(int itineraryId, AddRestaurantToItineraryFromSuggestionDto request)
         {
-            var itinerary = _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
                 ?? throw new BadHttpRequestException("Itinerary not found");
 
             var itineraryRestaurant = new ItineraryRestaurant
@@ -25,7 +26,7 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task AddRestaurantToItineraryFromSearchAsync(int itineraryId, AddRestaurantToItineraryFromSearch request)
         {
-            var itinerary = _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
                 ?? throw new BadHttpRequestException("Itinerary not found");
 
             var restaurant = await _unitOfWork.Restaurants.GetOneAsync(r => r.GooglePlaceId == request.GooglePlaceId);
@@ -48,7 +49,9 @@ namespace vivuvn_api.Services.Implementations
             var place = await _placeService.FetchPlaceDetailsByIdAsync(request.GooglePlaceId)
                 ?? throw new BadHttpRequestException("Fail to add restaurant. Cannot find restaurant data");
 
-            var newRestaurant = _mapper.Map<Restaurant>(place);
+            var restaurantDto = _mapper.Map<RestaurantDto>(place);
+
+            var newRestaurant = _mapper.Map<Restaurant>(restaurantDto);
 
             await _unitOfWork.Restaurants.AddAsync(newRestaurant);
             await _unitOfWork.SaveChangesAsync();
