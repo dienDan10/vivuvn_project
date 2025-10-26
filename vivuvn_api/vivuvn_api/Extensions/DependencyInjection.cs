@@ -22,6 +22,8 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IItineraryItemRepository, ItineraryItemRepository>();
             services.AddScoped<IItineraryRestaurantRepository, ItineraryRestaurantRepository>();
             services.AddScoped<IItineraryHotelRepository, ItineraryHotelRepository>();
+            services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+            services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IAiClientService, AiClientService>();
             return services;
         }

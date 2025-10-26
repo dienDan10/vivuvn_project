@@ -12,6 +12,8 @@
         IFavoritePlaceRepository FavoritePlaces { get; }
         IItineraryHotelRepository ItineraryHotels { get; }
         IItineraryRestaurantRepository ItineraryRestaurants { get; }
+        IHotelRepository Hotels { get; }
+        IRestaurantRepository Restaurants { get; }
 
         Task SaveChangesAsync();
 

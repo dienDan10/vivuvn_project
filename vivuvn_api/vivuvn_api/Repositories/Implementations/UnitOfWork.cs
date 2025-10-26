@@ -19,6 +19,8 @@ namespace vivuvn_api.Repositories.Implementations
         public IFavoritePlaceRepository FavoritePlaces { get; private set; }
         public IItineraryRestaurantRepository ItineraryRestaurants { get; private set; }
         public IItineraryHotelRepository ItineraryHotels { get; private set; }
+        public IRestaurantRepository Restaurants { get; private set; }
+        public IHotelRepository Hotels { get; private set; }
 
         public UnitOfWork(AppDbContext context,
             IUserRepository userRepository,
@@ -30,7 +32,9 @@ namespace vivuvn_api.Repositories.Implementations
             IFavoritePlaceRepository favoritePlaceRepository,
             IItineraryItemRepository itineraryItem,
             IItineraryRestaurantRepository itineraryRestaurantRepository,
-            IItineraryHotelRepository itineraryHotelRepository)
+            IItineraryHotelRepository itineraryHotelRepository,
+            IRestaurantRepository restaurantRepository,
+            IHotelRepository hotelRepository)
         {
             _context = context;
             Users = userRepository;
@@ -43,6 +47,8 @@ namespace vivuvn_api.Repositories.Implementations
             ItineraryItems = itineraryItem;
             ItineraryRestaurants = itineraryRestaurantRepository;
             ItineraryHotels = itineraryHotelRepository;
+            Restaurants = restaurantRepository;
+            Hotels = hotelRepository;
         }
 
         public async Task SaveChangesAsync()
