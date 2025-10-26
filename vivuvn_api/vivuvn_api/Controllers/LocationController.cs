@@ -49,7 +49,7 @@ namespace vivuvn_api.Controllers
             return Ok(hotels);
         }
 
-        [HttpGet("/restaurants/search")]
+        [HttpGet("restaurants/search")]
         public async Task<IActionResult> SearchRestaurantsByText([FromQuery] string textQuery, [FromQuery] string? provinceName = null)
         {
             var places = await _locationService.SearchRestaurantsByTextAsync(textQuery, provinceName);
