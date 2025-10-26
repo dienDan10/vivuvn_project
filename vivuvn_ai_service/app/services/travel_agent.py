@@ -28,6 +28,8 @@ from app.prompts.travel_prompts import SYSTEM_PROMPT, create_user_prompt
 # Cluster places geographically for better route optimization
 from app.utils.geo_utils import simple_kmeans_geo
 from app.utils.helpers import normalize_province_name
+# Create TravelItinerary from the structured data
+from app.models.travel_models import TravelItinerary, DayItinerary, Activity, TransportationSuggestion
 import asyncio
 
 logger = structlog.get_logger(__name__)
@@ -240,13 +242,9 @@ class TravelPlanningAgent:
                 "days": [day.model_dump() for day in structured_itinerary.days],
                 "transportation_suggestions": [t.model_dump() for t in structured_itinerary.transportation_suggestions],
                 "total_cost": structured_itinerary.total_cost,
-                "places_used_count": structured_itinerary.places_used_count,
                 "schedule_unavailable": structured_itinerary.schedule_unavailable,
                 "unavailable_reason": structured_itinerary.unavailable_reason
             }
-
-            logger.info(f"[Node 2/5] Generated {len(structured_data.get('days', []))} days, "
-                       f"used {structured_data.get('places_used_count', 0)} database places")
 
             # Log budget validation status
             if structured_data.get('schedule_unavailable'):
@@ -371,8 +369,6 @@ class TravelPlanningAgent:
 
             # Convert structured_itinerary to TravelItinerary object
             try:
-                # Create TravelItinerary from the structured data
-                from app.models.travel_models import TravelItinerary, DayItinerary, Activity, TransportationSuggestion
 
                 day_itineraries = []
                 for day_data in structured_itinerary.get("days", []):
@@ -414,7 +410,6 @@ class TravelPlanningAgent:
                     days=day_itineraries,
                     transportation_suggestions=transport_objects,
                     total_cost=structured_itinerary.get("total_cost", 0.0),
-                    places_used_count=structured_itinerary.get("places_used_count", 0),
                     schedule_unavailable=structured_itinerary.get("schedule_unavailable", False),
                     unavailable_reason=structured_itinerary.get("unavailable_reason", "")
                 )

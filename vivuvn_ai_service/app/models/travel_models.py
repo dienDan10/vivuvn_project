@@ -182,11 +182,6 @@ class TravelItinerary(BaseModel):
         description="Total trip cost in VND",
         ge=0
     )
-    places_used_count: int = Field(
-        ..., 
-        description="Number of database places actually used in itinerary",
-        ge=0
-    )
     schedule_unavailable: bool = Field(
         ...,
         description="True if itinerary could not be fully scheduled due to constraints"
