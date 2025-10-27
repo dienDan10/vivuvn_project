@@ -77,5 +77,14 @@ namespace vivuvn_api.Services.Implementations
             await _jsonService.SaveSingleRestaurantToJsonFile(newRestaurant);
         }
 
+        public async Task UpdateNotesAsync(int itineraryId, int itineraryRestaurantId, string notes)
+        {
+            var itineraryRestaurant = await _unitOfWork.ItineraryRestaurants.GetOneAsync(ir => ir.Id == itineraryRestaurantId && ir.ItineraryId == itineraryId)
+                ?? throw new BadHttpRequestException("Itinerary restaurant not found");
+            itineraryRestaurant.Notes = notes;
+            _unitOfWork.ItineraryRestaurants.Update(itineraryRestaurant);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
     }
 }

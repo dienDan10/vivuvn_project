@@ -33,5 +33,13 @@ namespace vivuvn_api.Controllers
             await _itineraryRestaurantService.AddRestaurantToItineraryFromSearchAsync(itineraryId, request);
             return Ok(new { message = "Restaurant added to itinerary successfully." });
         }
+
+        [HttpPut("{itineraryRestaurantId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryRestaurant(int itineraryId, int itineraryRestaurantId, [FromBody] string notes)
+        {
+            await _itineraryRestaurantService.UpdateNotesAsync(itineraryId, itineraryRestaurantId, notes);
+            return Ok(new { message = "Itinerary restaurant updated successfully." });
+        }
     }
 }
