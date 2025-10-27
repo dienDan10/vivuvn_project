@@ -96,5 +96,15 @@ namespace vivuvn_api.Services.Implementations
             await _unitOfWork.SaveChangesAsync();
         }
 
+        public async Task UpdateTimeAsync(int itineraryId, int itineraryRestaurantId, TimeOnly time)
+        {
+            var itineraryRestaurant = await _unitOfWork.ItineraryRestaurants
+                .GetOneAsync(ir => ir.Id == itineraryRestaurantId && ir.ItineraryId == itineraryId)
+                ?? throw new BadHttpRequestException("Itinerary restaurant not found");
+            itineraryRestaurant.Time = time;
+            _unitOfWork.ItineraryRestaurants.Update(itineraryRestaurant);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
     }
 }
