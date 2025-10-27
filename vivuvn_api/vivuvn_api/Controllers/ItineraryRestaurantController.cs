@@ -34,12 +34,20 @@ namespace vivuvn_api.Controllers
             return Ok(new { message = "Restaurant added to itinerary successfully." });
         }
 
-        [HttpPut("{itineraryRestaurantId}")]
+        [HttpPut("{itineraryRestaurantId}/notes")]
         [Authorize]
         public async Task<IActionResult> UpdateItineraryRestaurant(int itineraryId, int itineraryRestaurantId, [FromBody] string notes)
         {
             await _itineraryRestaurantService.UpdateNotesAsync(itineraryId, itineraryRestaurantId, notes);
             return Ok(new { message = "Itinerary restaurant updated successfully." });
+        }
+
+        [HttpPut("{itineraryRestaurantId}/dates")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryRestaurantDateTime(int itineraryId, int itineraryRestaurantId, [FromBody] DateOnly date)
+        {
+            await _itineraryRestaurantService.UpdateDateAsync(itineraryId, itineraryRestaurantId, date);
+            return Ok(new { message = "Itinerary restaurant date and time updated successfully." });
         }
     }
 }

@@ -8,6 +8,7 @@ namespace vivuvn_api.Services.Interfaces
         Task<IEnumerable<ItineraryRestaurantDto>> GetRestaurantsInItineraryAsync(int itineraryId);
         Task AddRestaurantToItineraryFromSuggestionAsync(int itineraryId, AddRestaurantToItineraryFromSuggestionDto request);
         Task AddRestaurantToItineraryFromSearchAsync(int itineraryId, AddRestaurantToItineraryFromSearch request);
-        Task UpdateNotesAsync(int itineraryId, int itineraryRestaurantId, string notes)
+        Task UpdateNotesAsync(int itineraryId, int itineraryRestaurantId, string notes);
+        Task UpdateDateAsync(int itineraryId, int itineraryRestaurantId, DateOnly date);
     }
 }
