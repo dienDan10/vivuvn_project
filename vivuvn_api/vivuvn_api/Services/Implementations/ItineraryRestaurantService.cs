@@ -9,6 +9,13 @@ namespace vivuvn_api.Services.Implementations
 {
     public class ItineraryRestaurantService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper, IJsonService _jsonService) : IitineraryRestaurantService
     {
+        public async Task<IEnumerable<ItineraryRestaurantDto>> GetRestaurantsInItineraryAsync(int itineraryId)
+        {
+            var itineraryRestaurants = await _unitOfWork.ItineraryRestaurants.GetAllAsync(ir => ir.ItineraryId == itineraryId, includeProperties: "Restaurant,BudgetItem");
+            var itineraryRestaurantDtos = _mapper.Map<IEnumerable<ItineraryRestaurantDto>>(itineraryRestaurants);
+            return itineraryRestaurantDtos;
+        }
+
         public async Task AddRestaurantToItineraryFromSuggestionAsync(int itineraryId, AddRestaurantToItineraryFromSuggestionDto request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
