@@ -110,14 +110,14 @@ namespace vivuvn_api.Services.Implementations
         public async Task UpdateCostAsync(int itineraryId, int itineraryRestaurantId, decimal cost)
         {
             var itineraryRestaurant = await _unitOfWork.ItineraryRestaurants
-                .GetOneAsync(ir => ir.Id == itineraryRestaurantId && ir.ItineraryId == itineraryId, includeProperties: "BudgetItem,Restaurant,Itinerary")
+                .GetOneAsync(ir => ir.Id == itineraryRestaurantId && ir.ItineraryId == itineraryId, includeProperties: "BudgetItem,Restaurant")
                 ?? throw new BadHttpRequestException("Itinerary restaurant not found");
 
             // if budget item exists, update cost
             if (itineraryRestaurant.BudgetItem != null)
             {
                 itineraryRestaurant.BudgetItem.Cost = cost;
-                _unitOfWork.ItineraryRestaurants.Update(itineraryRestaurant);
+                await _unitOfWork.Budgets.UpdateBudgetItemAsync(itineraryRestaurant.BudgetItem);
                 await _unitOfWork.SaveChangesAsync();
                 return;
             }
@@ -133,7 +133,7 @@ namespace vivuvn_api.Services.Implementations
 
             var budgetItem = new BudgetItem
             {
-                Name = itineraryRestaurant.Restaurant.Name ?? "Food cost",
+                Name = itineraryRestaurant.Restaurant?.Name ?? "Food cost",
                 BudgetId = budget.BudgetId,
                 Cost = cost,
                 Date = itineraryRestaurant.Date.HasValue
@@ -142,6 +142,7 @@ namespace vivuvn_api.Services.Implementations
                 BudgetTypeId = budgetType.BudgetTypeId
             };
             await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);
+            await _unitOfWork.SaveChangesAsync();
 
             itineraryRestaurant.BudgetItemId = budgetItem.Id;
             _unitOfWork.ItineraryRestaurants.Update(itineraryRestaurant);
