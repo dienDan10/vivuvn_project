@@ -12,5 +12,6 @@ namespace vivuvn_api.Services.Interfaces
         Task UpdateDateAsync(int itineraryId, int itineraryRestaurantId, DateOnly date);
         Task UpdateTimeAsync(int itineraryId, int itineraryRestaurantId, TimeOnly time);
         Task UpdateCostAsync(int itineraryId, int itineraryRestaurantId, decimal cost);
+        Task DeleteItineraryRestaurantAsync(int itineraryId, int itineraryRestaurantId);
     }
 }
