@@ -36,33 +36,38 @@ namespace vivuvn_api.Controllers
 
         [HttpPut("{itineraryRestaurantId}/notes")]
         [Authorize]
-        public async Task<IActionResult> UpdateItineraryRestaurant(int itineraryId, int itineraryRestaurantId, [FromBody] string notes)
+        public async Task<IActionResult> UpdateItineraryRestaurant(int itineraryId, int itineraryRestaurantId, [FromBody] UpdateNoteRequestDto requestDto)
         {
-            await _itineraryRestaurantService.UpdateNotesAsync(itineraryId, itineraryRestaurantId, notes);
+            await _itineraryRestaurantService.UpdateNotesAsync(itineraryId, itineraryRestaurantId, requestDto.Notes);
             return Ok(new { message = "Itinerary restaurant updated successfully." });
         }
 
         [HttpPut("{itineraryRestaurantId}/dates")]
         [Authorize]
-        public async Task<IActionResult> UpdateItineraryRestaurantDateTime(int itineraryId, int itineraryRestaurantId, [FromBody] DateOnly date)
+        public async Task<IActionResult> UpdateItineraryRestaurantDateTime(int itineraryId, int itineraryRestaurantId, [FromBody] UpdateDateRequestDto request)
         {
-            await _itineraryRestaurantService.UpdateDateAsync(itineraryId, itineraryRestaurantId, date);
+            await _itineraryRestaurantService.UpdateDateAsync(itineraryId, itineraryRestaurantId, request.Date);
             return Ok(new { message = "Itinerary restaurant date and time updated successfully." });
         }
 
         [HttpPut("{itineraryRestaurantId}/times")]
         [Authorize]
-        public async Task<IActionResult> UpdateItineraryRestaurantTime(int itineraryId, int itineraryRestaurantId, [FromBody] TimeOnly time)
+        public async Task<IActionResult> UpdateItineraryRestaurantTime(int itineraryId, int itineraryRestaurantId, [FromBody] UpdateTimeRequestDto request)
         {
-            await _itineraryRestaurantService.UpdateTimeAsync(itineraryId, itineraryRestaurantId, time);
+            await _itineraryRestaurantService.UpdateTimeAsync(itineraryId, itineraryRestaurantId, request.Time);
             return Ok(new { message = "Itinerary restaurant time updated successfully." });
         }
 
         [HttpPut("{itineraryRestaurantId}/costs")]
         [Authorize]
-        public async Task<IActionResult> UpdateItineraryRestaurantCost(int itineraryId, int itineraryRestaurantId, [FromBody] decimal cost)
+        public async Task<IActionResult> UpdateItineraryRestaurantCost(int itineraryId, int itineraryRestaurantId, [FromBody] UpdateCostRequestDto request)
         {
-            await _itineraryRestaurantService.UpdateCostAsync(itineraryId, itineraryRestaurantId, cost);
+            if (request.Cost == 0)
+            {
+                return BadRequest("Cost must be greater than 0");
+            }
+
+            await _itineraryRestaurantService.UpdateCostAsync(itineraryId, itineraryRestaurantId, request.Cost);
             return Ok(new { message = "Itinerary restaurant cost updated successfully." });
 
         }
