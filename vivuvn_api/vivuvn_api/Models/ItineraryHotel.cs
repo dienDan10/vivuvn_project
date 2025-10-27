@@ -14,8 +14,6 @@ namespace vivuvn_api.Models
         public int? HotelId { get; set; }
         public Hotel? Hotel { get; set; }
 
-        public decimal? Cost { get; set; }
-
         public DateOnly? CheckIn { get; set; }
         public DateOnly? CheckOut { get; set; }
 

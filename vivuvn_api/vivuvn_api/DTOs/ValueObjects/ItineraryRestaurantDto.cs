@@ -6,7 +6,7 @@
         public int? RestaurantId { get; set; }
         public RestaurantDto? Restaurant { get; set; }
 
-        public decimal? Cost { get; set; }
+        public decimal? Cost { get; set; } = 0;
 
         public DateOnly Date { get; set; }
         public TimeOnly Time { get; set; }

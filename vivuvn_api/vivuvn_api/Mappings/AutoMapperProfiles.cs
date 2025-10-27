@@ -102,10 +102,12 @@ namespace vivuvn_api.Mappings
             CreateMap<FavoritePlace, FavoritePlaceDto>();
 
             // Mapping for Itinerary Hotel
-            CreateMap<ItineraryHotel, ItineraryHotelDto>();
+            CreateMap<ItineraryHotel, ItineraryHotelDto>()
+                .ForMember(dest => dest.Cost, opt => opt.MapFrom(src => src.BudgetItem != null ? src.BudgetItem.Cost : 0));
 
             // Mapping for Itinerary Restaurant
-            CreateMap<ItineraryRestaurant, ItineraryRestaurantDto>();
+            CreateMap<ItineraryRestaurant, ItineraryRestaurantDto>()
+                .ForMember(dest => dest.Cost, opt => opt.MapFrom(src => src.BudgetItem != null ? src.BudgetItem.Cost : 0));
 
             // Mapping for AI Generated Itinerary to Database Models
             // Map TravelItinerary to Itinerary (updates existing itinerary)

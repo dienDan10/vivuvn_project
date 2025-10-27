@@ -6,7 +6,7 @@
         public int? HotelId { get; set; }
         public HotelDto? Hotel { get; set; }
 
-        public decimal? Cost { get; set; }
+        public decimal? Cost { get; set; } = 0;
 
         public DateOnly CheckIn { get; set; }
         public DateOnly CheckOut { get; set; }

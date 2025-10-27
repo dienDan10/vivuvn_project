@@ -14,8 +14,6 @@ namespace vivuvn_api.Models
         public int? RestaurantId { get; set; }
         public Restaurant? Restaurant { get; set; }
 
-        public decimal? Cost { get; set; }
-
         public DateOnly? Date { get; set; }
         public TimeOnly? Time { get; set; }
 
