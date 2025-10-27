@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../model/location.dart';
 import '../../ui/widgets/place_action_button_direction.dart';
 import '../../ui/widgets/place_action_button_location.dart';
 import '../../ui/widgets/place_action_button_website.dart';
@@ -26,7 +27,7 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch dữ liệu location khi mở màn
+    //  Fetch dữ liệu location khi mở màn
     Future.microtask(() {
       ref
           .read(locationControllerProvider.notifier)
@@ -45,7 +46,7 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
       return Scaffold(body: Center(child: Text(state.error!)));
     }
 
-    final location = state.detail;
+    final Location? location = state.detail;
     if (location == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -58,7 +59,7 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Slider dùng carousel_slider
+            /// Slider ảnh
             LocationImageSlider(
               photos: photos,
               currentIndex: _currentIndex,
@@ -70,7 +71,7 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
 
             const SizedBox(height: 20),
 
-            ///  Tên địa điểm
+            /// Tên địa điểm
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -84,35 +85,35 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
             ),
             const SizedBox(height: 10),
 
-            ///  Rating section
+            /// Rating
             LocationRatingSection(
               rating: location.rating,
-              ratingCount: location.ratingCount,
+              ratingCount: location.ratingCount ?? 0,
             ),
             const SizedBox(height: 10),
 
-            ///  Địa chỉ
+            /// Địa chỉ
             LocationAddressRow(address: location.address),
             const SizedBox(height: 20),
 
-            ///  Các nút hành động
-            const SingleChildScrollView(
+            /// Nút hành động
+            SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  PlaceActionButtonDirection(),
-                  SizedBox(width: 16),
-                  PlaceActionButtonLocation(),
-                  SizedBox(width: 16),
-                  PlaceActionButtonWebsite(),
+                  PlaceActionButtonDirection(location: location),
+                  const SizedBox(width: 16),
+                  PlaceActionButtonLocation(location: location),
+                  const SizedBox(width: 16),
+                  PlaceActionButtonWebsite(location: location),
                 ],
               ),
             ),
 
             const SizedBox(height: 32),
 
-            ///  Mô tả
+            /// Mô tả
             LocationDescription(description: location.description),
             const SizedBox(height: 40),
           ],

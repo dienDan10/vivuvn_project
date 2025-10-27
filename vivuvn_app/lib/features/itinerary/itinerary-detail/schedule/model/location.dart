@@ -7,6 +7,9 @@ class Location {
   final double rating;
   final int? ratingCount;
   final String? websiteUri;
+  final String? placeUri;
+  final String? directionsUri;
+
   final List<String> photos;
 
   Location({
@@ -18,6 +21,8 @@ class Location {
     required this.rating,
     this.ratingCount,
     this.websiteUri,
+    this.placeUri,
+    this.directionsUri,
     required this.photos,
   });
 
@@ -35,13 +40,14 @@ class Location {
           ? json['ratingCount'] as int
           : null,
       websiteUri: json['websiteUri']?.toString(),
+      placeUri: json['placeUri']?.toString(),
+      directionsUri: json['directionsUri']?.toString(),
       photos:
           (json['photos'] as List?)?.map((final e) => e.toString()).toList() ??
           [],
     );
   }
 
-  /// ✅ Thêm hàm này để hỗ trợ chuyển Location -> JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -52,6 +58,8 @@ class Location {
       'rating': rating,
       'ratingCount': ratingCount,
       'websiteUri': websiteUri,
+      'placeUri': placeUri,
+      'directionsUri': directionsUri,
       'photos': photos,
     };
   }

@@ -55,6 +55,16 @@ class AddPlaceButton extends ConsumerWidget {
           onPressed: onPressed ?? () => _openAddPlaceBottomSheet(context, ref),
           icon: const Icon(Icons.add_location_alt_outlined, size: 20),
           label: Text(label),
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+              width: 1.2,
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
         ),
       ),
     );

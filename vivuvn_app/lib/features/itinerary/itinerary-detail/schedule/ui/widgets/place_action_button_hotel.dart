@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../location/ui/location_detail_screen.dart';
-import '../../model/location.dart';
-
-class PlaceActionButtonInfo extends StatelessWidget {
-  final Location location;
-  const PlaceActionButtonInfo({super.key, required this.location});
+class PlaceActionButtonHotel extends StatelessWidget {
+  const PlaceActionButtonHotel({super.key});
 
   @override
   Widget build(final BuildContext context) {
@@ -18,17 +14,10 @@ class PlaceActionButtonInfo extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => LocationDetailScreen(locationId: location.id),
-          ),
-        );
-      },
-      icon: const Icon(Icons.info_outline, size: 20),
+      onPressed: () {},
+      icon: const Icon(Icons.hotel_outlined, size: 20),
       label: const Text(
-        'Thông tin',
+        'Khách sạn',
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
       ),
     );
