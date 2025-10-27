@@ -14,6 +14,7 @@
         IItineraryRestaurantRepository ItineraryRestaurants { get; }
         IHotelRepository Hotels { get; }
         IRestaurantRepository Restaurants { get; }
+        IBudgetTypeRepository BudgetTypes { get; }
 
         Task SaveChangesAsync();
 

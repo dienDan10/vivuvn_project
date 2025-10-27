@@ -57,5 +57,14 @@ namespace vivuvn_api.Controllers
             await _itineraryRestaurantService.UpdateTimeAsync(itineraryId, itineraryRestaurantId, time);
             return Ok(new { message = "Itinerary restaurant time updated successfully." });
         }
+
+        [HttpPut("{itineraryRestaurantId}/costs")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryRestaurantCost(int itineraryId, int itineraryRestaurantId, [FromBody] decimal cost)
+        {
+            await _itineraryRestaurantService.UpdateCostAsync(itineraryId, itineraryRestaurantId, cost);
+            return Ok(new { message = "Itinerary restaurant cost updated successfully." });
+
+        }
     }
 }

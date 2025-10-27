@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.ValueObjects;
+using vivuvn_api.Helpers;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
@@ -102,6 +103,47 @@ namespace vivuvn_api.Services.Implementations
                 .GetOneAsync(ir => ir.Id == itineraryRestaurantId && ir.ItineraryId == itineraryId)
                 ?? throw new BadHttpRequestException("Itinerary restaurant not found");
             itineraryRestaurant.Time = time;
+            _unitOfWork.ItineraryRestaurants.Update(itineraryRestaurant);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task UpdateCostAsync(int itineraryId, int itineraryRestaurantId, decimal cost)
+        {
+            var itineraryRestaurant = await _unitOfWork.ItineraryRestaurants
+                .GetOneAsync(ir => ir.Id == itineraryRestaurantId && ir.ItineraryId == itineraryId, includeProperties: "BudgetItem,Restaurant,Itinerary")
+                ?? throw new BadHttpRequestException("Itinerary restaurant not found");
+
+            // if budget item exists, update cost
+            if (itineraryRestaurant.BudgetItem != null)
+            {
+                itineraryRestaurant.BudgetItem.Cost = cost;
+                _unitOfWork.ItineraryRestaurants.Update(itineraryRestaurant);
+                await _unitOfWork.SaveChangesAsync();
+                return;
+            }
+
+            // else, create new budget item
+            var budget = await _unitOfWork.Budgets
+                .GetOneAsync(b => b.ItineraryId == itineraryId)
+                ?? throw new BadHttpRequestException("Budget not found for this itinerary");
+
+            var budgetType = await _unitOfWork.BudgetTypes
+                .GetOneAsync(bt => bt.Name == Constants.BudgetType_Food)
+                ?? throw new BadHttpRequestException("Budget type 'Food' not found");
+
+            var budgetItem = new BudgetItem
+            {
+                Name = itineraryRestaurant.Restaurant.Name ?? "Food cost",
+                BudgetId = budget.BudgetId,
+                Cost = cost,
+                Date = itineraryRestaurant.Date.HasValue
+                    ? itineraryRestaurant.Date.Value.ToDateTime(new TimeOnly(0, 0))
+                    : DateTime.UtcNow,
+                BudgetTypeId = budgetType.BudgetTypeId
+            };
+            await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);
+
+            itineraryRestaurant.BudgetItemId = budgetItem.Id;
             _unitOfWork.ItineraryRestaurants.Update(itineraryRestaurant);
             await _unitOfWork.SaveChangesAsync();
         }
