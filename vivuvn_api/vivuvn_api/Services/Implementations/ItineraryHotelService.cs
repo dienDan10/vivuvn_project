@@ -7,7 +7,9 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryHotelService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper, IJsonService _jsonService) : IitineraryHotelService
+    public class ItineraryHotelService(IUnitOfWork _unitOfWork,
+        IGoogleMapPlaceService _placeService,
+        IMapper _mapper, IJsonService _jsonService) : IitineraryHotelService
     {
         public async Task<IEnumerable<ItineraryHotelDto>> GetHotelsInItineraryAsync(int itineraryId)
         {
@@ -75,6 +77,15 @@ namespace vivuvn_api.Services.Implementations
 
             // save hotel data to json file for caching
             await _jsonService.SaveSingleHotelToJsonFile(newHotel);
+        }
+
+        public async Task UpdateNotesAsync(int itineraryId, int itineraryHotelId, string notes)
+        {
+            var itineraryHotel = await _unitOfWork.ItineraryHotels.GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId)
+                ?? throw new BadHttpRequestException("Itinerary hotel not found");
+            itineraryHotel.Notes = notes;
+            _unitOfWork.ItineraryHotels.Update(itineraryHotel);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

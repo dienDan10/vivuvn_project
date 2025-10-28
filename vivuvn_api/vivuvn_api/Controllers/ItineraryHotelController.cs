@@ -33,5 +33,13 @@ namespace vivuvn_api.Controllers
             await _itineraryHotelService.AddHotelToItineraryFromSearchAsync(itineraryId, request);
             return Ok(new { message = "Hotel added to itinerary successfully." });
         }
+
+        [HttpPut("{itineraryHotelId}/notes")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryHotelNotes(int itineraryId, int itineraryHotelId, [FromBody] UpdateNoteRequestDto requestDto)
+        {
+            await _itineraryHotelService.UpdateNotesAsync(itineraryId, itineraryHotelId, requestDto.Notes);
+            return Ok(new { message = "Itinerary hotel notes updated successfully." });
+        }
     }
 }
