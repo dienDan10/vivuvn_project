@@ -55,7 +55,7 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
             Text(
               'AI Suggested Schedule',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
