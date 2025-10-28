@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using vivuvn_api.DTOs.Request;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Controllers
@@ -10,10 +11,19 @@ namespace vivuvn_api.Controllers
     {
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetRestaurantsInItinerary(int itineraryId)
+        public async Task<IActionResult> GetHotelsInItinerary(int itineraryId)
         {
-            var restaurants = await _itineraryHotelService.GetHotelsInItineraryAsync(itineraryId);
-            return Ok(restaurants);
+            var hotels = await _itineraryHotelService.GetHotelsInItineraryAsync(itineraryId);
+            return Ok(hotels);
+        }
+
+        [HttpPost("suggestions")]
+        [Authorize]
+        public async Task<IActionResult> AddHotelToItineraryFromSuggestion(int itineraryId, [FromBody] AddHotelToItineraryFromSuggestionDto request)
+        {
+            await _itineraryHotelService.AddHotelToItineraryFromSuggestionAsync(itineraryId, request);
+
+            return Ok(new { message = "Hotel added to itinerary successfully." });
         }
     }
 }
