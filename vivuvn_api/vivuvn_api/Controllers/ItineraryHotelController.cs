@@ -62,5 +62,13 @@ namespace vivuvn_api.Controllers
             await _itineraryHotelService.UpdateCostAsync(itineraryId, itineraryHotelId, request.Cost);
             return Ok(new { message = "Itinerary hotel cost updated successfully." });
         }
+
+        [HttpDelete("{itineraryHotelId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteItineraryHotel(int itineraryId, int itineraryHotelId)
+        {
+            await _itineraryHotelService.DeleteItineraryHotelAsync(itineraryId, itineraryHotelId);
+            return Ok(new { message = "Itinerary hotel deleted successfully." });
+        }
     }
 }

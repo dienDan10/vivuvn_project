@@ -140,5 +140,23 @@ namespace vivuvn_api.Services.Implementations
             _unitOfWork.ItineraryHotels.Update(itineraryHotel);
             await _unitOfWork.SaveChangesAsync();
         }
+
+        public async Task DeleteItineraryHotelAsync(int itineraryId, int itineraryHotelId)
+        {
+            var itineraryHotel = await _unitOfWork.ItineraryHotels
+                .GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId,
+                             includeProperties: "BudgetItem")
+                ?? throw new BadHttpRequestException("Itinerary hotel not found");
+
+            // Delete the related budget item if it exists
+            if (itineraryHotel.BudgetItemId.HasValue)
+            {
+                await _unitOfWork.Budgets.DeleteBudgetItemAsync(itineraryHotel.BudgetItemId.Value);
+            }
+
+            // Delete the itinerary hotel
+            _unitOfWork.ItineraryHotels.Remove(itineraryHotel);
+            await _unitOfWork.SaveChangesAsync();
+        }
     }
 }
