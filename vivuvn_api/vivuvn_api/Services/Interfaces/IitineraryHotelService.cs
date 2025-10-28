@@ -7,5 +7,6 @@ namespace vivuvn_api.Services.Interfaces
     {
         Task<IEnumerable<ItineraryHotelDto>> GetHotelsInItineraryAsync(int itineraryId);
         Task AddHotelToItineraryFromSuggestionAsync(int itineraryId, AddHotelToItineraryFromSuggestionDto request);
+        Task AddHotelToItineraryFromSearchAsync(int itineraryId, AddHotelToItineraryFromSearch request);
     }
 }
