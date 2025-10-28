@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../data/dto/favourite_places_response.dart';
-import 'add_place_button.dart';
-import 'animated_place_card.dart';
-import 'place_list_header.dart';
+import '../../controller/hotels_restaurants_controller.dart';
+import 'add_hotel_button.dart';
+import 'animated_hotel_card.dart';
+import 'hotel_list_header.dart';
 
-class PlaceListItem extends StatelessWidget {
-  const PlaceListItem({
+class HotelListItem extends StatelessWidget {
+  const HotelListItem({
     required this.index,
-    required this.places,
+    required this.hotels,
     required this.isExpanded,
     required this.iconRotationAnimation,
     required this.onToggle,
@@ -16,7 +16,7 @@ class PlaceListItem extends StatelessWidget {
   });
 
   final int index;
-  final List<FavouritePlacesResponse> places;
+  final List<HotelItem> hotels;
   final bool isExpanded;
   final Animation<double> iconRotationAnimation;
   final VoidCallback onToggle;
@@ -25,8 +25,8 @@ class PlaceListItem extends StatelessWidget {
   Widget build(final BuildContext context) {
     // Header với toggle button
     if (index == 0) {
-      return PlaceListHeader(
-        placesCount: places.length,
+      return HotelListHeader(
+        hotelsCount: hotels.length,
         isExpanded: isExpanded,
         iconRotationAnimation: iconRotationAnimation,
         onToggle: onToggle,
@@ -41,24 +41,24 @@ class PlaceListItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Place cards với animation
-    if (index <= places.length) {
-      final place = places[index - 1];
-      return AnimatedPlaceCard(
-        place: place,
+    // Hotel cards với animation
+    if (index <= hotels.length) {
+      final hotel = hotels[index - 1];
+      return AnimatedHotelCard(
+        hotel: hotel,
         index: index,
         isExpanded: isExpanded,
       );
     }
 
-    // Spacing sau place cards
-    if (index == places.length + 1) {
-      return const SizedBox(height: 12);
+    // Spacing sau hotel cards
+    if (index == hotels.length + 1) {
+      return const SizedBox(height: 8);
     }
 
     // Add button
-    if (index == places.length + 2) {
-      return const AddPlaceButton();
+    if (index == hotels.length + 2) {
+      return const AddHotelButton();
     }
 
     // Bottom spacing

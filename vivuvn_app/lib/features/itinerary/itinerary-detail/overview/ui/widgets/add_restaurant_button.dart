@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'add_place_modal.dart';
+import 'add_restaurant_modal.dart';
 
-class AddPlaceButton extends StatelessWidget {
-  const AddPlaceButton({super.key});
+class AddRestaurantButton extends StatelessWidget {
+  const AddRestaurantButton({super.key});
 
-  void _showAddPlaceModal(final BuildContext context) {
-    showModalBottomSheet<void>(
+  void _showAddRestaurantModal(final BuildContext context) {
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (final context) => const AddPlaceModal(),
+      builder: (final context) => const AddRestaurantModal(),
     );
   }
 
@@ -19,16 +19,13 @@ class AddPlaceButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: OutlinedButton(
-        onPressed: () => _showAddPlaceModal(context),
+        onPressed: () => _showAddRestaurantModal(context),
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 40),
           padding: const EdgeInsets.symmetric(vertical: 10),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: const Text(
-          'Thêm địa điểm yêu thích',
-          style: TextStyle(fontSize: 14),
-        ),
+        child: const Text('Thêm nhà hàng', style: TextStyle(fontSize: 14)),
       ),
     );
   }

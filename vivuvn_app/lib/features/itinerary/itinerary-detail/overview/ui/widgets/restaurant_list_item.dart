@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../data/dto/favourite_places_response.dart';
-import 'add_place_button.dart';
-import 'animated_place_card.dart';
-import 'place_list_header.dart';
+import '../../controller/hotels_restaurants_controller.dart';
+import 'add_restaurant_button.dart';
+import 'animated_restaurant_card.dart';
+import 'restaurant_list_header.dart';
 
-class PlaceListItem extends StatelessWidget {
-  const PlaceListItem({
+class RestaurantListItem extends StatelessWidget {
+  const RestaurantListItem({
     required this.index,
-    required this.places,
+    required this.restaurants,
     required this.isExpanded,
     required this.iconRotationAnimation,
     required this.onToggle,
@@ -16,7 +16,7 @@ class PlaceListItem extends StatelessWidget {
   });
 
   final int index;
-  final List<FavouritePlacesResponse> places;
+  final List<RestaurantItem> restaurants;
   final bool isExpanded;
   final Animation<double> iconRotationAnimation;
   final VoidCallback onToggle;
@@ -25,8 +25,8 @@ class PlaceListItem extends StatelessWidget {
   Widget build(final BuildContext context) {
     // Header với toggle button
     if (index == 0) {
-      return PlaceListHeader(
-        placesCount: places.length,
+      return RestaurantListHeader(
+        restaurantsCount: restaurants.length,
         isExpanded: isExpanded,
         iconRotationAnimation: iconRotationAnimation,
         onToggle: onToggle,
@@ -41,24 +41,24 @@ class PlaceListItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Place cards với animation
-    if (index <= places.length) {
-      final place = places[index - 1];
-      return AnimatedPlaceCard(
-        place: place,
+    // Restaurant cards với animation
+    if (index <= restaurants.length) {
+      final restaurant = restaurants[index - 1];
+      return AnimatedRestaurantCard(
+        restaurant: restaurant,
         index: index,
         isExpanded: isExpanded,
       );
     }
 
-    // Spacing sau place cards
-    if (index == places.length + 1) {
-      return const SizedBox(height: 12);
+    // Spacing sau restaurant cards
+    if (index == restaurants.length + 1) {
+      return const SizedBox(height: 8);
     }
 
     // Add button
-    if (index == places.length + 2) {
-      return const AddPlaceButton();
+    if (index == restaurants.length + 2) {
+      return const AddRestaurantButton();
     }
 
     // Bottom spacing
