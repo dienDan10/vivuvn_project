@@ -87,5 +87,17 @@ namespace vivuvn_api.Services.Implementations
             _unitOfWork.ItineraryHotels.Update(itineraryHotel);
             await _unitOfWork.SaveChangesAsync();
         }
+
+        public async Task UpdateCheckInCheckOutAsync(int itineraryId, int itineraryHotelId, DateOnly checkIn, DateOnly checkOut)
+        {
+            var itineraryHotel = await _unitOfWork.ItineraryHotels
+                .GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId)
+                ?? throw new BadHttpRequestException("Itinerary hotel not found");
+            
+            itineraryHotel.CheckIn = checkIn;
+            itineraryHotel.CheckOut = checkOut;
+            _unitOfWork.ItineraryHotels.Update(itineraryHotel);
+            await _unitOfWork.SaveChangesAsync();
+        }
     }
 }

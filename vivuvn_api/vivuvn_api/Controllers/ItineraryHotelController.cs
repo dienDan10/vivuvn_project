@@ -41,5 +41,13 @@ namespace vivuvn_api.Controllers
             await _itineraryHotelService.UpdateNotesAsync(itineraryId, itineraryHotelId, requestDto.Notes);
             return Ok(new { message = "Itinerary hotel notes updated successfully." });
         }
+
+        [HttpPut("{itineraryHotelId}/dates")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryHotelDates(int itineraryId, int itineraryHotelId, [FromBody] UpdateHotelCheckInCheckOutDateRequestDto request)
+        {
+            await _itineraryHotelService.UpdateCheckInCheckOutAsync(itineraryId, itineraryHotelId, request.CheckIn, request.CheckOut);
+            return Ok(new { message = "Itinerary hotel check-in and check-out dates updated successfully." });
+        }
     }
 }
