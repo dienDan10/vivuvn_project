@@ -49,5 +49,18 @@ namespace vivuvn_api.Controllers
             await _itineraryHotelService.UpdateCheckInCheckOutAsync(itineraryId, itineraryHotelId, request.CheckIn, request.CheckOut);
             return Ok(new { message = "Itinerary hotel check-in and check-out dates updated successfully." });
         }
+
+        [HttpPut("{itineraryHotelId}/costs")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryHotelCost(int itineraryId, int itineraryHotelId, [FromBody] UpdateCostRequestDto request)
+        {
+            if (request.Cost == 0)
+            {
+                return BadRequest("Cost must be greater than 0");
+            }
+
+            await _itineraryHotelService.UpdateCostAsync(itineraryId, itineraryHotelId, request.Cost);
+            return Ok(new { message = "Itinerary hotel cost updated successfully." });
+        }
     }
 }

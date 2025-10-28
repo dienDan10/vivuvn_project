@@ -10,5 +10,6 @@ namespace vivuvn_api.Services.Interfaces
         Task AddHotelToItineraryFromSearchAsync(int itineraryId, AddHotelToItineraryFromSearch request);
         Task UpdateNotesAsync(int itineraryId, int itineraryHotelId, string notes);
         Task UpdateCheckInCheckOutAsync(int itineraryId, int itineraryHotelId, DateOnly checkIn, DateOnly checkOut);
+        Task UpdateCostAsync(int itineraryId, int itineraryHotelId, decimal cost);
     }
 }
