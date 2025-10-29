@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # SQL Server service
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: vivuvn-sqlserver
+    env_file:
+      - .env
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Express
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - vivuvn-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" -C || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    # AI Service
+  vivuvn-ai-service:
+    image: minhdang1163/vivuvn-ai-service:latest
+    container_name: vivuvn-ai-service
+    env_file:
+      - ../vivuvn_ai_service/.env.docker  # Fixed: correct path to env file
+    ports:
+      - "8000:8000"
+    volumes:
+      - model-cache:/home/vivuapp/.cache
+    networks:
+      - vivuvn-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Added: Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    # Added: Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # .NET API service
+  vivuvn-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vivuvn-api
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - SA_PASSWORD=${SA_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - GOOGLE_MAPS_ROUTE_URL=${GOOGLE_MAPS_ROUTE_URL} 
+      - GOOGLE_MAPS_PLACE_URL=${GOOGLE_MAPS_PLACE_URL} 
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL}
+      - ADMIN_PANEL_URL=${ADMIN_PANEL_URL}
+    ports:
+      - "5277:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      vivuvn-ai-service:
+        condition: service_healthy
+    volumes:
+      - ./images:/app/images
+    networks:
+      - vivuvn-network
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+  model-cache:
+    name: vivuvn-model-cache
+    driver: local
+
+networks:
+  vivuvn-network:
+    driver: bridge

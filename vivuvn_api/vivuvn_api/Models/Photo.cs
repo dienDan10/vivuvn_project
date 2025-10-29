@@ -6,11 +6,17 @@ namespace vivuvn_api.Models
     {
         [Key]
         public int Id { get; set; }
-
         [Required]
         public string PhotoUrl { get; set; } = string.Empty;
 
-        public bool DeleteFlag { get; set; }
+        public int? RestaurantId { get; set; }
+        public Restaurant? Restaurant { get; set; }
+
+        public int? LocationId { get; set; }
+        public Location? Location { get; set; }
+
+        public int? HotelId { get; set; }
+        public Hotel? Hotel { get; set; }
 
     }
 }

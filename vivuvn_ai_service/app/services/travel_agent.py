@@ -9,14 +9,13 @@ This module implements travel planning using:
 - Direct JSON response (no parsing needed)
 """
 
+from os import system
 import structlog
 from typing import Dict, List, Any, Optional, TypedDict
-from datetime import datetime, timedelta
 
 from langgraph.graph import StateGraph, END
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
 
 from app.core.config import settings
 from app.core.exceptions import TravelPlanningError, ItineraryGenerationError
@@ -24,10 +23,10 @@ from app.api.schemas import TravelRequest, TravelResponse
 from app.models.travel_models import Activity, DayItinerary, TravelItinerary
 from app.services.vector_service import get_vector_service
 from app.services.embedding_service import get_embedding_service
-from app.prompts.travel_prompts import SYSTEM_PROMPT, create_user_prompt
-# Cluster places geographically for better route optimization
+from app.prompts.travel_prompts import create_user_prompt, get_system_prompt_for_request
 from app.utils.geo_utils import simple_kmeans_geo
 from app.utils.helpers import normalize_province_name
+from app.models.travel_models import TravelItinerary, DayItinerary, Activity, TransportationSuggestion
 import asyncio
 
 logger = structlog.get_logger(__name__)
@@ -43,6 +42,7 @@ class TravelPlanningState(TypedDict):
     search_filters: Dict[str, Any]
     relevant_places: List[Dict[str, Any]]
     place_clusters: List[List[Dict[str, Any]]]  # Geographical clusters
+    top_relevant_places: List[Dict[str, Any]]  # Top places by Pinecone score (for descriptions)
     structured_itinerary: Optional[Dict[str, Any]]
     final_response: Optional[TravelResponse]
     error: Optional[str]
@@ -66,13 +66,15 @@ class TravelPlanningAgent:
         
         # Pre-configure the model for reuse
         self.model = settings.GEMINI_MODEL
-        self.generation_config = types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            response_mime_type="application/json",
-            response_schema=TravelItinerary,
-            temperature=settings.TEMPERATURE,
-            max_output_tokens=settings.MAX_TOKENS
-        )
+        
+        # Base config (without system instruction, which varies per request)
+        self.base_generation_config = {
+            "response_mime_type": "application/json",
+            "response_schema": TravelItinerary,
+            "thinking_config": types.ThinkingConfig(thinking_budget=0),
+            "temperature": settings.TEMPERATURE,
+            "max_output_tokens": settings.MAX_TOKENS
+        }
 
         self.workflow = self._build_workflow()
 
@@ -168,7 +170,11 @@ class TravelPlanningAgent:
                 logger.warning("[Node 2/5] No places found - risk of hallucination!")
                 state["relevant_places"] = []
                 state["place_clusters"] = []
+                state["top_relevant_places"] = []
                 return state
+
+            # Preserve top places by Pinecone score (for descriptions) BEFORE clustering
+            top_by_score = sorted(results, key=lambda x: x.get('score', 0), reverse=True)[:5]
 
             try:
                 # Auto-determine k based on number of results and trip duration
@@ -185,10 +191,12 @@ class TravelPlanningAgent:
 
                 state["relevant_places"] = ordered_places
                 state["place_clusters"] = clusters  # Store for prompt formatting
+                state["top_relevant_places"] = top_by_score  # Store top by score for descriptions
             except Exception as cluster_error:
                 logger.warning(f"[Node 2/5] Clustering failed: {cluster_error}, using original order")
                 state["relevant_places"] = results
                 state["place_clusters"] = []
+                state["top_relevant_places"] = top_by_score  # Store even if clustering fails
 
             return state
 
@@ -210,16 +218,24 @@ class TravelPlanningAgent:
 
             logger.info(f"[Node 2/5] Generating with {len(relevant_places)} verified places")
 
-            # Build user prompt with grounded data (with optional clusters)
+            # Build user prompt with grounded data (with optional clusters and top places by score)
             place_clusters = state.get("place_clusters", [])
-            user_prompt = create_user_prompt(travel_request, relevant_places, place_clusters)
+            top_relevant_places = state.get("top_relevant_places", [])
+            user_prompt = create_user_prompt(travel_request, relevant_places, place_clusters, top_relevant_places)
+            system_prompt = get_system_prompt_for_request(travel_request)
+
+            # Create config with system instruction (extends base config)
+            request_config = types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                **self.base_generation_config
+            )
 
             # Call Gemini with structured output using modern SDK pattern
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.client.models.generate_content(
                     model=self.model,
-                    config=self.generation_config,
+                    config=request_config,
                     contents=user_prompt
                 )
             )
@@ -240,13 +256,9 @@ class TravelPlanningAgent:
                 "days": [day.model_dump() for day in structured_itinerary.days],
                 "transportation_suggestions": [t.model_dump() for t in structured_itinerary.transportation_suggestions],
                 "total_cost": structured_itinerary.total_cost,
-                "places_used_count": structured_itinerary.places_used_count,
                 "schedule_unavailable": structured_itinerary.schedule_unavailable,
                 "unavailable_reason": structured_itinerary.unavailable_reason
             }
-
-            logger.info(f"[Node 2/5] Generated {len(structured_data.get('days', []))} days, "
-                       f"used {structured_data.get('places_used_count', 0)} database places")
 
             # Log budget validation status
             if structured_data.get('schedule_unavailable'):
@@ -371,8 +383,6 @@ class TravelPlanningAgent:
 
             # Convert structured_itinerary to TravelItinerary object
             try:
-                # Create TravelItinerary from the structured data
-                from app.models.travel_models import TravelItinerary, DayItinerary, Activity, TransportationSuggestion
 
                 day_itineraries = []
                 for day_data in structured_itinerary.get("days", []):
@@ -385,16 +395,14 @@ class TravelPlanningAgent:
                             place_id=activity_data.get("place_id", ""),
                             duration_hours=activity_data.get("duration_hours", 1.0),
                             cost_estimate=activity_data.get("cost_estimate", 0.0),
-                            category=activity_data.get("category", "sightseeing")
+                            notes=activity_data.get("notes", "")
                         )
                         activities.append(activity)
 
                     day_itinerary = DayItinerary(
                         day=day_data.get("day", 1),
                         date=day_data.get("date", travel_request.start_date.strftime("%Y-%m-%d")),
-                        activities=activities,
-                        estimated_cost=day_data.get("estimated_cost"),
-                        notes=day_data.get("notes", "Ghi chú cho ngày này")
+                        activities=activities
                     )
                     day_itineraries.append(day_itinerary)
 
@@ -414,7 +422,6 @@ class TravelPlanningAgent:
                     days=day_itineraries,
                     transportation_suggestions=transport_objects,
                     total_cost=structured_itinerary.get("total_cost", 0.0),
-                    places_used_count=structured_itinerary.get("places_used_count", 0),
                     schedule_unavailable=structured_itinerary.get("schedule_unavailable", False),
                     unavailable_reason=structured_itinerary.get("unavailable_reason", "")
                 )
@@ -472,15 +479,8 @@ class TravelPlanningAgent:
                 # - User inputs "Thành phố Đà Nẵng" but database has "Đà Nẵng"
                 normalized_province = normalize_province_name(province)
                 filters["province"] = normalized_province
-                logger.info(f"[Node 1/5] Province filter: '{province}' -> normalized: '{normalized_province}'")
-
-            # Preference-based smart filtering (future enhancement)
-            if travel_request.preferences:
-                logger.info(f"[Node 1/5] Preferences noted: {travel_request.preferences}")
-                # Can be expanded to filter by categories when available in data
 
             # Place ID filtering (for specific place requests)
-            # Can be extended to filter by specific place IDs if needed
             if additional_filters:
                 filters["additional_filters"] = additional_filters
 
@@ -527,6 +527,7 @@ class TravelPlanningAgent:
                 "search_filters": {},
                 "relevant_places": [],
                 "place_clusters": [],
+                "top_relevant_places": [],
                 "structured_itinerary": None,
                 "final_response": None,
                 "error": None,

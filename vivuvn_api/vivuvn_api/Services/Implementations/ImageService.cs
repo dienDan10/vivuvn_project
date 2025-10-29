@@ -1,35 +1,41 @@
-﻿using vivuvn_api.Helpers;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
+using vivuvn_api.Helpers;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ImageService(IWebHostEnvironment _env) : IImageService
+    public class ImageService : IImageService
     {
+        private readonly StorageClient _storageClient;
+        private readonly string _bucketName;
+        private readonly IWebHostEnvironment _env;
+
+        public ImageService(IWebHostEnvironment env, IConfiguration configuration)
+        {
+            _env = env;
+            var credentialsPath = Path.Combine(_env.ContentRootPath, "Secrets", configuration["Firebase:CredentialFile"]);
+            var credentials = GoogleCredential.FromFile(credentialsPath);
+            _storageClient = StorageClient.Create(credentials);
+            _bucketName = configuration["Firebase:BucketName"];
+        }
+
         public async Task<string> UploadImageAsync(IFormFile file)
         {
             ValidateImage(file);
 
-            // construct the upload path
-            var uploadPath = Path.Combine(_env.ContentRootPath, "Images");
+            // upload image to google cloud storage
+            var newFileName = $"vivuvn_image/{Guid.NewGuid()}{Path.GetExtension(file.FileName).ToLower()}";
 
-            // check if the directory exists, if not create it
-            if (!Directory.Exists(uploadPath))
-            {
-                Directory.CreateDirectory(uploadPath);
-            }
-
-            // construct the full file path
-            string newFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadPath, newFileName);
-
-            // save the file
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
+            var uploadedObject = await _storageClient.UploadObjectAsync(
+                bucket: _bucketName,
+                objectName: newFileName,
+                contentType: file.ContentType,
+                source: file.OpenReadStream()
+            );
 
             // newFileName.jpeg
-            return newFileName;
+            return $"https://firebasestorage.googleapis.com/v0/b/{_bucketName}/o/{Uri.EscapeDataString(uploadedObject.Name)}?alt=media";
         }
 
         private bool ValidateImage(IFormFile file)
@@ -47,5 +53,25 @@ namespace vivuvn_api.Services.Implementations
 
             return true;
         }
-    }
+
+		public async Task<bool> DeleteImageAsync(string fileUrl)
+		{
+			try
+			{
+				// Parse objectName from URL
+				// URL format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{objectName}?alt=media
+				var uri = new Uri(fileUrl);
+				var segments = uri.Segments;
+				var encodedObjectName = segments[^1].Replace("?alt=media", "");
+				var objectName = Uri.UnescapeDataString(encodedObjectName);
+
+				await _storageClient.DeleteObjectAsync(_bucketName, objectName);
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+	}
 }

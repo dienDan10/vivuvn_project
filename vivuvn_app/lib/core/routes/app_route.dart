@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
+import '../../features/itinerary/itinerary-detail/schedule/location/ui/location_detail_screen.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
+import '../../screens/itinerary_detail_screen.dart';
 import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
+import '../../screens/nearby_restaurant_screen.dart';
 import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
@@ -18,6 +21,7 @@ import 'routes.dart';
 
 final goRouterProvider = Provider<GoRouter>((final ref) {
   return GoRouter(
+    // initialLocation: splashRoute,
     initialLocation: splashRoute,
     errorBuilder: (final context, final state) => RouteErrorScreen(
       error: state.error.toString(),
@@ -29,11 +33,6 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
       final authStatus = ref.read(
         authControllerProvider.select((final state) => state.status),
       );
-
-      // Show splash screen while checking auth status
-      // if (authStatus == AuthStatus.unknown) {
-      //   return location == '/splash' ? null : '/splash';
-      // }
 
       // If unauthenticated, redirect to login (except if already on login/signup)
       if (authStatus == AuthStatus.unauthenticated) {
@@ -71,6 +70,25 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
         builder: (final context, final state) => const RegisterScreen(),
       ),
 
+      GoRoute(
+        path: itineraryDetailRoute,
+        builder: (final context, final state) {
+          final itineraryId = state.pathParameters['id']!;
+          return ItineraryDetailScreen(itineraryId: int.parse(itineraryId));
+        },
+      ),
+
+      GoRoute(
+        path: locationDetailRoute,
+        builder: (final context, final state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return LocationDetailScreen(locationId: id);
+        },
+      ),
+      GoRoute(
+        path: nearbyRestaurantRoute,
+        builder: (final context, final state) => const NearbyRestaurantScreen(),
+      ),
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
         builder:

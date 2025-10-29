@@ -12,6 +12,9 @@ using vivuvn_api.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Replace environment variable placeholders in configuration
+builder.ReplaceDockerEnvironmentVariables();
+
 // Add Exception Handlers
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -82,6 +85,7 @@ builder.Services.Configure<BrevoSettings>(builder.Configuration.GetSection("Brev
 builder.Services.AddServices();
 builder.Services.AddRepositories();
 builder.Services.AddUnitOfWork();
+builder.Services.AddCustomHttpClient(builder.Configuration);
 
 var app = builder.Build();
 
@@ -104,6 +108,9 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "images")),
     RequestPath = "/images"
 });
+
+// Add health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 app.MapControllers();
 
