@@ -136,7 +136,32 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<ItineraryItemDto>(item);
         }
 
-        private async Task UpdateTransportationDetailsAsync(ItineraryItem prevItem, ItineraryItem curItem)
+        public async Task<ItineraryItemDto> UpdateItineraryItemRouteInfoAsync(int itemId, UpdateItineraryItemRouteInfoRequestDto request)
+        {
+            if (!IsValidTravelMode(request.TravelMode))
+            {
+                throw new ArgumentException($"Invalid travel mode: {request.TravelMode}");
+            }
+
+            var item = await _unitOfWork.ItineraryItems
+                .GetOneAsync(i => i.ItineraryItemId == itemId)
+                ?? throw new KeyNotFoundException($"Itinerary item with id {itemId} not found.");
+
+            var dayItems = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == item.ItineraryDayId,
+                orderBy: q => q.OrderBy(i => i.OrderIndex));
+            var prevItem = dayItems.FirstOrDefault(i => i.OrderIndex == item.OrderIndex - 1);
+
+            if (prevItem is not null)
+            {
+                await UpdateTransportationDetailsAsync(prevItem, item, request.TravelMode);
+                _unitOfWork.ItineraryItems.Update(item);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<ItineraryItemDto>(item);
+        }
+
+        private async Task UpdateTransportationDetailsAsync(ItineraryItem prevItem, ItineraryItem curItem, string? travelMode = Constants.TravelMode_Driving)
         {
             var prevItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == prevItem.LocationId);
 
@@ -152,16 +177,26 @@ namespace vivuvn_api.Services.Implementations
                 {
                     PlaceId = curItemLocation?.GooglePlaceId
                 },
+                TravelMode = travelMode ?? Constants.TravelMode_Driving,
             };
 
             var response = await _routeService.GetRouteInformationAsync(request);
 
             curItem.TransportationDistance = response?.Routes?.FirstOrDefault()?.DistanceMeters ?? 500;
-            curItem.TransportationVehicle = Constants.TravelMode_Driving;
+            curItem.TransportationVehicle = travelMode ?? Constants.TravelMode_Driving;
 
             _ = double.TryParse(response?.Routes?.FirstOrDefault()?.Duration.Replace("s", ""), out double durationInSeconds);
 
             curItem.TransportationDuration = durationInSeconds;
+        }
+
+        private bool IsValidTravelMode(string travelMode)
+        {
+            return travelMode == Constants.TravelMode_Driving ||
+                   travelMode == Constants.TravelMode_Walking ||
+                   travelMode == Constants.TravelMode_Bicycling ||
+                   travelMode == Constants.TravelMode_Transit ||
+                   travelMode == Constants.TravelMode_Two_Wheeler;
         }
     }
 }
