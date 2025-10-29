@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../overview/modal/location.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import 'search_location_field.dart';
 
@@ -32,7 +31,6 @@ class AddPlaceBottomSheet extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Thanh kéo nhỏ ở đầu sheet
             Container(
               width: 40,
               height: 4,
@@ -45,11 +43,10 @@ class AddPlaceBottomSheet extends ConsumerWidget {
             Expanded(
               child: SearchLocationField(
                 hintText: _getHintText(),
-                onSelected: (final Location location) async {
+                onSelected: (final location) async {
                   final messenger = ScaffoldMessenger.of(context);
                   final navigator = Navigator.of(context);
 
-                  // Lấy dayId hiện tại từ controller
                   final dayId = ref.read(
                     itineraryScheduleControllerProvider.select(
                       (final s) => s.selectedDayId,
@@ -63,13 +60,11 @@ class AddPlaceBottomSheet extends ConsumerWidget {
                     return;
                   }
 
-                  // Gọi controller để thêm địa điểm
                   await ref
                       .read(itineraryScheduleControllerProvider.notifier)
                       .addItemToDay(dayId, location.id);
 
                   if (!context.mounted) return;
-
                   messenger.showSnackBar(
                     SnackBar(content: Text('Đã thêm: ${location.name}')),
                   );

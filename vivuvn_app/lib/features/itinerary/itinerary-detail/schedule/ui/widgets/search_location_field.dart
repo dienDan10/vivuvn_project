@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../overview/controller/favourite_places_controller.dart';
 import '../../../overview/controller/search_location_controller.dart';
 import '../../../overview/modal/location.dart';
-import '../../../overview/ui/widgets/empty_search_result.dart';
-import '../../../overview/ui/widgets/search_error_widget.dart';
-import '../../../overview/ui/widgets/search_loading_indicator.dart';
+import 'favorite_places_list.dart';
+import 'search_input.dart';
+import 'search_results_list.dart';
 
 class SearchLocationField extends ConsumerStatefulWidget {
   const SearchLocationField({
@@ -19,11 +20,10 @@ class SearchLocationField extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<SearchLocationField> createState() =>
-      _SimpleSearchLocationFieldState();
+      _SearchLocationFieldState();
 }
 
-class _SimpleSearchLocationFieldState
-    extends ConsumerState<SearchLocationField> {
+class _SearchLocationFieldState extends ConsumerState<SearchLocationField> {
   final TextEditingController _controller = TextEditingController();
   List<Location> _results = [];
   bool _isLoading = false;
@@ -37,7 +37,10 @@ class _SimpleSearchLocationFieldState
 
   Future<void> _search(final String query) async {
     if (query.isEmpty) {
-      setState(() => _results = []);
+      setState(() {
+        _results = [];
+        _error = null;
+      });
       return;
     }
 
@@ -60,44 +63,48 @@ class _SimpleSearchLocationFieldState
 
   @override
   Widget build(final BuildContext context) {
+    final favState = ref.watch(favouritePlacesControllerProvider);
+    final favPlaces = favState.places;
+    final text = _controller.text.trim();
+    final showFavorites = text.isEmpty;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
+        SearchInputField(
           controller: _controller,
-          autofocus: true,
-          onChanged: _search,
-          decoration: InputDecoration(
-            hintText: widget.hintText,
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () {
-                FocusScope.of(context).unfocus();
-                Navigator.pop(context);
-              },
-            ),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          ),
+          hintText: widget.hintText,
+          onQueryChanged: _search,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
+
         if (_isLoading)
-          const SearchLoadingIndicator()
+          const Center(child: CircularProgressIndicator())
         else if (_error != null)
-          SearchErrorWidget(error: _error!)
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              'Lỗi: $_error',
+              style: const TextStyle(color: Colors.red),
+            ),
+          )
+        else if (showFavorites)
+          Expanded(
+            child: FavoritePlacesList(
+              favPlaces: favPlaces,
+              onSelected: widget.onSelected,
+            ),
+          )
         else if (_results.isEmpty)
-          const EmptySearchResult()
+          const Expanded(
+            child: Center(child: Text('Không tìm thấy địa điểm nào.')),
+          )
         else
           Expanded(
-            child: ListView.builder(
-              itemCount: _results.length,
-              itemBuilder: (final context, final index) {
-                final location = _results[index];
-                return ListTile(
-                  title: Text(location.name),
-                  subtitle: Text(location.address),
-                  onTap: () => widget.onSelected?.call(location),
-                );
-              },
+            child: SearchResultsList(
+              results: _results,
+              favPlaces: favPlaces,
+              onSelected: widget.onSelected,
             ),
           ),
       ],
