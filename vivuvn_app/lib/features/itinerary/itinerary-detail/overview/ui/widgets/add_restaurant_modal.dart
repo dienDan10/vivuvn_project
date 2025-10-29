@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../controller/hotels_restaurants_controller.dart';
+import '../../controller/restaurants_controller.dart';
+import '../../data/dto/restaurant_item_response.dart';
 import '../../modal/location.dart';
 import 'restaurant_search_modal.dart';
 
 class AddRestaurantModal extends ConsumerStatefulWidget {
-  final RestaurantItem? restaurantToEdit;
+  final RestaurantItemResponse? restaurantToEdit;
 
   const AddRestaurantModal({super.key, this.restaurantToEdit});
 
@@ -197,30 +198,40 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
     }
   }
 
-  void _handleSave(final BuildContext context) {
+  Future<void> _handleSave(final BuildContext context) async {
     final name = _selectedLocation?.name ?? widget.restaurantToEdit?.name ?? '';
-    final address =
-        _selectedLocation?.address ?? widget.restaurantToEdit?.address ?? '';
 
     if (name.isEmpty) return;
 
     if (widget.restaurantToEdit != null) {
-      // Update existing restaurant
-      ref
-          .read(hotelsRestaurantsControllerProvider.notifier)
-          .updateRestaurant(
-            widget.restaurantToEdit!.id,
-            name,
-            address,
-            _mealDate,
-          );
-    } else {
-      // Add new restaurant
-      ref
-          .read(hotelsRestaurantsControllerProvider.notifier)
-          .addRestaurant(name, address, _mealDate);
+      // Update existing restaurant: only update date/time via per-field endpoints
+      if (_mealDate != null) {
+        final time = DateFormat('HH:mm:ss').format(_mealDate!);
+        await ref
+            .read(restaurantsControllerProvider.notifier)
+            .updateRestaurantDate(
+              id: widget.restaurantToEdit!.id,
+              date: _mealDate!,
+            );
+        await ref
+            .read(restaurantsControllerProvider.notifier)
+            .updateRestaurantTime(id: widget.restaurantToEdit!.id, time: time);
+      }
+      // Note: name/address editing is not supported by per-field APIs currently.
+      Navigator.pop(context);
+      return;
     }
 
-    Navigator.pop(context);
+    // Add new restaurant
+    final googlePlaceId = _selectedLocation?.googlePlaceId;
+    if (googlePlaceId == null) return; // cannot add without googlePlaceId
+    final success = await ref
+        .read(restaurantsControllerProvider.notifier)
+        .addRestaurant(
+          googlePlaceId: googlePlaceId,
+          mealDate: _mealDate ?? DateTime.now(),
+        );
+
+    if (success) Navigator.pop(context);
   }
 }

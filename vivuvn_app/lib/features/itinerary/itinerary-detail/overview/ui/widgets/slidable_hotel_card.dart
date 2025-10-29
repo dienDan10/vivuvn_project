@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../../../../../common/toast/global_toast.dart';
-import '../../controller/hotels_restaurants_controller.dart';
-import 'edit_hotel_modal.dart';
+import '../../controller/hotels_controller.dart';
+import '../../data/dto/hotel_item_response.dart';
 import 'hotel_card.dart';
 
 class SlidableHotelCard extends ConsumerWidget {
   const SlidableHotelCard({required this.hotel, this.index, super.key});
 
-  final HotelItem hotel;
+  final HotelItemResponse hotel;
   final int? index;
 
   @override
@@ -20,17 +20,10 @@ class SlidableHotelCard extends ConsumerWidget {
         key: ValueKey(hotel.id),
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
-          extentRatio: 0.36,
+          extentRatio: 0.22,
           children: [
             SlidableAction(
-              onPressed: (final context) => _handleEdit(context, ref),
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              icon: Icons.edit,
-              label: 'Sửa',
-            ),
-            SlidableAction(
-              onPressed: (final context) => _handleDelete(context, ref),
+              onPressed: (final _) => _handleDelete(context, ref),
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               icon: Icons.delete,
@@ -43,28 +36,12 @@ class SlidableHotelCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleEdit(
-    final BuildContext context,
-    final WidgetRef ref,
-  ) async {
-    await showEditHotelModal(context, hotelToEdit: hotel);
-
-    // Giả lập API call thành công
-    if (context.mounted) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật thông tin khách sạn thành công',
-      );
-    }
-  }
-
   Future<void> _handleDelete(
     final BuildContext context,
     final WidgetRef ref,
   ) async {
     final hotelName = hotel.name;
 
-    // Hiện dialog xác nhận
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (final context) => AlertDialog(
@@ -84,11 +61,14 @@ class SlidableHotelCard extends ConsumerWidget {
       ),
     );
 
-    // Nếu user xác nhận, gọi controller để xóa
     if (confirmed == true) {
-      ref
-          .read(hotelsRestaurantsControllerProvider.notifier)
-          .removeHotel(hotel.id);
+      await ref.read(hotelsControllerProvider.notifier).removeHotel(hotel.id);
+      if (context.mounted) {
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Xóa khách sạn thành công',
+        );
+      }
     }
   }
 }

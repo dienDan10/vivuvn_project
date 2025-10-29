@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../controller/hotels_restaurants_controller.dart';
+import '../../controller/hotels_controller.dart';
+import '../../data/dto/hotel_item_response.dart';
 import '../../modal/location.dart';
 import 'hotel_search_modal.dart';
 
 class AddHotelModal extends ConsumerStatefulWidget {
-  final HotelItem? hotelToEdit;
+  final HotelItemResponse? hotelToEdit;
 
   const AddHotelModal({super.key, this.hotelToEdit});
 
@@ -227,31 +228,42 @@ class _AddHotelModalState extends ConsumerState<AddHotelModal> {
     }
   }
 
-  void _handleSave(final BuildContext context) {
+  Future<void> _handleSave(final BuildContext context) async {
     final name = _selectedLocation?.name ?? widget.hotelToEdit?.name ?? '';
-    final address =
-        _selectedLocation?.address ?? widget.hotelToEdit?.address ?? '';
 
     if (name.isEmpty) return;
 
     if (widget.hotelToEdit != null) {
-      // Update existing hotel
-      ref
-          .read(hotelsRestaurantsControllerProvider.notifier)
-          .updateHotel(
-            widget.hotelToEdit!.id,
-            name,
-            address,
-            _checkInDate,
-            _checkOutDate,
+      // Update only the dates for existing hotel (API exposes per-field updates)
+      final checkIn =
+          _checkInDate ?? widget.hotelToEdit!.checkInDate ?? DateTime.now();
+      final checkOut =
+          _checkOutDate ??
+          widget.hotelToEdit!.checkOutDate ??
+          checkIn.add(const Duration(days: 1));
+      final success = await ref
+          .read(hotelsControllerProvider.notifier)
+          .updateHotelDate(
+            id: widget.hotelToEdit!.id,
+            checkInDate: checkIn,
+            checkOutDate: checkOut,
           );
-    } else {
-      // Add new hotel
-      ref
-          .read(hotelsRestaurantsControllerProvider.notifier)
-          .addHotel(name, address, _checkInDate, _checkOutDate);
+      if (success) Navigator.pop(context);
+      return;
     }
 
-    Navigator.pop(context);
+    // Add new hotel — requires googlePlaceId and date values
+    final googlePlaceId = _selectedLocation?.googlePlaceId;
+    if (googlePlaceId == null) return; // can't add without googlePlaceId
+
+    final success = await ref
+        .read(hotelsControllerProvider.notifier)
+        .addHotel(
+          googlePlaceId: googlePlaceId,
+          checkInDate: _checkInDate ?? DateTime.now(),
+          checkOutDate: _checkOutDate ?? _checkInDate ?? DateTime.now(),
+        );
+
+    if (success) Navigator.pop(context);
   }
 }

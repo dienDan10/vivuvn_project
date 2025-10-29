@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../controller/itinerary_detail_controller.dart';
 import '../data/dto/add_favorite_place_request.dart';
 import '../data/dto/delete_favorite_place_request.dart';
 import '../services/favourite_places_service.dart';
@@ -17,6 +18,16 @@ class FavouritePlacesController
     extends AutoDisposeNotifier<FavouritePlacesState> {
   @override
   FavouritePlacesState build() {
+    // Auto-load favourite places when controller is first created and itineraryId is available
+    final itineraryId = ref.watch(
+      itineraryDetailControllerProvider.select((final s) => s.itineraryId),
+    );
+
+    if (itineraryId != null) {
+      // Schedule load for next microtask to avoid modifying state during build
+      Future.microtask(() => loadFavouritePlaces(itineraryId));
+    }
+
     return FavouritePlacesState();
   }
 

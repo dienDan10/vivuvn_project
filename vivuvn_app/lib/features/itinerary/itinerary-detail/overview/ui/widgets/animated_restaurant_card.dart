@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../controller/hotels_restaurants_controller.dart';
+import '../../data/dto/restaurant_item_response.dart';
 import 'slidable_restaurant_card.dart';
 
 class AnimatedRestaurantCard extends StatelessWidget {
@@ -11,7 +11,7 @@ class AnimatedRestaurantCard extends StatelessWidget {
     super.key,
   });
 
-  final RestaurantItem restaurant;
+  final RestaurantItemResponse restaurant;
   final int index;
   final bool isExpanded;
 

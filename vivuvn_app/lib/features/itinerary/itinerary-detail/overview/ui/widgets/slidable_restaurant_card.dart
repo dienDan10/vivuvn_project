@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../../../../../common/toast/global_toast.dart';
-import '../../controller/hotels_restaurants_controller.dart';
-import 'edit_restaurant_modal.dart';
+import '../../controller/restaurants_controller.dart';
+import '../../data/dto/restaurant_item_response.dart';
 import 'restaurant_card.dart';
 
 class SlidableRestaurantCard extends ConsumerWidget {
@@ -14,7 +14,7 @@ class SlidableRestaurantCard extends ConsumerWidget {
     super.key,
   });
 
-  final RestaurantItem restaurant;
+  final RestaurantItemResponse restaurant;
   final int? index;
 
   @override
@@ -24,17 +24,10 @@ class SlidableRestaurantCard extends ConsumerWidget {
         key: ValueKey(restaurant.id),
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
-          extentRatio: 0.36,
+          extentRatio: 0.22,
           children: [
             SlidableAction(
-              onPressed: (final context) => _handleEdit(context, ref),
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              icon: Icons.edit,
-              label: 'Sửa',
-            ),
-            SlidableAction(
-              onPressed: (final context) => _handleDelete(context, ref),
+              onPressed: (final _) => _handleDelete(context, ref),
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               icon: Icons.delete,
@@ -45,21 +38,6 @@ class SlidableRestaurantCard extends ConsumerWidget {
         child: RestaurantCard(restaurant: restaurant, index: index),
       ),
     );
-  }
-
-  Future<void> _handleEdit(
-    final BuildContext context,
-    final WidgetRef ref,
-  ) async {
-    await showEditRestaurantModal(context, restaurantToEdit: restaurant);
-
-    // Giả lập API call thành công
-    if (context.mounted) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật thông tin nhà hàng thành công',
-      );
-    }
   }
 
   Future<void> _handleDelete(
@@ -88,9 +66,15 @@ class SlidableRestaurantCard extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      ref
-          .read(hotelsRestaurantsControllerProvider.notifier)
+      await ref
+          .read(restaurantsControllerProvider.notifier)
           .removeRestaurant(restaurant.id);
+      if (context.mounted) {
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Xóa nhà hàng thành công',
+        );
+      }
     }
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
-import '../../controller/search_location_controller.dart';
+import '../../controller/restaurants_controller.dart';
 import '../../modal/location.dart';
 import 'empty_search_result.dart';
 import 'location_suggestion_card.dart';
@@ -75,9 +75,7 @@ class _RestaurantSearchModalState extends ConsumerState<RestaurantSearchModal> {
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           controller.clear();
-                          ref
-                              .read(searchLocationControllerProvider.notifier)
-                              .clearLocations();
+                          setState(() {});
                         },
                       )
                     : null,
@@ -89,9 +87,12 @@ class _RestaurantSearchModalState extends ConsumerState<RestaurantSearchModal> {
             );
           },
           debounceDuration: const Duration(milliseconds: 300),
-          suggestionsCallback: (final searchText) => ref
-              .read(searchLocationControllerProvider.notifier)
-              .searchLocation(searchText),
+          suggestionsCallback: (final searchText) {
+            if (searchText.trim().isEmpty) return Future.value(<Location>[]);
+            return ref
+                .read(restaurantsControllerProvider.notifier)
+                .searchRestaurants(searchText);
+          },
           itemBuilder: (final context, final suggestion) {
             return LocationSuggestionCard(
               location: suggestion,

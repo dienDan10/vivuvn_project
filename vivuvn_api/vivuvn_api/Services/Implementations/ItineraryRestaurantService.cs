@@ -12,7 +12,7 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task<IEnumerable<ItineraryRestaurantDto>> GetRestaurantsInItineraryAsync(int itineraryId)
         {
-            var itineraryRestaurants = await _unitOfWork.ItineraryRestaurants.GetAllAsync(ir => ir.ItineraryId == itineraryId, includeProperties: "Restaurant,BudgetItem");
+            var itineraryRestaurants = await _unitOfWork.ItineraryRestaurants.GetAllAsync(ir => ir.ItineraryId == itineraryId, includeProperties: "Restaurant,BudgetItem,Restaurant.Photos");
             var itineraryRestaurantDtos = _mapper.Map<IEnumerable<ItineraryRestaurantDto>>(itineraryRestaurants);
             return itineraryRestaurantDtos;
         }

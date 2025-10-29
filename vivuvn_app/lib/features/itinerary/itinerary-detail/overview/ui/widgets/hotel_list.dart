@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/hotels_restaurants_controller.dart';
-import 'hotel_list_item.dart';
+import '../../controller/hotels_controller.dart';
+import '../../data/dto/hotel_item_response.dart';
+import 'add_hotel_button.dart';
+import 'animated_hotel_card.dart';
+import 'hotel_list_header.dart';
 
 class HotelList extends ConsumerStatefulWidget {
   const HotelList({super.key});
@@ -48,24 +51,43 @@ class _HotelListState extends ConsumerState<HotelList>
 
   @override
   Widget build(final BuildContext context) {
-    final hotelsState = ref.watch(hotelsRestaurantsControllerProvider);
-    final hotels = hotelsState.hotels;
+    final hotelsState = ref.watch(hotelsControllerProvider);
+    final List<HotelItemResponse> hotels = hotelsState.hotels;
 
-    // Calculate total items: header(1) + hotels(n) + spacing(1) + button(1) + bottom(1)
-    const extraItemsCount = 4;
-    final totalItemCount = hotels.length + extraItemsCount;
+    // Render section similarly to PlaceListItem (single column) — header,
+    // collapse/expand, animated hotel cards, add button and spacing.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Header
+        HotelListHeader(
+          hotelsCount: hotels.length,
+          isExpanded: _isExpanded,
+          iconRotationAnimation: _iconRotationAnimation,
+          onToggle: toggleExpanded,
+        ),
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: totalItemCount,
-      itemBuilder: (final context, final index) => HotelListItem(
-        index: index,
-        hotels: hotels,
-        isExpanded: _isExpanded,
-        iconRotationAnimation: _iconRotationAnimation,
-        onToggle: toggleExpanded,
-      ),
+        // If collapsed show small spacing
+        if (!_isExpanded) const SizedBox(height: 8),
+
+        // Hotel cards
+        if (_isExpanded)
+          for (var i = 0; i < hotels.length; i++)
+            AnimatedHotelCard(
+              hotel: hotels[i],
+              index: i + 1,
+              isExpanded: _isExpanded,
+            ),
+
+        // Spacing after hotel cards
+        if (_isExpanded) const SizedBox(height: 8),
+
+        // Add button
+        if (_isExpanded) const AddHotelButton(),
+
+        // Bottom spacing
+        const SizedBox(height: 8),
+      ],
     );
   }
 }

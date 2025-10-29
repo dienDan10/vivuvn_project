@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "GooglePlaceId": "ChIJA1ArJBIvdTER88faTtjN2jo",
+    "Name": "A IN HOTEL RIVERSIDE",
+    "Address": "B\u1EBFn V\u00E2n \u0110\u1ED3n/188 - 189 Kh\u00E1nh H\u1ED9i, Ph\u01B0\u1EDDng, Qu\u1EADn 4, Th\u00E0nh ph\u1ED1 H\u1ED3 Ch\u00ED Minh, Vietnam",
+    "Rating": 4.4,
+    "UserRatingCount": 267,
+    "Latitude": 10.761455,
+    "Longitude": 106.69748980000001,
+    "GoogleMapsUri": "https://maps.google.com/?cid=4240928328042334195\u0026g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
+    "PriceLevel": null,
+    "Photos": [
+      "https://lh3.googleusercontent.com/places/ANXAkqHSaU73LC2bOatSeBwEHhvBSP1vSJXYwTV0Ikl92-AqKkIkx9aGnJHwI8xxKbbtG-V3n4cFvNx-Zb4aRX_QiYNVshFUKwOo9fA=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/places/ANXAkqFr6bGOFxiyPEpedRslvyMxGaauIRw4unemGzz_reyhvftOpr9GQ8-jaw3zE13tJznEjOP_A7zdpGo6m6LfVX5K075jwzwNXwk=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/places/ANXAkqFjKgFzZPUxBM5OSKdmKkqUaQSDnq52A6g-mcRfKFIvjJnfZya9Kbm-Z3QGQkoIoNNo7JK1TvrWVmnVNq8ciHlH4moJ8nJtQy8=s4800-w800-h800"
+    ]
+  },
+  {
+    "GooglePlaceId": "ChIJXzYtyUEndTERJRz5FRiqxnc",
+    "Name": "A IN HOTEL GLAMOUR",
+    "Address": "63/1 - 63/3 \u0110\u01B0\u1EDDng s\u1ED1 19, Ph\u01B0\u1EDDng An Kh\u00E1nh, Th\u1EE7 \u0110\u1EE9c, Th\u00E0nh ph\u1ED1 H\u1ED3 Ch\u00ED Minh 700000, Vietnam",
+    "Rating": 4.4,
+    "UserRatingCount": 512,
+    "Latitude": 10.7980483,
+    "Longitude": 106.729726,
+    "GoogleMapsUri": "https://maps.google.com/?cid=8630772756326718501\u0026g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
+    "PriceLevel": null,
+    "Photos": [
+      "https://lh3.googleusercontent.com/places/ANXAkqGG7GVPi3ASruCiIsrvgTgPqAZHN2n0JR0Fk6bbQWfaHdg4CX60oyfd408tqtuTnzGBWOHZww9LdUaRScXxznW6B_0YZo3TiZM=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/places/ANXAkqG1v3D4SwtGbBf5rQAlyvXyq3-BizfCHede5w6r1QTKx8wijpJfSD6ESiDppxUC5dX7oCxZ_ew3SW4QWLfgbq47VQ5cbvtKGn8=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/places/ANXAkqFya3HDqsVKaXyFgpVcONI_cPCA_Pbp9-1mrX_mAQJHzmQEwAFiJ6BKBp-My1HsQoABUXQ-p1gNB6bupI5b3O7YcoS88PEOVEA=s4800-w800-h800"
+    ]
+  }
+]

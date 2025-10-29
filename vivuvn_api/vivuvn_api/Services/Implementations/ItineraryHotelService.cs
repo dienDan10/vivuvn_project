@@ -12,7 +12,7 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task<IEnumerable<ItineraryHotelDto>> GetHotelsInItineraryAsync(int itineraryId)
         {
-            var itineraryHotels = await _unitOfWork.ItineraryHotels.GetAllAsync(ir => ir.ItineraryId == itineraryId, includeProperties: "Hotel,BudgetItem");
+            var itineraryHotels = await _unitOfWork.ItineraryHotels.GetAllAsync(ir => ir.ItineraryId == itineraryId, includeProperties: "Hotel,BudgetItem,Hotel.Photos");
             var itineraryHotelDtos = _mapper.Map<IEnumerable<ItineraryHotelDto>>(itineraryHotels);
             return itineraryHotelDtos;
         }
@@ -92,7 +92,7 @@ namespace vivuvn_api.Services.Implementations
             var itineraryHotel = await _unitOfWork.ItineraryHotels
                 .GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId)
                 ?? throw new BadHttpRequestException("Itinerary hotel not found");
-            
+
             itineraryHotel.CheckIn = checkIn;
             itineraryHotel.CheckOut = checkOut;
             _unitOfWork.ItineraryHotels.Update(itineraryHotel);

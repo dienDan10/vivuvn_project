@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../controller/hotels_restaurants_controller.dart';
+import '../../data/dto/restaurant_item_response.dart';
 import 'add_restaurant_button.dart';
 import 'animated_restaurant_card.dart';
 import 'restaurant_list_header.dart';
@@ -16,7 +16,7 @@ class RestaurantListItem extends StatelessWidget {
   });
 
   final int index;
-  final List<RestaurantItem> restaurants;
+  final List<RestaurantItemResponse> restaurants;
   final bool isExpanded;
   final Animation<double> iconRotationAnimation;
   final VoidCallback onToggle;

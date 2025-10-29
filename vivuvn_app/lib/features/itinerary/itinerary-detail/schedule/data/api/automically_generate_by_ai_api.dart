@@ -21,10 +21,10 @@ class AutomaticallyGenerateByAi {
     final resp = await _dio.post(
       '/api/v1/itineraries/${request.itineraryId}/days/auto-generate',
       data: request.toJson(),
-      options: Options(
-        receiveTimeout: const Duration(minutes: 5),
-        // sendTimeout: const Duration(minutes: 1),
-      ),
+      // options: Options(
+      //   receiveTimeout: const Duration(milliseconds: 300),
+      //   // sendTimeout: const Duration(minutes: 1),
+      // ),
     );
     return resp;
   }

@@ -5,6 +5,7 @@ class Itinerary {
   final DateTime startDate;
   final DateTime endDate;
   final int groupSize;
+  final String? destinationProvinceName;
   final String transportationVehicle;
 
   Itinerary({
@@ -14,6 +15,7 @@ class Itinerary {
     required this.startDate,
     required this.endDate,
     required this.groupSize,
+    this.destinationProvinceName,
     this.transportationVehicle = '',
   });
 
@@ -25,6 +27,9 @@ class Itinerary {
       startDate: DateTime.parse(json['startDate'] as String),
       endDate: DateTime.parse(json['endDate'] as String),
       groupSize: json['groupSize'] as int? ?? 0,
+      destinationProvinceName:
+          json['destinationProvinceName'] as String? ??
+          json['destinationProvince'] as String?,
       transportationVehicle: json['transportationVehicle'] ?? '',
     );
   }
