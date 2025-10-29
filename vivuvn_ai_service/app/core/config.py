@@ -56,8 +56,21 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # AI Model Parameters
-    MAX_TOKENS: int = 32000  # Increased for complex travel itineraries
-    TEMPERATURE: float = 0.3
+    MAX_TOKENS: int = 20000  # Optimized for faster generation while maintaining quality
+    TEMPERATURE: float = 0.15  # Lower for more deterministic, faster responses
+
+    # Prompt optimization settings
+    PLACES_PER_DAY_RATIO: float = 2.5
+    MIN_PLACES_IN_PROMPT: int = 10
+    TOP_PLACES_WITH_DESCRIPTION: int = 3
+    DESCRIPTION_MAX_LENGTH: int = 60
+    COORD_DECIMAL_PLACES: int = 2
+    PREFERENCE_MATCH_MIN: float = 0.60
+    PREFERENCE_MATCH_MAX: float = 0.70
+    MIN_ACTIVITIES_PER_DAY: int = 3
+    BUDGET_TIER_ECONOMY: int = 500_000
+    BUDGET_TIER_MID_RANGE: int = 1_500_000
+    BUDGET_TIER_COMFORT: int = 3_000_000
     
     # CORS Configuration
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]

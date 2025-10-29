@@ -39,10 +39,9 @@ class Activity(BaseModel):
         description="Estimated cost in VND (0 for free activities)",
         ge=0
     )
-    category: str = Field(
-        ...,
-        description="Activity category (must match predefined categories)",
-        pattern="^(food|sightseeing|culture|history|nature|adventure|shopping|entertainment|relaxation)$"
+    notes: Optional[str] = Field(
+        default="", 
+        description="Tips and recommendations for location (optional)"
     )
     
     @field_validator("time")
@@ -56,18 +55,6 @@ class Activity(BaseModel):
             return v
         except (ValueError, AttributeError):
             raise ValueError("Time must be in HH:MM format")
-    
-    @field_validator("category")
-    @classmethod
-    def validate_category(cls, v):
-        """Validate activity category (removed 'transportation' - not allowed)."""
-        valid_categories = {
-            "food", "sightseeing", "culture", "history", "nature",
-            "adventure", "shopping", "entertainment", "relaxation"
-        }
-        if v.lower() not in valid_categories:
-            raise ValueError(f"Category must be one of: {', '.join(valid_categories)}")
-        return v.lower()
 
     @field_validator("duration_hours")
     @classmethod
@@ -98,14 +85,6 @@ class DayItinerary(BaseModel):
         description="List of activities for the day",
         min_items=1
     )
-    estimated_cost: Optional[float] = Field(
-        None,
-        description="Total estimated cost for the day in VND"
-    )
-    notes: str = Field(
-        ..., 
-        description="Daily tips and recommendations"
-    )
     
     @field_validator("date")
     @classmethod
@@ -117,14 +96,6 @@ class DayItinerary(BaseModel):
             return v
         except ValueError:
             raise ValueError("Date must be in YYYY-MM-DD format")
-    
-    @field_validator("estimated_cost")
-    @classmethod
-    def validate_estimated_cost(cls, v):
-        """Validate estimated cost is non-negative."""
-        if v is not None and v < 0:
-            raise ValueError("Estimated cost cannot be negative")
-        return v
 
 class TransportationSuggestion(BaseModel):
     """Transportation suggestion for inter-city travel.

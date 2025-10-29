@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../common/validator/validation_exception.dart';
 import '../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../controller/itinerary_detail_controller.dart';
 import '../data/api/automically_generate_by_ai_api.dart';
 import '../data/dto/generate_itinerary_by_ai_request.dart';
 import '../model/interested_category.dart';
@@ -32,7 +33,7 @@ class AutomaticallyGenerateByAiController
 
   void attachToParent() {
     final int? itineraryId = ref.read(
-      itineraryScheduleControllerProvider.select((final s) => s.itineraryId),
+      itineraryDetailControllerProvider.select((final s) => s.itineraryId),
     );
 
     if (itineraryId != null) {
