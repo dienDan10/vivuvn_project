@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../common/helper/app_constants.dart';
-import '../../view-itinerary-list/models/itinerary.dart';
+import '../../../../core/routes/routes.dart';
+import '../controller/itinerary_detail_controller.dart';
 import 'btn_back.dart';
 import 'btn_settings.dart';
 
-class ExpandedAppbarBackground extends StatelessWidget {
-  final Itinerary itinerary;
-  const ExpandedAppbarBackground({super.key, required this.itinerary});
+class ExpandedAppbarBackground extends ConsumerWidget {
+  const ExpandedAppbarBackground({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final itinerary = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary!,
+      ),
+    );
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -43,9 +51,12 @@ class ExpandedAppbarBackground extends StatelessWidget {
           top: MediaQuery.of(context).padding.top + 7,
           left: 12,
           right: 12,
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [ButtonBack(), ButtonSettings()],
+            children: [
+              ButtonBack(onTap: () => context.go(itineraryRoute)),
+              const ButtonSettings(),
+            ],
           ),
         ),
 

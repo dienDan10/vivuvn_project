@@ -30,9 +30,9 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
   Widget build(final BuildContext context) {
     return ExpandableFab(
       key: _fabKey,
-      // overlayStyle: ExpandableFabOverlayStyle(
-      //   color: Colors.black.withValues(alpha: 0.7),
-      // ),
+      overlayStyle: ExpandableFabOverlayStyle(
+        color: Colors.black.withValues(alpha: 0.7),
+      ),
       distance: 70,
       childrenAnimation: ExpandableFabAnimation.none,
       openButtonBuilder: RotateFloatingActionButtonBuilder(
@@ -52,12 +52,12 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
       children: [
         Row(
           children: [
-            Text(
-              'AI Suggested Schedule',
+            const Text(
+              'Tạo lịch trình thông minh',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
             const SizedBox(width: 20),

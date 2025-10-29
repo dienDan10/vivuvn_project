@@ -81,6 +81,7 @@ class BudgetHeader extends ConsumerWidget {
               estimatedBudget > 0 ? estimatedBudget : null,
             ),
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );

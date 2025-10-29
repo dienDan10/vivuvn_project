@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sliver_snap/sliver_snap.dart';
 
 import '../../../../common/helper/app_constants.dart';
+import '../budget/ui/budget_tab.dart';
 import '../controller/itinerary_detail_controller.dart';
+import '../overview/ui/overview_tab_layout.dart';
 import '../schedule/controller/automically_generate_by_ai_controller.dart';
+import '../schedule/ui/schedule_tab.dart';
 import '../state/itinerary_detail_state.dart';
-import 'budget_header_persistent.dart';
-import 'day_selector_persistent.dart';
-import 'hero_section.dart';
-import 'tabbar_content.dart';
+import 'collapsed_appbar.dart';
+import 'expanded_appbar_background.dart';
 import 'tabbar_header.dart';
 
 class ItineraryDetailLayout extends ConsumerStatefulWidget {
@@ -23,7 +25,6 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   late TabController _tabController;
-  bool _isHeroCollapsed = false;
 
   late ProviderSubscription<ItineraryDetailState> _itineraryListener;
 
@@ -31,7 +32,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _registerScrollListener();
+    //_registerScrollListener();
     _setupItineraryListener();
     _setupAiTabSwitchListener();
   }
@@ -70,38 +71,6 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     );
   }
 
-  void _registerScrollListener() {
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging && _tabController.index != 0) {
-        _scrollController.animateTo(
-          appbarExpandedHeight -
-              (kToolbarHeight + MediaQuery.of(context).padding.top),
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-        );
-
-        _isHeroCollapsed = true;
-      } else if (_tabController.indexIsChanging && _tabController.index == 0) {
-        // Reset when returning to Overview tab
-        _isHeroCollapsed = false;
-      }
-
-      // Listen to scroll position to prevent scrolling back up
-      _scrollController.addListener(() {
-        if (_tabController.index != 0 && _isHeroCollapsed) {
-          final collapsePoint =
-              appbarExpandedHeight -
-              (kToolbarHeight + MediaQuery.of(context).padding.top);
-
-          // Prevent scrolling above the collapse point
-          if (_scrollController.offset < collapsePoint) {
-            _scrollController.jumpTo(collapsePoint);
-          }
-        }
-      });
-    });
-  }
-
   @override
   void dispose() {
     _scrollController.dispose();
@@ -136,24 +105,50 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
       );
     }
 
-    return Scaffold(
-      body: AnimatedBuilder(
-        animation: _tabController,
-        builder: (final context, final child) {
-          return NestedScrollView(
-            controller: _scrollController,
-            headerSliverBuilder: (final context, final innerBoxIsScrolled) => [
-              HeroSection(itinerary: detailState.itinerary!),
-              TabbarHeader(tabController: _tabController),
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (final context, final child) {
+        return Scaffold(body: _buildBody());
+      },
+    );
+  }
 
-              // Add DaySelectorBar only when Schedule tab is active
-              if (_tabController.index == 1) const DaySelectorPersistent(),
+  Widget _buildBody() {
+    if (_tabController.index == 0) {
+      return _buildOverviewTab();
+    } else {
+      return _buildOtherTabs();
+    }
+  }
 
-              if (_tabController.index == 2) const BudgetHeaderPersistent(),
-            ],
-            body: TabbarContent(tabController: _tabController),
-          );
-        },
+  Widget _buildOverviewTab() {
+    return SliverSnap(
+      scrollController: _scrollController,
+      expandedContent: const ExpandedAppbarBackground(),
+      expandedContentHeight: appbarExpandedHeight,
+      collapsedContent: const Column(children: [CollapsedAppbar()]),
+      collapsedBarHeight: const Size.fromHeight(kToolbarHeight).height,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(50.0),
+        child: TabbarHeader(tabController: _tabController),
+      ),
+      body: const OverviewTabLayout(),
+    );
+  }
+
+  Widget _buildOtherTabs() {
+    return Container(
+      color: Theme.of(context).colorScheme.secondary,
+      child: Column(
+        children: [
+          const CollapsedAppbar(),
+          TabbarHeader(tabController: _tabController),
+          Expanded(
+            child: _tabController.index == 1
+                ? const ScheduleTab()
+                : const BudgetTab(),
+          ),
+        ],
       ),
     );
   }

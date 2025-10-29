@@ -15,7 +15,7 @@ class BudgetHeaderRow extends StatelessWidget {
       children: [
         const ExchangeRateDisplay(),
         IconButton(
-          color: Colors.green,
+          color: Colors.white,
           icon: const Icon(Icons.bar_chart_outlined),
           tooltip: 'Thống kê',
           onPressed: onStatisticsPressed,

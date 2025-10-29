@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../view-itinerary-list/models/itinerary.dart';
+import '../../../../core/routes/routes.dart';
+import '../controller/itinerary_detail_controller.dart';
 import 'btn_back.dart';
 import 'btn_settings.dart';
 
-class CollapsedAppbar extends StatelessWidget {
-  final Itinerary itinerary;
-  const CollapsedAppbar({super.key, required this.itinerary});
+class CollapsedAppbar extends ConsumerWidget {
+  const CollapsedAppbar({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final itinerary = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary!,
+      ),
+    );
+
     return Container(
       color: Colors.white,
       padding: EdgeInsets.only(
@@ -20,7 +28,7 @@ class CollapsedAppbar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const ButtonBack(onAppbar: true),
+          ButtonBack(onAppbar: true, onTap: () => context.go(itineraryRoute)),
           Expanded(
             child: Text(
               itinerary.name,

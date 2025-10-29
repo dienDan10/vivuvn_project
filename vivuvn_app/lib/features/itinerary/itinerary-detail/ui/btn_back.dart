@@ -3,15 +3,14 @@ import 'package:go_router/go_router.dart';
 
 class ButtonBack extends StatelessWidget {
   final bool onAppbar;
+  final VoidCallback? onTap;
 
-  const ButtonBack({super.key, this.onAppbar = false});
+  const ButtonBack({super.key, this.onAppbar = false, this.onTap});
 
   @override
   Widget build(final BuildContext context) {
     return InkWell(
-      onTap: () {
-        context.pop();
-      },
+      onTap: onTap ?? () => context.pop(),
       child: Container(
         height: 40,
         width: 40,
