@@ -7,6 +7,8 @@ This module contains:
 """
 
 from typing import Dict, List, Any, Optional
+
+from fastapi.logger import logger
 from app.api.schemas import TravelRequest
 # Format with geographical clusters for better organization
 from app.core.config import Settings
@@ -275,16 +277,10 @@ def create_user_prompt(
     """
     
     config = Settings()
-    
+
     # Calculate key metrics
     duration = (travel_request.end_date - travel_request.start_date).days + 1
     preferences_str = ", ".join(travel_request.preferences) if travel_request.preferences else "tham quan chung"
-    
-    # Dynamic place limit - documented formula
-    max_places_in_prompt = min(
-        len(relevant_places),
-        max(config.MIN_PLACES_IN_PROMPT, int(duration * config.PLACES_PER_DAY_RATIO))
-    )
     
     # Build set of top place_ids for detailed descriptions (only top 3)
     top_place_ids = set()
@@ -319,9 +315,6 @@ def create_user_prompt(
         
         place_counter = 0
         for cluster_idx, cluster in enumerate(place_clusters):
-            if place_counter >= max_places_in_prompt:
-                break
-            
             # Use external function if available, else simple naming
             try:
                 cluster_name = get_cluster_name(cluster, cluster_idx, len(place_clusters), global_center)
@@ -343,10 +336,8 @@ def create_user_prompt(
             if cluster_stats.get('radius_km', 0) > 0:
                 places_context += f" | ~{cluster_stats['radius_km']:.1f}km"
             places_context += "\n\n"
-            
+
             for place in cluster:
-                if place_counter >= max_places_in_prompt:
-                    break
                 place_counter += 1
                 meta = place.get('metadata', {})
                 
@@ -374,7 +365,7 @@ def create_user_prompt(
     
     else:
         # Linear list (no clusters) - same optimizations
-        for i, place in enumerate(relevant_places[:max_places_in_prompt], 1):
+        for i, place in enumerate(relevant_places, 1):
             meta = place.get('metadata', {})
             lat = meta.get('latitude', 0)
             lng = meta.get('longitude', 0)
@@ -392,8 +383,6 @@ def create_user_prompt(
     # Data sufficiency note (compact)
     if len(relevant_places) < config.MIN_ACTIVITIES_PER_DAY * duration:
         places_context += f"⚠️ {len(relevant_places)} địa điểm - có thể cần giảm số ngày\n"
-    elif max_places_in_prompt < len(relevant_places):
-        places_context += f"Hiển thị {max_places_in_prompt}/{len(relevant_places)} phù hợp nhất\n"
     
     # CALCULATE BUDGET TIER - documented thresholds
     budget_per_person_per_day = travel_request.budget / (travel_request.group_size * duration)
