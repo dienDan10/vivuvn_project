@@ -1,4 +1,4 @@
-import '../../view-itinerary-list/models/itinerary.dart';
+import '../../../view-itinerary-list/models/itinerary.dart';
 
 class ItineraryDetailState {
   final int? itineraryId;

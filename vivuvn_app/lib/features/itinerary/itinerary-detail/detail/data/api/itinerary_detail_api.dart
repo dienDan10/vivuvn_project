@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/data/remote/network/network_service.dart';
-import '../../../view-itinerary-list/models/itinerary.dart';
+import '../../../../../../core/data/remote/network/network_service.dart';
+import '../../../../view-itinerary-list/models/itinerary.dart';
 
 final itineraryDetailApiProvider = Provider.autoDispose<ItineraryDetailApi>((
   final ref,

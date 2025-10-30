@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sliver_snap/sliver_snap.dart';
 
-import '../../../../common/helper/app_constants.dart';
-import '../budget/ui/budget_tab.dart';
+import '../../../../../common/helper/app_constants.dart';
+import '../../budget/ui/budget_tab.dart';
+import '../../overview/ui/overview_tab_layout.dart';
+import '../../schedule/controller/automically_generate_by_ai_controller.dart';
+import '../../schedule/ui/schedule_tab.dart';
 import '../controller/itinerary_detail_controller.dart';
-import '../overview/ui/overview_tab_layout.dart';
-import '../schedule/controller/automically_generate_by_ai_controller.dart';
-import '../schedule/ui/schedule_tab.dart';
 import '../state/itinerary_detail_state.dart';
 import 'collapsed_appbar.dart';
 import 'expanded_appbar_background.dart';

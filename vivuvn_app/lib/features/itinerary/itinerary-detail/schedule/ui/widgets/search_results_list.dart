@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../overview/controller/favourite_places_controller.dart';
+import '../../../overview/data/dto/favourite_places_response.dart';
 import '../../../overview/modal/location.dart';
 
 class SearchResultsList extends StatelessWidget {
   final List<Location> results;
-  final List<FavouritePlace> favPlaces;
+  final List<FavouritePlacesResponse> favPlaces;
   final ValueChanged<Location>? onSelected;
 
   const SearchResultsList({

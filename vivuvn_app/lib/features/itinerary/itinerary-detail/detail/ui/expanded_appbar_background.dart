@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../common/helper/app_constants.dart';
-import '../../../../core/routes/routes.dart';
+import '../../../../../common/helper/app_constants.dart';
+import '../../../../../core/routes/routes.dart';
 import '../controller/itinerary_detail_controller.dart';
 import 'btn_back.dart';
 import 'btn_settings.dart';

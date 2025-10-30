@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../itinerary/itinerary-detail/ui/btn_back.dart';
+import '../../itinerary/itinerary-detail/detail/ui/btn_back.dart';
 import '../../login/ui/widgets/loading_overlay.dart';
 import '../controller/restaurant_controller.dart';
 import 'widgets/map_restaurant.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/itinerary_detail_controller.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../controller/budget_controller.dart';
 import 'widgets/btn_add_budget_item.dart';
 import 'widgets/budget_control.dart';

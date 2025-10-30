@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../view-itinerary-list/models/itinerary.dart';
+import '../../../view-itinerary-list/models/itinerary.dart';
 import '../data/api/itinerary_detail_api.dart';
 
 final itineraryDetailServiceProvider =

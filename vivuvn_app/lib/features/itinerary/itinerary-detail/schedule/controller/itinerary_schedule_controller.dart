@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/itinerary_detail_controller.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../model/itinerary_day.dart';
 import '../service/itinerary_schedule_service.dart';
 import '../state/itinerary_schedule_state.dart';

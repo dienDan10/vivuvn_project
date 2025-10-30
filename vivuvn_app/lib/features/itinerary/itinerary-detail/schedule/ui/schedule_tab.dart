@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../ui/btn_ai_gen_itinerary.dart';
+import '../../detail/ui/btn_ai_gen_itinerary.dart';
 import '../controller/itinerary_schedule_controller.dart';
 import 'widgets/add_hotel_expan.dart';
 import 'widgets/add_restaurant_expan.dart';
