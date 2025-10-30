@@ -1,57 +1,46 @@
-import 'package:cherry_toast/cherry_toast.dart';
-import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../model/location.dart';
-
 class PlaceActionButtonLocation extends StatelessWidget {
-  final Location location;
-  const PlaceActionButtonLocation({super.key, required this.location});
+  final String url;
+  const PlaceActionButtonLocation({super.key, required this.url});
 
-  Future<void> _openMap(final BuildContext context) async {
-    final url = location.placeUri ?? location.directionsUri;
-
-    if (url == null || url.isEmpty) {
-      if (context.mounted) {
-        CherryToast.error(
-          title: const Text('Không có liên kết vị trí'),
-          toastPosition: Position.bottom,
-        ).show(context);
-      }
-      return;
-    }
-
+  Future<void> _openMap() async {
     final uri = Uri.parse(url);
-    if (!await canLaunchUrl(uri)) {
-      if (context.mounted) {
-        CherryToast.error(
-          title: const Text('Không thể mở bản đồ'),
-          toastPosition: Position.top,
-        ).show(context);
-      }
-      return;
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
-
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
   Widget build(final BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: colorScheme.surfaceContainerHighest,
-        foregroundColor: colorScheme.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 0,
-      ),
-      onPressed: () => _openMap(context),
-      icon: const Icon(Icons.location_on_outlined, size: 20),
-      label: const Text(
-        'Vị trí',
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+    return GestureDetector(
+      onTap: () => _openMap(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(40),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.location_on_outlined,
+              size: 20,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Vị trí',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

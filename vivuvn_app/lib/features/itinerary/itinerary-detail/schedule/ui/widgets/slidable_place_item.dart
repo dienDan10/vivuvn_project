@@ -5,49 +5,57 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import '../../model/itinerary_item.dart';
 import 'schedule_place_card.dart';
+import 'transport_section.dart';
 
-class SlidablePlaceItem extends ConsumerWidget {
+class SlidablePlaceItem extends ConsumerStatefulWidget {
   final ItineraryItem item;
-  final int dayId;
-  final int index;
 
-  const SlidablePlaceItem({
-    super.key,
-    required this.item,
-    required this.dayId,
-    required this.index,
-  });
+  const SlidablePlaceItem({super.key, required this.item});
 
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    return Slidable(
-      key: ValueKey('${dayId}_${item.itineraryItemId}'),
-      endActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        extentRatio: 0.18,
+  ConsumerState<SlidablePlaceItem> createState() => _SlidablePlaceItemState();
+}
+
+class _SlidablePlaceItemState extends ConsumerState<SlidablePlaceItem> {
+  void _deleteItineraryItem() async {
+    await ref
+        .read(itineraryScheduleControllerProvider.notifier)
+        .deleteItem(widget.item.itineraryItemId);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã xóa ${widget.item.location.name}')),
+      );
+    }
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
         children: [
-          SlidableAction(
-            onPressed: (_) async {
-              await ref
-                  .read(itineraryScheduleControllerProvider.notifier)
-                  .deleteItem(dayId, item.itineraryItemId);
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Đã xóa ${item.location.name}')),
-              );
-            },
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            icon: Icons.delete,
-            label: 'Xóa',
+          if (widget.item.orderIndex > 1)
+            Padding(
+              padding: const EdgeInsets.only(left: 32, right: 32, bottom: 16),
+              child: TransportSection(item: widget.item),
+            ),
+          Slidable(
+            endActionPane: ActionPane(
+              motion: const DrawerMotion(),
+              extentRatio: 0.18,
+              children: [
+                SlidableAction(
+                  onPressed: (final _) => _deleteItineraryItem(),
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'Xóa',
+                ),
+              ],
+            ),
+            child: SchedulePlaceCard(item: widget.item),
           ),
         ],
-      ),
-      child: SchedulePlaceCard(
-        dayId: dayId,
-        index: index,
-        itemId: item.itineraryItemId,
-        location: item.location,
       ),
     );
   }

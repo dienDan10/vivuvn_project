@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/data/remote/network/network_service.dart';
+import '../../../../../core/data/remote/network/network_service.dart';
 import '../../model/hotel.dart';
 
 class HotelApi {

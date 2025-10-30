@@ -104,7 +104,7 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
                 children: [
                   PlaceActionButtonDirection(location: location),
                   const SizedBox(width: 16),
-                  PlaceActionButtonLocation(location: location),
+                  PlaceActionButtonLocation(url: location.placeUri ?? ''),
                   const SizedBox(width: 16),
                   PlaceActionButtonWebsite(location: location),
                 ],

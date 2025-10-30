@@ -61,7 +61,6 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
       child: Stack(
         children: [
           ListView(
-            physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.zero,
             children: const [
               DaySelectorBar(),

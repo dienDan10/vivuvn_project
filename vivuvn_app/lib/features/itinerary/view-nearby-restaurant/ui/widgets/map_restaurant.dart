@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../itinerary-detail/schedule/model/location.dart';
 import '../../controller/restaurant_controller.dart';
 import '../../model/restaurant.dart';
 import '../../service/icon_service.dart';
 
 class MapRestaurant extends ConsumerStatefulWidget {
-  const MapRestaurant({super.key});
+  final Location location;
+  const MapRestaurant({super.key, required this.location});
 
   @override
   ConsumerState<MapRestaurant> createState() => _MapRestaurantState();
@@ -19,24 +21,33 @@ class _MapRestaurantState extends ConsumerState<MapRestaurant> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  final CameraPosition _initialPosition = const CameraPosition(
-    target: LatLng(21.0235876, 105.8516497),
-    zoom: 14,
-  );
+  late CameraPosition _initialPosition;
 
   @override
   void initState() {
     super.initState();
+    _initialPosition = CameraPosition(
+      target: LatLng(widget.location.latitude!, widget.location.longitude!),
+      zoom: 14,
+    );
 
     // Fetch nearby restaurants after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((final _) {
       ref
           .read(restaurantControllerProvider.notifier)
-          .fetchNearbyRestaurants(40);
+          .fetchNearbyRestaurants(widget.location.id);
     });
 
     // Load custom markers
     _loadLocationMarkers();
+
+    // show info window for location marker after map is created
+    WidgetsBinding.instance.addPostFrameCallback((final _) async {
+      final controller = await _controller.future;
+      await controller.showMarkerInfoWindow(
+        MarkerId('location-${widget.location.id}'),
+      );
+    });
   }
 
   Future<void> _loadLocationMarkers() async {
@@ -46,9 +57,10 @@ class _MapRestaurantState extends ConsumerState<MapRestaurant> {
 
     ref.read(restaurantControllerProvider.notifier).addMarkers([
       Marker(
-        markerId: const MarkerId('location-40'),
-        position: const LatLng(21.0235876, 105.8516497),
+        markerId: MarkerId('location-${widget.location.id}'),
+        position: LatLng(widget.location.latitude!, widget.location.longitude!),
         icon: locationIcon,
+        infoWindow: InfoWindow(title: widget.location.name),
       ),
     ]);
   }

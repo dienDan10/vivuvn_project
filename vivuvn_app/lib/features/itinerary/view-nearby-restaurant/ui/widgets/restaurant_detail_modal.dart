@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../common/helper/app_constants.dart';
-import '../../../view-nearby-restaurant/ui/widgets/btn_add_to_itinerary.dart';
-import '../../../view-nearby-restaurant/ui/widgets/btn_open_map.dart';
-import '../../model/hotel.dart';
+import '../../../../../common/helper/app_constants.dart';
+import '../../model/restaurant.dart';
+import 'btn_add_to_itinerary.dart';
+import 'btn_open_map.dart';
 
-class HotelDetailModal extends StatelessWidget {
-  final Hotel hotel;
-  const HotelDetailModal({super.key, required this.hotel});
+class RestaurantDetailModal extends StatelessWidget {
+  final Restaurant restaurant;
+  const RestaurantDetailModal({super.key, required this.restaurant});
 
   @override
   Widget build(final BuildContext context) {
-    final priceLevel = hotel.priceLevel;
+    final priceLevel = restaurant.priceLevel;
     final priceLevelString = priceLevelIndicators[priceLevel] ?? 'Unknown';
 
     return DraggableScrollableSheet(
@@ -34,7 +34,7 @@ class HotelDetailModal extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    hotel.name,
+                    restaurant.name,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -50,16 +50,16 @@ class HotelDetailModal extends StatelessWidget {
 
             // Restaurant Images
             const SizedBox(height: 16),
-            if (hotel.photos.isNotEmpty)
+            if (restaurant.photos.isNotEmpty)
               CarouselSlider.builder(
-                itemCount: hotel.photos.length,
+                itemCount: restaurant.photos.length,
                 itemBuilder: (final context, final itemIndex, _) {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: FadeInImage.assetNetwork(
                       placeholder: 'assets/images/image-placeholder.jpeg',
-                      image: hotel.photos.isNotEmpty
-                          ? hotel.photos[itemIndex]
+                      image: restaurant.photos.isNotEmpty
+                          ? restaurant.photos[itemIndex]
                           : 'assets/images/image-placeholder.jpeg',
                       width: double.infinity,
                       height: 200,
@@ -98,7 +98,7 @@ class HotelDetailModal extends StatelessWidget {
                 const SizedBox(width: 10),
                 // Rating Text
                 Text(
-                  '${hotel.rating}',
+                  '${restaurant.rating}',
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -107,7 +107,7 @@ class HotelDetailModal extends StatelessWidget {
                 ),
                 // Rating count
                 const SizedBox(width: 4),
-                Text('(${hotel.userRatingCount})'),
+                Text('(${restaurant.userRatingCount})'),
 
                 // google image
                 const SizedBox(width: 8),
@@ -127,7 +127,7 @@ class HotelDetailModal extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: SvgPicture.asset(
-                    'assets/icons/hotel.svg',
+                    'assets/icons/restaurant.svg',
                     width: 20,
                     height: 20,
                   ),
@@ -135,7 +135,7 @@ class HotelDetailModal extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    hotel.address,
+                    restaurant.address,
                     style: const TextStyle(fontSize: 14),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
@@ -160,7 +160,7 @@ class HotelDetailModal extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
-                          color: hotel.getPriceLevelColor(),
+                          color: restaurant.getPriceLevelColor(),
                         ),
                       ),
                     ],
@@ -174,7 +174,7 @@ class HotelDetailModal extends StatelessWidget {
             Row(
               children: [
                 // Map Button
-                ButtonOpenMap(mapUrl: hotel.googleMapsUri ?? ''),
+                ButtonOpenMap(mapUrl: restaurant.googleMapsUri ?? ''),
 
                 const SizedBox(width: 12),
 

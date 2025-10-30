@@ -10,15 +10,8 @@ class PlaceActionButtonInfo extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: colorScheme.surfaceContainerHighest,
-        foregroundColor: colorScheme.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 0,
-      ),
-      onPressed: () {
+    return GestureDetector(
+      onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -26,10 +19,26 @@ class PlaceActionButtonInfo extends StatelessWidget {
           ),
         );
       },
-      icon: const Icon(Icons.info_outline, size: 20),
-      label: const Text(
-        'Thông tin',
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.primary,
+          borderRadius: BorderRadius.circular(40),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, size: 20, color: colorScheme.onPrimary),
+            const SizedBox(width: 8),
+            Text(
+              'Thông tin',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

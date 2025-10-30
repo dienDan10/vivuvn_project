@@ -9,6 +9,8 @@ class Location {
   final String? websiteUri;
   final String? placeUri;
   final String? directionsUri;
+  final double? latitude;
+  final double? longitude;
 
   final List<String> photos;
 
@@ -23,6 +25,8 @@ class Location {
     this.websiteUri,
     this.placeUri,
     this.directionsUri,
+    this.latitude,
+    this.longitude,
     required this.photos,
   });
 
@@ -42,6 +46,8 @@ class Location {
       websiteUri: json['websiteUri']?.toString(),
       placeUri: json['placeUri']?.toString(),
       directionsUri: json['directionsUri']?.toString(),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       photos:
           (json['photos'] as List?)?.map((final e) => e.toString()).toList() ??
           [],
@@ -60,6 +66,8 @@ class Location {
       'websiteUri': websiteUri,
       'placeUri': placeUri,
       'directionsUri': directionsUri,
+      'latitude': latitude,
+      'longitude': longitude,
       'photos': photos,
     };
   }

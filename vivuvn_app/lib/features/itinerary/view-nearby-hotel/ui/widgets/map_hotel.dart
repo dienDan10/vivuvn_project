@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../itinerary-detail/schedule/model/location.dart';
 import '../../../view-nearby-restaurant/service/icon_service.dart';
 import '../../controller/hotel_controller.dart';
 import '../../model/hotel.dart';
 
 class MapHotel extends ConsumerStatefulWidget {
-  const MapHotel({super.key});
+  final Location location;
+  const MapHotel({super.key, required this.location});
 
   @override
   ConsumerState<MapHotel> createState() => _MapHotelState();
@@ -19,14 +21,14 @@ class _MapHotelState extends ConsumerState<MapHotel> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  final CameraPosition _initialPosition = const CameraPosition(
-    target: LatLng(21.0235876, 105.8516497),
-    zoom: 14,
-  );
-
+  late CameraPosition _initialPosition;
   @override
   void initState() {
     super.initState();
+    _initialPosition = CameraPosition(
+      target: LatLng(widget.location.latitude!, widget.location.longitude!),
+      zoom: 14,
+    );
 
     // Fetch nearby restaurants after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((final _) {
@@ -35,6 +37,14 @@ class _MapHotelState extends ConsumerState<MapHotel> {
 
     // Load custom markers
     _loadLocationMarkers();
+
+    // show info window for location marker after map is created
+    WidgetsBinding.instance.addPostFrameCallback((final _) async {
+      final controller = await _controller.future;
+      await controller.showMarkerInfoWindow(
+        MarkerId('location-${widget.location.id}'),
+      );
+    });
   }
 
   Future<void> _loadLocationMarkers() async {
@@ -44,9 +54,10 @@ class _MapHotelState extends ConsumerState<MapHotel> {
 
     ref.read(hotelControllerProvider.notifier).addMarkers([
       Marker(
-        markerId: const MarkerId('location-40'),
-        position: const LatLng(21.0235876, 105.8516497),
+        markerId: MarkerId('location-${widget.location.id}'),
+        position: LatLng(widget.location.latitude!, widget.location.longitude!),
         icon: locationIcon,
+        infoWindow: InfoWindow(title: widget.location.name),
       ),
     ]);
   }

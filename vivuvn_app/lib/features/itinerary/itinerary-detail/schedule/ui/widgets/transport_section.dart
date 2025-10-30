@@ -1,30 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/itinerary_schedule_controller.dart';
+import '../../model/itinerary_item.dart';
 
 class TransportSection extends ConsumerWidget {
-  final int index; // index của item trong ngày
+  final ItineraryItem item;
 
-  const TransportSection({super.key, required this.index});
+  const TransportSection({super.key, required this.item});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(itineraryScheduleControllerProvider);
-    final selectedDay =
-        (state.days.isNotEmpty && state.selectedIndex < state.days.length)
-        ? state.days[state.selectedIndex]
-        : null;
-
-    if (selectedDay == null) return const SizedBox();
-    if (index >= selectedDay.items.length - 1) return const SizedBox();
-
-    final nextItem = selectedDay.items[index + 1];
-
     // Chọn icon theo vehicle
     IconData vehicleIcon;
     Color iconColor;
-    switch (nextItem.transportationVehicle?.toUpperCase()) {
+    switch (item.transportationVehicle?.toUpperCase()) {
       case 'DRIVE':
         vehicleIcon = Icons.directions_car;
         iconColor = Colors.blue;
@@ -47,13 +36,13 @@ class TransportSection extends ConsumerWidget {
     }
 
     // Duration (giây → phút)
-    final durationText = nextItem.transportationDuration != null
-        ? '${(nextItem.transportationDuration! / 60).ceil()} phút'
+    final durationText = item.transportationDuration != null
+        ? '${(item.transportationDuration! / 60).ceil()} phút'
         : '-';
 
     // Distance (mét → km)
-    final distanceText = nextItem.transportationDistance != null
-        ? '${(nextItem.transportationDistance! / 1000).toStringAsFixed(1)} km'
+    final distanceText = item.transportationDistance != null
+        ? '${(item.transportationDistance! / 1000).toStringAsFixed(1)} km'
         : '-';
 
     return Row(
@@ -65,6 +54,8 @@ class TransportSection extends ConsumerWidget {
         const Text('–', style: TextStyle(color: Colors.grey)),
         const SizedBox(width: 6),
         Text(distanceText, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(width: 6),
+        const Expanded(child: Divider(thickness: 1)),
       ],
     );
   }
