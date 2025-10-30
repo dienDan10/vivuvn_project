@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../model/location.dart';
 import '../../ui/widgets/place_action_button_direction.dart';
 import '../../ui/widgets/place_action_button_location.dart';
 import '../../ui/widgets/place_action_button_website.dart';
@@ -14,6 +13,7 @@ import 'wiget/location_rating_section.dart';
 
 class LocationDetailScreen extends ConsumerStatefulWidget {
   final int locationId;
+
   const LocationDetailScreen({super.key, required this.locationId});
 
   @override
@@ -22,40 +22,17 @@ class LocationDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
-  final PageController _pageController = PageController();
   int _currentIndex = 0;
-  Timer? _autoSlideTimer;
-
-  void _startAutoSlide(final int itemCount) {
-    _autoSlideTimer?.cancel();
-    if (itemCount > 1) {
-      _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-        _currentIndex = (_currentIndex + 1) % itemCount;
-        _pageController.animateToPage(
-          _currentIndex,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
-        );
-        setState(() {});
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
+    //  Fetch dữ liệu location khi mở màn
     Future.microtask(() {
       ref
           .read(locationControllerProvider.notifier)
           .fetchLocationDetail(widget.locationId);
     });
-  }
-
-  @override
-  void dispose() {
-    _autoSlideTimer?.cancel();
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -69,13 +46,12 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
       return Scaffold(body: Center(child: Text(state.error!)));
     }
 
-    final location = state.detail;
+    final Location? location = state.detail;
     if (location == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final photos = location.photos;
-    _startAutoSlide(photos.length);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -83,12 +59,16 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// Slider ảnh
             LocationImageSlider(
               photos: photos,
               currentIndex: _currentIndex,
-              controller: _pageController,
+              onPageChanged: (final index, final reason) {
+                setState(() => _currentIndex = index);
+              },
               onBackPressed: () => Navigator.pop(context),
             ),
+
             const SizedBox(height: 20),
 
             /// Tên địa điểm
@@ -105,10 +85,10 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
             ),
             const SizedBox(height: 10),
 
-            /// Rating section
+            /// Rating
             LocationRatingSection(
               rating: location.rating,
-              ratingCount: location.ratingCount,
+              ratingCount: location.ratingCount ?? 0,
             ),
             const SizedBox(height: 10),
 
@@ -117,16 +97,16 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
             const SizedBox(height: 20),
 
             /// Nút hành động
-            const SingleChildScrollView(
+            SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  PlaceActionButtonDirection(),
-                  SizedBox(width: 16),
-                  PlaceActionButtonLocation(),
-                  SizedBox(width: 16),
-                  PlaceActionButtonWebsite(),
+                  PlaceActionButtonDirection(location: location),
+                  const SizedBox(width: 16),
+                  PlaceActionButtonLocation(location: location),
+                  const SizedBox(width: 16),
+                  PlaceActionButtonWebsite(location: location),
                 ],
               ),
             ),

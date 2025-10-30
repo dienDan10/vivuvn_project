@@ -57,6 +57,7 @@ dependencies:
   url_launcher: ^6.3.2
   sliver_snap: ^2.1.1
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
