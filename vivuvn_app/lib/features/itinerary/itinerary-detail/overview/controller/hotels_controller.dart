@@ -101,6 +101,10 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
     required final DateTime checkInDate,
     required final DateTime checkOutDate,
   }) async {
+    state = state.copyWith(
+      savingHotelId: id,
+      savingType: HotelSavingType.dates,
+    );
     try {
       final service = ref.read(hotelsServiceProvider);
       await service.updateHotelDate(
@@ -110,13 +114,22 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
         checkOutDate: checkOutDate,
       );
       await loadHotels(state.itineraryId);
+      state = state.copyWith(savingHotelId: null, savingType: null);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(
+        error: errorMsg,
+        savingHotelId: null,
+        savingType: null,
+      );
       return false;
     } catch (_) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(
+        error: 'Unknown error',
+        savingHotelId: null,
+        savingType: null,
+      );
       return false;
     }
   }
@@ -125,6 +138,10 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
     required final String id,
     required final String note,
   }) async {
+    state = state.copyWith(
+      savingHotelId: id,
+      savingType: HotelSavingType.note,
+    );
     try {
       final service = ref.read(hotelsServiceProvider);
       await service.updateHotelNote(
@@ -133,13 +150,22 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
         note: note,
       );
       await loadHotels(state.itineraryId);
+      state = state.copyWith(savingHotelId: null, savingType: null);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(
+        error: errorMsg,
+        savingHotelId: null,
+        savingType: null,
+      );
       return false;
     } catch (_) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(
+        error: 'Unknown error',
+        savingHotelId: null,
+        savingType: null,
+      );
       return false;
     }
   }
@@ -148,6 +174,10 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
     required final String id,
     required final double cost,
   }) async {
+    state = state.copyWith(
+      savingHotelId: id,
+      savingType: HotelSavingType.cost,
+    );
     try {
       final service = ref.read(hotelsServiceProvider);
       await service.updateHotelCost(
@@ -156,13 +186,22 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
         cost: cost,
       );
       await loadHotels(state.itineraryId);
+      state = state.copyWith(savingHotelId: null, savingType: null);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(
+        error: errorMsg,
+        savingHotelId: null,
+        savingType: null,
+      );
       return false;
     } catch (_) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(
+        error: 'Unknown error',
+        savingHotelId: null,
+        savingType: null,
+      );
       return false;
     }
   }

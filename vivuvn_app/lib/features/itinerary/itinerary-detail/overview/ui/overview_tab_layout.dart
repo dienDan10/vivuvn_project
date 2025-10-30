@@ -21,7 +21,6 @@ class OverviewTabLayout extends ConsumerStatefulWidget {
 
 class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  // Separate expand states for each section
   bool _hotelsExpanded = false;
   bool _restaurantsExpanded = false;
   bool _placesExpanded = false;
@@ -29,7 +28,6 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
   bool _itineraryListenerRegistered = false;
   bool _initialDataLoaded = false;
 
-  // Separate animation controllers for each section
   late AnimationController _hotelsAnimationController;
   late AnimationController _restaurantsAnimationController;
   late AnimationController _placesAnimationController;
@@ -39,13 +37,12 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
   late Animation<double> _placesIconRotation;
 
   @override
-  bool get wantKeepAlive => true; // ← Giữ state khi switch tabs
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize animation controllers for each section
     _hotelsAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -59,7 +56,6 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
       vsync: this,
     );
 
-    // Initialize rotation animations
     _hotelsIconRotation = Tween<double>(begin: 0.0, end: 0.5).animate(
       CurvedAnimation(
         parent: _hotelsAnimationController,
@@ -123,71 +119,61 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
 
   @override
   Widget build(final BuildContext context) {
-    super.build(context); // ← Gọi super.build để AutomaticKeepAlive hoạt động
+    super.build(context);
 
-    // Lấy danh sách places từ controller
-    final favouritePlacesState = ref.watch(favouritePlacesControllerProvider);
-    final places = favouritePlacesState.places;
+    // Use .select() to watch only specific parts of state
+    final places = ref.watch(
+      favouritePlacesControllerProvider.select((s) => s.places),
+    );
+    final placesLoading = ref.watch(
+      favouritePlacesControllerProvider.select((s) => s.isLoading),
+    );
+    final placesError = ref.watch(
+      favouritePlacesControllerProvider.select((s) => s.error),
+    );
 
-    // Lấy danh sách hotels và restaurants từ controller để hiển thị header counts
-    final hotelsState = ref.watch(hotelsControllerProvider);
-    final hotels = hotelsState.hotels;
+    final hotelsCount = ref.watch(
+      hotelsControllerProvider.select((s) => s.hotels.length),
+    );
+    final restaurantsCount = ref.watch(
+      restaurantsControllerProvider.select((s) => s.restaurants.length),
+    );
 
-    final restaurantsState = ref.watch(restaurantsControllerProvider);
-    final restaurants = restaurantsState.restaurants;
-
-    // Register a one-time listener during build so we load lists as soon as
-    // `itineraryId` becomes available. `ref.listen` must be invoked while
-    // building (Consumer build), so we guard registration with a bool.
+    // Load data on first render if itineraryId exists
     if (!_itineraryListenerRegistered) {
       final currentId = ref.read(itineraryDetailControllerProvider).itineraryId;
 
-      // CRITICAL FIX: Load data immediately if itineraryId exists and data is empty
-      // This ensures counts show up on first render instead of showing (0)
-      if (currentId != null) {
-        if (!_initialDataLoaded) {
-          _initialDataLoaded = true;
+      if (currentId != null && !_initialDataLoaded) {
+        _initialDataLoaded = true;
 
-          // Check if data needs loading and trigger immediately
-          final needsPlacesLoad =
-              favouritePlacesState.places.isEmpty &&
-              !favouritePlacesState.isLoading;
-          final needsHotelsLoad =
-              hotelsState.hotels.isEmpty && !hotelsState.isLoading;
-          final needsRestaurantsLoad =
-              restaurantsState.restaurants.isEmpty &&
-              !restaurantsState.isLoading;
+        final needsPlacesLoad = places.isEmpty && !placesLoading;
+        final needsHotelsLoad = hotelsCount == 0 &&
+            !ref.read(hotelsControllerProvider).isLoading;
+        final needsRestaurantsLoad = restaurantsCount == 0 &&
+            !ref.read(restaurantsControllerProvider).isLoading;
 
-          if (needsPlacesLoad || needsHotelsLoad || needsRestaurantsLoad) {
-            // Schedule load for next frame to avoid modifying state during build
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                if (needsPlacesLoad) {
-                  ref
-                      .read(favouritePlacesControllerProvider.notifier)
-                      .loadFavouritePlaces(currentId);
-                }
-                if (needsHotelsLoad) {
-                  ref
-                      .read(hotelsControllerProvider.notifier)
-                      .loadHotels(currentId);
-                }
-                if (needsRestaurantsLoad) {
-                  ref
-                      .read(restaurantsControllerProvider.notifier)
-                      .loadRestaurants(currentId);
-                }
+        if (needsPlacesLoad || needsHotelsLoad || needsRestaurantsLoad) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              if (needsPlacesLoad) {
+                ref
+                    .read(favouritePlacesControllerProvider.notifier)
+                    .loadFavouritePlaces(currentId);
               }
-            });
-          }
+              if (needsHotelsLoad) {
+                ref.read(hotelsControllerProvider.notifier).loadHotels(currentId);
+              }
+              if (needsRestaurantsLoad) {
+                ref
+                    .read(restaurantsControllerProvider.notifier)
+                    .loadRestaurants(currentId);
+              }
+            }
+          });
         }
       }
 
-      // Also listen for future changes
-      ref.listen(itineraryDetailControllerProvider, (
-        final previous,
-        final next,
-      ) {
+      ref.listen(itineraryDetailControllerProvider, (previous, next) {
         try {
           final id = next.itineraryId;
           if (id != null && previous?.itineraryId != id) {
@@ -206,13 +192,13 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
       _itineraryListenerRegistered = true;
     }
 
-    // Hiển thị loading nếu đang tải lần đầu
-    if (favouritePlacesState.isLoading && places.isEmpty) {
+    // Show loading on first load
+    if (placesLoading && places.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Hiển thị error nếu có
-    if (favouritePlacesState.error != null && places.isEmpty) {
+    // Show error if present
+    if (placesError != null && places.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -224,7 +210,7 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
             ),
             const SizedBox(height: 16),
             Text(
-              favouritePlacesState.error!,
+              placesError,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.error,
                 fontSize: 14,
@@ -236,7 +222,6 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
       );
     }
 
-    // Calculate total items: group_size(1) + transportation(1) + header(1) + places(n) + spacing(1) + button(1) + bottom(1)
     const extraItemsCount = 6;
     final totalItemCount = places.length + extraItemsCount;
 
@@ -248,12 +233,11 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
         Expanded(
           child: ListView(
             children: [
-              // Hotels section - render items directly without nested ListView
+              // Hotels section
               ...List.generate(
-                hotels.length + 3,
-                (final index) => HotelListItem(
+                hotelsCount + 3,
+                (index) => HotelListItem(
                   index: index,
-                  hotels: hotels,
                   isExpanded: _hotelsExpanded,
                   iconRotationAnimation: _hotelsIconRotation,
                   onToggle: toggleHotels,
@@ -261,12 +245,11 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
               ),
               const SectionDivider(),
 
-              // Restaurants section - render items directly
+              // Restaurants section
               ...List.generate(
-                restaurants.length + 3,
-                (final index) => RestaurantListItem(
+                restaurantsCount + 3,
+                (index) => RestaurantListItem(
                   index: index,
-                  restaurants: restaurants,
                   isExpanded: _restaurantsExpanded,
                   iconRotationAnimation: _restaurantsIconRotation,
                   onToggle: toggleRestaurants,
@@ -274,10 +257,10 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
               ),
               const SectionDivider(),
 
-              // Places section - render items directly
+              // Places section
               ...List.generate(
                 totalItemCount,
-                (final index) => PlaceListItem(
+                (index) => PlaceListItem(
                   index: index,
                   places: places,
                   isExpanded: _placesExpanded,

@@ -14,43 +14,32 @@ class PlaceCardImage extends StatefulWidget {
 }
 
 class _PlaceCardImageState extends State<PlaceCardImage> {
-  bool _hasTimedOut = false;
-  Timer? _timeoutTimer;
-  static const _loadTimeout = Duration(seconds: 5);
+  bool _timedOut = false;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _startTimeout();
+    if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
+      _timer = Timer(const Duration(seconds: 10), () {
+        if (mounted) {
+          setState(() => _timedOut = true);
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
-    _timeoutTimer?.cancel();
+    _timer?.cancel();
     super.dispose();
-  }
-
-  void _startTimeout() {
-    _timeoutTimer?.cancel();
-    _timeoutTimer = Timer(_loadTimeout, () {
-      if (mounted) {
-        setState(() {
-          _hasTimedOut = true;
-        });
-      }
-    });
   }
 
   @override
   Widget build(final BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    if (widget.imageUrl == null || widget.imageUrl!.isEmpty) {
-      return _buildPlaceholder(colorScheme);
-    }
-
-    // Nếu đã timeout, hiển thị placeholder luôn
-    if (_hasTimedOut) {
+    if (widget.imageUrl == null || widget.imageUrl!.isEmpty || _timedOut) {
       return _buildPlaceholder(colorScheme);
     }
 
@@ -62,8 +51,7 @@ class _PlaceCardImageState extends State<PlaceCardImage> {
         height: widget.size,
         fit: BoxFit.cover,
         imageBuilder: (final context, final imageProvider) {
-          // Ảnh load thành công → Cancel timeout
-          _timeoutTimer?.cancel();
+          _timer?.cancel();
           return Image(
             image: imageProvider,
             width: widget.size,
@@ -71,33 +59,25 @@ class _PlaceCardImageState extends State<PlaceCardImage> {
             fit: BoxFit.cover,
           );
         },
-        progressIndicatorBuilder:
-            (final context, final url, final downloadProgress) => Container(
-              width: widget.size,
-              height: widget.size,
-              color: colorScheme.primaryContainer,
-              child: Center(
-                child: CircularProgressIndicator(
-                  value: downloadProgress.progress,
-                  strokeWidth: 2,
-                ),
-              ),
+        placeholder: (final context, final url) => Container(
+          width: widget.size,
+          height: widget.size,
+          color: colorScheme.primaryContainer,
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colorScheme.onPrimaryContainer,
             ),
+          ),
+        ),
         errorWidget: (final context, final url, final error) {
-          // Error → Cancel timeout và hiện placeholder
-          _timeoutTimer?.cancel();
+          _timer?.cancel();
           return _buildPlaceholder(colorScheme);
         },
-        // Lazy loading configuration
-        memCacheWidth: (widget.size * 2).toInt(),
-        memCacheHeight: (widget.size * 2).toInt(),
-        maxWidthDiskCache: (widget.size * 3).toInt(),
-        maxHeightDiskCache: (widget.size * 3).toInt(),
       ),
     );
   }
 
-  /// Placeholder khi không có ảnh hoặc ảnh lỗi
   Widget _buildPlaceholder(final ColorScheme colorScheme) {
     return Container(
       width: widget.size,

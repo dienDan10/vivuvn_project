@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/dto/hotel_item_response.dart';
+import '../../controller/hotels_controller.dart';
 import 'add_hotel_button.dart';
 import 'animated_hotel_card.dart';
 import 'hotel_list_header.dart';
 
-class HotelListItem extends StatelessWidget {
+class HotelListItem extends ConsumerWidget {
   const HotelListItem({
     required this.index,
-    required this.hotels,
     required this.isExpanded,
     required this.iconRotationAnimation,
     required this.onToggle,
@@ -16,14 +16,17 @@ class HotelListItem extends StatelessWidget {
   });
 
   final int index;
-  final List<HotelItemResponse> hotels;
   final bool isExpanded;
   final Animation<double> iconRotationAnimation;
   final VoidCallback onToggle;
 
   @override
-  Widget build(final BuildContext context) {
-    // Header với toggle button
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hotels = ref.watch(
+      hotelsControllerProvider.select((s) => s.hotels),
+    );
+
+    // Header
     if (index == 0) {
       return HotelListHeader(
         hotelsCount: hotels.length,
@@ -33,7 +36,7 @@ class HotelListItem extends StatelessWidget {
       );
     }
 
-    // Nếu đang thu gọn, chỉ hiển thị bottom spacing
+    // Collapsed spacing
     if (!isExpanded) {
       if (index == 1) {
         return const SizedBox(height: 8);
@@ -41,7 +44,7 @@ class HotelListItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Hotel cards với animation
+    // Hotel cards
     if (index <= hotels.length) {
       final hotel = hotels[index - 1];
       return AnimatedHotelCard(
@@ -51,7 +54,7 @@ class HotelListItem extends StatelessWidget {
       );
     }
 
-    // Spacing sau hotel cards
+    // Spacing after cards
     if (index == hotels.length + 1) {
       return const SizedBox(height: 8);
     }

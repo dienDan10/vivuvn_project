@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 import '../../controller/restaurants_controller.dart';
 import '../../data/dto/restaurant_item_response.dart';
 import '../../modal/location.dart';
+import 'restaurant_date_picker.dart';
+import 'restaurant_save_button.dart';
+import 'restaurant_search_field.dart';
 import 'restaurant_search_modal.dart';
 
 class AddRestaurantModal extends ConsumerStatefulWidget {
@@ -25,6 +28,8 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
     super.initState();
     if (widget.restaurantToEdit != null) {
       _mealDate = widget.restaurantToEdit!.mealDate;
+    } else {
+      _mealDate = DateTime.now();
     }
   }
 
@@ -67,42 +72,14 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
             const SizedBox(height: 24),
 
             // Search field (read-only, opens modal on tap)
-            InkWell(
+            RestaurantSearchField(
+              selectedLocation: _selectedLocation,
               onTap: () => _openSearchModal(context),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.search, color: Colors.grey),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _selectedLocation?.name ??
-                            widget.restaurantToEdit?.name ??
-                            'Tìm tên hoặc địa chỉ nhà hàng',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color:
-                              _selectedLocation != null ||
-                                  widget.restaurantToEdit != null
-                              ? Colors.black
-                              : Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
             const SizedBox(height: 16),
 
             // Date picker
-            _buildDatePicker(
-              context: context,
+            RestaurantDatePicker(
               label: 'Ngày ăn',
               date: _mealDate,
               onTap: () => _selectMealDate(context),
@@ -110,20 +87,10 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
             const SizedBox(height: 24),
 
             // Save button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: (_selectedLocation != null || isEditMode)
-                    ? () => _handleSave(context)
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(isEditMode ? 'Cập nhật' : 'Thêm'),
-              ),
+            RestaurantSaveButton(
+              enabled: (_selectedLocation != null || isEditMode),
+              onPressed: () => _handleSave(context),
+              isEditMode: isEditMode,
             ),
           ],
         ),
@@ -140,49 +107,7 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
     }
   }
 
-  Widget _buildDatePicker({
-    required final BuildContext context,
-    required final String label,
-    required final DateTime? date,
-    required final VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    date != null
-                        ? DateFormat('dd/MM/yyyy').format(date)
-                        : 'Chọn ngày',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: date != null ? Colors.black : Colors.grey[400],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.calendar_today, color: Colors.grey[400], size: 20),
-          ],
-        ),
-      ),
-    );
-  }
+  // Đã tách thành RestaurantDatePicker
 
   Future<void> _selectMealDate(final BuildContext context) async {
     final DateTime? picked = await showDatePicker(

@@ -27,6 +27,9 @@ class _AddHotelModalState extends ConsumerState<AddHotelModal> {
     if (widget.hotelToEdit != null) {
       _checkInDate = widget.hotelToEdit!.checkInDate;
       _checkOutDate = widget.hotelToEdit!.checkOutDate;
+    } else {
+      _checkInDate = DateTime.now();
+      _checkOutDate = DateTime.now();
     }
   }
 

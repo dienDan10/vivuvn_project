@@ -20,9 +20,6 @@ class HotelItemResponse {
   });
 
   factory HotelItemResponse.fromJson(final Map<String, dynamic> json) {
-    // Support two shapes:
-    // 1) itinerary item { id, hotelId, hotel: { googlePlaceId, name, address, ... }, checkIn, checkOut }
-    // 2) flat shape { id, name, address, checkInDate, checkOutDate }
     final nestedHotel = json['hotel'] as Map<String, dynamic>?;
     final dynamic rawId =
         json['id'] ??
@@ -41,11 +38,22 @@ class HotelItemResponse {
         (nestedHotel?['formattedAddress'] as String?) ??
         '';
 
-    // Try several common keys for image/url
-    final imageUrl =
-        (json['imageUrl'] as String?) ?? (nestedHotel?['imageUrl'] as String?);
+    String? imageUrl;
+    try {
+      final photos =
+          (nestedHotel?['photos'] ?? json['photos']) as List<dynamic>?;
+      if (photos != null && photos.isNotEmpty) {
+        final first = photos.first;
+        if (first is String) {
+          imageUrl = first;
+        } else if (first is Map<String, dynamic>) {
+          imageUrl = first['url'] as String?;
+        }
+      }
+    } catch (e) {
+      imageUrl = null;
+    }
 
-    // Date keys may be 'checkIn'/'checkOut' or 'checkInDate'/'checkOutDate'
     final checkInStr =
         (json['checkIn'] as String?) ?? (json['checkInDate'] as String?);
     final checkOutStr =

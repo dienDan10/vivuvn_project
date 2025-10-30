@@ -127,6 +127,10 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
     required final String id,
     required final DateTime date,
   }) async {
+    state = state.copyWith(
+      savingRestaurantId: id,
+      savingType: RestaurantSavingType.date,
+    );
     try {
       final service = ref.read(restaurantsServiceProvider);
       await service.updateRestaurantDate(
@@ -135,13 +139,22 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
         date: date,
       );
       await loadRestaurants(state.itineraryId);
+      state = state.copyWith(savingRestaurantId: null, savingType: null);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(
+        error: errorMsg,
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     } catch (_) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(
+        error: 'Unknown error',
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     }
   }
@@ -150,6 +163,10 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
     required final String id,
     required final String time,
   }) async {
+    state = state.copyWith(
+      savingRestaurantId: id,
+      savingType: RestaurantSavingType.time,
+    );
     try {
       final service = ref.read(restaurantsServiceProvider);
       await service.updateRestaurantTime(
@@ -158,13 +175,22 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
         time: time,
       );
       await loadRestaurants(state.itineraryId);
+      state = state.copyWith(savingRestaurantId: null, savingType: null);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(
+        error: errorMsg,
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     } catch (_) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(
+        error: 'Unknown error',
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     }
   }
@@ -173,6 +199,10 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
     required final String id,
     required final String note,
   }) async {
+    state = state.copyWith(
+      savingRestaurantId: id,
+      savingType: RestaurantSavingType.note,
+    );
     try {
       final service = ref.read(restaurantsServiceProvider);
       await service.updateRestaurantNote(
@@ -181,13 +211,22 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
         note: note,
       );
       await loadRestaurants(state.itineraryId);
+      state = state.copyWith(savingRestaurantId: null, savingType: null);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(
+        error: errorMsg,
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     } catch (_) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(
+        error: 'Unknown error',
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     }
   }
@@ -196,6 +235,10 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
     required final String id,
     required final double cost,
   }) async {
+    state = state.copyWith(
+      savingRestaurantId: id,
+      savingType: RestaurantSavingType.cost,
+    );
     try {
       final service = ref.read(restaurantsServiceProvider);
       await service.updateRestaurantCost(
@@ -204,13 +247,22 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
         cost: cost,
       );
       await loadRestaurants(state.itineraryId);
+      state = state.copyWith(savingRestaurantId: null, savingType: null);
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(
+        error: errorMsg,
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     } catch (_) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(
+        error: 'Unknown error',
+        savingRestaurantId: null,
+        savingType: null,
+      );
       return false;
     }
   }

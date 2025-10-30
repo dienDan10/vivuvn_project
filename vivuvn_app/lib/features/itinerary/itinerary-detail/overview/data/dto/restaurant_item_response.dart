@@ -18,26 +18,19 @@ class RestaurantItemResponse {
   });
 
   factory RestaurantItemResponse.fromJson(final Map<String, dynamic> json) {
-    // The server returns items either as a flat object or with a nested
-    // 'restaurant' object when returned as part of an itinerary list. Handle
-    // both shapes.
     final nested = (json['restaurant'] is Map<String, dynamic>)
         ? (json['restaurant'] as Map<String, dynamic>)
         : json;
 
-    // Item id (itinerary item) is usually at top-level 'id'. Fallback to
-    // 'restaurantId' or nested restaurant id/googlePlaceId when needed.
     final idValue =
         json['id'] ??
         json['restaurantId'] ??
         nested['id'] ??
         nested['googlePlaceId'];
 
-    // Name and address come from the nested restaurant object when present.
     final nameValue = nested['name'] ?? nested['title'] ?? '';
     final addressValue = nested['address'] ?? nested['formattedAddress'] ?? '';
 
-    // imageUrl: if the restaurant has photos, try to extract a usable url.
     String? image;
     try {
       final photos = nested['photos'];
@@ -49,19 +42,15 @@ class RestaurantItemResponse {
           image = first['url'] as String?;
         }
       }
-    } catch (_) {
+    } catch (e) {
       image = null;
     }
 
-    // mealDate: server returns separate 'date' and 'time' fields at top-level
-    // for itinerary items. Prefer combining them. Fallback to nested 'mealDate'
-    // or 'date'.
     DateTime? mealDate;
     try {
       final dateStr = (json['date'] ?? nested['date']) as String?;
       final timeStr = (json['time'] ?? nested['time']) as String?;
       if (dateStr != null && timeStr != null) {
-        // Construct an ISO-like datetime string and parse.
         final combined = '${dateStr}T$timeStr';
         mealDate = DateTime.tryParse(combined);
       } else if (dateStr != null) {

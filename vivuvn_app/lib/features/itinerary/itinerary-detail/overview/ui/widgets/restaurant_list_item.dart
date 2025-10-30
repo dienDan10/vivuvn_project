@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/dto/restaurant_item_response.dart';
+import '../../controller/restaurants_controller.dart';
 import 'add_restaurant_button.dart';
 import 'animated_restaurant_card.dart';
 import 'restaurant_list_header.dart';
 
-class RestaurantListItem extends StatelessWidget {
+class RestaurantListItem extends ConsumerWidget {
   const RestaurantListItem({
     required this.index,
-    required this.restaurants,
     required this.isExpanded,
     required this.iconRotationAnimation,
     required this.onToggle,
@@ -16,14 +16,17 @@ class RestaurantListItem extends StatelessWidget {
   });
 
   final int index;
-  final List<RestaurantItemResponse> restaurants;
   final bool isExpanded;
   final Animation<double> iconRotationAnimation;
   final VoidCallback onToggle;
 
   @override
-  Widget build(final BuildContext context) {
-    // Header với toggle button
+  Widget build(BuildContext context, WidgetRef ref) {
+    final restaurants = ref.watch(
+      restaurantsControllerProvider.select((s) => s.restaurants),
+    );
+
+    // Header
     if (index == 0) {
       return RestaurantListHeader(
         restaurantsCount: restaurants.length,
@@ -33,7 +36,7 @@ class RestaurantListItem extends StatelessWidget {
       );
     }
 
-    // Nếu đang thu gọn, chỉ hiển thị bottom spacing
+    // Collapsed spacing
     if (!isExpanded) {
       if (index == 1) {
         return const SizedBox(height: 8);
@@ -41,7 +44,7 @@ class RestaurantListItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Restaurant cards với animation
+    // Restaurant cards
     if (index <= restaurants.length) {
       final restaurant = restaurants[index - 1];
       return AnimatedRestaurantCard(
@@ -51,7 +54,7 @@ class RestaurantListItem extends StatelessWidget {
       );
     }
 
-    // Spacing sau restaurant cards
+    // Spacing after cards
     if (index == restaurants.length + 1) {
       return const SizedBox(height: 8);
     }

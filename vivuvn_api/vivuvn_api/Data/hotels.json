@@ -30,5 +30,21 @@
       "https://lh3.googleusercontent.com/places/ANXAkqG1v3D4SwtGbBf5rQAlyvXyq3-BizfCHede5w6r1QTKx8wijpJfSD6ESiDppxUC5dX7oCxZ_ew3SW4QWLfgbq47VQ5cbvtKGn8=s4800-w800-h800",
       "https://lh3.googleusercontent.com/places/ANXAkqFya3HDqsVKaXyFgpVcONI_cPCA_Pbp9-1mrX_mAQJHzmQEwAFiJ6BKBp-My1HsQoABUXQ-p1gNB6bupI5b3O7YcoS88PEOVEA=s4800-w800-h800"
     ]
+  },
+  {
+    "GooglePlaceId": "ChIJcxi957wpdTERNLQ9pXyNYPs",
+    "Name": "Bed In Town Saigon",
+    "Address": "15AB Nguy\u1EC5n V\u0103n Th\u1EE7, \u0110a Kao, Qu\u1EADn 1, Th\u00E0nh ph\u1ED1 H\u1ED3 Ch\u00ED Minh 700000, Vietnam",
+    "Rating": 4.1,
+    "UserRatingCount": 95,
+    "Latitude": 10.7920191,
+    "Longitude": 106.70134829999999,
+    "GoogleMapsUri": "https://maps.google.com/?cid=18113633267771880500\u0026g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
+    "PriceLevel": null,
+    "Photos": [
+      "https://lh3.googleusercontent.com/places/ANXAkqEchUUQAAXqyUXezh2QTk96yqy3iYs4_en9wEde8qFD4-w3qZBlXX14Enuow4uEmLvG-HoNgHwkR48CFhF5-AjqQneTRewAo8w=s4800-w800-h722",
+      "https://lh3.googleusercontent.com/places/ANXAkqE0sH9DEMmKOlpDqQiX-a7otlT_2gEoj56cKW5LxHQL1lzLLuBhZLLCkFkxMJpkfsn4d8SJIEYGllAf8SAQo5RZf4bG9KQQstE=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/places/ANXAkqH-i-ajL4ZxfogQVIfvFGwK2DWIaHscom_D9ow7iMVEsgBgLoOq7POOwTufEgn3J5dI9k3RqFzl9tjwr7qviJ5LZiAcfx-vplU=s4800-w800-h800"
+    ]
   }
 ]
