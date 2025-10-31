@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../overview/ui/widgets/place_card_image.dart';
+import '../../../overview/ui/widgets/favourite_place/place_card_image.dart';
 import '../../model/itinerary_item.dart';
 import 'place_time_editor.dart';
 

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../overview/controller/favourite_places_controller.dart';
 import '../../../overview/controller/search_location_controller.dart';
-import '../../../overview/modal/location.dart';
+import '../../../overview/models/location.dart';
 import 'favorite_places_list.dart';
 import 'search_input.dart';
 import 'search_results_list.dart';

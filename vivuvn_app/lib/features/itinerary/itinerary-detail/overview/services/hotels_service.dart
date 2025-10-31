@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/api/hotels_api.dart';
 import '../data/dto/add_hotel_request.dart';
 import '../data/dto/hotel_item_response.dart';
-import '../modal/location.dart';
+import '../models/location.dart';
 
 final hotelsServiceProvider = Provider.autoDispose<IHotelsService>((final ref) {
   final api = ref.watch(hotelsApiProvider);

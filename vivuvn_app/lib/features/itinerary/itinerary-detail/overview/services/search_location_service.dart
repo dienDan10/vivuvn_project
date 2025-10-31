@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/search_location_api.dart';
-import '../modal/location.dart';
+import '../models/location.dart';
 
 final searchLocationServiceProvider =
     Provider.autoDispose<ISearchLocationService>((final ref) {

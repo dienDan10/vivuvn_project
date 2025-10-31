@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../modal/location.dart';
+import '../models/location.dart';
 import '../services/search_location_service.dart';
 import '../state/search_location_state.dart';
 

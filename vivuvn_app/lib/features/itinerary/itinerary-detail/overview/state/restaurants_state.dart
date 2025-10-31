@@ -1,4 +1,9 @@
 import '../data/dto/restaurant_item_response.dart';
+import '../models/location.dart';
+
+class _UnsetR {
+  const _UnsetR();
+}
 
 class RestaurantsState {
   final bool isLoading;
@@ -8,6 +13,12 @@ class RestaurantsState {
   final String? savingRestaurantId;
   final RestaurantSavingType? savingType;
 
+  // Add restaurant form fields
+  final Location? formSelectedLocation;
+  final DateTime? formMealDate;
+
+  static const _UnsetR _unset = _UnsetR();
+
   RestaurantsState({
     this.isLoading = false,
     this.restaurants = const [],
@@ -15,33 +26,52 @@ class RestaurantsState {
     this.itineraryId,
     this.savingRestaurantId,
     this.savingType,
+    this.formSelectedLocation,
+    this.formMealDate,
   });
 
   RestaurantsState copyWith({
     final bool? isLoading,
     final List<RestaurantItemResponse>? restaurants,
     final String? error,
-    final int? itineraryId,
-    final String? savingRestaurantId,
-    final RestaurantSavingType? savingType,
+    final Object? itineraryId = _unset,
+    final Object? savingRestaurantId = _unset,
+    final Object? savingType = _unset,
+    final Object? formSelectedLocation = _unset,
+    final Object? formMealDate = _unset,
   }) {
     return RestaurantsState(
       isLoading: isLoading ?? this.isLoading,
       restaurants: restaurants ?? this.restaurants,
       error: error,
-      itineraryId: itineraryId ?? this.itineraryId,
-      savingRestaurantId: savingRestaurantId,
-      savingType: savingType,
+      itineraryId:
+          identical(itineraryId, _unset) ? this.itineraryId : itineraryId as int?,
+      savingRestaurantId: identical(savingRestaurantId, _unset)
+          ? this.savingRestaurantId
+          : savingRestaurantId as String?,
+      savingType: identical(savingType, _unset)
+          ? this.savingType
+          : savingType as RestaurantSavingType?,
+      formSelectedLocation: identical(formSelectedLocation, _unset)
+          ? this.formSelectedLocation
+          : formSelectedLocation as Location?,
+      formMealDate: identical(formMealDate, _unset)
+          ? this.formMealDate
+          : formMealDate as DateTime?,
     );
   }
 
-  bool isSaving(String restaurantId, RestaurantSavingType type) {
+  bool isSaving(final String restaurantId, final RestaurantSavingType type) {
     return savingRestaurantId == restaurantId && savingType == type;
   }
 
-  bool isAnySaving(String restaurantId) {
+  bool isAnySaving(final String restaurantId) {
     return savingRestaurantId == restaurantId;
   }
+
+  // Form helpers
+  bool get formIsValid => formSelectedLocation != null;
+  String get formDisplayName => formSelectedLocation?.name ?? '';
 }
 
 enum RestaurantSavingType {

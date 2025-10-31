@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../overview/data/dto/favourite_places_response.dart';
-import '../../../overview/modal/location.dart';
+import '../../../overview/models/location.dart';
 
 class SearchResultsList extends StatelessWidget {
   final List<Location> results;

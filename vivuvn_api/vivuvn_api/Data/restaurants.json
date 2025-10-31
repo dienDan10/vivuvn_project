@@ -78,5 +78,37 @@
       "https://lh3.googleusercontent.com/places/ANXAkqF0rb_fjSr8t7II-CO2PjU-k0yPsqox05_MLeiuKChAKYOhAIndn23FsiMLy3TdeL0fvfnodPcxXNuKHd1IhnYfu3mndnzhoCA=s4800-w800-h800",
       "https://lh3.googleusercontent.com/places/ANXAkqHp0qeX7nALfFHwkdOZcete01qQLFQEKFn2QWKnV982wn2bhgXuJ3tbnJ6FUJ5TZE3koh2HHiSUOXwVD8ANUqbFfJYsF5XQno0=s4800-w800-h800"
     ]
+  },
+  {
+    "GooglePlaceId": "ChIJJ_geySQvdTERTw_DG-txwD4",
+    "Name": "G\u00E0 34- Vua G\u00E0 S\u00E0i G\u00F2n",
+    "Address": "26 \u0110. Th\u00E0nh Th\u00E1i, Ph\u01B0\u1EDDng 12, Qu\u1EADn 10, Th\u00E0nh ph\u1ED1 H\u1ED3 Ch\u00ED Minh, Vietnam",
+    "Rating": 4.5,
+    "UserRatingCount": 37,
+    "Latitude": 10.768628500000002,
+    "Longitude": 106.6668261,
+    "GoogleMapsUri": "https://maps.google.com/?cid=4521739280476999503\u0026g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
+    "PriceLevel": null,
+    "Photos": [
+      "https://lh3.googleusercontent.com/places/ANXAkqGaVlJ4a4_Jn9CPf4-1NvhwoCmMeQZHvE8YUs1epWRyMT04WC0R_X2wVP9EluwGvWb2UjyYQrc_B-JG1wEhZe3bGPogFermKDE=s4800-w720-h720",
+      "https://lh3.googleusercontent.com/place-photos/AEkURDyBMx1YBylQuMTgk7BVYTBz6YWDxmz8GyUDoYQuQHfjS3hXc1xw4R77OpxmtXnaphzGds8I8I1Af17sGkWuCB5S6Dl79AyyWHZRegm-iLoERFrBgEc0Jjfhvy45TxU2oNrvcLoJkt5NIKuSgGl_vP2e=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/places/ANXAkqHHMKxOlgNyn-aXirafRWQgUBMD9fHvUPGm4crxl7x-XAAdaiMJk5eP0TBrHxNwDuBqUPOGY0Z2p4FZr1esTcTkAXg5sqSNfeg=s4800-w800-h700"
+    ]
+  },
+  {
+    "GooglePlaceId": "ChIJn-k5ZN7LCjERy11_aGp0aWM",
+    "Name": "G\u00E0 Ta T\u01B0\u1EDDng Vy T\u00E2n Th\u00E0nh - C\u01A1m G\u00E0, Ch\u00E1o G\u00E0, G\u1ECFi G\u00E0 T\u00E2n Ph\u00FA",
+    "Address": "58A \u0110. T\u00E2n Th\u00E0nh, H\u00F2a Th\u1EA1nh, T\u00E2n Ph\u00FA, Th\u00E0nh ph\u1ED1 H\u1ED3 Ch\u00ED Minh 700000, Vietnam",
+    "Rating": 4.8,
+    "UserRatingCount": 496,
+    "Latitude": 10.7870861,
+    "Longitude": 106.6386788,
+    "GoogleMapsUri": "https://maps.google.com/?cid=7163384682678017483\u0026g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
+    "PriceLevel": "PRICE_LEVEL_MODERATE",
+    "Photos": [
+      "https://lh3.googleusercontent.com/place-photos/AEkURDyvE6kCLSmRRvc5OCgkm3YsvFBXyWYQzEPLpv-EgxirBiH8uKW4Crm949QewKZ23XHVoDYOg57xKSuOmBMd6b7kHS_2GIB4nrAuUnrxttuOD3bxebD8A8C2BSQ2VdKrza_DVULHHRFtXrkSig=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/place-photos/AEkURDzdmppEtqMN2dqmlt71BUtRraZC14hD8OYN_N_-uF7zx5YWR8Z-QUTd-UVLjQCvgCCqC5M_gZBJPlSExm-XNTVHqQqqNWHzSuyAvqWMCVrkjzsNsElhs8UuCRjH-2susOpLg6n-I8RZJQv6hw=s4800-w800-h800",
+      "https://lh3.googleusercontent.com/place-photos/AEkURDz2vzdr5pkujqJvPMJ8M7M54XT4ywpP3jLJB1RRsNfMKuK0Oo1eAP8M-wfT7q9hZH9t-i7FJUJouDCRuhLPpaC9yaKTeJUzwK-gHucQ4u8r5d_03PR5is53_PGweSluO1kfd34pixUqnme662KFcTZp5w=s4800-w800-h800"
+    ]
   }
 ]

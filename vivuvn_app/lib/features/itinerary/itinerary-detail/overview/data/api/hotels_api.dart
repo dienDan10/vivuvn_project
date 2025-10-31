@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
-import '../../modal/location.dart';
+import '../../models/location.dart';
 import '../dto/add_hotel_request.dart';
 import '../dto/hotel_item_response.dart';
 

@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
-import '../../controller/itinerary_detail_controller.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../data/dto/add_hotel_request.dart';
-import '../modal/location.dart';
+import '../models/location.dart';
 import '../services/hotels_service.dart';
 import '../state/hotels_state.dart';
 
@@ -85,6 +85,7 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
       }
       await service.addHotel(itineraryId: itineraryId, request: request);
       await loadHotels(itineraryId);
+      initializeForm();
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
@@ -138,10 +139,7 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
     required final String id,
     required final String note,
   }) async {
-    state = state.copyWith(
-      savingHotelId: id,
-      savingType: HotelSavingType.note,
-    );
+    state = state.copyWith(savingHotelId: id, savingType: HotelSavingType.note);
     try {
       final service = ref.read(hotelsServiceProvider);
       await service.updateHotelNote(
@@ -174,10 +172,7 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
     required final String id,
     required final double cost,
   }) async {
-    state = state.copyWith(
-      savingHotelId: id,
-      savingType: HotelSavingType.cost,
-    );
+    state = state.copyWith(savingHotelId: id, savingType: HotelSavingType.cost);
     try {
       final service = ref.read(hotelsServiceProvider);
       await service.updateHotelCost(
@@ -224,5 +219,57 @@ class HotelsController extends AutoDisposeNotifier<HotelsState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  // Form methods
+  void initializeForm() {
+    state = state.copyWith(
+      formSelectedLocation: null,
+      formCheckInDate: DateTime.now(),
+      formCheckOutDate: DateTime.now(),
+    );
+  }
+
+  void setFormLocation(final Location location) {
+    state = state.copyWith(formSelectedLocation: location);
+  }
+
+  void setFormCheckInDate(final DateTime date) {
+    state = state.copyWith(formCheckInDate: date);
+
+    // Auto adjust check-out if it's before check-in
+    if (state.formCheckOutDate != null &&
+        state.formCheckOutDate!.isBefore(date)) {
+      state = state.copyWith(
+        formCheckOutDate: date.add(const Duration(days: 1)),
+      );
+    }
+  }
+
+  void setFormCheckOutDate(final DateTime date) {
+    state = state.copyWith(formCheckOutDate: date);
+  }
+
+  Future<bool> saveForm() async {
+    if (state.formDisplayName.isEmpty) return false;
+
+    // Add new hotel — requires googlePlaceId and date values
+    final googlePlaceId = state.formSelectedLocation?.googlePlaceId;
+    if (googlePlaceId == null) return false;
+
+    return await addHotel(
+      googlePlaceId: googlePlaceId,
+      checkInDate: state.formCheckInDate ?? DateTime.now(),
+      checkOutDate:
+          state.formCheckOutDate ?? state.formCheckInDate ?? DateTime.now(),
+    );
+  }
+
+  void resetForm() {
+    state = state.copyWith(
+      formSelectedLocation: null,
+      formCheckInDate: null,
+      formCheckOutDate: null,
+    );
   }
 }

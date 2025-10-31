@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
-import '../../modal/location.dart';
+import '../../models/location.dart';
 import '../dto/add_restaurant_request.dart';
 import '../dto/restaurant_item_response.dart';
 

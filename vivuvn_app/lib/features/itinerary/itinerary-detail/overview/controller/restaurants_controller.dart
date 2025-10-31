@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
-import '../../controller/itinerary_detail_controller.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../data/dto/add_restaurant_request.dart';
-import '../modal/location.dart';
+import '../models/location.dart';
 import '../services/restaurants_service.dart';
 import '../state/restaurants_state.dart';
 
@@ -60,6 +60,34 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
     );
   }
 
+  // Form methods (add-only)
+  void initializeForm() {
+    state = state.copyWith(
+      formSelectedLocation: null,
+      formMealDate: DateTime.now(),
+    );
+  }
+
+  void setFormLocation(final Location location) {
+    state = state.copyWith(formSelectedLocation: location);
+  }
+
+  void setFormMealDate(final DateTime date) {
+    state = state.copyWith(formMealDate: date);
+  }
+
+  Future<bool> saveForm() async {
+    if (state.formDisplayName.isEmpty) return false;
+
+    final googlePlaceId = state.formSelectedLocation?.googlePlaceId;
+    if (googlePlaceId == null) return false;
+
+    return await addRestaurant(
+      googlePlaceId: googlePlaceId,
+      mealDate: state.formMealDate ?? DateTime.now(),
+    );
+  }
+
   Future<bool> addRestaurant({
     required final String googlePlaceId,
     required final DateTime mealDate,
@@ -83,6 +111,7 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
       }
       await service.addRestaurant(itineraryId: itineraryId, request: request);
       await loadRestaurants(itineraryId);
+      initializeForm();
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);

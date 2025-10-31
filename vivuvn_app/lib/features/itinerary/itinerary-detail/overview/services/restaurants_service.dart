@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/api/restaurants_api.dart';
 import '../data/dto/add_restaurant_request.dart';
 import '../data/dto/restaurant_item_response.dart';
-import '../modal/location.dart';
+import '../models/location.dart';
 
 final restaurantsServiceProvider = Provider.autoDispose<IRestaurantsService>((
   final ref,

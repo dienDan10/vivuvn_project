@@ -6,9 +6,9 @@ import '../controller/favourite_places_controller.dart';
 import '../controller/hotels_controller.dart';
 import '../controller/restaurants_controller.dart';
 import 'widgets/group_size_card.dart';
-import 'widgets/hotel_list_item.dart';
-import 'widgets/place_list_item.dart';
-import 'widgets/restaurant_list_item.dart';
+import 'widgets/hotel/hotel_list_item.dart';
+import 'widgets/favourite_place/place_list_item.dart';
+import 'widgets/restaurant/restaurant_list_item.dart';
 import 'widgets/section_divider.dart';
 import 'widgets/transportation_card.dart';
 
@@ -123,20 +123,20 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
 
     // Use .select() to watch only specific parts of state
     final places = ref.watch(
-      favouritePlacesControllerProvider.select((s) => s.places),
+      favouritePlacesControllerProvider.select((final s) => s.places),
     );
     final placesLoading = ref.watch(
-      favouritePlacesControllerProvider.select((s) => s.isLoading),
+      favouritePlacesControllerProvider.select((final s) => s.isLoading),
     );
     final placesError = ref.watch(
-      favouritePlacesControllerProvider.select((s) => s.error),
+      favouritePlacesControllerProvider.select((final s) => s.error),
     );
 
     final hotelsCount = ref.watch(
-      hotelsControllerProvider.select((s) => s.hotels.length),
+      hotelsControllerProvider.select((final s) => s.hotels.length),
     );
     final restaurantsCount = ref.watch(
-      restaurantsControllerProvider.select((s) => s.restaurants.length),
+      restaurantsControllerProvider.select((final s) => s.restaurants.length),
     );
 
     // Load data on first render if itineraryId exists
@@ -173,7 +173,7 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
         }
       }
 
-      ref.listen(itineraryDetailControllerProvider, (previous, next) {
+      ref.listen(itineraryDetailControllerProvider, (final previous, final next) {
         try {
           final id = next.itineraryId;
           if (id != null && previous?.itineraryId != id) {
@@ -225,53 +225,50 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
     const extraItemsCount = 6;
     final totalItemCount = places.length + extraItemsCount;
 
-    return Column(
-      children: [
-        const SizedBox(),
-        const GroupSizeCard(),
-        const TransportationCard(),
-        Expanded(
-          child: ListView(
-            children: [
-              // Hotels section
-              ...List.generate(
-                hotelsCount + 3,
-                (index) => HotelListItem(
-                  index: index,
-                  isExpanded: _hotelsExpanded,
-                  iconRotationAnimation: _hotelsIconRotation,
-                  onToggle: toggleHotels,
-                ),
-              ),
-              const SectionDivider(),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(),
+          const GroupSizeCard(),
+          const TransportationCard(),
 
-              // Restaurants section
-              ...List.generate(
-                restaurantsCount + 3,
-                (index) => RestaurantListItem(
-                  index: index,
-                  isExpanded: _restaurantsExpanded,
-                  iconRotationAnimation: _restaurantsIconRotation,
-                  onToggle: toggleRestaurants,
-                ),
-              ),
-              const SectionDivider(),
-
-              // Places section
-              ...List.generate(
-                totalItemCount,
-                (index) => PlaceListItem(
-                  index: index,
-                  places: places,
-                  isExpanded: _placesExpanded,
-                  iconRotationAnimation: _placesIconRotation,
-                  onToggle: togglePlaces,
-                ),
-              ),
-            ],
+          // Hotels section
+          ...List.generate(
+            hotelsCount + 3,
+            (final index) => HotelListItem(
+              index: index,
+              isExpanded: _hotelsExpanded,
+              iconRotationAnimation: _hotelsIconRotation,
+              onToggle: toggleHotels,
+            ),
           ),
-        ),
-      ],
+          const SectionDivider(),
+
+          // Restaurants section
+          ...List.generate(
+            restaurantsCount + 3,
+            (final index) => RestaurantListItem(
+              index: index,
+              isExpanded: _restaurantsExpanded,
+              iconRotationAnimation: _restaurantsIconRotation,
+              onToggle: toggleRestaurants,
+            ),
+          ),
+          const SectionDivider(),
+
+          // Places section
+          ...List.generate(
+            totalItemCount,
+            (final index) => PlaceListItem(
+              index: index,
+              places: places,
+              isExpanded: _placesExpanded,
+              iconRotationAnimation: _placesIconRotation,
+              onToggle: togglePlaces,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
