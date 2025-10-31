@@ -21,4 +21,14 @@ class ItineraryDetailApi {
     final data = response.data;
     return Itinerary.fromJson(data as Map<String, dynamic>);
   }
+
+  Future<void> updateGroupSize({
+    required final int itineraryId,
+    required final int groupSize,
+  }) async {
+    await _dio.put(
+      '/api/v1/itineraries/$itineraryId/group-size',
+      data: {'groupSize': groupSize},
+    );
+  }
 }

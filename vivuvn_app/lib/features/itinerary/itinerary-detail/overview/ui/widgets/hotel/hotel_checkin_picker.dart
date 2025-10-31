@@ -1,3 +1,4 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -14,15 +15,30 @@ class HotelCheckinPicker extends ConsumerWidget {
 
     return InkWell(
       onTap: () async {
-        final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: hotelsState.formCheckInDate ?? DateTime.now(),
-          firstDate: DateTime.now(),
-          lastDate: DateTime.now().add(const Duration(days: 365)),
+        final config = CalendarDatePicker2WithActionButtonsConfig(
+          calendarType: CalendarDatePicker2Type.range,
+          firstDayOfWeek: 1,
         );
-        if (picked != null) {
-          controller.setFormCheckInDate(picked);
+        final result = await showCalendarDatePicker2Dialog(
+          context: context,
+          value: [hotelsState.formCheckInDate, hotelsState.formCheckOutDate],
+          config: config,
+          dialogSize: const Size(340, 400),
+          borderRadius: BorderRadius.circular(12),
+        );
+        if (result == null || result.isEmpty) return;
+
+        DateTime? start = result[0];
+        DateTime? end = (result.length > 1) ? result[1] : null;
+        if (start == null || end == null) return;
+        // Normalize order
+        if (end.isBefore(start)) {
+          final tmp = start;
+          start = end;
+          end = tmp;
         }
+        controller.setFormCheckInDate(DateTime(start.year, start.month, start.day));
+        controller.setFormCheckOutDate(DateTime(end.year, end.month, end.day));
       },
       child: Container(
         padding: const EdgeInsets.all(12),
