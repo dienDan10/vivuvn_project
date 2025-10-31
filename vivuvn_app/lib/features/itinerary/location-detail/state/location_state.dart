@@ -1,4 +1,4 @@
-import '../../model/location.dart';
+import '../../itinerary-detail/schedule/model/location.dart';
 
 class LocationState {
   final bool isLoading;

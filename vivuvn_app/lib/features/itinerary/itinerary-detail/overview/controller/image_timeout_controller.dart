@@ -10,7 +10,7 @@ class ImageTimeoutController extends StateNotifier<ImageTimeoutState> {
 
   ImageTimeoutController() : super(const ImageTimeoutState());
 
-  void startTimeout(Duration duration) {
+  void startTimeout(final Duration duration) {
     _timer?.cancel();
     _timer = Timer(duration, () {
       if (mounted) {
@@ -38,5 +38,5 @@ class ImageTimeoutController extends StateNotifier<ImageTimeoutState> {
 /// Provider family for image timeout controller (per image URL)
 final imageTimeoutControllerProvider = StateNotifierProvider.family
     .autoDispose<ImageTimeoutController, ImageTimeoutState, String>(
-  (ref, imageUrl) => ImageTimeoutController(),
-);
+      (final ref, final imageUrl) => ImageTimeoutController(),
+    );

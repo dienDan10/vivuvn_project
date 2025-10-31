@@ -22,7 +22,7 @@ class RestaurantCardExpanded extends StatelessWidget {
   final String? note;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).unfocus(),
@@ -43,15 +43,9 @@ class RestaurantCardExpanded extends StatelessWidget {
             const SizedBox(height: 12),
             const Divider(),
             const SizedBox(height: 12),
-            RestaurantCostField(
-              restaurantId: restaurantId,
-              initialCost: cost,
-            ),
+            RestaurantCostField(restaurantId: restaurantId, initialCost: cost),
             const SizedBox(height: 12),
-            RestaurantNoteField(
-              restaurantId: restaurantId,
-              initialNote: note,
-            ),
+            RestaurantNoteField(restaurantId: restaurantId, initialNote: note),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

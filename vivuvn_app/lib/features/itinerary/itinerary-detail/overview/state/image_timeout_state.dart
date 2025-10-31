@@ -2,15 +2,9 @@
 class ImageTimeoutState {
   final bool timedOut;
 
-  const ImageTimeoutState({
-    this.timedOut = false,
-  });
+  const ImageTimeoutState({this.timedOut = false});
 
-  ImageTimeoutState copyWith({
-    bool? timedOut,
-  }) {
-    return ImageTimeoutState(
-      timedOut: timedOut ?? this.timedOut,
-    );
+  ImageTimeoutState copyWith({final bool? timedOut}) {
+    return ImageTimeoutState(timedOut: timedOut ?? this.timedOut);
   }
 }

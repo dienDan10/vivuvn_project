@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../model/location.dart';
-import '../../ui/widgets/place_action_button_direction.dart';
-import '../../ui/widgets/place_action_button_location.dart';
-import '../../ui/widgets/place_action_button_website.dart';
+import '../../itinerary-detail/schedule/model/location.dart';
+import '../../itinerary-detail/schedule/ui/widgets/place_action_button_direction.dart';
+import '../../itinerary-detail/schedule/ui/widgets/place_action_button_location.dart';
+import '../../itinerary-detail/schedule/ui/widgets/place_action_button_website.dart';
 import '../controller/location_controller.dart';
 import 'wiget/location_address_row.dart';
 import 'wiget/location_description.dart';

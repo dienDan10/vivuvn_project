@@ -71,11 +71,11 @@ class HotelsState {
     );
   }
 
-  bool isSaving(String hotelId, HotelSavingType type) {
+  bool isSaving(final String hotelId, final HotelSavingType type) {
     return savingHotelId == hotelId && savingType == type;
   }
 
-  bool isAnySaving(String hotelId) {
+  bool isAnySaving(final String hotelId) {
     return savingHotelId == hotelId;
   }
 

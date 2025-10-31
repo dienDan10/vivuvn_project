@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../service/location_service.dart';
 import '../state/location_state.dart';
 

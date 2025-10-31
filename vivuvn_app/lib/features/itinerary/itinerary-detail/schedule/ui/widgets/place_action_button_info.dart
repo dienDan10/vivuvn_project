@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../location/ui/location_detail_screen.dart';
+import '../../../../location-detail/ui/location_detail_screen.dart';
 import '../../model/location.dart';
 
 class PlaceActionButtonInfo extends StatelessWidget {

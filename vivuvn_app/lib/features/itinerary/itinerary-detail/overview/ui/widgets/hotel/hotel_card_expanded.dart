@@ -24,7 +24,7 @@ class HotelCardExpanded extends StatelessWidget {
   final String? note;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).unfocus(),
@@ -46,23 +46,14 @@ class HotelCardExpanded extends StatelessWidget {
             const SizedBox(height: 12),
             const Divider(),
             const SizedBox(height: 12),
-            HotelCostField(
-              hotelId: hotelId,
-              initialCost: cost,
-            ),
+            HotelCostField(hotelId: hotelId, initialCost: cost),
             const SizedBox(height: 12),
-            HotelNoteField(
-              hotelId: hotelId,
-              initialNote: note,
-            ),
+            HotelNoteField(hotelId: hotelId, initialNote: note),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                HotelDeleteButton(
-                  hotelId: hotelId,
-                  hotelName: hotelName,
-                ),
+                HotelDeleteButton(hotelId: hotelId, hotelName: hotelName),
               ],
             ),
           ],

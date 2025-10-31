@@ -6,20 +6,20 @@ import '../state/card_expand_state.dart';
 class HotelCardExpandController extends StateNotifier<CardExpandState> {
   HotelCardExpandController() : super(const CardExpandState());
 
-  void toggle(String hotelId) {
+  void toggle(final String hotelId) {
     final currentState = state.isExpanded(hotelId);
     final newMap = Map<String, bool>.from(state.expandedCards);
     newMap[hotelId] = !currentState;
     state = state.copyWith(expandedCards: newMap);
   }
 
-  void collapse(String hotelId) {
+  void collapse(final String hotelId) {
     final newMap = Map<String, bool>.from(state.expandedCards);
     newMap[hotelId] = false;
     state = state.copyWith(expandedCards: newMap);
   }
 
-  void expand(String hotelId) {
+  void expand(final String hotelId) {
     final newMap = Map<String, bool>.from(state.expandedCards);
     newMap[hotelId] = true;
     state = state.copyWith(expandedCards: newMap);
@@ -33,5 +33,5 @@ class HotelCardExpandController extends StateNotifier<CardExpandState> {
 /// Provider for hotel card expand state
 final hotelCardExpandControllerProvider =
     StateNotifierProvider<HotelCardExpandController, CardExpandState>(
-  (ref) => HotelCardExpandController(),
-);
+      (final ref) => HotelCardExpandController(),
+    );

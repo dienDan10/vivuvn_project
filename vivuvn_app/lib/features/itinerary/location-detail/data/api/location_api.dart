@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../../core/data/remote/network/network_service.dart';
-import '../../../model/location.dart';
+import '../../../../../core/data/remote/network/network_service.dart';
+import '../../../itinerary-detail/schedule/model/location.dart';
 
 final locationApiProvider = Provider.autoDispose<LocationApi>((final ref) {
   final dio = ref.watch(networkServiceProvider);

@@ -39,11 +39,11 @@ class RestaurantListExpandController extends StateNotifier<ListExpandState> {
 /// Provider for hotel list expand state
 final hotelListExpandControllerProvider =
     StateNotifierProvider<HotelListExpandController, ListExpandState>(
-  (ref) => HotelListExpandController(),
-);
+      (final ref) => HotelListExpandController(),
+    );
 
 /// Provider for restaurant list expand state
 final restaurantListExpandControllerProvider =
     StateNotifierProvider<RestaurantListExpandController, ListExpandState>(
-  (ref) => RestaurantListExpandController(),
-);
+      (final ref) => RestaurantListExpandController(),
+    );

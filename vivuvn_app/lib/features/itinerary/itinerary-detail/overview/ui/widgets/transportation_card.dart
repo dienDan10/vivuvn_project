@@ -60,7 +60,7 @@ class TransportationCard extends ConsumerWidget {
               bottom: 6,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF8A5B).withOpacity(0.1),
+              color: const Color(0xFFFF8A5B).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 24, color: const Color(0xFFFF8A5B)),
@@ -103,7 +103,6 @@ class TransportationCard extends ConsumerWidget {
               color: Colors.grey.shade600,
             ),
             onPressed: () {
-              // TODO: Implement edit transportation
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Chức năng chỉnh sửa sẽ được thêm sau'),

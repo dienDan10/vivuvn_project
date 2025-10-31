@@ -2,17 +2,11 @@
 class CardExpandState {
   final Map<String, bool> expandedCards;
 
-  const CardExpandState({
-    this.expandedCards = const {},
-  });
+  const CardExpandState({this.expandedCards = const {}});
 
-  CardExpandState copyWith({
-    Map<String, bool>? expandedCards,
-  }) {
-    return CardExpandState(
-      expandedCards: expandedCards ?? this.expandedCards,
-    );
+  CardExpandState copyWith({final Map<String, bool>? expandedCards}) {
+    return CardExpandState(expandedCards: expandedCards ?? this.expandedCards);
   }
 
-  bool isExpanded(String cardId) => expandedCards[cardId] ?? false;
+  bool isExpanded(final String cardId) => expandedCards[cardId] ?? false;
 }

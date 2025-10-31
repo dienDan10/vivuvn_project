@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../model/location.dart';
+import '../../itinerary-detail/schedule/model/location.dart';
 import '../data/api/location_api.dart';
 
 final locationServiceProvider = Provider.autoDispose<LocationService>((

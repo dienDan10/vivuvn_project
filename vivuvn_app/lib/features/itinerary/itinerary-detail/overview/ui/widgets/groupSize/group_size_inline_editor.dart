@@ -18,7 +18,8 @@ class GroupSizeInlineEditor extends ConsumerStatefulWidget {
   final Future<bool> Function() onSave;
 
   @override
-  ConsumerState<GroupSizeInlineEditor> createState() => _GroupSizeInlineEditorState();
+  ConsumerState<GroupSizeInlineEditor> createState() =>
+      _GroupSizeInlineEditorState();
 }
 
 class _GroupSizeInlineEditorState extends ConsumerState<GroupSizeInlineEditor> {
@@ -84,7 +85,7 @@ class _GroupSizeInlineEditorState extends ConsumerState<GroupSizeInlineEditor> {
           onPressed: widget.isSaving ? null : widget.onCancel,
           style: IconButton.styleFrom(
             shape: const CircleBorder(),
-            backgroundColor: Colors.grey.withOpacity(0.15),
+            backgroundColor: Colors.grey.withValues(alpha: 0.15),
             splashFactory: InkSparkle.splashFactory,
           ),
           icon: const Icon(Icons.close),
@@ -98,7 +99,7 @@ class _GroupSizeInlineEditorState extends ConsumerState<GroupSizeInlineEditor> {
                 },
           style: IconButton.styleFrom(
             shape: const CircleBorder(),
-            backgroundColor: Colors.green.withOpacity(0.15),
+            backgroundColor: Colors.green.withValues(alpha: 0.15),
             splashFactory: InkSparkle.splashFactory,
           ),
           icon: widget.isSaving
@@ -113,5 +114,3 @@ class _GroupSizeInlineEditorState extends ConsumerState<GroupSizeInlineEditor> {
     );
   }
 }
-
-

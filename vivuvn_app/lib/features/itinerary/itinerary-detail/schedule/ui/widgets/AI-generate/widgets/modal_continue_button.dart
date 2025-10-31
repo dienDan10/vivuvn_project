@@ -26,19 +26,22 @@ class ModalContinueButton extends ConsumerWidget {
       _showLoadingDialog(context);
       final ValidateAndSubmitResult res = await controller.validateAndSubmit();
       // close loading
-      Navigator.of(context).pop();
+      if (context.mounted) Navigator.of(context).pop();
 
-      if (res.status == ValidateAndSubmitStatus.submittedSuccess) {
+      if (res.status == ValidateAndSubmitStatus.submittedSuccess &&
+          context.mounted) {
         GlobalToast.showSuccessToast(
           context,
           message: 'Tạo lịch trình thành công',
         );
-      } else if (res.status == ValidateAndSubmitStatus.submittedError) {
+      } else if (res.status == ValidateAndSubmitStatus.submittedError &&
+          context.mounted) {
         GlobalToast.showErrorToast(
           context,
           message: res.message ?? 'Không thể tạo lịch trình',
         );
-      } else if (res.status == ValidateAndSubmitStatus.validationError) {
+      } else if (res.status == ValidateAndSubmitStatus.validationError &&
+          context.mounted) {
         // unlikely here because controller returns validationError without submitting
         GlobalToast.showErrorToast(
           context,
@@ -55,7 +58,8 @@ class ModalContinueButton extends ConsumerWidget {
       controller.nextStep();
       return;
     }
-    if (res.status == ValidateAndSubmitStatus.validationError) {
+    if (res.status == ValidateAndSubmitStatus.validationError &&
+        context.mounted) {
       GlobalToast.showErrorToast(
         context,
         message: res.message ?? 'Dữ liệu không hợp lệ',
