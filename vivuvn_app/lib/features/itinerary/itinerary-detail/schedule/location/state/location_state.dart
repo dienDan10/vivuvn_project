@@ -1,16 +1,16 @@
-import '../model/location_detail.dart';
+import '../../model/location.dart';
 
 class LocationState {
   final bool isLoading;
   final String? error;
-  final LocationDetail? detail;
+  final Location? detail;
 
   LocationState({this.isLoading = false, this.error, this.detail});
 
   LocationState copyWith({
     final bool? isLoading,
     final String? error,
-    final LocationDetail? detail,
+    final Location? detail,
   }) {
     return LocationState(
       isLoading: isLoading ?? this.isLoading,

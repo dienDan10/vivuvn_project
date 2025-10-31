@@ -10,30 +10,29 @@ class DaySelectorBar extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(itineraryScheduleControllerProvider);
+    final days = ref.watch(
+      itineraryScheduleControllerProvider.select((final state) => state.days),
+    );
+    final selectedIndex = ref.watch(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.selectedIndex,
+      ),
+    );
+    final isLoading = ref.watch(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.isLoading,
+      ),
+    );
+    final error = ref.watch(
+      itineraryScheduleControllerProvider.select((final state) => state.error),
+    );
 
-    final days = state.days;
-    final selectedIndex = state.selectedIndex;
-
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+    if (isLoading) {
+      return const SizedBox.shrink();
     }
 
-    if (state.error != null) {
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          'Lỗi: ${state.error}',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      );
-    }
-
-    if (days.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Text('Chưa có ngày nào trong lịch trình.'),
-      );
+    if (error != null) {
+      return const SizedBox.shrink();
     }
 
     Future<void> openDateRangePicker() async {

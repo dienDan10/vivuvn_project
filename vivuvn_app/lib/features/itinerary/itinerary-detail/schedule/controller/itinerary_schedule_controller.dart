@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/itinerary_detail_controller.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../model/itinerary_day.dart';
 import '../service/itinerary_schedule_service.dart';
 import '../state/itinerary_schedule_state.dart';
@@ -81,13 +81,16 @@ class ItineraryScheduleController
   }
 
   // === Xóa item ===
-  Future<void> deleteItem(final int dayId, final int itemId) async {
+  Future<void> deleteItem(final int itemId) async {
     if (itineraryId == null) return;
+    // get day id
+    final dayId = state.days[state.selectedIndex].id;
     try {
       await ref
           .read(itineraryScheduleServiceProvider)
           .deleteItemFromDay(itineraryId!, dayId, itemId);
 
+      // remove item from state
       final updatedDays = state.days.map((final day) {
         if (day.id == dayId) {
           final newItems = day.items
@@ -118,13 +121,14 @@ class ItineraryScheduleController
   }
 
   Future<void> updateItem({
-    required final int dayId,
     required final int itemId,
     final String? note,
     final TimeOfDay? startTime,
     final TimeOfDay? endTime,
   }) async {
     if (itineraryId == null) return;
+    // get day id
+    final dayId = state.days[state.selectedIndex].id;
     try {
       await ref
           .read(itineraryScheduleServiceProvider)

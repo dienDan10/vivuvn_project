@@ -29,7 +29,10 @@ class EstimatedBudgetButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (estimatedBudget == 0)
-            const Text('Nhập ngân sách dự kiến', style: TextStyle(fontSize: 14))
+            const Text(
+              'Nhập ngân sách dự kiến',
+              style: TextStyle(fontSize: 14, color: Colors.white),
+            )
           else ...[
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -39,16 +42,17 @@ class EstimatedBudgetButton extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
                 Text(
                   '(≈ \$${(estimatedBudget / BudgetConstants.exchangeRate).toStringAsFixed(2)})',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: const TextStyle(fontSize: 11, color: Colors.white),
                 ),
               ],
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.edit_outlined, size: 16),
+            const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
           ],
         ],
       ),

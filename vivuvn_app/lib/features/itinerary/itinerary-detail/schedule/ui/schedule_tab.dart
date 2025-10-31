@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../ui/btn_ai_gen_itinerary.dart';
+import '../../detail/ui/btn_ai_gen_itinerary.dart';
 import '../controller/itinerary_schedule_controller.dart';
 import 'widgets/add_hotel_expan.dart';
 import 'widgets/add_restaurant_expan.dart';
+import 'widgets/day_selector_bar.dart';
 import 'widgets/day_title.dart';
 import 'widgets/place_list_section.dart';
 import 'widgets/suggested_places_tile.dart';
@@ -28,44 +28,53 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
 
   @override
   Widget build(final BuildContext context) {
-    final scheduleState = ref.watch(itineraryScheduleControllerProvider);
+    final isLoading = ref.watch(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.isLoading,
+      ),
+    );
+    final error = ref.watch(
+      itineraryScheduleControllerProvider.select((final state) => state.error),
+    );
 
-    if (scheduleState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+    if (isLoading) {
+      return Container(
+        color: Theme.of(context).colorScheme.onPrimary,
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
 
-    if (scheduleState.error != null) {
-      return Center(
-        child: Text(
-          'Lỗi: ${scheduleState.error}',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
+    if (error != null) {
+      return Container(
+        color: Theme.of(context).colorScheme.onPrimary,
+        child: Center(
+          child: Text(
+            'Lỗi: $error',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         ),
       );
     }
 
-    final days = scheduleState.days;
-    final selectedIndex = scheduleState.selectedIndex;
-    final selectedDay = (days.isNotEmpty && selectedIndex < days.length)
-        ? days[selectedIndex]
-        : null;
-
-    return Scaffold(
-      body: selectedDay == null
-          ? const Center(child: Text('Chưa có ngày nào trong lịch trình.'))
-          : ListView(
-              padding: EdgeInsets.zero,
-              physics: const BouncingScrollPhysics(),
-              children: const [
-                DayTitle(),
-                PlaceListSection(),
-                SuggestedPlacesTile(),
-                AddHotelTile(),
-                AddRestaurantTile(),
-                SizedBox(height: 80), // Space for FAB
-              ],
-            ),
-      floatingActionButton: const ButtonGenerateItinerary(),
-      floatingActionButtonLocation: ExpandableFab.location,
+    return Container(
+      color: Colors.white,
+      child: Stack(
+        children: [
+          ListView(
+            padding: EdgeInsets.zero,
+            children: const [
+              DaySelectorBar(),
+              DayTitle(),
+              PlaceListSection(),
+              SuggestedPlacesTile(),
+              AddHotelTile(),
+              AddRestaurantTile(),
+              SizedBox(height: 80), // Space for FAB
+            ],
+          ),
+          const Positioned(child: ButtonGenerateItinerary()),
+        ],
+      ),
     );
   }
 }

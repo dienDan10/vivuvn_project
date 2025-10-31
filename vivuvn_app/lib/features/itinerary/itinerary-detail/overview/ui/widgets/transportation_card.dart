@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../controller/itinerary_detail_controller.dart';
+import '../../../detail/controller/itinerary_detail_controller.dart';
 
 /// Widget hiển thị và chỉnh sửa phương tiện di chuyển
 class TransportationCard extends ConsumerWidget {

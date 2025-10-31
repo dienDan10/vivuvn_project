@@ -3,31 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../controller/itinerary_schedule_controller.dart';
+import '../../model/itinerary_item.dart';
 
 class PlaceTimeEditor extends ConsumerWidget {
-  const PlaceTimeEditor({super.key, required this.dayId, required this.itemId});
+  const PlaceTimeEditor({super.key, required this.item});
 
-  final int dayId;
-  final int itemId;
+  final ItineraryItem item;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(itineraryScheduleControllerProvider);
-    final currentDay = state.days.firstWhere(
-      (final d) => d.id == dayId,
-      orElse: () => throw Exception('Day not found'),
-    );
-    final currentItem = currentDay.items.firstWhere(
-      (final i) => i.itineraryItemId == itemId,
-      orElse: () => throw Exception('Item not found'),
-    );
-
     return InkWell(
       onTap: () async {
-        TimeOfDay start =
-            currentItem.startTime ?? const TimeOfDay(hour: 8, minute: 0);
-        TimeOfDay end =
-            currentItem.endTime ?? const TimeOfDay(hour: 9, minute: 0);
+        TimeOfDay start = item.startTime ?? const TimeOfDay(hour: 8, minute: 0);
+        TimeOfDay end = item.endTime ?? const TimeOfDay(hour: 9, minute: 0);
         final format = NumberFormat('00');
 
         await showDialog(
@@ -81,8 +69,7 @@ class PlaceTimeEditor extends ConsumerWidget {
                       await ref
                           .read(itineraryScheduleControllerProvider.notifier)
                           .updateItem(
-                            dayId: dayId,
-                            itemId: itemId,
+                            itemId: item.itineraryItemId,
                             startTime: start,
                             endTime: end,
                           );
@@ -108,7 +95,7 @@ class PlaceTimeEditor extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
+          color: Colors.blue.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: const Icon(

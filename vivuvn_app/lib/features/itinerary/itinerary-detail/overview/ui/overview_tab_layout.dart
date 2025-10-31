@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/itinerary_detail_controller.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../controller/favourite_places_controller.dart';
 import '../controller/hotels_controller.dart';
 import '../controller/restaurants_controller.dart';

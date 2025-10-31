@@ -22,14 +22,21 @@ class _BudgetControlState extends ConsumerState<BudgetControl> {
       budgetControllerProvider.select((final state) => state.currentSort),
     );
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 8, top: 8, bottom: 8),
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
+        ),
+      ),
+      padding: const EdgeInsets.only(left: 16, right: 8, top: 16, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
             'Các chi phí',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
           ),
           InkWell(
             onTap: () => _showSortOptions(context),

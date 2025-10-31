@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
 import '../../features/itinerary/itinerary-detail/schedule/location/ui/location_detail_screen.dart';
+import '../../features/itinerary/itinerary-detail/schedule/model/location.dart';
 import '../../screens/bottom_navigation_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_detail_screen.dart';
@@ -89,12 +90,18 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
 
       GoRoute(
         path: nearbyRestaurantRoute,
-        builder: (final context, final state) => const NearbyRestaurantScreen(),
+        builder: (final context, final state) {
+          final location = state.extra as Location;
+          return NearbyRestaurantScreen(location: location);
+        },
       ),
 
       GoRoute(
         path: nearbyHotelRoute,
-        builder: (final context, final state) => const NearbyHotelScreen(),
+        builder: (final context, final state) {
+          final location = state.extra as Location;
+          return NearbyHotelScreen(location: location);
+        },
       ),
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(

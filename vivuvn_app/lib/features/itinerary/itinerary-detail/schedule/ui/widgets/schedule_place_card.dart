@@ -1,55 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/place_expand_controller.dart';
-import '../../model/location.dart';
+import '../../model/itinerary_item.dart';
 import 'place_card_details.dart';
 import 'place_card_header.dart';
 
-class SchedulePlaceCard extends ConsumerWidget {
-  const SchedulePlaceCard({
-    super.key,
-    required this.dayId,
-    required this.index,
-    required this.itemId,
-    required this.location,
-  });
+class SchedulePlaceCard extends ConsumerStatefulWidget {
+  const SchedulePlaceCard({super.key, required this.item});
 
-  final int dayId;
-  final int index;
-  final int itemId;
-  final Location location;
+  final ItineraryItem item;
 
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    final expandState = ref.watch(
-      placeExpandControllerProvider((dayId, index)),
-    );
-    final controller = ref.read(
-      placeExpandControllerProvider((dayId, index)).notifier,
-    );
+  ConsumerState<SchedulePlaceCard> createState() => _SchedulePlaceCardState();
+}
 
-    return GestureDetector(
-      onTap: controller.toggleExpand,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 1),
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PlaceCardHeader(dayId: dayId, itemId: itemId, location: location),
-            if (expandState.isExpanded) ...[
-              const SizedBox(height: 12),
-              PlaceCardDetails(
-                dayId: dayId,
-                itemId: itemId,
-                location: location,
-              ),
-            ],
+class _SchedulePlaceCardState extends ConsumerState<SchedulePlaceCard> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(final BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 1),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+            child: PlaceCardHeader(item: widget.item),
+          ),
+          if (isExpanded) ...[
+            const SizedBox(height: 12),
+            PlaceCardDetails(item: widget.item),
           ],
-        ),
+        ],
       ),
     );
   }

@@ -9,10 +9,15 @@ class DayTitle extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(itineraryScheduleControllerProvider);
+    final days = ref.watch(
+      itineraryScheduleControllerProvider.select((final state) => state.days),
+    );
+    final selectedIndex = ref.watch(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.selectedIndex,
+      ),
+    );
 
-    final days = state.days;
-    final selectedIndex = state.selectedIndex;
     final selectedDay = (days.isNotEmpty && selectedIndex < days.length)
         ? days[selectedIndex]
         : null;

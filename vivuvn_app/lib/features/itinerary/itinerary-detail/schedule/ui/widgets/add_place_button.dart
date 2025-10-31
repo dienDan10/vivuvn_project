@@ -46,15 +46,32 @@ class AddPlaceButton extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: OutlinedButton.icon(
-          onPressed: onPressed ?? () => _openAddPlaceBottomSheet(context, ref),
-          icon: const Icon(Icons.add_location_alt_outlined, size: 20),
-          label: Text(label),
+    return GestureDetector(
+      onTap: onPressed ?? () => _openAddPlaceBottomSheet(context, ref),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(40),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_location_alt_outlined,
+              size: 20,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

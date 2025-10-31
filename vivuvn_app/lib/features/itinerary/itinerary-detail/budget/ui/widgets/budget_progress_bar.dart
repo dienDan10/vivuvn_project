@@ -48,12 +48,12 @@ class BudgetProgressBar extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: progressPercent > 100 ? Colors.red : null,
+                color: progressPercent > 100 ? Colors.red : Colors.white,
               ),
             ),
             Text(
               '${formatter.format(estimatedBudget.round())} đ',
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              style: const TextStyle(fontSize: 11, color: Colors.white),
             ),
           ],
         ),

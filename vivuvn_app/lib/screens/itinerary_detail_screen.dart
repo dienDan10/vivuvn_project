@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../features/itinerary/itinerary-detail/controller/itinerary_detail_controller.dart';
-import '../features/itinerary/itinerary-detail/ui/itinerary_detail_layout.dart';
+import '../features/itinerary/itinerary-detail/detail/controller/itinerary_detail_controller.dart';
+import '../features/itinerary/itinerary-detail/detail/ui/itinerary_detail_layout.dart';
 
 class ItineraryDetailScreen extends ConsumerStatefulWidget {
   final int itineraryId;

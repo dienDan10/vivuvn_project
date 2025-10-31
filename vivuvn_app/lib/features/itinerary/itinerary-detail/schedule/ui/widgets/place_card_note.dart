@@ -1,44 +1,26 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/itinerary_schedule_controller.dart';
-import '../../model/location.dart';
+import '../../model/itinerary_item.dart';
 
 class PlaceCardNote extends ConsumerStatefulWidget {
-  const PlaceCardNote({
-    super.key,
-    required this.dayId,
-    required this.itemId,
-    required this.location,
-  });
+  const PlaceCardNote({super.key, required this.item});
 
-  final int dayId;
-  final int itemId;
-  final Location location;
+  final ItineraryItem item;
 
   @override
   ConsumerState<PlaceCardNote> createState() => _PlaceCardNoteState();
 }
 
 class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
-  String? note;
-
   @override
   void initState() {
     super.initState();
-    final state = ref.read(itineraryScheduleControllerProvider);
-    final currentDay = state.days.firstWhereOrNull(
-      (final d) => d.id == widget.dayId,
-    );
-    final currentItem = currentDay?.items.firstWhereOrNull(
-      (final i) => i.itineraryItemId == widget.itemId,
-    );
-    note = currentItem?.note;
   }
 
   Future<void> _editNote() async {
-    final controllerText = TextEditingController(text: note ?? '');
+    final controllerText = TextEditingController(text: widget.item.note ?? '');
     final newNote = await showDialog<String>(
       context: context,
       builder: (final context) => AlertDialog(
@@ -67,18 +49,13 @@ class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
     if (newNote != null) {
       await ref
           .read(itineraryScheduleControllerProvider.notifier)
-          .updateItem(
-            dayId: widget.dayId,
-            itemId: widget.itemId,
-            note: newNote,
-          );
-      setState(() => note = newNote);
+          .updateItem(itemId: widget.item.itineraryItemId, note: newNote);
     }
   }
 
   @override
   Widget build(final BuildContext context) {
-    return note == null
+    return widget.item.note == null
         ? TextButton.icon(
             onPressed: _editNote,
             icon: const Icon(Icons.note_add_outlined, size: 20),
@@ -92,7 +69,7 @@ class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(note!),
+              child: Text(widget.item.note ?? ''),
             ),
           );
   }
