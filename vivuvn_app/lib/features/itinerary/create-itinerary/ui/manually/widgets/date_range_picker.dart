@@ -35,9 +35,13 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
   }
 
   Future<void> _openPicker() async {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
     final config = CalendarDatePicker2WithActionButtonsConfig(
       calendarType: CalendarDatePicker2Type.range,
       firstDayOfWeek: 1,
+      firstDate: todayDate,
+      lastDate: todayDate.add(const Duration(days: 365)),
     );
 
     final result = await showCalendarDatePicker2Dialog(
