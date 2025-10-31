@@ -77,12 +77,7 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
         .updateHotelCost(id: widget.hotelId, cost: parsed);
 
     if (!mounted) return;
-    if (success) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật chi phí thành công',
-      );
-    } else {
+    if (!success) {
       GlobalToast.showErrorToast(context, message: 'Cập nhật chi phí thất bại');
     }
   }

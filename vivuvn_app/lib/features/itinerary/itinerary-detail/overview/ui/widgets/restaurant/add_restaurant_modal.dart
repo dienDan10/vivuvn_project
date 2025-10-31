@@ -6,6 +6,7 @@ import 'restaurant_date_picker.dart';
 import 'restaurant_save_button.dart';
 import 'restaurant_search_field.dart';
 import 'restaurant_search_modal.dart';
+import 'restaurant_time_picker_row.dart';
 
 class AddRestaurantModal extends ConsumerStatefulWidget {
   const AddRestaurantModal({super.key});
@@ -74,6 +75,13 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
               date: formState.formMealDate,
               onTap: () => _selectMealDate(context),
             ),
+            const SizedBox(height: 16),
+            // Time picker
+            RestaurantTimePickerRow(
+              label: 'Giờ ăn',
+              timeText: formState.formMealTime,
+              onTap: () => _selectMealTime(context),
+            ),
             const SizedBox(height: 24),
 
             // Save button
@@ -107,6 +115,18 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
     );
     if (picked != null) {
       ref.read(restaurantsControllerProvider.notifier).setFormMealDate(picked);
+    }
+  }
+
+  Future<void> _selectMealTime(final BuildContext context) async {
+    final now = TimeOfDay.now();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: now,
+    );
+    if (picked != null) {
+      final timeStr = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
+      ref.read(restaurantsControllerProvider.notifier).setFormMealTime(timeStr);
     }
   }
 

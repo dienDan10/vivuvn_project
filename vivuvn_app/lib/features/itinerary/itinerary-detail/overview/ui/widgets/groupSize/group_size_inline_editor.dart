@@ -94,15 +94,7 @@ class _GroupSizeInlineEditorState extends ConsumerState<GroupSizeInlineEditor> {
           onPressed: widget.isSaving
               ? null
               : () async {
-                  final ok = await widget.onSave();
-                  if (!ok && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Lưu thất bại'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
+                  await widget.onSave();
                 },
           style: IconButton.styleFrom(
             shape: const CircleBorder(),

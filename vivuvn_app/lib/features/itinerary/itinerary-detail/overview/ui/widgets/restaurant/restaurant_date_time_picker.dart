@@ -48,12 +48,7 @@ class RestaurantDateTimePicker extends ConsumerWidget {
         .updateRestaurantDate(id: restaurantId, date: newDateTime);
 
     if (!context.mounted) return;
-    if (success) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật ngày thành công',
-      );
-    } else {
+    if (!success) {
       GlobalToast.showErrorToast(context, message: 'Cập nhật ngày thất bại');
     }
   }
@@ -68,19 +63,14 @@ class RestaurantDateTimePicker extends ConsumerWidget {
 
     if (picked == null) return;
 
-    final timeStr = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+    final timeStr = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
 
     final success = await ref
         .read(restaurantsControllerProvider.notifier)
         .updateRestaurantTime(id: restaurantId, time: timeStr);
 
     if (!context.mounted) return;
-    if (success) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật giờ thành công',
-      );
-    } else {
+    if (!success) {
       GlobalToast.showErrorToast(context, message: 'Cập nhật giờ thất bại');
     }
   }

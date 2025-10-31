@@ -57,12 +57,7 @@ class HotelDateRangePicker extends ConsumerWidget {
         );
 
     if (!context.mounted) return;
-    if (success) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật ngày thành công',
-      );
-    } else {
+    if (!success) {
       GlobalToast.showErrorToast(context, message: 'Cập nhật ngày thất bại');
     }
   }

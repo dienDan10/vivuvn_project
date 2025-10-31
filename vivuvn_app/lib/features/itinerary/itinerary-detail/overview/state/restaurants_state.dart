@@ -16,6 +16,7 @@ class RestaurantsState {
   // Add restaurant form fields
   final Location? formSelectedLocation;
   final DateTime? formMealDate;
+  final String? formMealTime; // HH:mm:ss
 
   static const _UnsetR _unset = _UnsetR();
 
@@ -28,6 +29,7 @@ class RestaurantsState {
     this.savingType,
     this.formSelectedLocation,
     this.formMealDate,
+    this.formMealTime,
   });
 
   RestaurantsState copyWith({
@@ -39,6 +41,7 @@ class RestaurantsState {
     final Object? savingType = _unset,
     final Object? formSelectedLocation = _unset,
     final Object? formMealDate = _unset,
+    final Object? formMealTime = _unset,
   }) {
     return RestaurantsState(
       isLoading: isLoading ?? this.isLoading,
@@ -58,6 +61,9 @@ class RestaurantsState {
       formMealDate: identical(formMealDate, _unset)
           ? this.formMealDate
           : formMealDate as DateTime?,
+      formMealTime: identical(formMealTime, _unset)
+          ? this.formMealTime
+          : formMealTime as String?,
     );
   }
 

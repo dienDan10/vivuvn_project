@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
 import '../../models/location.dart';
@@ -76,11 +77,13 @@ class HotelsApi {
     required final DateTime checkOutDate,
   }) async {
     // Use PUT if server expects it (consistent with costs endpoint)
+    final dateOnly = DateFormat('yyyy-MM-dd');
     await _dio.put(
       '/api/v1/itineraries/$itineraryId/hotels/$id/dates',
       data: {
-        'checkInDate': checkInDate.toIso8601String(),
-        'checkOutDate': checkOutDate.toIso8601String(),
+        // Many backends expect date-only strings for hotel dates
+        'checkIn': dateOnly.format(checkInDate),
+        'checkOut': dateOnly.format(checkOutDate),
       },
     );
   }

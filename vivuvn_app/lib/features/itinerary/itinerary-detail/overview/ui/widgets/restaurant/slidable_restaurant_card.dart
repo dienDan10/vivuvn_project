@@ -2,7 +2,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../../../../../../common/toast/global_toast.dart';
 import '../../../controller/restaurants_controller.dart';
 import '../../../data/dto/restaurant_item_response.dart';
 import 'restaurant_card.dart';
@@ -69,12 +68,6 @@ class SlidableRestaurantCard extends ConsumerWidget {
       await ref
           .read(restaurantsControllerProvider.notifier)
           .removeRestaurant(restaurant.id);
-      if (context.mounted) {
-        GlobalToast.showSuccessToast(
-          context,
-          message: 'Xóa nhà hàng thành công',
-        );
-      }
     }
   }
 }

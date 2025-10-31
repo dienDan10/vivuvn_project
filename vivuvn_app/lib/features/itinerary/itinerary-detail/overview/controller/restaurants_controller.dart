@@ -65,6 +65,7 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
     state = state.copyWith(
       formSelectedLocation: null,
       formMealDate: DateTime.now(),
+      formMealTime: DateFormat('HH:mm:ss').format(DateTime.now()),
     );
   }
 
@@ -76,15 +77,30 @@ class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
     state = state.copyWith(formMealDate: date);
   }
 
+  void setFormMealTime(final String time) {
+    state = state.copyWith(formMealTime: time);
+  }
+
   Future<bool> saveForm() async {
     if (state.formDisplayName.isEmpty) return false;
 
     final googlePlaceId = state.formSelectedLocation?.googlePlaceId;
     if (googlePlaceId == null) return false;
 
+    final date = state.formMealDate ?? DateTime.now();
+    final timeStr = state.formMealTime ?? DateFormat('HH:mm:ss').format(DateTime.now());
+    final parts = timeStr.split(':');
+    final combined = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+      parts.length > 2 ? int.parse(parts[2]) : 0,
+    );
     return await addRestaurant(
       googlePlaceId: googlePlaceId,
-      mealDate: state.formMealDate ?? DateTime.now(),
+      mealDate: combined,
     );
   }
 

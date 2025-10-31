@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../../../../../../common/toast/global_toast.dart';
 import '../../../controller/hotels_controller.dart';
 import '../../../data/dto/hotel_item_response.dart';
 import 'hotel_card.dart';
@@ -63,12 +62,6 @@ class SlidableHotelCard extends ConsumerWidget {
 
     if (confirmed == true) {
       await ref.read(hotelsControllerProvider.notifier).removeHotel(hotel.id);
-      if (context.mounted) {
-        GlobalToast.showSuccessToast(
-          context,
-          message: 'Xóa khách sạn thành công',
-        );
-      }
     }
   }
 }

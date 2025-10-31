@@ -72,7 +72,7 @@ class RestaurantsApi {
   }) async {
     // send date in yyyy-MM-dd format
     await _dio.put(
-      '/api/v1/itineraries/$itineraryId/restaurants/$id/date',
+      '/api/v1/itineraries/$itineraryId/restaurants/$id/dates',
       data: {'date': DateFormat('yyyy-MM-dd').format(date)},
     );
   }

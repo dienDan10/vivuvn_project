@@ -78,12 +78,7 @@ class _RestaurantCostFieldState extends ConsumerState<RestaurantCostField> {
         .updateRestaurantCost(id: widget.restaurantId, cost: parsed);
 
     if (!mounted) return;
-    if (success) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật chi phí thành công',
-      );
-    } else {
+    if (!success) {
       GlobalToast.showErrorToast(context, message: 'Cập nhật chi phí thất bại');
     }
   }

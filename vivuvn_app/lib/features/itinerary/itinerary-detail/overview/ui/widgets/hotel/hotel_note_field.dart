@@ -63,12 +63,7 @@ class _HotelNoteFieldState extends ConsumerState<HotelNoteField> {
         .updateHotelNote(id: widget.hotelId, note: text);
 
     if (!mounted) return;
-    if (success) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Cập nhật ghi chú thành công',
-      );
-    } else {
+    if (!success) {
       GlobalToast.showErrorToast(context, message: 'Cập nhật ghi chú thất bại');
     }
   }
