@@ -16,16 +16,33 @@ class AddRestaurantButton extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: OutlinedButton(
-        onPressed: () => _showAddRestaurantModal(context),
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 40),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return GestureDetector(
+      onTap: () => _showAddRestaurantModal(context),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(40),
         ),
-        child: const Text('Thêm nhà hàng', style: TextStyle(fontSize: 14)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.restaurant_outlined,
+              size: 20,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Thêm nhà hàng',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
