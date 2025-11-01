@@ -54,7 +54,9 @@ namespace vivuvn_api.Services.Implementations
                 BudgetId = budget.BudgetId,
                 Cost = item.Cost,
                 Date = item.Date,
-                BudgetTypeId = item.BudgetTypeId
+                BudgetTypeId = item.BudgetTypeId,
+                PaidByMemberId = item.MemberId.HasValue && item.MemberId.Value > 0
+                                ? item.MemberId : null
             };
 
             await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);

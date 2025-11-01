@@ -11,5 +11,6 @@ namespace vivuvn_api.DTOs.Request
         public int BudgetTypeId { get; set; }
         [Required]
         public DateTime Date { get; set; }
+        public int? MemberId { get; set; }
     }
 }
