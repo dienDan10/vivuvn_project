@@ -3,9 +3,8 @@
     public class ItineraryDto
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
-        public UserDto User { get; set; } = null!;
-        public bool isOwner { get; set; } = false;
+        public UserDto Owner { get; set; } = null!;
+        public bool IsOwner { get; set; } = false;
         public string Name { get; set; } = string.Empty;
         public int StartProvinceId { get; set; }
         public string StartProvinceName { get; set; } = string.Empty;

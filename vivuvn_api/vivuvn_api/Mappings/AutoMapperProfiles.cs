@@ -19,7 +19,8 @@ namespace vivuvn_api.Mappings
 
             // Mapping For Itinerary
             CreateMap<Itinerary, ItineraryDto>()
-                .ForMember(dest => dest.isOwner, opt => opt.MapFrom(src => src.User.Id == src.UserId))
+                .ForMember(dest => dest.IsOwner, opt => opt.MapFrom(src => src.User.Id == src.UserId))
+                .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.StartProvinceName, opt => opt.MapFrom(src => src.StartProvince.Name))
                 .ForMember(dest => dest.DestinationProvinceName, opt => opt.MapFrom(src => src.DestinationProvince.Name))
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl))
