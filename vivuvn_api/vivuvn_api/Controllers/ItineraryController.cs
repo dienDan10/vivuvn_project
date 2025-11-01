@@ -101,5 +101,29 @@ namespace vivuvn_api.Controllers
             }
             return Ok();
         }
+
+        [HttpPut("{id}/public")]
+        [Authorize]
+        public async Task<IActionResult> SetItineraryToPublic(int id)
+        {
+            var result = await _itineraryService.SetItineraryToPublicAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
+        [HttpPut("{id}/private")]
+        [Authorize]
+        public async Task<IActionResult> SetItineraryToPrivate(int id)
+        {
+            var result = await _itineraryService.SetItineraryToPrivateAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
     }
 }

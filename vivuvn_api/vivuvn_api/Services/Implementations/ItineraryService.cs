@@ -164,6 +164,32 @@ namespace vivuvn_api.Services.Implementations
             return true;
         }
 
+        public async Task<bool> SetItineraryToPublicAsync(int itineraryId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.IsPublic = true;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> SetItineraryToPrivateAsync(int itineraryId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.IsPublic = false;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
         #endregion
 
         #region Itinerary Schedule Methods
