@@ -52,5 +52,16 @@ namespace vivuvn_api.Services.Implementations
             var random = new Random();
             return random.Next(100000, 999999).ToString();
         }
+
+        public string CreateItineraryInviteToken()
+        {
+            const string chars = "qwertyuiopasdfghjklmnbvcxzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            var random = new Random();
+            var code = new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            return $"{Constants.InviteCodePrefix}-{code}";
+
+        }
     }
 }
