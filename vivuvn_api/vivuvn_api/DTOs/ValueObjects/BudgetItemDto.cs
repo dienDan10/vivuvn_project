@@ -7,5 +7,6 @@
         public decimal Cost { get; set; }
         public DateTime Date { get; set; }
         public string? BudgetType { get; set; }
+        public ItineraryMemberDto? PaidByMember { get; set; }
     }
 }

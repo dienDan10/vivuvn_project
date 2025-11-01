@@ -18,17 +18,25 @@ namespace vivuvn_api.Services.Implementations
             var itineraries = await _unitOfWork.Itineraries
                 .GetAllAsync(i => (i.UserId == userId || i.Members.Any(i => i.UserId == userId)) && !i.DeleteFlag, includeProperties: "StartProvince,DestinationProvince,User");
 
-            return _mapper.Map<IEnumerable<ItineraryDto>>(itineraries);
+            var itineraryDtos = _mapper.Map<IEnumerable<ItineraryDto>>(itineraries);
+            foreach (var dto in itineraryDtos)
+            {
+                var itinerary = itineraries.First(i => i.Id == dto.Id);
+                dto.IsOwner = itinerary.UserId == userId;
+            }
+
+            return itineraryDtos;
         }
 
-        public async Task<ItineraryDto> GetItineraryByIdAsync(int id)
+        public async Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id && !i.DeleteFlag,
-                includeProperties: "StartProvince,DestinationProvince");
+                includeProperties: "StartProvince,DestinationProvince,User");
 
             if (itinerary == null) throw new KeyNotFoundException($"Itinerary with id {id} not found.");
-
-            return _mapper.Map<ItineraryDto>(itinerary);
+            var dto = _mapper.Map<ItineraryDto>(itinerary);
+            dto.IsOwner = itinerary.UserId == userId;
+            return dto;
         }
 
         public async Task<CreateItineraryResponseDto> CreateItineraryAsync(int userId, CreateItineraryRequestDto request)

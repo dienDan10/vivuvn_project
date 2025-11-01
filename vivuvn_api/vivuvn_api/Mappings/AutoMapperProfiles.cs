@@ -129,7 +129,7 @@ namespace vivuvn_api.Mappings
 
             // Mapping for Itinerary Member
             CreateMap<ItineraryMember, ItineraryMemberDto>()
-                .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
                 .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.User.UserPhoto))

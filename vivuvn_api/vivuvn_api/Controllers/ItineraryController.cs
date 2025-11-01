@@ -33,7 +33,8 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> GetItineraryById(int id)
         {
-            var itinerary = await _itineraryService.GetItineraryByIdAsync(id);
+            var userId = GetCurrentUserId();
+            var itinerary = await _itineraryService.GetItineraryByIdAsync(id, userId);
 
             return Ok(itinerary);
         }
@@ -124,6 +125,12 @@ namespace vivuvn_api.Controllers
                 return NotFound(new { message = $"Itinerary with id {id} not found." });
             }
             return Ok();
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim!);
         }
     }
 }

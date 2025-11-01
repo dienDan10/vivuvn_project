@@ -29,7 +29,7 @@ namespace vivuvn_api.Controllers
         }
 
         // kick member from itinerary
-        [HttpPost("{memberId}")]
+        [HttpDelete("{memberId}")]
         [Authorize]
         public async Task<IActionResult> KickMember(int itineraryId, int memberId)
         {

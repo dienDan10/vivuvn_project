@@ -17,6 +17,8 @@
         public int GroupSize { get; set; }
         public string? TransportationVehicle { get; set; }
         public bool IsPublic { get; set; } = false;
+        public string? InviteCode { get; set; }
+        public DateTime? InviteCodeGeneratedAt { get; set; }
 
         public List<ItineraryDayDto> Days { get; set; } = new List<ItineraryDayDto>();
         public BudgetDto Budget { get; set; }

@@ -83,6 +83,11 @@ namespace vivuvn_api.Services.Implementations
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
                 ?? throw new ArgumentException("Itinerary not found");
 
+            if (itinerary.UserId == userId)
+            {
+                throw new InvalidOperationException("Itinerary owner cannot leave the itinerary");
+            }
+
             var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.UserId == userId && !im.DeleteFlag)
                 ?? throw new ArgumentException("User is not a member of this itinerary");
             member.DeleteFlag = true;

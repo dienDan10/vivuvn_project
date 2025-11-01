@@ -242,7 +242,7 @@ namespace vivuvn_api.Data
             // Relationship: ItineraryMember - User
             modelBuilder.Entity<ItineraryMember>()
                 .HasOne(im => im.User)
-                .WithMany()
+                .WithMany(u => u.ItineraryMemberships)
                 .HasForeignKey(im => im.UserId)
                 .OnDelete(DeleteBehavior.NoAction); // Avoid cascade conflicts with Itinerary->User
 

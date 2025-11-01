@@ -11,7 +11,7 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task<BudgetDto?> GetBudgetByItineraryIdAsync(int itineraryId)
         {
-            var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, includeProperties: "Items,Items.BudgetType");
+            var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, includeProperties: "Items,Items.BudgetType,Items.PaidByMember,Items.PaidByMember.User");
 
             if (budget == null)
             {
@@ -38,9 +38,17 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<IEnumerable<BudgetTypeDto>>(budgetTypes);
         }
 
-
-        public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto item)
+        public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto request, int userId)
         {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
+                ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
+
+            // only owner can add budget items
+            if (itinerary.UserId != userId)
+            {
+                throw new BadHttpRequestException("User does not have permission to add budget items to this itinerary.");
+            }
+
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId);
 
             if (budget == null)
@@ -50,14 +58,17 @@ namespace vivuvn_api.Services.Implementations
 
             var budgetItem = new BudgetItem
             {
-                Name = item.Name ?? "New Budget Item",
+                Name = request.Name ?? "New Budget Item",
                 BudgetId = budget.BudgetId,
-                Cost = item.Cost,
-                Date = item.Date,
-                BudgetTypeId = item.BudgetTypeId,
-                PaidByMemberId = item.MemberId.HasValue && item.MemberId.Value > 0
-                                ? item.MemberId : null
+                Cost = request.Cost,
+                Date = request.Date,
+                BudgetTypeId = request.BudgetTypeId,
             };
+
+            if (request.MemberId.HasValue && request.MemberId.Value > 0)
+            {
+                budgetItem.PaidByMemberId = request.MemberId.Value;
+            }
 
             await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);
             await _unitOfWork.SaveChangesAsync();
@@ -67,8 +78,17 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<BudgetItemDto>(budgetItem);
         }
 
-        public async Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request)
+        public async Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request, int userId)
         {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
+                ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
+
+            // only owner can update budget
+            if (itinerary.UserId != userId)
+            {
+                throw new BadHttpRequestException("User does not have permission to update the budget for this itinerary.");
+            }
+
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, tracked: true);
             if (budget is null)
             {
