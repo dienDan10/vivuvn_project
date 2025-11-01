@@ -1,11 +1,12 @@
-﻿using vivuvn_api.DTOs.ValueObjects;
+﻿using AutoMapper;
+using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryMemberService(ITokenService _tokenService, IUnitOfWork _unitOfWork) : IItineraryMemberService
+    public class ItineraryMemberService(ITokenService _tokenService, IUnitOfWork _unitOfWork, IMapper _mapper) : IItineraryMemberService
     {
         public async Task<InviteCodeDto> GenerateInviteCodeAsync(int itineraryId, int ownerId)
         {
@@ -62,6 +63,19 @@ namespace vivuvn_api.Services.Implementations
             };
             await _unitOfWork.ItineraryMembers.AddAsync(newMember);
             await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<ItineraryMemberDto>> GetMembersAsync(int itineraryId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
+                ?? throw new ArgumentException("Itinerary not found");
+
+            var members = await _unitOfWork.ItineraryMembers.GetAllAsync(
+                filter: im => im.ItineraryId == itineraryId && !im.DeleteFlag,
+                includeProperties: "User"
+            );
+
+            return _mapper.Map<IEnumerable<ItineraryMemberDto>>(members);
         }
     }
 }

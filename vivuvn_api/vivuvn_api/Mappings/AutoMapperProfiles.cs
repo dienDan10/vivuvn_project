@@ -127,6 +127,16 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.TransportationDuration, opt => opt.Ignore())
                 .ForMember(dest => dest.TransportationDistance, opt => opt.Ignore());
 
+            // Mapping for Itinerary Member
+            CreateMap<ItineraryMember, ItineraryMemberDto>()
+                .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.User.UserPhoto))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.User.PhoneNumber))
+                .ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(src => src.JoinedAt))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role));
+
         }
     }
 }
