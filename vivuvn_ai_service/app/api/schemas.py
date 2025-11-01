@@ -8,7 +8,7 @@ with comprehensive validation and documentation.
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 
 # Import travel models from dedicated module
 from app.models.travel_models import Activity, DayItinerary, TravelItinerary, TransportationSuggestion
@@ -64,21 +64,24 @@ class TravelRequest(BaseModel):
         example="Vegetarian meals required"
     )
     
-    @validator("end_date")
-    def validate_date_range(cls, v, values):
+    @field_validator("end_date")
+    @classmethod
+    def validate_date_range(cls, v, info: ValidationInfo):
         """Validate that end_date is after start_date."""
-        if "start_date" in values and v <= values["start_date"]:
+        if info.data.get("start_date") and v <= info.data["start_date"]:
             raise ValueError("End date must be after start date")
         return v
     
-    @validator("start_date")
+    @field_validator("start_date")
+    @classmethod
     def validate_start_date_not_past(cls, v):
         """Validate that start date is not in the past."""
         if v < date.today():
             raise ValueError("Start date cannot be in the past")
         return v
     
-    @validator("preferences")
+    @field_validator("preferences")
+    @classmethod
     def validate_preferences(cls, v):
         """Validate preference categories (matches Flutter InterestCategory)."""
         valid_preferences = {
@@ -90,7 +93,8 @@ class TravelRequest(BaseModel):
                 raise ValueError(f"Invalid preference: {pref}")
         return [pref.lower() for pref in v]
     
-    @validator("budget")
+    @field_validator("budget")
+    @classmethod
     def validate_budget(cls, v):
         """Validate budget."""
         if v is not None:
@@ -121,11 +125,6 @@ class TravelResponse(BaseModel):
     itinerary: Optional[TravelItinerary] = Field(
         None,
         description="Generated travel itinerary"
-    )
-    weather_info: Optional[str] = Field(
-        None,
-        description="Weather information for the travel period",
-        example="Warm and humid, 26-33°C with occasional rain"
     )
 
 
@@ -178,7 +177,8 @@ class DataInsertRequest(BaseModel):
         }
     )
     
-    @validator('item_type')
+    @field_validator('item_type')
+    @classmethod
     def validate_item_type(cls, v):
         if v not in ['destination', 'attraction', 'activity']:
             raise ValueError('item_type must be one of: destination, attraction, activity')

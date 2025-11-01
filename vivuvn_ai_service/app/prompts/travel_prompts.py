@@ -10,9 +10,11 @@ from typing import Dict, List, Any, Optional
 
 from fastapi.logger import logger
 from app.api.schemas import TravelRequest
+from app.models.weather_models import WeatherForecast
 # Format with geographical clusters for better organization
 from app.core.config import Settings
 from app.utils.geo_utils import get_cluster_name, calculate_cluster_stats
+from app.utils.weather_helpers import format_weather_for_prompt
 
 # ============================================================================
 # CORE PROMPT COMPONENTS - Modular & Composable
@@ -146,6 +148,30 @@ Xem thêm: Bảo tàng, Biển, Thác, Chợ tại reference guide."""
 
 **Flow:** Lọc không phù hợp → Chọn từ còn lại → Tối ưu geography/preferences"""
 
+    WEATHER_PLANNING_RULES = """## QUY TẮC LẬP KẾ HOẠCH DỰA TRÊN THỜI TIẾT
+
+**Khi có thông tin dự báo thời tiết, áp dụng các nguyên tắc sau:**
+
+**Ngày mưa (lượng mưa >5mm):**
+- ƯU TIÊN: Hoạt động trong nhà (bảo tàng, chùa có mái che, trung tâm thương mại, lớp nấu ăn, chợ có mái)
+- TRÁNH: Bãi biển, leo núi, chụp ảnh ngoài trời, công viên, đạp xe
+- GHI CHÚ: Đề xuất mang ô hoặc áo mưa
+
+**Ngày nắng nóng (nhiệt độ chiều >32°C):**
+- Lên lịch hoạt động ngoài trời vào BUỔI SÁNG (06:00-10:00) hoặc BUỔI CHIỀU (16:00-19:00)
+- Lên lịch BUỔI TRƯA (11:00-15:00): Địa điểm có điều hòa (bảo tàng, trung tâm thương mại, quán cà phê)
+- GHI CHÚ: Khuyến nghị kem chống nắng, uống đủ nước, che chắn
+
+**Thời tiết đẹp (20-28°C, mưa <2mm):**
+- TỐI ĐA HÓA hoạt động ngoài trời: tour thiên nhiên, bãi biển, leo núi, chụp ảnh, đạp xe
+- Khuyến khích trải nghiệm ngoài trời cả ngày
+- Thời điểm tốt nhất cho các địa điểm ngắm cảnh
+
+**Tổng quát:**
+- Tích hợp các mẹo liên quan đến thời tiết vào phần ghi chú của hoạt động
+- Ví dụ: "Mang ô nếu trời mưa chiều", "Nên đi sớm để tránh nắng nóng"
+- Ưu tiên sự an toàn và thoải mái của du khách"""
+
     BUDGET_STRATEGY = """## CHIẾN LƯỢC NGÂN SÁCH
 
 **Tiers (VND/người/ngày):**
@@ -228,11 +254,15 @@ def build_system_prompt(
     if has_preferences:
         components.append("\n")
         components.append(PromptComponents.PREFERENCES_GUIDE)
-    
+
     if has_special_requirements:
         components.append("\n")
         components.append(PromptComponents.SPECIAL_REQUIREMENTS_GUIDE)
-    
+
+    # Always include weather planning rules
+    components.append("\n")
+    components.append(PromptComponents.WEATHER_PLANNING_RULES)
+
     # Always include budget strategy and optimization
     components.append("\n")
     components.append(PromptComponents.BUDGET_STRATEGY)
@@ -252,26 +282,28 @@ def create_user_prompt(
     travel_request: TravelRequest,  # TravelRequest type
     relevant_places: List[Dict[str, Any]],
     place_clusters: Optional[List[List[Dict[str, Any]]]] = None,
-    top_relevant_places: Optional[List[Dict[str, Any]]] = None
+    top_relevant_places: Optional[List[Dict[str, Any]]] = None,
+    weather_forecast: Optional[WeatherForecast] = None
 ) -> str:
     """
     Build token-optimized user prompt with grounded data.
-    
+
     Optimizations applied:
     - Reduced coordinate precision: 4 → 2 decimals (saves ~10 chars/place)
     - Removed unnecessary backticks and formatting
     - Conditional descriptions only for top 3 places
     - Compact cluster info format
     - Smart truncation based on duration
-    
+
     Token reduction: ~30-40% vs original
-    
+
     Args:
         travel_request: User's travel request
         relevant_places: Verified places from search (geographically ordered)
         place_clusters: Optional geographical clusters
         top_relevant_places: Top places by relevance score
-    
+        weather_forecast: Optional weather forecast for the trip
+
     Returns:
         Token-efficient prompt with grounded data
     """
@@ -408,7 +440,14 @@ def create_user_prompt(
             f"{travel_request.special_requirements}\n"
             f"→ Lọc địa điểm không phù hợp, ưu tiên > preferences/geography\n"
         )
-    
+
+    # Add weather information if available
+    weather_section = ""
+    if weather_forecast:
+        formatted_weather = format_weather_for_prompt(weather_forecast)
+        if formatted_weather:
+            weather_section = f"\n{formatted_weather}\n"
+
     # Compact header
     return f"""## NHIỆM VỤ
 Tạo lịch {duration} ngày {travel_request.destination}, CHỈ dùng địa điểm danh sách.
@@ -420,7 +459,7 @@ Tạo lịch {duration} ngày {travel_request.destination}, CHỈ dùng địa �
 🎯 Sở thích: {preferences_str} {"⚠️ 60-70% activities phải khớp" if travel_request.preferences else ""}
 💰 {travel_request.budget:,.0f} VND (≈{budget_per_person_per_day:,.0f} VND/người/ngày)
 💼 TIER: {budget_tier} → {budget_strategy}
-{special_reqs}
+{special_reqs}{weather_section}
 {places_context}
 
 ## YÊU CẦU
@@ -428,7 +467,7 @@ Tạo lịch {duration} ngày {travel_request.destination}, CHỈ dùng địa �
 2. Nhóm cùng khu vực/ngày, sắp xếp tọa độ
 3. Transportation: CHỈ trong transportation_suggestions, max 2
 4. Nếu cost > {travel_request.budget:,.0f}: schedule_unavailable=true
-5. Notes: 15-30 từ tiếng Việt, theo template
+5. Notes: sử dụng tiếng Việt, theo template
 
 **JSON schema TravelItinerary**"""
 
