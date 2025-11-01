@@ -63,7 +63,6 @@ namespace vivuvn_api.Services.Implementations
                 days.Add(itineraryDay);
             }
             await _unitOfWork.ItineraryDays.AddRangeAsync(days);
-            await _unitOfWork.SaveChangesAsync();
 
             // add default budget
             var budget = new Budget
@@ -73,8 +72,18 @@ namespace vivuvn_api.Services.Implementations
                 TotalBudget = 0 // default budget amount
             };
             await _unitOfWork.Budgets.AddAsync(budget);
-            await _unitOfWork.SaveChangesAsync();
 
+            // add owner as member
+            var member = new ItineraryMember
+            {
+                ItineraryId = itinerary.Id,
+                UserId = userId,
+                JoinedAt = DateTime.UtcNow,
+                Role = Constants.ItineraryRole_Owner
+            };
+            await _unitOfWork.ItineraryMembers.AddAsync(member);
+
+            await _unitOfWork.SaveChangesAsync();
             return new CreateItineraryResponseDto { Id = itinerary.Id };
         }
 
