@@ -109,5 +109,21 @@ namespace vivuvn_api.Services.Implementations
             _unitOfWork.ItineraryMembers.Update(member);
             await _unitOfWork.SaveChangesAsync();
         }
+
+        public async Task<bool> IsOwnerAsync(int itineraryId, int userId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && i.UserId == userId);
+            return itinerary is not null;
+        }
+
+        public async Task<bool> IsMemberAsync(int itineraryId, int userId)
+        {
+            return await _unitOfWork.ItineraryMembers.IsMemberRoleAsync(itineraryId, userId);
+        }
+
+        public async Task<int> GetCurrentMemberCountAsync(int itineraryId)
+        {
+            return await _unitOfWork.ItineraryMembers.CountAsync(itineraryId);
+        }
     }
 }

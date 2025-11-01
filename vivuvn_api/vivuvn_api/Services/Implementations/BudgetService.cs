@@ -38,16 +38,10 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<IEnumerable<BudgetTypeDto>>(budgetTypes);
         }
 
-        public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto request, int userId)
+        public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
                 ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
-
-            // only owner can add budget items
-            if (itinerary.UserId != userId)
-            {
-                throw new BadHttpRequestException("User does not have permission to add budget items to this itinerary.");
-            }
 
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId);
 
@@ -78,16 +72,10 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<BudgetItemDto>(budgetItem);
         }
 
-        public async Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request, int userId)
+        public async Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
                 ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
-
-            // only owner can update budget
-            if (itinerary.UserId != userId)
-            {
-                throw new BadHttpRequestException("User does not have permission to update the budget for this itinerary.");
-            }
 
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, tracked: true);
             if (budget is null)

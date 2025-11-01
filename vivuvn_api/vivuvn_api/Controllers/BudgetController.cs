@@ -8,7 +8,7 @@ namespace vivuvn_api.Controllers
 {
     [Route("api/v1/itineraries/{itineraryId}/budget")]
     [ApiController]
-    public class BudgetController(IBudgetService _budgetService) : ControllerBase
+    public class BudgetController(IBudgetService _budgetService, IItineraryMemberService _memberService) : ControllerBase
     {
 
         [HttpGet]
@@ -40,7 +40,12 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> CreateBudgetItem(int itineraryId, CreateBudgetItemRequestDto request)
         {
             var userId = GetCurrentUserId();
-            var budgetItem = await _budgetService.AddBudgetItemAsync(itineraryId, request, userId);
+            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
+            if (!isOwner)
+            {
+                return Forbid("Only itinerary owner can add budget items.");
+            }
+            var budgetItem = await _budgetService.AddBudgetItemAsync(itineraryId, request);
             return Ok(budgetItem);
         }
 
@@ -49,7 +54,12 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> UpdateBudget(int itineraryId, [FromBody] UpdateBudgetRequestDto request)
         {
             var userId = GetCurrentUserId();
-            var budget = await _budgetService.UpdateBudgetAsync(itineraryId, request, userId);
+            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
+            if (!isOwner)
+            {
+                return Forbid("Only itinerary owner can add budget items.");
+            }
+            var budget = await _budgetService.UpdateBudgetAsync(itineraryId, request);
             return Ok(budget);
         }
 
@@ -59,6 +69,11 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> UpdateBudgetItem(int itineraryId, int itemId, UpdateBudgetItemRequestDto request)
         {
             var userId = GetCurrentUserId();
+            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
+            if (!isOwner)
+            {
+                return Forbid("Only itinerary owner can update budget items.");
+            }
             var budgetItem = await _budgetService.UpdateBudgetItemAsync(itemId, request);
             return Ok(budgetItem);
         }
@@ -67,6 +82,12 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteBudgetItem(int itineraryId, int itemId)
         {
+            var userId = GetCurrentUserId();
+            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
+            if (!isOwner)
+            {
+                return Forbid("Only itinerary owner can delete budget items.");
+            }
             var budgetItem = await _budgetService.DeleteBudgetItemAsync(itemId);
             return Ok(budgetItem);
         }

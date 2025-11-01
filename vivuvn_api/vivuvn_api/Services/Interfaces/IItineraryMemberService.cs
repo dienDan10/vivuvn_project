@@ -9,5 +9,10 @@ namespace vivuvn_api.Services.Interfaces
         Task<IEnumerable<ItineraryMemberDto>> GetMembersAsync(int itineraryId);
         Task LeaveItineraryAsync(int userId, int itineraryId);
         Task KickMemberAsync(int userId, int itineraryId, int memberId);
+
+        // Helper methods
+        Task<bool> IsOwnerAsync(int itineraryId, int userId);
+        Task<bool> IsMemberAsync(int itineraryId, int userId);
+        Task<int> GetCurrentMemberCountAsync(int itineraryId);
     }
 }
