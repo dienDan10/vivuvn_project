@@ -10,6 +10,7 @@ namespace vivuvn_api.Controllers
     [ApiController]
     public class ItineraryController(IItineraryService _itineraryService) : ControllerBase
     {
+        // Get all itineraries of the user (include joined itineraries)
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAllItineraries()

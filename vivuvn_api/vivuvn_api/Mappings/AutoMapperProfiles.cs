@@ -19,6 +19,7 @@ namespace vivuvn_api.Mappings
 
             // Mapping For Itinerary
             CreateMap<Itinerary, ItineraryDto>()
+                .ForMember(dest => dest.isOwner, opt => opt.MapFrom(src => src.User.Id == src.UserId))
                 .ForMember(dest => dest.StartProvinceName, opt => opt.MapFrom(src => src.StartProvince.Name))
                 .ForMember(dest => dest.DestinationProvinceName, opt => opt.MapFrom(src => src.DestinationProvince.Name))
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl))
@@ -121,7 +122,7 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.Time))
                 .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.Time.AddHours(src.DurationHours)))
                 .ForMember(dest => dest.Note, opt => opt.MapFrom(src => src.Notes))
-				.ForMember(dest => dest.TransportationVehicle, opt => opt.Ignore()) // Will be set by service layer
+                .ForMember(dest => dest.TransportationVehicle, opt => opt.Ignore()) // Will be set by service layer
                 .ForMember(dest => dest.TransportationDuration, opt => opt.Ignore())
                 .ForMember(dest => dest.TransportationDistance, opt => opt.Ignore());
 

@@ -1,12 +1,11 @@
-﻿using vivuvn_api.Models;
-
-namespace vivuvn_api.DTOs.ValueObjects
+﻿namespace vivuvn_api.DTOs.ValueObjects
 {
     public class ItineraryDto
     {
         public int Id { get; set; }
         public int UserId { get; set; }
-        public User User { get; set; } = null!;
+        public UserDto User { get; set; } = null!;
+        public bool isOwner { get; set; } = false;
         public string Name { get; set; } = string.Empty;
         public int StartProvinceId { get; set; }
         public string StartProvinceName { get; set; } = string.Empty;
