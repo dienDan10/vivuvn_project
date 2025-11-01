@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   vivuvn-ai-service:
@@ -20,35 +20,18 @@ services:
     ports:
       - "8000:8000"
 
-    # Volume mounts
-    volumes:
-      # REQUIRED: Persistent model cache (ML models downloaded on first run)
-      # This saves ~500MB-1GB in image size and allows model updates without rebuild
-      - model-cache:/home/vivuapp/.cache
-
-      # Optional: Uncomment for development with hot reload
-      # - ./app:/app/app:ro
-
-    # Restart policy
     restart: unless-stopped
 
-    # Health check (uses the HEALTHCHECK from Dockerfile)
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
     # Resource limits (optional but recommended for production)
+    # Reduced memory requirements since using cloud-based embeddings
     deploy:
       resources:
         limits:
-          cpus: '2.0'
-          memory: 3G
+          cpus: "2.0"
+          memory: 2G  # Reduced from 3G (no local ML models)
         reservations:
-          cpus: '0.5'
-          memory: 1G
+          cpus: "0.5"
+          memory: 512M  # Reduced from 1G
 
     # Logging configuration
     logging:
@@ -61,12 +44,7 @@ services:
     networks:
       - vivuvn-network
 
-# Named volumes for data persistence
-volumes:
-  model-cache:
-    name: vivuvn-model-cache
-    driver: local
-
+# Networks
 networks:
   vivuvn-network:
     driver: bridge

@@ -80,12 +80,10 @@ class TravelRequest(BaseModel):
     
     @validator("preferences")
     def validate_preferences(cls, v):
-        """Validate preference categories."""
+        """Validate preference categories (matches Flutter InterestCategory)."""
         valid_preferences = {
-            "food", "culture", "history", "nature", "adventure", "shopping",
-            "nightlife", "beaches", "mountains", "cities", "rural", "art",
-            "architecture", "museums", "temples", "markets", "local_life",
-            "photography", "relaxation", "budget", "luxury"
+            "culture", "history", "nature", "photography", "food",
+            "shopping", "adventure", "relaxation", "nightlife"
         }
         for pref in v:
             if pref.lower() not in valid_preferences:

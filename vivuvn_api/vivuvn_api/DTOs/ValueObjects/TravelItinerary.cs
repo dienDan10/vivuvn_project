@@ -23,12 +23,6 @@ namespace vivuvn_api.DTOs.ValueObjects
 		public decimal TotalCost { get; set; }
 
 		/// <summary>
-		/// Number of database places actually used in itinerary
-		/// </summary>
-		[JsonPropertyName("places_used_count")]
-		public int PlacesUsedCount { get; set; }
-
-		/// <summary>
 		/// True if itinerary could not be fully scheduled due to constraints
 		/// </summary>
 		[JsonPropertyName("schedule_unavailable")]

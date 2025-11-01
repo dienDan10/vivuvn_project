@@ -308,13 +308,17 @@ async def test_pinecone_query():
 
         # Try a test query
         test_query = "Hà Nội travel destinations Vietnam"
-        test_embedding = embedding_service._generate_embedding(test_query)
+        # Use RETRIEVAL_QUERY task type for search queries
+        test_embedding = embedding_service._generate_embedding(
+            test_query,
+            task_type=settings.EMBEDDING_TASK_TYPE_QUERY
+        )
 
-        # Query default namespace
+        # Query configured namespace (travel_location)
         results = await vector_service.search(
             vector=test_embedding,
             top_k=5,
-            namespace="",
+            namespace=None,  # Uses PINECONE_DEFAULT_NAMESPACE from settings
             include_metadata=True
         )
 
@@ -327,7 +331,7 @@ async def test_pinecone_query():
             "sample_results": results[:3] if results else [],
             "diagnosis": {
                 "vectors_in_index": stats.get("total_vectors", 0),
-                "default_namespace_used": True,
+                "namespace_used": settings.PINECONE_DEFAULT_NAMESPACE,
                 "query_successful": len(results) > 0,
                 "need_reload_data": len(results) == 0 and stats.get("total_vectors", 0) == 0,
                 "message": "✅ Query successful!" if len(results) > 0 else "⚠️ No results found - may need to reload data"

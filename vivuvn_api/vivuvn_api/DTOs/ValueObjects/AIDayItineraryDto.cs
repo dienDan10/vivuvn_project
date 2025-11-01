@@ -27,12 +27,6 @@ namespace vivuvn_api.DTOs.ValueObjects
         public List<AIActivityDto> Activities { get; set; } = new List<AIActivityDto>();
 
         /// <summary>
-        /// Total estimated cost for the day in VND
-        /// </summary>
-        [JsonPropertyName("estimated_cost")]
-        public decimal? EstimatedCost { get; set; }
-
-        /// <summary>
         /// Daily tips and recommendations
         /// </summary>
         [JsonPropertyName("notes")]

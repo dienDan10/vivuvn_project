@@ -9,14 +9,13 @@ This module implements travel planning using:
 - Direct JSON response (no parsing needed)
 """
 
+from os import system
 import structlog
 from typing import Dict, List, Any, Optional, TypedDict
-from datetime import datetime, timedelta
 
 from langgraph.graph import StateGraph, END
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
 
 from app.core.config import settings
 from app.core.exceptions import TravelPlanningError, ItineraryGenerationError
@@ -24,7 +23,11 @@ from app.api.schemas import TravelRequest, TravelResponse
 from app.models.travel_models import Activity, DayItinerary, TravelItinerary
 from app.services.vector_service import get_vector_service
 from app.services.embedding_service import get_embedding_service
-from app.prompts.travel_prompts import SYSTEM_PROMPT, create_user_prompt
+from app.prompts.travel_prompts import create_user_prompt, get_system_prompt_for_request
+from app.utils.geo_utils import simple_kmeans_geo
+from app.utils.helpers import normalize_province_name
+from app.models.travel_models import TravelItinerary, DayItinerary, Activity, TransportationSuggestion
+import asyncio
 
 logger = structlog.get_logger(__name__)
 
@@ -38,6 +41,8 @@ class TravelPlanningState(TypedDict):
     travel_request: TravelRequest
     search_filters: Dict[str, Any]
     relevant_places: List[Dict[str, Any]]
+    place_clusters: List[List[Dict[str, Any]]]  # Geographical clusters
+    top_relevant_places: List[Dict[str, Any]]  # Top places by Pinecone score (for descriptions)
     structured_itinerary: Optional[Dict[str, Any]]
     final_response: Optional[TravelResponse]
     error: Optional[str]
@@ -61,13 +66,15 @@ class TravelPlanningAgent:
         
         # Pre-configure the model for reuse
         self.model = settings.GEMINI_MODEL
-        self.generation_config = types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            response_mime_type="application/json",
-            response_schema=TravelItinerary,
-            temperature=settings.TEMPERATURE,
-            max_output_tokens=settings.MAX_TOKENS
-        )
+        
+        # Base config (without system instruction, which varies per request)
+        self.base_generation_config = {
+            "response_mime_type": "application/json",
+            "response_schema": TravelItinerary,
+            "thinking_config": types.ThinkingConfig(thinking_budget=0),
+            "temperature": settings.TEMPERATURE,
+            "max_output_tokens": settings.MAX_TOKENS
+        }
 
         self.workflow = self._build_workflow()
 
@@ -91,6 +98,36 @@ class TravelPlanningAgent:
 
         return workflow.compile()
 
+    def _calculate_dynamic_top_k(self, duration_days: int) -> int:
+        """
+        Calculate optimal top_k based on trip duration (optimized for token efficiency).
+
+        Formula: base + (activities_per_day * duration * diversity_factor)
+        Reduced from previous values to minimize token usage while maintaining quality.
+
+        Args:
+            duration_days: Trip duration in days
+
+        Returns:
+            Optimized top_k value (clamped between min and max)
+
+        Examples:
+            1 day:  8 + (3.0 * 1 * 1.5) = 12-13
+            3 days: 8 + (3.0 * 3 * 1.5) = 21-22
+            7 days: 8 + (3.0 * 7 * 1.5) = 39-40 (capped at 35)
+        """
+        # Optimized formula: reduced diversity factor and activities per day
+        calculated_k = int(
+            settings.VECTOR_SEARCH_BASE_K +
+            (3.0 * duration_days * 1.5)  # Reduced from 3.5 * 2.0 = 7.0 to 3.0 * 1.5 = 4.5
+        )
+
+        # Clamp between min and max (with tighter max)
+        top_k = max(settings.VECTOR_SEARCH_MIN_K, min(calculated_k, 35))  # Reduced max from 50 to 35
+
+        logger.info(f"Dynamic top_k: {duration_days} days → {top_k} places (calculated: {calculated_k})")
+        return top_k
+
     # ========================================================================
     # NODES
     # ========================================================================
@@ -101,18 +138,26 @@ class TravelPlanningAgent:
             travel_request = state["travel_request"]
             filters = state.get("search_filters", {})
 
+            # Calculate dynamic top_k based on trip duration
+            duration_days = travel_request.duration_days
+            dynamic_top_k = self._calculate_dynamic_top_k(duration_days)
+
             # Build comprehensive search query
             search_query = travel_request.destination
             if travel_request.preferences:
-                search_query += f" {' '.join(travel_request.preferences)}"
+                search_query += f" {' '.join(travel_request.preferences)} {travel_request.special_requirements}"
 
-            logger.info(f"[Node 2/5] Searching: {search_query}")
+            logger.info(f"[Node 2/5] Searching: {search_query} (duration: {duration_days} days, top_k: {dynamic_top_k})")
 
             # Generate embedding and search with filters
-            query_embedding = self.embedding_service._generate_embedding(search_query)
+            # Use RETRIEVAL_QUERY task type for user queries (optimized for search)
+            query_embedding = self.embedding_service._generate_embedding(
+                search_query,
+                task_type=settings.EMBEDDING_TASK_TYPE_QUERY
+            )
             results = await self.vector_service.search_places(
                 query_embedding=query_embedding,
-                top_k=30,  # More places = better diversity and less hallucination
+                top_k=dynamic_top_k,  # Dynamic based on trip duration
                 province_filter=filters.get("province"),
                 min_rating=filters.get("min_rating"),
                 place_ids=filters.get("place_ids", []),
@@ -123,8 +168,36 @@ class TravelPlanningAgent:
 
             if not results:
                 logger.warning("[Node 2/5] No places found - risk of hallucination!")
+                state["relevant_places"] = []
+                state["place_clusters"] = []
+                state["top_relevant_places"] = []
+                return state
 
-            state["relevant_places"] = results
+            # Preserve top places by Pinecone score (for descriptions) BEFORE clustering
+            top_by_score = sorted(results, key=lambda x: x.get('score', 0), reverse=True)[:5]
+
+            try:
+                # Auto-determine k based on number of results and trip duration
+                # More days = potentially need more geographical spread
+                suggested_k = min(4, max(2, duration_days // 2))
+                clusters = simple_kmeans_geo(results, k=suggested_k)
+
+                # Flatten clusters back to list (preserves geographical ordering)
+                ordered_places = []
+                for cluster in clusters:
+                    ordered_places.extend(cluster)
+
+                logger.info(f"[Node 2/5] Organized {len(results)} places into {len(clusters)} geographical clusters")
+
+                state["relevant_places"] = ordered_places
+                state["place_clusters"] = clusters  # Store for prompt formatting
+                state["top_relevant_places"] = top_by_score  # Store top by score for descriptions
+            except Exception as cluster_error:
+                logger.warning(f"[Node 2/5] Clustering failed: {cluster_error}, using original order")
+                state["relevant_places"] = results
+                state["place_clusters"] = []
+                state["top_relevant_places"] = top_by_score  # Store even if clustering fails
+
             return state
 
         except Exception as e:
@@ -145,16 +218,24 @@ class TravelPlanningAgent:
 
             logger.info(f"[Node 2/5] Generating with {len(relevant_places)} verified places")
 
-            # Build user prompt with grounded data
-            user_prompt = create_user_prompt(travel_request, relevant_places)
+            # Build user prompt with grounded data (with optional clusters and top places by score)
+            place_clusters = state.get("place_clusters", [])
+            top_relevant_places = state.get("top_relevant_places", [])
+            user_prompt = create_user_prompt(travel_request, relevant_places, place_clusters, top_relevant_places)
+            system_prompt = get_system_prompt_for_request(travel_request)
+
+            # Create config with system instruction (extends base config)
+            request_config = types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                **self.base_generation_config
+            )
 
             # Call Gemini with structured output using modern SDK pattern
-            import asyncio
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.client.models.generate_content(
                     model=self.model,
-                    config=self.generation_config,
+                    config=request_config,
                     contents=user_prompt
                 )
             )
@@ -169,16 +250,21 @@ class TravelPlanningAgent:
                 raise ItineraryGenerationError("No structured response from Gemini")
 
             structured_itinerary: TravelItinerary = response.parsed
-            
-            # Convert to dictionary format for compatibility
+
+            # Convert to dictionary format for compatibility (using Pydantic v2 model_dump)
             structured_data = {
-                "days": [day.dict() for day in structured_itinerary.days],
+                "days": [day.model_dump() for day in structured_itinerary.days],
+                "transportation_suggestions": [t.model_dump() for t in structured_itinerary.transportation_suggestions],
                 "total_cost": structured_itinerary.total_cost,
-                "places_used_count": structured_itinerary.places_used_count
+                "schedule_unavailable": structured_itinerary.schedule_unavailable,
+                "unavailable_reason": structured_itinerary.unavailable_reason
             }
 
-            logger.info(f"[Node 2/5] Generated {len(structured_data.get('days', []))} days, "
-                       f"used {structured_data.get('places_used_count', 0)} database places")
+            # Log budget validation status
+            if structured_data.get('schedule_unavailable'):
+                logger.warning(f"[Node 2/5] ⚠️ Budget exceeded: {structured_data.get('unavailable_reason', 'No reason provided')}")
+            else:
+                logger.info(f"[Node 2/5] ✅ Budget OK: {structured_data.get('total_cost', 0):,.0f} VND")
 
             state["structured_itinerary"] = structured_data
             return state
@@ -189,7 +275,13 @@ class TravelPlanningAgent:
             return state
 
     async def _validate_output_node(self, state: TravelPlanningState) -> TravelPlanningState:
-        """Node 4: Validate output for hallucinations."""
+        """Node 4: Validate output for hallucinations.
+
+        Since all activities must have place_id (database requirement), validation
+        now checks:
+        1. Every activity has a non-empty place_id
+        2. Activity names match database places (fuzzy match for minor variations)
+        """
         try:
             structured_itinerary = state.get("structured_itinerary")
             relevant_places = state.get("relevant_places", [])
@@ -201,43 +293,67 @@ class TravelPlanningAgent:
                 state["error"] = "No itinerary generated to validate"
                 return state
 
-            # Extract place names from database
+            # Extract place IDs and names from database
+            db_place_ids = set()
             db_place_names = set()
             for place in relevant_places:
+                place_id = place.get('metadata', {}).get('place_id', '')
                 name = place.get('metadata', {}).get('name', '')
+                if place_id:
+                    db_place_ids.add(place_id.strip())
                 if name:
                     db_place_names.add(name.lower().strip())
 
             # Check each activity
             days = structured_itinerary.get('days', [])
+            missing_place_id_count = 0
             hallucinated_count = 0
             validated_count = 0
+            total_activities = 0
 
             for day in days:
                 for activity in day.get('activities', []):
-                    if activity.get('from_database', False):
-                        activity_name = activity.get('name', '').lower().strip()
+                    total_activities += 1
+                    activity_place_id = activity.get('place_id', '').strip()
+                    activity_name = activity.get('name', '').lower().strip()
 
-                        # Check if activity name matches any database place
-                        found = False
-                        for db_name in db_place_names:
-                            if db_name in activity_name or activity_name in db_name:
-                                found = True
-                                validated_count += 1
-                                break
+                    # Check 1: Must have place_id (critical for DB foreign key)
+                    if not activity_place_id:
+                        missing_place_id_count += 1
+                        logger.warning(f"[Node 4/5] ❌ Missing place_id: '{activity.get('name')}'")
+                        continue
 
-                        if not found:
-                            hallucinated_count += 1
-                            logger.warning(f"[Node 4/5] Possible hallucination: '{activity.get('name')}'")
+                    # Check 2: place_id should match database (exact match)
+                    if activity_place_id not in db_place_ids:
+                        hallucinated_count += 1
+                        logger.warning(f"[Node 4/5] ⚠️ Unknown place_id: '{activity_place_id}' for '{activity.get('name')}'")
+                        continue
+
+                    # Check 3: Activity name should match database place (fuzzy match)
+                    found = False
+                    for db_name in db_place_names:
+                        if db_name in activity_name or activity_name in db_name:
+                            found = True
+                            validated_count += 1
+                            break
+
+                    if not found:
+                        logger.warning(f"[Node 4/5] ⚠️ Name mismatch (but place_id OK): '{activity.get('name')}'")
+                        # Don't count as hallucination if place_id is valid
+                        validated_count += 1
 
             # Log validation results
-            logger.info(f"[Node 4/5] Validation: {validated_count} verified, "
-                       f"{hallucinated_count} suspicious activities")
+            logger.info(f"[Node 4/5] Validation: {validated_count}/{total_activities} verified, "
+                       f"{missing_place_id_count} missing place_id, {hallucinated_count} unknown place_id")
 
-            state["validation_passed"] = (hallucinated_count == 0)
+            # Pass validation if all activities have valid place_id
+            state["validation_passed"] = (missing_place_id_count == 0 and hallucinated_count == 0)
+
+            if missing_place_id_count > 0:
+                logger.error(f"[Node 4/5] ❌ CRITICAL: {missing_place_id_count} activities missing place_id (DB requirement)")
 
             if hallucinated_count > 0:
-                logger.warning(f"[Node 4/5] Found {hallucinated_count} potential hallucinations")
+                logger.warning(f"[Node 4/5] ⚠️ Found {hallucinated_count} activities with unknown place_id")
 
             return state
 
@@ -267,34 +383,30 @@ class TravelPlanningAgent:
 
             # Convert structured_itinerary to TravelItinerary object
             try:
-                # Create TravelItinerary from the structured data
-                from app.models.travel_models import TravelItinerary, DayItinerary, Activity, TransportationSuggestion
-                
+
                 day_itineraries = []
                 for day_data in structured_itinerary.get("days", []):
                     activities = []
                     for activity_data in day_data.get("activities", []):
+                        # All activities must have place_id (from_database field removed)
                         activity = Activity(
                             time=activity_data.get("time", "09:00"),
                             name=activity_data.get("name", "Hoạt động chưa xác định"),
-                            place_id=activity_data.get("place_id"),
-                            duration_hours=activity_data.get("duration_hours", 1),
+                            place_id=activity_data.get("place_id", ""),
+                            duration_hours=activity_data.get("duration_hours", 1.0),
                             cost_estimate=activity_data.get("cost_estimate", 0.0),
-                            category=activity_data.get("category", "sightseeing"),
-                            from_database=activity_data.get("from_database", False)
+                            notes=activity_data.get("notes", "")
                         )
                         activities.append(activity)
-                    
+
                     day_itinerary = DayItinerary(
                         day=day_data.get("day", 1),
                         date=day_data.get("date", travel_request.start_date.strftime("%Y-%m-%d")),
-                        activities=activities,
-                        estimated_cost=day_data.get("estimated_cost"),
-                        notes=day_data.get("notes", "Ghi chú cho ngày này")
+                        activities=activities
                     )
                     day_itineraries.append(day_itinerary)
-                
-                # Create transportation suggestions (empty for now)
+
+                # Create transportation suggestions
                 transportation_suggestions = structured_itinerary.get("transportation_suggestions", [])
                 transport_objects = []
                 for transport_data in transportation_suggestions:
@@ -310,7 +422,6 @@ class TravelPlanningAgent:
                     days=day_itineraries,
                     transportation_suggestions=transport_objects,
                     total_cost=structured_itinerary.get("total_cost", 0.0),
-                    places_used_count=structured_itinerary.get("places_used_count", 0),
                     schedule_unavailable=structured_itinerary.get("schedule_unavailable", False),
                     unavailable_reason=structured_itinerary.get("unavailable_reason", "")
                 )
@@ -352,41 +463,34 @@ class TravelPlanningAgent:
         """Node 1: Build smart search filters based on travel request."""
         try:
             travel_request = state["travel_request"]
-            
+
             logger.info(f"[Node 1/5] Building search filters for {travel_request.destination}")
-            
+
             filters = {}
             additional_filters = {}
-            
-            # Province/Location filtering
+
+            # Province/Location filtering with normalization
+            # Normalize province name to remove prefixes like "Thành phố", "Tỉnh", etc.
             province = travel_request.destination.strip()
+
             if province:
-                filters["province"] = province
-                logger.info(f"[Node 1/5] Province filter: {province}")
-            
-            # Basic quality filtering
-            filters["min_rating"] = 3.1  # Minimum decent rating
-            logger.info(f"[Node 1/5] Min rating filter: 3.1")
-            
-            # Preference-based smart filtering (future enhancement)
-            if travel_request.preferences:
-                logger.info(f"[Node 1/5] Preferences noted: {travel_request.preferences}")
-                # Can be expanded to filter by categories when available in data
-            
+                # Normalize the province name to handle cases where:
+                # - User inputs "Hà Nội" but database has "Thành phố Hà Nội"
+                # - User inputs "Thành phố Đà Nẵng" but database has "Đà Nẵng"
+                normalized_province = normalize_province_name(province)
+                filters["province"] = normalized_province
+
             # Place ID filtering (for specific place requests)
-            # Can be extended to filter by specific place IDs if needed
-            
             if additional_filters:
                 filters["additional_filters"] = additional_filters
 
             logger.info(f"[Node 1/5] Built filters: {filters}")
-                
+
             # Store filters in state
             state["search_filters"] = filters
-            logger.info(f"[Node 1/5] Filters built successfully: {list(filters.keys())}")
-            
+
             return state
-            
+
         except Exception as e:
             logger.error(f"[Node 1/5] Filter building failed: {e}")
             state["error"] = f"Filter building failed: {str(e)}"
@@ -422,6 +526,8 @@ class TravelPlanningAgent:
                 "travel_request": travel_request,
                 "search_filters": {},
                 "relevant_places": [],
+                "place_clusters": [],
+                "top_relevant_places": [],
                 "structured_itinerary": None,
                 "final_response": None,
                 "error": None,
