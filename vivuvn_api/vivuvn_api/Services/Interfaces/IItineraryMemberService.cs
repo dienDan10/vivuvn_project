@@ -5,5 +5,6 @@ namespace vivuvn_api.Services.Interfaces
     public interface IItineraryMemberService
     {
         Task<InviteCodeDto> GenerateInviteCodeAsync(int itineraryId, int ownerId);
+        Task JoinItineraryByInviteCodeAsync(int userId, string inviteCode);
     }
 }

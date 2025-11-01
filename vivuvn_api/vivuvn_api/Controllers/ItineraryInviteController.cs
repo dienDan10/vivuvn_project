@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using vivuvn_api.DTOs.Request;
 using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Controllers
@@ -22,6 +23,15 @@ namespace vivuvn_api.Controllers
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.Parse(userIdClaim!);
+        }
+
+        [HttpPost("join")]
+        [Authorize]
+        public async Task<IActionResult> JoinItinerary([FromBody] JoinItineraryRequestDto request)
+        {
+            var userId = GetCurrentUserId();
+            await _memberService.JoinItineraryByInviteCodeAsync(userId, request.InviteCode);
+            return Ok(new { message = "Successfully joined the itinerary." });
         }
     }
 }
