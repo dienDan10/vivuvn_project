@@ -20,7 +20,7 @@ from app.api.schemas import (
     TravelResponse,
     ErrorResponse
 )
-from app.services.travel_agent import get_travel_agent
+from app.agents import get_travel_agent
 
 logger = structlog.get_logger(__name__)
 
