@@ -77,5 +77,32 @@ namespace vivuvn_api.Services.Implementations
 
             return _mapper.Map<IEnumerable<ItineraryMemberDto>>(members);
         }
+
+        public async Task LeaveItineraryAsync(int userId, int itineraryId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
+                ?? throw new ArgumentException("Itinerary not found");
+
+            var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.UserId == userId && !im.DeleteFlag)
+                ?? throw new ArgumentException("User is not a member of this itinerary");
+            member.DeleteFlag = true;
+            _unitOfWork.ItineraryMembers.Update(member);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task KickMemberAsync(int userId, int itineraryId, int memberId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
+                ?? throw new ArgumentException("Itinerary not found");
+            if (itinerary.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("Only the itinerary owner can kick members");
+            }
+            var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.UserId == memberId && !im.DeleteFlag)
+                ?? throw new ArgumentException("Member not found in this itinerary");
+            member.DeleteFlag = true;
+            _unitOfWork.ItineraryMembers.Update(member);
+            await _unitOfWork.SaveChangesAsync();
+        }
     }
 }

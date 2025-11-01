@@ -19,8 +19,24 @@ namespace vivuvn_api.Controllers
         }
 
         // leave itinerary
+        [HttpPost("leave")]
+        [Authorize]
+        public async Task<IActionResult> LeaveItinerary(int itineraryId)
+        {
+            var userId = GetCurrentUserId();
+            await _memberService.LeaveItineraryAsync(userId, itineraryId);
+            return NoContent();
+        }
 
         // kick member from itinerary
+        [HttpPost("{memberId}")]
+        [Authorize]
+        public async Task<IActionResult> KickMember(int itineraryId, int memberId)
+        {
+            var userId = GetCurrentUserId();
+            await _memberService.KickMemberAsync(userId, itineraryId, memberId);
+            return NoContent();
+        }
 
         private int GetCurrentUserId()
         {
