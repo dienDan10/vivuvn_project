@@ -33,8 +33,10 @@ namespace vivuvn_api.Data
         public DbSet<BudgetItem> BudgetItems { get; set; }
         public DbSet<BudgetType> BudgetTypes { get; set; }
 
-        public DbSet<ExternalService> ExternalServices { get; set; }
-        public DbSet<ServiceType> ServiceTypes { get; set; }
+        public DbSet<ItineraryMember> ItineraryMembers { get; set; }
+        public DbSet<ItineraryMessage> ItineraryMessages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -95,12 +97,6 @@ namespace vivuvn_api.Data
                 .HasIndex(p => p.NameNormalized)
                 .IsUnique();
 
-            modelBuilder.Entity<ExternalService>()
-                .HasIndex(es => es.ItineraryDayId);
-
-            modelBuilder.Entity<ExternalService>()
-                .HasIndex(es => es.ServiceTypeId);
-
             //Indexes for ItineraryHotel and ItineraryRestaurant
             modelBuilder.Entity<ItineraryHotel>()
                 .HasIndex(ih => ih.ItineraryId);
@@ -121,6 +117,39 @@ namespace vivuvn_api.Data
             modelBuilder.Entity<ItineraryRestaurant>()
                 .HasIndex(ir => ir.BudgetItemId)
                 .IsUnique();
+            // Indexes for ItineraryMember
+            modelBuilder.Entity<ItineraryMember>()
+                .HasIndex(im => im.ItineraryId);
+
+            modelBuilder.Entity<ItineraryMember>()
+                .HasIndex(im => im.UserId);
+
+            modelBuilder.Entity<ItineraryMember>()
+                .HasIndex(im => new { im.ItineraryId, im.UserId })
+                .IsUnique();
+
+            // Indexes for ItineraryMessage
+            modelBuilder.Entity<ItineraryMessage>()
+                .HasIndex(msg => msg.ItineraryId);
+
+            modelBuilder.Entity<ItineraryMessage>()
+                .HasIndex(msg => msg.ItineraryMemberId);
+
+            modelBuilder.Entity<ItineraryMessage>()
+                .HasIndex(msg => msg.CreatedAt);
+
+            // Indexes for Notification
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.UserId);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.ItineraryId);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.IsRead);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.CreatedAt);
 
             // Relationship configurations
             modelBuilder.Entity<Itinerary>()
@@ -202,6 +231,60 @@ namespace vivuvn_api.Data
                 .WithMany()
                 .HasForeignKey(ir => ir.RestaurantId)
                 .OnDelete(DeleteBehavior.Restrict); // Don't delete Restaurant entity
+
+            // Relationship: ItineraryMember - Itinerary
+            modelBuilder.Entity<ItineraryMember>()
+                .HasOne(im => im.Itinerary)
+                .WithMany(i => i.Members)
+                .HasForeignKey(im => im.ItineraryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relationship: ItineraryMember - User
+            modelBuilder.Entity<ItineraryMember>()
+                .HasOne(im => im.User)
+                .WithMany()
+                .HasForeignKey(im => im.UserId)
+                .OnDelete(DeleteBehavior.NoAction); // Avoid cascade conflicts with Itinerary->User
+
+            // Relationship: ItineraryMessage - Itinerary
+            modelBuilder.Entity<ItineraryMessage>()
+                .HasOne(msg => msg.Itinerary)
+                .WithMany(i => i.Messages)
+                .HasForeignKey(msg => msg.ItineraryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relationship: ItineraryMessage - ItineraryMember
+            modelBuilder.Entity<ItineraryMessage>()
+                .HasOne(msg => msg.ItineraryMember)
+                .WithMany()
+                .HasForeignKey(msg => msg.ItineraryMemberId)
+                .OnDelete(DeleteBehavior.NoAction); // Avoid cascade conflicts
+
+            // Relationship: Notification - User
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Relationship: Notification - Itinerary
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Itinerary)
+                .WithMany(i => i.Notifications)
+                .HasForeignKey(n => n.ItineraryId)
+                .OnDelete(DeleteBehavior.Cascade); // Avoid cascade conflicts with User
+
+            // Index for Itinerary.InviteCode (unique, nullable)
+            modelBuilder.Entity<Itinerary>()
+                .HasIndex(i => i.InviteCode)
+                .IsUnique();
+
+            // BudgetItem - ItineraryMember (PaidByMember relationship)
+            modelBuilder.Entity<BudgetItem>()
+                .HasOne(bi => bi.PaidByMember)
+                .WithMany()
+                .HasForeignKey(bi => bi.PaidByMemberId)
+                .OnDelete(DeleteBehavior.NoAction);
 
         }
     }
