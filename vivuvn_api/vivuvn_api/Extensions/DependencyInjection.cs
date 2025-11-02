@@ -26,7 +26,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IBudgetTypeRepository, BudgetTypeRepository>();
             services.AddScoped<IItineraryMemberRepository, ItineraryMemberRepository>();
-            services.AddScoped<IAiClientService, AiClientService>();
+            services.AddScoped<IItineraryMessageRepository, ItineraryMessageRepository>();
             return services;
         }
 
@@ -51,6 +51,8 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IGoogleMapPlaceService, GoogleMapPlaceService>();
             services.AddScoped<IJsonService, JsonService>();
             services.AddScoped<IItineraryMemberService, ItineraryMemberService>();
+            services.AddScoped<IItineraryMessageService, ItineraryMessageService>();
+            services.AddScoped<IAiClientService, AiClientService>();
             return services;
         }
 
