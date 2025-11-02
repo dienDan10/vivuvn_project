@@ -22,11 +22,5 @@ namespace vivuvn_api.DTOs.Response
 		/// </summary>
 		[JsonPropertyName("itinerary")]
 		public TravelItinerary? Itinerary { get; set; }
-
-		/// <summary>
-		/// Weather information for the travel period
-		/// </summary>
-		[JsonPropertyName("weather_info")]
-		public string? WeatherInfo { get; set; }
 	}
 }

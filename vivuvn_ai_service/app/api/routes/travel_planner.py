@@ -8,19 +8,14 @@ and related operations.
 import structlog
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
 
-from app.core.exceptions import (
-    TravelPlanningError,
-    ItineraryGenerationError
-)
 from app.api.schemas import (
+    ErrorResponse,
     TravelRequest,
-    TravelResponse,
-    ErrorResponse
+    TravelResponse
 )
-from app.services.travel_agent import get_travel_agent
+from app.agents import get_travel_agent
 
 logger = structlog.get_logger(__name__)
 
@@ -74,49 +69,33 @@ async def generate_itinerary(
 ):
     """
     Generate travel itinerary for Vietnam destinations.
-    
+
     Args:
         travel_request: Travel planning request
         travel_agent: Travel planning agent
-        
+
     Returns:
         TravelResponse: Generated travel itinerary
     """
-    try:
-        logger.info(
-            "Travel itinerary generation started",
-            destination=travel_request.destination,
-            duration=travel_request.duration_days,
-            preferences=travel_request.preferences
-        )
-        
-        # Generate new itinerary
-        start_time = datetime.now()
-        travel_response = await travel_agent.plan_travel(travel_request)
-        generation_time = int((datetime.now() - start_time).total_seconds() * 1000)
-        
-        logger.info(
-            "Travel itinerary generated successfully",
-            destination=travel_request.destination,
-            generation_time_ms=generation_time,
-        )
-        
-        return travel_response
-        
-    except ItineraryGenerationError as e:
-        logger.error("Itinerary generation failed", error=str(e))
-        raise HTTPException(status_code=500, detail=str(e))
-        
-    except TravelPlanningError as e:
-        logger.error("Travel planning error", error=str(e))
-        raise HTTPException(status_code=400, detail=str(e))
-        
-    except Exception as e:
-        logger.error("Unexpected error in itinerary generation", error=str(e), exc_info=True)
-        raise HTTPException(
-            status_code=500, 
-            detail="An unexpected error occurred while generating your itinerary"
-        )
+    logger.info(
+        "Travel itinerary generation started",
+        destination=travel_request.destination,
+        duration=travel_request.duration_days,
+        preferences=travel_request.preferences
+    )
+
+    # Generate new itinerary
+    start_time = datetime.now()
+    travel_response = await travel_agent.plan_travel(travel_request)
+    generation_time = int((datetime.now() - start_time).total_seconds() * 1000)
+
+    logger.info(
+        "Travel itinerary generated successfully",
+        destination=travel_request.destination,
+        generation_time_ms=generation_time,
+    )
+
+    return travel_response
 
 
 
