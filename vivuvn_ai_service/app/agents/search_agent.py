@@ -11,6 +11,7 @@ import structlog
 from typing import Dict, List, Any
 
 from app.core.config import settings
+from app.core.exceptions import NoResultsError
 from app.services.vector_service import get_vector_service
 from app.services.embedding_service import get_embedding_service
 from app.utils.geo_utils import simple_kmeans_geo
@@ -113,7 +114,7 @@ class SearchAgent:
             logger.info(f"[Node 2/6] Searching: {search_query} (duration: {duration_days} days, top_k: {dynamic_top_k})")
 
             # Generate embedding and search with filters
-            query_embedding = self.embedding_service._generate_embedding(
+            query_embedding = await self.embedding_service._generate_embedding(
                 search_query,
                 task_type=settings.EMBEDDING_TASK_TYPE_QUERY
             )
@@ -129,7 +130,13 @@ class SearchAgent:
             logger.info(f"[Node 2/6] Found {len(results)} places")
 
             if not results:
-                logger.warning("[Node 2/6] No places found - risk of hallucination!")
+                error_msg = f"No places found for destination '{travel_request.destination}'. Try a different destination or broaden your search criteria."
+                logger.error(
+                    "[Node 2/6] No places found - cannot generate itinerary",
+                    destination=travel_request.destination,
+                    error_code="NO_RESULTS_FOUND"
+                )
+                state["error"] = error_msg
                 state["relevant_places"] = []
                 state["place_clusters"] = []
                 state["top_relevant_places"] = []
@@ -162,7 +169,13 @@ class SearchAgent:
             return state
 
         except Exception as e:
-            logger.error(f"[Node 2/6] Failed: {e}")
+            logger.error(
+                "[Node 2/6] Search failed",
+                destination=travel_request.destination,
+                error=str(e),
+                error_code="SEARCH_FAILED",
+                exc_info=True
+            )
             state["error"] = f"Search failed: {str(e)}"
             state["relevant_places"] = []
             return state

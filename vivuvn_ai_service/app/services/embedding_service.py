@@ -17,13 +17,12 @@ except ImportError:
     RecursiveCharacterTextSplitter = None
 
 try:
-    from google import genai
     from google.genai import types
 except ImportError:
-    genai = None
     types = None
 
 from app.core.config import settings
+from app.clients.gemini_client import get_gemini_client
 
 logger = structlog.get_logger(__name__)
 
@@ -52,22 +51,20 @@ class EmbeddingService:
     """
 
     def __init__(self):
-        """Initialize embedding service with Gemini client and text splitter."""
+        """Initialize embedding service with shared Gemini client and text splitter."""
         logger.info("Initializing EmbeddingService...")
 
         # Check dependencies
-        if not genai:
-            raise EmbeddingServiceError("google-genai library not available")
         if not RecursiveCharacterTextSplitter:
             raise EmbeddingServiceError("langchain library not available")
 
-        # Initialize Google Gemini client
+        # Get shared Gemini client (singleton)
         try:
-            logger.info(f"Initializing Gemini client with model: {settings.EMBEDDING_MODEL}")
-            self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            logger.info(f"Gemini client initialized ({settings.VECTOR_DIMENSION} dims)")
+            logger.info(f"Using shared Gemini client with model: {settings.EMBEDDING_MODEL}")
+            self.gemini_client = get_gemini_client()
+            logger.info(f"Gemini client obtained ({settings.VECTOR_DIMENSION} dims)")
         except Exception as e:
-            logger.error(f"Failed to initialize Gemini client: {e}")
+            logger.error(f"Failed to get Gemini client: {e}")
             raise EmbeddingServiceError(f"Failed to initialize Gemini: {e}")
 
         # Initialize LangChain text splitter
@@ -81,16 +78,16 @@ class EmbeddingService:
 
         logger.info("EmbeddingService initialized successfully")
     
-    def process_place(self, place: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def process_place(self, place: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
         Process place and return Pinecone vectors with MINIMAL metadata.
-        
+
         Args:
             place: Place data dictionary from location_data.json
-            
+
         Returns:
             List[Dict]: List of vectors ready for Pinecone upsert
-            
+
         Raises:
             EmbeddingServiceError: If processing fails
         """
@@ -99,49 +96,49 @@ class EmbeddingService:
             if not place_name:
                 logger.warning("Place missing name, skipping")
                 return []
-            
+
             logger.info(f"Processing: {place_name}")
-            
+
             # Smart chunking based on description length
             chunks = self._smart_chunk(place)
             total_chunks = len(chunks)
-            
+
             if len(place.get('description', '')) > 1200:
                 logger.debug(f"{len(place.get('description', ''))} chars → {total_chunks} chunks")
             else:
                 logger.debug(f"{len(place.get('description', ''))} chars → {total_chunks} chunk (no split)")
-            
+
             vectors = []
             for chunk_index, chunk_text in enumerate(chunks):
                 try:
                     # Create embedding text with context
                     embedding_text = self._create_embedding_text(place, chunk_text)
-                    
+
                     # Generate embedding
-                    embedding = self._generate_embedding(embedding_text)
-                    
+                    embedding = await self._generate_embedding(embedding_text)
+
                     # Create minimal metadata (use province from place data)
                     province = place.get('province', 'Vietnam')
                     metadata = self._create_minimal_metadata(
                         place, chunk_text, chunk_index, total_chunks, province=province
                     )
-                    
+
                     # Create vector for Pinecone
                     vector = {
                         "id": f"place_{place.get('googlePlaceId', uuid.uuid4())}_chunk_{chunk_index}",
                         "values": embedding,
                         "metadata": metadata
                     }
-                    
+
                     vectors.append(vector)
-                    
+
                 except Exception as e:
                     logger.warning(f"Failed to create vector for chunk {chunk_index}: {e}")
                     continue
-            
+
             logger.info(f"Generated {len(vectors)} vectors (minimal metadata)")
             return vectors
-            
+
         except Exception as e:
             logger.error(f"Failed to process place {place.get('name', 'unknown')}: {e}")
             raise EmbeddingServiceError(f"Processing failed: {e}")
@@ -205,7 +202,7 @@ class EmbeddingService:
         
         return "\n".join(part for part in embedding_parts if part)
     
-    def _generate_embedding(self, text: str, task_type: Optional[str] = None) -> List[float]:
+    async def _generate_embedding(self, text: str, task_type: Optional[str] = None) -> List[float]:
         """
         Generate embedding using Google Gemini embedding model (gemini-embedding-001).
 
@@ -228,18 +225,11 @@ class EmbeddingService:
             if task_type is None:
                 task_type = settings.EMBEDDING_TASK_TYPE_DOCUMENT
 
-            # Generate embedding with Gemini API
-            result = self.client.models.embed_content(
-                model=settings.EMBEDDING_MODEL,
-                contents=text,
-                config=types.EmbedContentConfig(
-                    output_dimensionality=settings.VECTOR_DIMENSION,
-                    task_type=task_type
-                )
+            # Generate embedding using shared GeminiClient
+            embedding_list = await self.gemini_client.embed_content(
+                text=text,
+                task_type=task_type
             )
-
-            # Extract embedding values from response
-            embedding_list = result.embeddings[0].values
 
             # Verify dimension matches configuration
             if len(embedding_list) != settings.VECTOR_DIMENSION:
@@ -255,7 +245,7 @@ class EmbeddingService:
             raise
         except Exception as e:
             logger.error(f"Failed to generate embedding with Gemini: {e}")
-            raise EmbeddingServiceError(f"Gemini embedding generation failed: {e}")
+            raise EmbeddingServiceError(f"{e}")
     
     def _create_minimal_metadata(
         self, 
@@ -327,20 +317,20 @@ class EmbeddingService:
             "chunk_size": 1200,
             "chunk_overlap": 100,
             "min_chunk_length": 100,
-            "client_initialized": self.client is not None,
+            "client_initialized": self.gemini_client is not None,
             "splitter_configured": self.text_splitter is not None
         }
-    
-    def health_check(self) -> bool:
+
+    async def health_check(self) -> bool:
         """
         Check if the embedding service is healthy.
-        
+
         Returns:
             bool: True if service is healthy
         """
         try:
             # Test embedding generation
-            test_embedding = self._generate_embedding("Test text for health check")
+            test_embedding = await self._generate_embedding("Test text for health check")
             return len(test_embedding) == settings.VECTOR_DIMENSION
         except Exception as e:
             logger.error(f"Health check failed: {e}")

@@ -227,10 +227,12 @@ class VectorService:
         top_k: int = 10,
         namespace: Optional[str] = None,
         filter_dict: Optional[Dict[str, Any]] = None,
-        include_metadata: bool = True
+        include_metadata: bool = True,
+        attempt: int = 0,
+        max_retries: int = 2
     ) -> List[Dict[str, Any]]:
         """
-        Core vector search with Pinecone best practices.
+        Core vector search with Pinecone best practices and retry logic.
 
         Args:
             vector: Query embedding vector
@@ -238,6 +240,8 @@ class VectorService:
             namespace: Namespace to search (default: uses PINECONE_DEFAULT_NAMESPACE from settings)
             filter_dict: Metadata filters
             include_metadata: Include metadata in results
+            attempt: Current retry attempt (0-based)
+            max_retries: Maximum number of retries (default: 2 for 3 total attempts)
 
         Returns:
             List of results with id, score, and metadata
@@ -278,9 +282,55 @@ class VectorService:
             logger.info(f"Search in namespace '{namespace}' returned {len(results)} results")
             return results
 
+        except asyncio.TimeoutError as e:
+            # Timeout: Retry with backoff (cold start or network blip)
+            if attempt < max_retries:
+                delay = 2 ** attempt  # Exponential backoff: 1s, 2s
+                logger.warning(
+                    f"[Node 2/6] Pinecone search timeout, retrying in {delay}s (attempt {attempt + 1}/{max_retries + 1})",
+                    namespace=namespace,
+                    error=str(e)
+                )
+                await asyncio.sleep(delay)
+                return await self.search(
+                    vector=vector,
+                    top_k=top_k,
+                    namespace=namespace,
+                    filter_dict=filter_dict,
+                    include_metadata=include_metadata,
+                    attempt=attempt + 1,
+                    max_retries=max_retries
+                )
+            else:
+                logger.error(f"[Node 2/6] Pinecone search timeout - Max retries exhausted: {e}")
+                raise VectorServiceError(f"Pinecone search timeout after {max_retries + 1} attempts: {e}")
+
         except Exception as e:
-            logger.error(f"Vector search in namespace '{namespace}' failed: {e}")
-            raise VectorServiceError(f"Vector search failed: {e}")
+            # Check if it's a transient service error (503, etc)
+            error_str = str(e).lower()
+            is_transient = any(indicator in error_str for indicator in ["503", "unavailable", "temporarily", "cold start"])
+
+            if is_transient and attempt < max_retries:
+                delay = 2 ** attempt  # Exponential backoff: 1s, 2s
+                logger.warning(
+                    f"[Node 2/6] Pinecone transient error, retrying in {delay}s (attempt {attempt + 1}/{max_retries + 1})",
+                    namespace=namespace,
+                    error=str(e),
+                    error_code="PINECONE_TRANSIENT"
+                )
+                await asyncio.sleep(delay)
+                return await self.search(
+                    vector=vector,
+                    top_k=top_k,
+                    namespace=namespace,
+                    filter_dict=filter_dict,
+                    include_metadata=include_metadata,
+                    attempt=attempt + 1,
+                    max_retries=max_retries
+                )
+            else:
+                logger.error(f"[Node 2/6] Vector search in namespace '{namespace}' failed: {e}")
+                raise VectorServiceError(f"Vector search failed: {e}")
 
     async def query_namespaces(
         self,

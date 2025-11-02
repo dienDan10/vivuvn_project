@@ -14,5 +14,7 @@ namespace vivuvn_api.DTOs.Request
 		public long? Budget { get; set; }
 
 		public string? SpecialRequirements { get; set; }
+
+		public string? TransportationMode { get; set; }
 	}
 }

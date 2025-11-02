@@ -63,6 +63,11 @@ class TravelRequest(BaseModel):
         description="Special requirements or accessibility needs",
         example="Vegetarian meals required"
     )
+    transportation_mode: Optional[str] = Field(
+        None,
+        description="Preferred mode of transportation",
+        example="xe khách"
+    )
     
     @field_validator("end_date")
     @classmethod
@@ -102,7 +107,16 @@ class TravelRequest(BaseModel):
                 raise ValueError("Budget cannot be negative")
             return v
         return v
-    
+
+    @field_validator("transportation_mode")
+    @classmethod
+    def validate_transportation_mode(cls, v):
+        """Validate transportation mode."""
+        valid_modes = {"xe khách", "tàu hỏa", "máy bay", "ô tô cá nhân", "xe máy"}
+        if v is not None and v.lower() not in valid_modes:
+            raise ValueError(f"Invalid transportation mode: {v}")
+        return v
+
     @property
     def duration_days(self) -> int:
         """Calculate trip duration in days."""
