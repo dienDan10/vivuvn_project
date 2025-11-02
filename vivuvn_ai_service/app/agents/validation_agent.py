@@ -92,17 +92,29 @@ class ValidationAgent:
             # Pass validation if all activities have valid place_id
             state["validation_passed"] = (missing_place_id_count == 0 and hallucinated_count == 0)
 
+            # Set error if validation fails (critical failures only)
             if missing_place_id_count > 0:
-                logger.error(f"[Node 5/6] ❌ CRITICAL: {missing_place_id_count} activities missing place_id (DB requirement)")
+                error_msg = f"Validation failed: {missing_place_id_count} activities missing place_id (database requirement)"
+                logger.error(f"[Node 5/6] ❌ CRITICAL: {error_msg}")
+                state["error"] = error_msg
 
-            if hallucinated_count > 0:
-                logger.warning(f"[Node 5/6] ⚠️ Found {hallucinated_count} activities with unknown place_id")
+            if hallucinated_count > 0 and not state.get("error"):
+                # Only set as error if it's not already set by missing place_id
+                error_msg = f"Validation failed: {hallucinated_count} activities with invalid place_id"
+                logger.error(f"[Node 5/6] ❌ CRITICAL: {error_msg}")
+                state["error"] = error_msg
 
             return state
 
         except Exception as e:
-            logger.error(f"[Node 5/6] Validation failed: {e}")
+            logger.error(
+                "[Node 5/6] Validation failed",
+                error=str(e),
+                error_code="VALIDATION_FAILED",
+                exc_info=True
+            )
             state["validation_passed"] = False
+            state["error"] = f"Validation failed: {str(e)}"
             return state
 
 

@@ -206,7 +206,8 @@ namespace vivuvn_api.Services.Implementations
                 GroupSize = request.GroupSize,
                 Budget = request.Budget,
                 SpecialRequirements = request.SpecialRequirements,
-            };
+                TransportationMode = request.TransportationMode
+			};
 
             var aiResponse = await _aiClient.GenerateItineraryAsync<AutoGenerateItineraryResponse>(aiRequest);
 

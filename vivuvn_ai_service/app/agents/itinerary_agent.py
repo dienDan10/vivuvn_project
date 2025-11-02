@@ -92,7 +92,7 @@ class ItineraryAgent:
                     logger.error(
                         f"[Node 4/6] Failed to parse Gemini response",
                         error=str(parse_error),
-                        raw_response=response.text[:300]
+                        raw_response=response.text
                     )
                     raise ItineraryGenerationError(f"Failed to parse itinerary JSON: {str(parse_error)}")
             else:

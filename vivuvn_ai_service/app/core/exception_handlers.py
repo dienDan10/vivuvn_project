@@ -40,13 +40,22 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     Note: Request validation errors are framework-level errors. Logging is minimal
     since FastAPI's middleware already logs request details.
     """
+    # Convert validation errors to JSON-serializable format
+    errors = []
+    for error in exc.errors():
+        errors.append({
+            "key": error.get("loc", [])[1],
+            "msg": str(error.get("msg", ""))
+        })
+    
     return JSONResponse(
         status_code=422,
         content={
             "error": {
                 "message": "Request validation failed",
-                "code": "VALIDATION_ERROR",
-                "details": {"validation_errors": exc.errors()}
+                "status_code": 422,
+                "type": "ValidationError",
+                "details": errors
             }
         }
     )
@@ -63,8 +72,9 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         content={
             "error": {
                 "message": exc.detail,
-                "code": "HTTP_ERROR",
-                "details": {"status_code": exc.status_code}
+                "status_code": exc.status_code,
+                "type": "HTTPException",
+                "details": {}
             }
         }
     )
@@ -91,7 +101,8 @@ async def general_exception_handler(request: Request, exc: Exception):
         content={
             "error": {
                 "message": "Internal server error",
-                "code": "INTERNAL_ERROR",
+                "status_code": 500,
+                "type": "InternalServerError",
                 "details": {"error_type": type(exc).__name__} if settings.DEBUG else {}
             }
         }
