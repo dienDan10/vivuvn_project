@@ -34,6 +34,6 @@ namespace vivuvn_api.Services.Interfaces
         /// <summary>
         /// Delete a message (soft delete)
         /// </summary>
-        Task<bool> DeleteMessageAsync(int messageId, int userId);
+        Task DeleteMessageAsync(int messageId, int userId);
     }
 }

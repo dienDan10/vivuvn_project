@@ -59,6 +59,20 @@ namespace vivuvn_api.Controllers
         }
 
         // delete message
+        [HttpDelete("{messageId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteMessage(int itineraryId, int messageId)
+        {
+            // check for if user is member of itinerary
+            int userId = GetCurrentUserId();
+            bool isMember = await _memberService.IsMemberAsync(itineraryId, userId);
+            if (!isMember)
+            {
+                return Forbid("You are not a member of this itinerary.");
+            }
+            await _messageService.DeleteMessageAsync(messageId, userId);
+            return NoContent();
+        }
 
         private int GetCurrentUserId()
         {

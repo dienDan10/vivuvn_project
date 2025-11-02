@@ -75,9 +75,14 @@ namespace vivuvn_api.Services.Implementations
 
             return _mapper.Map<ItineraryMessageDto>(savedMessage);
         }
-        public Task<bool> DeleteMessageAsync(int messageId, int userId)
+        public async Task DeleteMessageAsync(int messageId, int userId)
         {
-            throw new NotImplementedException();
+            var message = await _unitOfWork.ItineraryMessages.GetOneAsync(
+                m => m.Id == messageId && m.ItineraryMember.UserId == userId)
+                ?? throw new BadHttpRequestException("Message not found");
+
+            _unitOfWork.ItineraryMessages.Remove(message);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }
