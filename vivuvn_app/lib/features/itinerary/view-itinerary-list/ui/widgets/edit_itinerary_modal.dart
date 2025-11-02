@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/routes/routes.dart';
 import '../../models/itinerary.dart';
 import 'delete_confirm_dialog.dart';
 
@@ -24,6 +25,11 @@ class _EditItineraryModalState extends ConsumerState<EditItineraryModal> {
     );
   }
 
+  void _editItinerary() {
+    context.pop();
+    context.push(createItineraryDetailRoute(widget.itinerary.id));
+  }
+
   @override
   Widget build(final BuildContext context) {
     return Padding(
@@ -36,10 +42,7 @@ class _EditItineraryModalState extends ConsumerState<EditItineraryModal> {
               'Sửa chuyến đi',
               style: TextStyle(fontSize: 14.0),
             ),
-            onTap: () {
-              Navigator.of(context).pop();
-              // Handle edit action
-            },
+            onTap: _editItinerary,
           ),
           ListTile(
             leading: const Icon(Icons.public, size: 20.0),
