@@ -2,6 +2,7 @@
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
+using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
 
@@ -54,9 +55,25 @@ namespace vivuvn_api.Services.Implementations
             return messageDtos;
         }
 
-        public Task<ItineraryMessageDto> SendMessageAsync(int itineraryId, int userId, SendMessageRequestDto request)
+        public async Task<ItineraryMessageDto> SendMessageAsync(int itineraryId, int userId, SendMessageRequestDto request)
         {
-            throw new NotImplementedException();
+            var member = await _unitOfWork.ItineraryMembers.GetOneAsync(m => m.ItineraryId == itineraryId && m.UserId == userId);
+
+            var newMessage = new ItineraryMessage
+            {
+                ItineraryId = itineraryId,
+                ItineraryMemberId = member!.Id,
+                Message = request.Message,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _unitOfWork.ItineraryMessages.AddAsync(newMessage);
+            await _unitOfWork.SaveChangesAsync();
+
+            var savedMessage = await _unitOfWork.ItineraryMessages.GetOneAsync(
+                m => m.Id == newMessage.Id,
+                includeProperties: "ItineraryMember,ItineraryMember.User");
+
+            return _mapper.Map<ItineraryMessageDto>(savedMessage);
         }
         public Task<bool> DeleteMessageAsync(int messageId, int userId)
         {
