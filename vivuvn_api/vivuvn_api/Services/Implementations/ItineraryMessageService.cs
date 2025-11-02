@@ -15,7 +15,7 @@ namespace vivuvn_api.Services.Implementations
             var (items, totalCount) = await _unitOfWork.ItineraryMessages.GetPagedAsync(
                filter: m => m.ItineraryId == itineraryId,
                includeProperties: "ItineraryMember,ItineraryMember.User",
-               orderBy: q => q.OrderBy(m => m.CreatedAt),
+               orderBy: q => q.OrderByDescending(m => m.CreatedAt),
                pageNumber: page,
                pageSize: pageSize);
 
@@ -38,9 +38,20 @@ namespace vivuvn_api.Services.Implementations
             };
         }
 
-        public Task<List<ItineraryMessageDto>> GetNewMessagesAsync(int itineraryId, int userId, int lastMessageId)
+        public async Task<List<ItineraryMessageDto>> GetNewMessagesAsync(int itineraryId, int userId, int lastMessageId)
         {
-            throw new NotImplementedException();
+            var messages = await _unitOfWork.ItineraryMessages.GetAllAsync(
+                filter: m => m.ItineraryId == itineraryId && m.Id > lastMessageId,
+                includeProperties: "ItineraryMember,ItineraryMember.User",
+                orderBy: q => q.OrderByDescending(m => m.CreatedAt));
+
+            var messageDtos = _mapper.Map<List<ItineraryMessageDto>>(messages);
+            for (int i = 0; i < messageDtos.Count; i++)
+            {
+                var member = messages.ElementAt(i).ItineraryMember;
+                messageDtos[i].IsOwnMessage = member?.UserId == userId;
+            }
+            return messageDtos;
         }
 
         public Task<ItineraryMessageDto> SendMessageAsync(int itineraryId, int userId, SendMessageRequestDto request)
