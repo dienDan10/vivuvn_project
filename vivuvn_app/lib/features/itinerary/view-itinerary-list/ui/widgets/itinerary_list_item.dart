@@ -17,7 +17,7 @@ class ItineraryListItem extends StatelessWidget {
       showDragHandle: true,
       useRootNavigator: true,
       builder: (final BuildContext ctx) {
-        return const EditItineraryModal();
+        return EditItineraryModal(itinerary: itinerary);
       },
     );
   }

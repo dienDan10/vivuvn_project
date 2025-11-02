@@ -17,7 +17,7 @@ class ItineraryListLayout extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Text(
-                'Itineraries',
+                'Chuyến đi',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,

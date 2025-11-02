@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class EditItineraryModal extends StatelessWidget {
-  const EditItineraryModal({super.key});
+import '../../models/itinerary.dart';
+import 'delete_confirm_dialog.dart';
+
+class EditItineraryModal extends ConsumerStatefulWidget {
+  final Itinerary itinerary;
+  const EditItineraryModal({super.key, required this.itinerary});
+
+  @override
+  ConsumerState<EditItineraryModal> createState() => _EditItineraryModalState();
+}
+
+class _EditItineraryModalState extends ConsumerState<EditItineraryModal> {
+  void _showDeleteConfirmationDialog() {
+    context.pop();
+    showDialog(
+      context: context,
+      builder: (final BuildContext ctx) {
+        return DeleteConfirmDialog(itineraryId: widget.itinerary.id);
+      },
+    );
+  }
 
   @override
   Widget build(final BuildContext context) {
@@ -10,28 +31,34 @@ class EditItineraryModal extends StatelessWidget {
       child: Wrap(
         children: [
           ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Edit Itinerary'),
+            leading: const Icon(Icons.edit, size: 20.0),
+            title: const Text(
+              'Sửa chuyến đi',
+              style: TextStyle(fontSize: 14.0),
+            ),
             onTap: () {
               Navigator.of(context).pop();
               // Handle edit action
             },
           ),
           ListTile(
-            leading: const Icon(Icons.public),
-            title: const Text('Set as public'),
+            leading: const Icon(Icons.public, size: 20.0),
+            title: const Text(
+              'Đặt là công khai',
+              style: TextStyle(fontSize: 14.0),
+            ),
             onTap: () {
               Navigator.of(context).pop();
               // Handle set as public action
             },
           ),
           ListTile(
-            leading: const Icon(Icons.delete),
-            title: const Text('Delete Itinerary'),
-            onTap: () {
-              Navigator.of(context).pop();
-              // Handle delete action
-            },
+            leading: const Icon(Icons.delete, size: 20.0),
+            title: const Text(
+              'Xóa chuyến đi',
+              style: TextStyle(fontSize: 14.0),
+            ),
+            onTap: _showDeleteConfirmationDialog,
           ),
         ],
       ),
