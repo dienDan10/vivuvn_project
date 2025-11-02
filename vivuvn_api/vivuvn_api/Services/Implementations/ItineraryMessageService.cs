@@ -73,7 +73,10 @@ namespace vivuvn_api.Services.Implementations
                 m => m.Id == newMessage.Id,
                 includeProperties: "ItineraryMember,ItineraryMember.User");
 
-            return _mapper.Map<ItineraryMessageDto>(savedMessage);
+            var messageDto = _mapper.Map<ItineraryMessageDto>(savedMessage);
+            messageDto.IsOwnMessage = userId == savedMessage?.ItineraryMember.UserId;
+
+            return messageDto;
         }
         public async Task DeleteMessageAsync(int messageId, int userId)
         {

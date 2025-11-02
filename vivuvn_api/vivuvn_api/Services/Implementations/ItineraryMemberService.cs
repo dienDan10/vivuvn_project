@@ -37,6 +37,13 @@ namespace vivuvn_api.Services.Implementations
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.InviteCode == inviteCode)
                 ?? throw new ArgumentException("Invalid invite code");
 
+            // count the number of member and check for full
+            var membersCount = await _unitOfWork.ItineraryMembers.CountAsync(itinerary.Id);
+            if (membersCount >= itinerary.GroupSize)
+            {
+                throw new BadHttpRequestException("Members of this itinerary is full. Cannot join.");
+            }
+
             // check if user is already a member
             var existingMember = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itinerary.Id && im.UserId == userId);
 
@@ -118,7 +125,7 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<bool> IsMemberAsync(int itineraryId, int userId)
         {
-            return await _unitOfWork.ItineraryMembers.IsMemberRoleAsync(itineraryId, userId);
+            return await _unitOfWork.ItineraryMembers.IsMemberAsync(itineraryId, userId);
         }
 
         public async Task<int> GetCurrentMemberCountAsync(int itineraryId)
