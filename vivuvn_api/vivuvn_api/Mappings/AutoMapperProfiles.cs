@@ -137,6 +137,10 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(src => src.JoinedAt))
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role));
 
+            // Mapping for Itinerary Message
+            CreateMap<ItineraryMessage, ItineraryMessageDto>()
+                .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.ItineraryMember));
+
         }
     }
 }
