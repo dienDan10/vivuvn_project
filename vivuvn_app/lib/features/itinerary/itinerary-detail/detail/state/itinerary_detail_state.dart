@@ -12,6 +12,12 @@ class ItineraryDetailState {
   final bool isGroupSizeEditing;
   final bool isGroupSizeSaving;
   final int? groupSizeDraft;
+  // Invite code state
+  final String? inviteCode;
+  final bool isInviteCodeLoading;
+  final String? inviteCodeError;
+  // QR code save state
+  final bool isSavingQrCode;
 
   ItineraryDetailState({
     this.itineraryId,
@@ -21,6 +27,10 @@ class ItineraryDetailState {
     this.isGroupSizeEditing = false,
     this.isGroupSizeSaving = false,
     this.groupSizeDraft,
+    this.inviteCode,
+    this.isInviteCodeLoading = false,
+    this.inviteCodeError,
+    this.isSavingQrCode = false,
   });
 
   ItineraryDetailState copyWith({
@@ -31,6 +41,10 @@ class ItineraryDetailState {
     final bool? isGroupSizeEditing,
     final bool? isGroupSizeSaving,
     final Object? groupSizeDraft = _noValue,
+    final String? inviteCode,
+    final bool? isInviteCodeLoading,
+    final Object? inviteCodeError = _noValue,
+    final bool? isSavingQrCode,
   }) {
     return ItineraryDetailState(
       itineraryId: itineraryId ?? this.itineraryId,
@@ -42,6 +56,12 @@ class ItineraryDetailState {
       groupSizeDraft: identical(groupSizeDraft, _noValue)
           ? this.groupSizeDraft
           : groupSizeDraft as int?,
+      inviteCode: inviteCode ?? this.inviteCode,
+      isInviteCodeLoading: isInviteCodeLoading ?? this.isInviteCodeLoading,
+      inviteCodeError: identical(inviteCodeError, _noValue)
+          ? this.inviteCodeError
+          : inviteCodeError as String?,
+      isSavingQrCode: isSavingQrCode ?? this.isSavingQrCode,
     );
   }
 }

@@ -6,6 +6,7 @@ import '../../../../../../common/toast/global_toast.dart';
 import '../../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../service/itinerary_detail_service.dart';
+import '../service/qr_code_save_service.dart';
 import '../state/itinerary_detail_state.dart';
 
 final itineraryDetailControllerProvider =
@@ -31,7 +32,11 @@ class ItineraryDetailController
       final data = await ref
           .read(itineraryDetailServiceProvider)
           .getItineraryDetail(state.itineraryId!);
-      state = state.copyWith(itinerary: data);
+      // Sync inviteCode từ itinerary object vào state nếu có
+      state = state.copyWith(
+        itinerary: data,
+        inviteCode: data.inviteCode ?? state.inviteCode,
+      );
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
       state = state.copyWith(error: errorMsg);
@@ -76,9 +81,8 @@ class ItineraryDetailController
     // Validate (treat null or empty as invalid)
     final validationError = Validator.validateGroupSize(draft?.toString());
     if (validationError != null) {
-      if (context.mounted) {
-        GlobalToast.showErrorToast(context, message: validationError);
-      }
+      if (!context.mounted) return false;
+      GlobalToast.showErrorToast(context, message: validationError);
       return false;
     }
     // At this point draft must be non-null
@@ -102,6 +106,71 @@ class ItineraryDetailController
     } catch (_) {
       state = state.copyWith(isGroupSizeSaving: false, error: 'unknown error');
       return false;
+    }
+  }
+
+  /// Fetch invite code for the itinerary
+  Future<void> fetchInviteCode() async {
+    final itineraryId = state.itineraryId;
+    if (itineraryId == null) return;
+
+    state = state.copyWith(
+      isInviteCodeLoading: true,
+      inviteCodeError: null,
+    );
+
+    try {
+      final inviteCode = await ref
+          .read(itineraryDetailServiceProvider)
+          .getInviteCode(itineraryId);
+      state = state.copyWith(
+        inviteCode: inviteCode,
+        isInviteCodeLoading: false,
+        inviteCodeError: null,
+      );
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(
+        isInviteCodeLoading: false,
+        inviteCodeError: errorMsg,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isInviteCodeLoading: false,
+        inviteCodeError: 'unknown error',
+      );
+    }
+  }
+
+  /// Save QR code to Gallery
+  Future<void> saveQrCodeToGallery(
+    final BuildContext context,
+    final GlobalKey repaintBoundaryKey,
+  ) async {
+    final inviteCode = state.inviteCode ?? state.itinerary?.inviteCode;
+
+    if (inviteCode == null) {
+      if (!context.mounted) return;
+      GlobalToast.showErrorToast(
+        context,
+        message: 'Không có mã QR code để lưu',
+      );
+      return;
+    }
+
+    state = state.copyWith(isSavingQrCode: true);
+
+    try {
+      final qrCodeSaveService = ref.read(qrCodeSaveServiceProvider);
+      await qrCodeSaveService.saveQrCodeToGallery(
+        context,
+        repaintBoundaryKey,
+      );
+    } catch (e) {
+      // Error handling đã được xử lý trong service
+      // Chỉ cần log nếu cần thiết
+    } finally {
+      state = state.copyWith(isSavingQrCode: false);
     }
   }
 }
