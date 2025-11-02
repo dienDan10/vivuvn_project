@@ -64,8 +64,8 @@ class Validator {
       return 'Xin hãy nhập số lượng nhóm';
     }
     final n = int.tryParse(value.trim());
-    if (n == null) return 'Số lượng nhóm phải là một số';
-    if (n < 1 || n > 10) return 'Số lượng nhóm phải từ 1 đến 10';
+    if (n == null) return 'Số lượng người trong đoàn phải là một số';
+    if (n < 1 || n > 10) return 'Số lượng người trong đoàn phải từ 1 đến 10';
     return null;
   }
 

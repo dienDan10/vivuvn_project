@@ -17,21 +17,25 @@ class TotalBudgetDisplay extends StatelessWidget {
       children: [
         Text(
           '${formatter.format(totalBudget.round())} đ',
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           '(≈ \$${(totalBudget / BudgetConstants.exchangeRate).toStringAsFixed(2)})',
           style: const TextStyle(
             fontSize: 12,
-            color: Colors.grey,
+            color: Colors.white,
             fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 2),
         const Text(
           'Tổng chi tiêu',
-          style: TextStyle(fontSize: 13, color: Colors.grey),
+          style: TextStyle(fontSize: 13, color: Colors.white),
         ),
       ],
     );

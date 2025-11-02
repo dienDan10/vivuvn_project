@@ -32,9 +32,27 @@ if %errorlevel% neq 0 (
 
 echo ? Docker is running
 
-REM Create images directory
-echo ?? Creating images directory...
-if not exist "images" mkdir images
+REM Check if local SQL Server is running
+echo ?? Checking local SQL Server...
+sqlcmd -S localhost,1433 -U sa -Q "SELECT 1" >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ??  WARNING: Cannot connect to local SQL Server on localhost:1433
+    echo    Please ensure:
+    echo    1. SQL Server is installed and running
+    echo    2. TCP/IP is enabled in SQL Server Configuration Manager
+    echo    3. SQL Server is configured to accept remote connections
+    echo    4. Port 1433 is open in Windows Firewall
+    echo    5. SQL Server Authentication is enabled
+    echo.
+    set /p continue="Do you want to continue anyway? (Y/N): "
+    if /i not "%continue%"=="Y" (
+        echo Setup cancelled.
+        pause
+        exit /b 1
+    )
+) else (
+    echo ??  Local SQL Server is accessible
+)
 
 REM Copy environment template if .env doesn't exist
 if not exist ".env" (
@@ -61,17 +79,11 @@ REM Pull required images
 echo ?? Pulling required Docker images...
 docker pull mcr.microsoft.com/dotnet/sdk:8.0
 docker pull mcr.microsoft.com/dotnet/aspnet:8.0
-docker pull mcr.microsoft.com/mssql/server:2022-latest
 docker pull minhdang1163/vivuvn-ai-service:latest
 
 REM Build and start containers
 echo ?? Building and starting containers...
 docker-compose up --build -d
-
-REM Wait for SQL Server to be ready
-echo ? Waiting for SQL Server to be ready...
-echo    This may take 30-60 seconds...
-timeout /t 30 /nobreak >nul
 
 REM Wait for AI Service to be ready
 echo ? Waiting for AI Service to be ready...
@@ -95,16 +107,18 @@ echo ?? Services:
 echo    ?? API: http://localhost:5277
 echo    ?? Swagger: http://localhost:5277/swagger
 echo    ?? AI Service: http://localhost:8000 (if exposed)
-echo    ???  SQL Server: localhost:1434
+echo    ???  Local SQL Server: localhost:1433
 echo       Username: sa
-echo       Password: [Check your .env file]
+echo       Password: [Your local SQL Server password]
 echo.
 echo ?? Useful Commands:
 echo    View API logs:        docker-compose logs -f vivuvn-api
 echo    View AI Service logs: docker-compose logs -f vivuvn-ai-service
-echo    View SQL logs:        docker-compose logs -f sqlserver
 echo    Stop services:        docker-compose down
 echo    Restart services:     docker-compose restart
+echo.
+echo ??  IMPORTANT: Make sure your local SQL Server is running and accessible
+echo    The API will connect to host.docker.internal:1433
 echo.
 echo ???  For troubleshooting, check the README-Docker.md file
 

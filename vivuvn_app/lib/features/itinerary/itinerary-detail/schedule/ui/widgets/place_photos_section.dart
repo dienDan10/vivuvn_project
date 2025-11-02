@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../overview/ui/widgets/place_card_image.dart';
+import '../../../overview/ui/widgets/favourite_place/place_card_image.dart';
 
 class PlacePhotosSection extends StatelessWidget {
   const PlacePhotosSection({

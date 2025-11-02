@@ -1,4 +1,4 @@
-import '../modal/location.dart';
+import '../models/location.dart';
 
 class SearchLocationState {
   final String searchText;

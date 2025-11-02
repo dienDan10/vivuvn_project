@@ -18,7 +18,7 @@ class ExchangeRateDisplay extends StatelessWidget {
           'Tỷ giá tạm tính: 1 USD = ${formatter.format(BudgetConstants.exchangeRate.round())} đ',
           style: const TextStyle(
             fontSize: 11,
-            color: Colors.grey,
+            color: Colors.white,
             fontStyle: FontStyle.italic,
           ),
         ),

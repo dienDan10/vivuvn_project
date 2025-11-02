@@ -14,11 +14,13 @@ class VivuVNBaseException(Exception):
     def __init__(
         self,
         message: str,
-        error_code: Optional[str] = None,
+        status_code: int = 500,
+        error_type: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None
     ):
         self.message = message
-        self.error_code = error_code
+        self.status_code = status_code
+        self.error_type = error_type or self.__class__.__name__
         self.details = details or {}
         super().__init__(self.message)
 
@@ -34,7 +36,8 @@ class TravelPlanningError(VivuVNBaseException):
     ):
         super().__init__(
             message=message,
-            error_code="TRAVEL_PLANNING_ERROR",
+            status_code=400,
+            error_type="TravelPlanningError",
             details={
                 "destination": destination,
                 "operation": operation
@@ -44,13 +47,52 @@ class TravelPlanningError(VivuVNBaseException):
 
 class ItineraryGenerationError(TravelPlanningError):
     """Raised when itinerary generation fails."""
-    
+
     def __init__(self, message: str, destination: Optional[str] = None):
         super().__init__(
             message=message,
             destination=destination,
             operation="itinerary_generation"
         )
+
+
+class ExternalServiceError(VivuVNBaseException):
+    """Raised when external service (Gemini, Pinecone, etc) is unavailable."""
+
+    def __init__(self, message: str, service: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=502,
+            error_type="ExternalServiceError",
+            details={"service": service}
+        )
+
+
+class ServiceUnavailableError(ExternalServiceError):
+    """Raised when service returns 503."""
+
+    def __init__(self, message: str, service: Optional[str] = None):
+        super().__init__(message, service)
+        self.status_code = 503
+        self.error_type = "ServiceUnavailableError"
+
+
+class ContentPolicyError(ItineraryGenerationError):
+    """Raised when content violates safety policies."""
+
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.status_code = 400
+        self.error_type = "ContentPolicyError"
+
+
+class NoResultsError(TravelPlanningError):
+    """Raised when no places found for given destination."""
+
+    def __init__(self, message: str, destination: Optional[str] = None):
+        super().__init__(message, destination, "search")
+        self.status_code = 404
+        self.error_type = "NoResultsError"
 
 
 class DataLoadingError(VivuVNBaseException):
@@ -64,7 +106,8 @@ class DataLoadingError(VivuVNBaseException):
     ):
         super().__init__(
             message=message,
-            error_code="DATA_LOADING_ERROR",
+            status_code=500,
+            error_type="DataLoadingError",
             details={
                 "file_path": file_path,
                 "operation": operation
@@ -75,44 +118,40 @@ class DataLoadingError(VivuVNBaseException):
 class WeatherServiceError(VivuVNBaseException):
     """Base exception for weather service errors."""
 
-    def __init__(self, message: str, error_code: str = "WEATHER_ERROR"):
-        super().__init__(message, error_code)
-        self.http_status_code = 500
+    def __init__(self, message: str, status_code: int = 500):
+        super().__init__(message, status_code, error_type="WeatherServiceError")
 
 
 class WeatherAPIError(WeatherServiceError):
     """Weather API communication error."""
 
     def __init__(self, message: str):
-        super().__init__(message, "WEATHER_API_ERROR")
+        super().__init__(message, status_code=502)
 
 
 class AuthenticationError(WeatherServiceError):
     """Invalid API key."""
 
     def __init__(self, message: str):
-        super().__init__(message, "WEATHER_AUTH_ERROR")
-        self.http_status_code = 401
+        super().__init__(message, status_code=401)
 
 
 class RateLimitError(WeatherServiceError):
     """Rate limit exceeded."""
 
     def __init__(self, message: str):
-        super().__init__(message, "WEATHER_RATE_LIMIT")
-        self.http_status_code = 429
+        super().__init__(message, status_code=429)
 
 
-# Exception mapping for HTTP status codes
-EXCEPTION_HTTP_STATUS_MAP = {
-    VivuVNBaseException: 500,
-    TravelPlanningError: 400,
-    ItineraryGenerationError: 500,
-    DataLoadingError: 500,
-    WeatherServiceError: 500,
-    WeatherAPIError: 500,
-    AuthenticationError: 401,
-    RateLimitError: 429,
+# Error message constants
+ERROR_MESSAGES = {
+    "SERVICE_UNAVAILABLE": "Service temporarily unavailable. Please try again.",
+    "EXTERNAL_SERVICE_DOWN": "External service is temporarily unavailable. Please try again.",
+    "GEMINI_AUTH_ERROR": "Internal service configuration error",
+    "GEMINI_TIMEOUT": "Request timeout. Please try again.",
+    "CONTENT_POLICY_VIOLATION": "Your request violates content policy. Please rephrase.",
+    "NO_PLACES_FOUND": "No places found for the specified destination. Please try a different destination.",
+    "VALIDATION_FAILED": "Itinerary validation failed. Please try again.",
 }
 
 
@@ -126,8 +165,9 @@ def get_http_status_code(exception: Exception) -> int:
     Returns:
         int: HTTP status code
     """
-    exception_type = type(exception)
-    return EXCEPTION_HTTP_STATUS_MAP.get(exception_type, 500)
+    if isinstance(exception, VivuVNBaseException):
+        return exception.status_code
+    return 500
 
 
 def format_error_response(exception: VivuVNBaseException) -> Dict[str, Any]:
@@ -143,7 +183,8 @@ def format_error_response(exception: VivuVNBaseException) -> Dict[str, Any]:
     return {
         "error": {
             "message": exception.message,
-            "code": exception.error_code,
+            "status_code": exception.status_code,
+            "type": exception.error_type,
             "details": exception.details
         }
     }
@@ -154,11 +195,16 @@ __all__ = [
     "VivuVNBaseException",
     "TravelPlanningError",
     "ItineraryGenerationError",
+    "ExternalServiceError",
+    "ServiceUnavailableError",
+    "ContentPolicyError",
+    "NoResultsError",
     "DataLoadingError",
     "WeatherServiceError",
     "WeatherAPIError",
     "AuthenticationError",
     "RateLimitError",
+    "ERROR_MESSAGES",
     "get_http_status_code",
     "format_error_response",
 ]

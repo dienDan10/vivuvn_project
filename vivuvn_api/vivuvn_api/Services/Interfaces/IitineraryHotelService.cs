@@ -1,0 +1,16 @@
+﻿using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.ValueObjects;
+
+namespace vivuvn_api.Services.Interfaces
+{
+    public interface IitineraryHotelService
+    {
+        Task<IEnumerable<ItineraryHotelDto>> GetHotelsInItineraryAsync(int itineraryId);
+        Task AddHotelToItineraryFromSuggestionAsync(int itineraryId, AddHotelToItineraryFromSuggestionDto request);
+        Task AddHotelToItineraryFromSearchAsync(int itineraryId, AddHotelToItineraryFromSearch request);
+        Task UpdateNotesAsync(int itineraryId, int itineraryHotelId, string notes);
+        Task UpdateCheckInCheckOutAsync(int itineraryId, int itineraryHotelId, DateOnly checkIn, DateOnly checkOut);
+        Task UpdateCostAsync(int itineraryId, int itineraryHotelId, decimal cost);
+        Task DeleteItineraryHotelAsync(int itineraryId, int itineraryHotelId);
+    }
+}

@@ -15,3 +15,6 @@ const String locationDetailRoute = '/location/:id';
 
 // restaurants routes
 const String nearbyRestaurantRoute = '/nearby-restaurants';
+
+// hotels routes
+const String nearbyHotelRoute = '/nearby-hotels';

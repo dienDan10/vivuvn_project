@@ -5,10 +5,10 @@ namespace vivuvn_api.DTOs.Request
     public class FetchGoogleRestaurantRequestDto
     {
         [JsonPropertyName("includedTypes")]
-        public List<string> IncludedTypes { get; set; } = new() { "restaurant" };
+        public List<string> IncludedTypes { get; set; } = new() { "restaurant", "cafe", "bar", "bakery", "meal_delivery", "meal_takeaway" };
 
         [JsonPropertyName("maxResultCount")]
-        public int MaxResultCount { get; set; } = 15;
+        public int MaxResultCount { get; set; } = 20;
 
         [JsonPropertyName("locationRestriction")]
         public LocationRestriction LocationRestriction { get; set; } = new();

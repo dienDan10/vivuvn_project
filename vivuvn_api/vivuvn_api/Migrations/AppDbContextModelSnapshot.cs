@@ -227,7 +227,7 @@ namespace vivuvn_api.Migrations
 
                     b.HasIndex("GooglePlaceId");
 
-                    b.ToTable("Hotel");
+                    b.ToTable("Hotels");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Itinerary", b =>
@@ -306,6 +306,45 @@ namespace vivuvn_api.Migrations
                     b.ToTable("ItineraryDays");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryHotel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BudgetItemId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("CheckIn")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("CheckOut")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItineraryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BudgetItemId")
+                        .IsUnique()
+                        .HasFilter("[BudgetItemId] IS NOT NULL");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.ToTable("ItineraryHotels");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.ItineraryItem", b =>
                 {
                     b.Property<int>("ItineraryItemId")
@@ -351,6 +390,45 @@ namespace vivuvn_api.Migrations
                     b.HasIndex("LocationId");
 
                     b.ToTable("ItineraryItems");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryRestaurant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BudgetItemId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("ItineraryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RestaurantId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly?>("Time")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BudgetItemId")
+                        .IsUnique()
+                        .HasFilter("[BudgetItemId] IS NOT NULL");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("ItineraryRestaurants");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Location", b =>
@@ -473,7 +551,7 @@ namespace vivuvn_api.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("Photo");
+                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Province", b =>
@@ -552,7 +630,7 @@ namespace vivuvn_api.Migrations
 
                     b.HasIndex("GooglePlaceId");
 
-                    b.ToTable("Restaurant");
+                    b.ToTable("Restaurants");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Role", b =>
@@ -794,6 +872,31 @@ namespace vivuvn_api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryHotel", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.BudgetItem", "BudgetItem")
+                        .WithOne("ItineraryHotel")
+                        .HasForeignKey("vivuvn_api.Models.ItineraryHotel", "BudgetItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("vivuvn_api.Models.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("vivuvn_api.Models.Itinerary", "Itinerary")
+                        .WithMany("Hotels")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BudgetItem");
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("Itinerary");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.ItineraryItem", b =>
                 {
                     b.HasOne("vivuvn_api.Models.ItineraryDay", "ItineraryDay")
@@ -809,6 +912,31 @@ namespace vivuvn_api.Migrations
                     b.Navigation("ItineraryDay");
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryRestaurant", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.BudgetItem", "BudgetItem")
+                        .WithOne("ItineraryRestaurant")
+                        .HasForeignKey("vivuvn_api.Models.ItineraryRestaurant", "BudgetItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("vivuvn_api.Models.Itinerary", "Itinerary")
+                        .WithMany("Restaurants")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("vivuvn_api.Models.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("BudgetItem");
+
+                    b.Navigation("Itinerary");
+
+                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Location", b =>
@@ -881,6 +1009,13 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.BudgetItem", b =>
+                {
+                    b.Navigation("ItineraryHotel");
+
+                    b.Navigation("ItineraryRestaurant");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.Hotel", b =>
                 {
                     b.Navigation("Photos");
@@ -893,6 +1028,10 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Days");
 
                     b.Navigation("FavoritePlaces");
+
+                    b.Navigation("Hotels");
+
+                    b.Navigation("Restaurants");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.ItineraryDay", b =>

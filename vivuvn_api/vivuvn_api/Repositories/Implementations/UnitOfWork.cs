@@ -11,12 +11,17 @@ namespace vivuvn_api.Repositories.Implementations
 
         public IUserRepository Users { get; private set; }
         public IItineraryRepository Itineraries { get; private set; }
-        public IItineraryDayRepository ItineraryDays { get; set; }
-        public IItineraryItemRepository ItineraryItems { get; set; }
-        public IBudgetRepository Budgets { get; set; }
-        public IProvinceRepository Provinces { get; set; }
+        public IItineraryDayRepository ItineraryDays { get; private set; }
+        public IItineraryItemRepository ItineraryItems { get; private set; }
+        public IBudgetRepository Budgets { get; private set; }
+        public IProvinceRepository Provinces { get; private set; }
         public ILocationRepository Locations { get; private set; }
         public IFavoritePlaceRepository FavoritePlaces { get; private set; }
+        public IItineraryRestaurantRepository ItineraryRestaurants { get; private set; }
+        public IItineraryHotelRepository ItineraryHotels { get; private set; }
+        public IRestaurantRepository Restaurants { get; private set; }
+        public IHotelRepository Hotels { get; private set; }
+        public IBudgetTypeRepository BudgetTypes { get; private set; }
 
         public UnitOfWork(AppDbContext context,
             IUserRepository userRepository,
@@ -26,7 +31,12 @@ namespace vivuvn_api.Repositories.Implementations
             IProvinceRepository provinceRepository,
             ILocationRepository locationRepository,
             IFavoritePlaceRepository favoritePlaceRepository,
-            IItineraryItemRepository itineraryItem)
+            IItineraryItemRepository itineraryItem,
+            IItineraryRestaurantRepository itineraryRestaurantRepository,
+            IItineraryHotelRepository itineraryHotelRepository,
+            IRestaurantRepository restaurantRepository,
+            IHotelRepository hotelRepository,
+            IBudgetTypeRepository budgetTypeRepository)
         {
             _context = context;
             Users = userRepository;
@@ -37,6 +47,11 @@ namespace vivuvn_api.Repositories.Implementations
             Locations = locationRepository;
             FavoritePlaces = favoritePlaceRepository;
             ItineraryItems = itineraryItem;
+            ItineraryRestaurants = itineraryRestaurantRepository;
+            ItineraryHotels = itineraryHotelRepository;
+            Restaurants = restaurantRepository;
+            Hotels = hotelRepository;
+            BudgetTypes = budgetTypeRepository;
         }
 
         public async Task SaveChangesAsync()

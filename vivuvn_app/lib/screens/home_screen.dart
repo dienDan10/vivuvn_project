@@ -33,6 +33,12 @@ class HomeScreen extends ConsumerWidget {
                 },
                 child: const Text('Nearby Restaurant'),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  context.push(nearbyHotelRoute);
+                },
+                child: const Text('Nearby Hotel'),
+              ),
             ],
           ),
         ),

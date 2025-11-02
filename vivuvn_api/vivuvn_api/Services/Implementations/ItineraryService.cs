@@ -165,6 +165,8 @@ namespace vivuvn_api.Services.Implementations
 
         #endregion
 
+        #region Itinerary Schedule Methods
+
         public async Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId)
         {
             var days = await _unitOfWork.ItineraryDays.GetAllAsync(d => d.ItineraryId == itineraryId,
@@ -173,6 +175,8 @@ namespace vivuvn_api.Services.Implementations
             if (days is null) return [];
             return _mapper.Map<IEnumerable<ItineraryDayDto>>(days);
         }
+
+        #endregion
 
         public async Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
         {
@@ -202,7 +206,8 @@ namespace vivuvn_api.Services.Implementations
                 GroupSize = request.GroupSize,
                 Budget = request.Budget,
                 SpecialRequirements = request.SpecialRequirements,
-            };
+                TransportationMode = request.TransportationMode
+			};
 
             var aiResponse = await _aiClient.GenerateItineraryAsync<AutoGenerateItineraryResponse>(aiRequest);
 

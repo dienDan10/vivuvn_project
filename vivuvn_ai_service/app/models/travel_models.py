@@ -106,8 +106,8 @@ class TransportationSuggestion(BaseModel):
 
     mode: str = Field(
         ...,
-        description="Mode of transportation: máy bay, xe khách, tàu hỏa, ô tô cá nhân",
-        pattern="^(máy bay|xe khách|tàu hỏa|ô tô cá nhân)$"
+        description="Mode of transportation: máy bay, xe khách, tàu hỏa, ô tô cá nhân, xe máy",
+        pattern="^(máy bay|xe khách|tàu hỏa|ô tô cá nhân|xe máy)$"
     )
     estimated_cost: float = Field(
         ...,
@@ -121,14 +121,16 @@ class TransportationSuggestion(BaseModel):
     )
     details: str = Field(
         ...,
-        description="Route and additional details (e.g., 'Hà Nội → Đà Nẵng, chuyến sáng 07:00-08:30')"
+        description="Route and travel time (e.g., 'Hà Nội → Đà Nẵng, 07:00-08:30, 14h')",
+        min_length=10,
+        max_length=150
     )
 
     @field_validator("mode")
     @classmethod
     def validate_mode(cls, v):
         """Validate transportation mode."""
-        valid_modes = {"máy bay", "xe khách", "tàu hỏa", "ô tô cá nhân"}
+        valid_modes = {"máy bay", "xe khách", "tàu hỏa", "ô tô cá nhân", "xe máy"}
         if v not in valid_modes:
             raise ValueError(f"Mode must be one of: {', '.join(valid_modes)}")
         return v

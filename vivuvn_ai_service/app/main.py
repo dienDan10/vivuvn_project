@@ -5,23 +5,15 @@ This module sets up the FastAPI application with middleware, exception handlers,
 and route registration.
 """
 
-import time
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
+from fastapi import FastAPI
 import structlog
-import logging
 
-from app.core.config import settings, get_cors_settings
-from app.core.exceptions import (
-    VivuVNBaseException, 
-    get_http_status_code, 
-    format_error_response
-)
+from app.core.config import settings
+from app.core.exception_handlers import register_exception_handlers
+from app.core.middleware import register_middleware
 from app.api.routes.travel_planner import router as travel_router
 from app.api.routes.data_management import router as data_router
 from app.api.schemas import HealthCheckResponse
@@ -35,7 +27,6 @@ structlog.configure(
         structlog.stdlib.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
     ],
@@ -111,139 +102,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    **get_cors_settings()
-)
-
-# Add trusted host middleware for security
-if not settings.DEBUG:
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=["*"]  # Configure with specific hosts in production
-    )
-
-
-# Request logging middleware
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    """Log all HTTP requests with timing information."""
-    start_time = time.time()
-    
-    # Log request
-    logger.info(
-        "HTTP request started",
-        method=request.method,
-        url=str(request.url),
-        client_ip=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent")
-    )
-    
-    # Process request
-    response = await call_next(request)
-    
-    # Calculate processing time
-    process_time = time.time() - start_time
-    
-    # Log response
-    logger.info(
-        "HTTP request completed",
-        method=request.method,
-        url=str(request.url),
-        status_code=response.status_code,
-        process_time=round(process_time, 4)
-    )
-    
-    # Add processing time header
-    response.headers["X-Process-Time"] = str(process_time)
-    
-    return response
-
-
-# Exception handlers
-@app.exception_handler(VivuVNBaseException)
-async def vivuvn_exception_handler(request: Request, exc: VivuVNBaseException):
-    """Handle custom application exceptions."""
-    logger.error(
-        "Application exception occurred",
-        error_code=exc.error_code,
-        message=exc.message,
-        details=exc.details,
-        path=request.url.path
-    )
-    
-    status_code = get_http_status_code(exc)
-    return JSONResponse(
-        status_code=status_code,
-        content=format_error_response(exc)
-    )
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Handle request validation errors."""
-    logger.warning(
-        "Request validation failed",
-        errors=exc.errors(),
-        path=request.url.path
-    )
-    
-    return JSONResponse(
-        status_code=422,
-        content={
-            "error": {
-                "message": "Request validation failed",
-                "code": "VALIDATION_ERROR",
-                "details": {"validation_errors": exc.errors()}
-            }
-        }
-    )
-
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    """Handle HTTP exceptions."""
-    logger.warning(
-        "HTTP exception",
-        status_code=exc.status_code,
-        detail=exc.detail,
-        path=request.url.path
-    )
-    
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error": {
-                "message": exc.detail,
-                "code": "HTTP_ERROR",
-                "details": {"status_code": exc.status_code}
-            }
-        }
-    )
-
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
-    """Handle unexpected exceptions."""
-    logger.error(
-        "Unexpected exception occurred",
-        error=str(exc),
-        error_type=type(exc).__name__,
-        path=request.url.path,
-        exc_info=True
-    )
-    
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": {
-                "message": "Internal server error",
-                "code": "INTERNAL_ERROR",
-                "details": {"error_type": type(exc).__name__} if settings.DEBUG else {}
-            }
-        }
-    )
+# Register middleware and exception handlers
+register_middleware(app)
+register_exception_handlers(app)
 
 
 # Health check endpoint

@@ -5,12 +5,13 @@ Handles:
 - Building prompts with grounded data
 - Calling Gemini API with structured output
 - Converting response to structured itinerary
+- Retry logic for transient failures
 """
 
 import structlog
 import asyncio
+import json
 
-from google import genai
 from google.genai import types
 
 from app.core.config import settings
@@ -18,6 +19,7 @@ from app.core.exceptions import ItineraryGenerationError
 from app.models.travel_models import TravelItinerary
 from app.prompts.travel_prompts import create_user_prompt, get_system_prompt_for_request
 from app.agents.state import TravelPlanningState
+from app.clients.gemini_client import get_gemini_client
 
 logger = structlog.get_logger(__name__)
 
@@ -27,8 +29,8 @@ class ItineraryAgent:
 
     def __init__(self):
         """Initialize itinerary generation agent."""
-        # Initialize Google AI client
-        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        # Get shared Gemini client (singleton)
+        self.gemini_client = get_gemini_client()
         self.model = settings.GEMINI_MODEL
 
         # Base config (without system instruction, which varies per request)
@@ -39,6 +41,7 @@ class ItineraryAgent:
             "temperature": settings.TEMPERATURE,
             "max_output_tokens": settings.MAX_TOKENS
         }
+
 
     async def generate_structured_itinerary(self, state: TravelPlanningState) -> TravelPlanningState:
         """Node 4: Generate itinerary with function calling."""
@@ -71,26 +74,33 @@ class ItineraryAgent:
                 **self.base_generation_config
             )
 
-            # Call Gemini with structured output
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.client.models.generate_content(
-                    model=self.model,
-                    config=request_config,
-                    contents=user_prompt
-                )
-            )
+            # Call Gemini with retry logic (handled by GeminiClient)
+            response = await self.gemini_client.generate_content(request_config, user_prompt)
 
-            logger.info(response)
+            # Parse structured response from Gemini
+            structured_itinerary: TravelItinerary = None
 
-            # Get structured data directly from parsed response
-            if not response.parsed:
-                logger.error(f"[Node 4/6] No parsed response from Gemini")
-                if response.text:
-                    logger.error(f"[Node 4/6] Raw response: {response.text[:500]}...")
+            # Try to get parsed response first (preferred method)
+            if hasattr(response, 'parsed') and response.parsed:
+                structured_itinerary = response.parsed
+            # Fallback: manually parse JSON from text response
+            elif response.text:
+                try:
+                    parsed_data = json.loads(response.text)
+                    structured_itinerary = TravelItinerary(**parsed_data)
+                except (json.JSONDecodeError, TypeError, ValueError) as parse_error:
+                    logger.error(
+                        f"[Node 4/6] Failed to parse Gemini response",
+                        error=str(parse_error),
+                        raw_response=response.text
+                    )
+                    raise ItineraryGenerationError(f"Failed to parse itinerary JSON: {str(parse_error)}")
+            else:
+                logger.error(f"[Node 4/6] No response from Gemini")
                 raise ItineraryGenerationError("No structured response from Gemini")
 
-            structured_itinerary: TravelItinerary = response.parsed
+            if not structured_itinerary:
+                raise ItineraryGenerationError("No structured response from Gemini")
 
             # Convert to dictionary format for compatibility
             structured_data = {
@@ -101,18 +111,37 @@ class ItineraryAgent:
                 "unavailable_reason": structured_itinerary.unavailable_reason
             }
 
-            # Log budget validation status
+            # Log budget validation status with structured fields
             if structured_data.get('schedule_unavailable'):
-                logger.warning(f"[Node 4/6] ⚠️ Budget exceeded: {structured_data.get('unavailable_reason', 'No reason provided')}")
+                logger.warning(
+                    "[Node 4/6] Budget exceeded",
+                    destination=travel_request.destination,
+                    total_cost=structured_data.get('total_cost', 0),
+                    budget=travel_request.budget,
+                    reason=structured_data.get('unavailable_reason', 'No reason provided'),
+                    error_code="BUDGET_EXCEEDED"
+                )
             else:
-                logger.info(f"[Node 4/6] ✅ Budget OK: {structured_data.get('total_cost', 0):,.0f} VND")
+                logger.info(
+                    "[Node 4/6] Itinerary generated successfully",
+                    destination=travel_request.destination,
+                    total_cost=structured_data.get('total_cost', 0),
+                    num_days=len(structured_data.get('days', [])),
+                    num_activities=sum(len(day.get('activities', [])) for day in structured_data.get('days', []))
+                )
 
             state["structured_itinerary"] = structured_data
             return state
 
         except Exception as e:
-            logger.error(f"[Node 4/6] Failed: {e}")
-            state["error"] = f"Generation failed: {str(e)}"
+            logger.error(
+                "[Node 4/6] Itinerary generation failed",
+                destination=travel_request.destination,
+                error=str(e),
+                error_code="GENERATION_FAILED",
+                exc_info=True
+            )
+            state["error"] = f"{str(e)}"
             return state
 
 

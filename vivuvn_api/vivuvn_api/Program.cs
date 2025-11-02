@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using sib_api_v3_sdk.Client;
 using vivuvn_api.Data.DbInitializer;
@@ -101,13 +100,6 @@ app.UseCors("AllowClientWebsite");
 app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
-
-// serving static files
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "images")),
-    RequestPath = "/images"
-});
 
 // Add health check endpoint
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));

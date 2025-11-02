@@ -1,36 +1,12 @@
 version: '3.8'
 
 services:
-  # SQL Server service
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: vivuvn-sqlserver
-    env_file:
-      - .env
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${SA_PASSWORD}
-      - MSSQL_PID=Express
-    ports:
-      - "1434:1433"
-    volumes:
-      - sqlserver_data:/var/opt/mssql
-    networks:
-      - vivuvn-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" -C || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
-    # AI Service
+  # AI Service
   vivuvn-ai-service:
     image: minhdang1163/vivuvn-ai-service:latest
     container_name: vivuvn-ai-service
     env_file:
-      - ../vivuvn_ai_service/.env.docker  # Fixed: correct path to env file
+      - ../vivuvn_ai_service/.env.docker
     ports:
       - "8000:8000"
     volumes:
@@ -44,7 +20,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    # Added: Resource limits
     deploy:
       resources:
         limits:
@@ -53,7 +28,6 @@ services:
         reservations:
           cpus: '0.5'
           memory: 1G
-    # Added: Logging configuration
     logging:
       driver: "json-file"
       options:
@@ -83,21 +57,20 @@ services:
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
       - AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL}
       - ADMIN_PANEL_URL=${ADMIN_PANEL_URL}
+      - DB_SERVER=host.docker.internal  # Key change: use host machine
+      - DB_PORT=1433  # Your local SQL Server port
     ports:
       - "5277:80"
     depends_on:
-      sqlserver:
-        condition: service_healthy
       vivuvn-ai-service:
         condition: service_healthy
-    volumes:
-      - ./images:/app/images
     networks:
       - vivuvn-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Enable host access
     restart: unless-stopped
 
 volumes:
-  sqlserver_data:
   model-cache:
     name: vivuvn-model-cache
     driver: local

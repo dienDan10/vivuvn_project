@@ -71,9 +71,8 @@ namespace vivuvn_api.Services.Implementations
         {
             string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
 
-            var request = new FetchGoogleRestaurantRequestDto
+            var request = new FetchGoogleHotelRequestDto
             {
-                IncludedTypes = new List<string> { "lodging" }, // Change to hotel/lodging type
                 LocationRestriction = new LocationRestriction
                 {
                     Circle = new Circle
@@ -119,6 +118,131 @@ namespace vivuvn_api.Services.Implementations
                 }
 
                 return responseContent;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<FetchGooglePlaceSimplifiedResponseDto?> SearchRestaurantsByTextAsync(string searchText, string? provinceName = null)
+        {
+            string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            var fullQuery = string.IsNullOrEmpty(provinceName)
+                ? searchText
+                : $"{searchText} in {provinceName}, Việt Nam";
+
+            var request = new SearchGooglePlaceTextRequestDto
+            {
+                TextQuery = fullQuery,
+                IncludedType = "restaurant"
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var jsonBody = JsonSerializer.Serialize(request, jsonOptions);
+            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, "./v1/places:searchText")
+                {
+                    Content = content
+                };
+
+                requestMessage.Headers.Add("X-Goog-Api-Key", apiKey);
+                requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress");
+
+                var response = await _httpClient.SendAsync(requestMessage);
+
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadFromJsonAsync<FetchGooglePlaceSimplifiedResponseDto>();
+
+                return responseContent;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<FetchGooglePlaceSimplifiedResponseDto?> SearchHotelsByTextAsync(string searchText, string? provinceName = null)
+        {
+            string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            var fullQuery = string.IsNullOrEmpty(provinceName)
+                ? searchText
+                : $"{searchText} in {provinceName}, Việt Nam";
+
+            var request = new SearchGooglePlaceTextRequestDto
+            {
+                TextQuery = fullQuery,
+                IncludedType = "hotel"
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var jsonBody = JsonSerializer.Serialize(request, jsonOptions);
+            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, "./v1/places:searchText")
+                {
+                    Content = content
+                };
+
+                requestMessage.Headers.Add("X-Goog-Api-Key", apiKey);
+                requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress");
+
+                var response = await _httpClient.SendAsync(requestMessage);
+
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadFromJsonAsync<FetchGooglePlaceSimplifiedResponseDto>();
+
+                return responseContent;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+
+        public async Task<Place?> FetchPlaceDetailsByIdAsync(string placeId)
+        {
+            string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            try
+            {
+                var requestUrl = $"./v1/places/{placeId}";
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                requestMessage.Headers.Add("X-Goog-Api-Key", apiKey);
+                requestMessage.Headers.Add("X-Goog-FieldMask", "id,displayName,formattedAddress,rating,userRatingCount,location,googleMapsUri,priceLevel,photos");
+
+                var response = await _httpClient.SendAsync(requestMessage);
+
+                response.EnsureSuccessStatusCode();
+
+                var place = await response.Content.ReadFromJsonAsync<Place>();
+
+                // Fetch photo URLs for the place
+                if (place?.Photos != null && place.Photos.Any())
+                {
+                    await FetchPlacesPhotosAsync(new[] { place });
+                }
+
+                return place;
             }
             catch (Exception)
             {

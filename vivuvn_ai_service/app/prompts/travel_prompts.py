@@ -46,12 +46,8 @@ class PromptComponents:
 ### Transportation (CHỈ trong transportation_suggestions)
 KHÔNG thêm vào activities | Tối đa 2 suggestions | Cost = TOTAL cho nhóm
 
-Distance → Mode:
-- 50-100km: Xe khách
-- 100-300km: Xe khách (default), Tàu hỏa (scenic routes: HN↔Lào Cai, ĐN↔Huế)
-- 300-400km: Máy bay (≤2 ngày), Tàu hỏa (>2 ngày)
-- >400km: Máy bay
-- Nhóm ≥4 + nhiều điểm: Ô tô cá nhân"""
+**Sử dụng phương tiện từ yêu cầu của user (transportation_mode):**
+- Gợi ý dựa CHÍNH XÁC trên phương tiện user chỉ định"""
 
     EXAMPLES_MINIMAL = """## VÍ DỤ CHUẨN
 
@@ -78,6 +74,17 @@ Distance → Mode:
   "notes": "Nóc nhà Đông Dương, cáp treo hoặc trekking. Mang áo ấm, nhiệt độ đỉnh rất thấp."
 }
 ```
+
+**Đi lại giữa các thành phố (Transportation - max 2):**
+```json
+{
+  "mode": "xe khách",
+  "estimated_cost": 500000,
+  "date": "2024-03-15",
+  "details": "Hà Nội → Đà Nẵng, 07:00-21:00 (14h)"
+}
+```
+*Format: Từ → Đến, giờ bắt đầu-giờ kết thúc (tổng thời gian). Max 150 ký tự. Không lặp lại route.*
 
 Xem thêm: Bảo tàng, Biển, Thác, Chợ tại reference guide."""
 
@@ -442,6 +449,12 @@ def create_user_prompt(
         )
 
     # Add weather information if available
+
+    transportation_info = ""
+    if travel_request.transportation_mode:
+        transportation_info = f"🚗 Phương tiện di chuyển: {travel_request.transportation_mode}\n"
+
+
     weather_section = ""
     if weather_forecast:
         formatted_weather = format_weather_for_prompt(weather_forecast)
@@ -459,7 +472,7 @@ Tạo lịch {duration} ngày {travel_request.destination}, CHỈ dùng địa �
 🎯 Sở thích: {preferences_str} {"⚠️ 60-70% activities phải khớp" if travel_request.preferences else ""}
 💰 {travel_request.budget:,.0f} VND (≈{budget_per_person_per_day:,.0f} VND/người/ngày)
 💼 TIER: {budget_tier} → {budget_strategy}
-{special_reqs}{weather_section}
+{transportation_info}{special_reqs}{weather_section}
 {places_context}
 
 ## YÊU CẦU

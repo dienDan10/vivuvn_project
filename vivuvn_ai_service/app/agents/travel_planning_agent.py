@@ -45,7 +45,7 @@ class TravelPlanningAgent:
         self.workflow = self._build_workflow()
 
     def _build_workflow(self) -> StateGraph:
-        """Build LangGraph workflow with all nodes."""
+        """Build LangGraph workflow with all nodes and error-handling branches."""
         workflow = StateGraph(TravelPlanningState)
 
         # Add nodes (delegate to specialized agents)
@@ -56,13 +56,70 @@ class TravelPlanningAgent:
         workflow.add_node("validate_output", self.validation_agent.validate_output)
         workflow.add_node("finalize_response", self.response_agent.finalize_response)
 
-        # Define workflow edges
+        # Define workflow edges with error handling
         workflow.set_entry_point("build_filters")
         workflow.add_edge("build_filters", "search_places")
-        workflow.add_edge("search_places", "fetch_weather_data")
+
+        # After search: check if places found
+        def should_continue_after_search(state: TravelPlanningState) -> str:
+            """Route after search_places: continue or skip to error response."""
+            if state.get("error"):
+                logger.warning(f"[Node 2/6] Critical error in search: {state['error']}")
+                return "finalize_response"
+            if not state.get("relevant_places"):
+                logger.warning("[Node 2/6] No places found - cannot continue")
+                return "finalize_response"
+            return "fetch_weather_data"
+
+        workflow.add_conditional_edges(
+            "search_places",
+            should_continue_after_search,
+            {
+                "fetch_weather_data": "fetch_weather_data",
+                "finalize_response": "finalize_response"
+            }
+        )
+
         workflow.add_edge("fetch_weather_data", "generate_structured_itinerary")
-        workflow.add_edge("generate_structured_itinerary", "validate_output")
-        workflow.add_edge("validate_output", "finalize_response")
+
+        # After generation: check if itinerary created
+        def should_continue_after_generation(state: TravelPlanningState) -> str:
+            """Route after generate_structured_itinerary: continue or skip to error response."""
+            if state.get("error"):
+                logger.warning(f"[Node 4/6] Critical error in generation: {state['error']}")
+                return "finalize_response"
+            if not state.get("structured_itinerary"):
+                logger.warning("[Node 4/6] No itinerary generated - cannot validate")
+                return "finalize_response"
+            return "validate_output"
+
+        workflow.add_conditional_edges(
+            "generate_structured_itinerary",
+            should_continue_after_generation,
+            {
+                "validate_output": "validate_output",
+                "finalize_response": "finalize_response"
+            }
+        )
+
+        # After validation: check results
+        def should_continue_after_validation(state: TravelPlanningState) -> str:
+            """Route after validate_output: continue to response or skip."""
+            if state.get("error"):
+                logger.warning(f"[Node 5/6] Critical validation error: {state['error']}")
+                return "finalize_response"
+            if not state.get("validation_passed"):
+                logger.warning("[Node 5/6] Validation failed - proceeding with warnings")
+            return "finalize_response"
+
+        workflow.add_conditional_edges(
+            "validate_output",
+            should_continue_after_validation,
+            {
+                "finalize_response": "finalize_response"
+            }
+        )
+
         workflow.add_edge("finalize_response", END)
 
         return workflow.compile()
@@ -117,7 +174,7 @@ class TravelPlanningAgent:
 
         except Exception as e:
             logger.error(f"❌ Failed: {e}")
-            raise TravelPlanningError(f"Planning failed: {str(e)}")
+            raise TravelPlanningError(f"{str(e)}")
 
 
 # ============================================================================

@@ -28,6 +28,12 @@ namespace vivuvn_api.Data.DbInitializer
             // Add locations data
             AddLocationData();
 
+            // Add nearby restaurant data
+            AddNearbyRestaurantData();
+
+            // Add nearby hotel data
+            AddNearbyHotelData();
+
             // Add restaurant data
             AddRestaurantData();
 
@@ -174,7 +180,7 @@ namespace vivuvn_api.Data.DbInitializer
             }
         }
 
-        private void AddRestaurantData()
+        private void AddNearbyRestaurantData()
         {
             var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurant_data.json");
 
@@ -256,7 +262,7 @@ namespace vivuvn_api.Data.DbInitializer
 
         }
 
-        private void AddHotelData()
+        private void AddNearbyHotelData()
         {
             var filePath = Path.Combine(_env.ContentRootPath, "Data", "hotel_data.json");
 
@@ -335,6 +341,130 @@ namespace vivuvn_api.Data.DbInitializer
                 _context.SaveChanges();
             }
 
+
+        }
+
+        private void AddRestaurantData()
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "restaurants.json");
+
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
+
+            var json = File.ReadAllText(filePath);
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            var restaurantList = JsonSerializer.Deserialize<List<RestaurantDataItem>>(json, options);
+
+            if (restaurantList == null || restaurantList.Count == 0)
+            {
+                return;
+            }
+
+            var newRestaurants = new List<Restaurant>();
+
+            foreach (var restaurantItem in restaurantList)
+            {
+                var exists = _context.Restaurants.Any(r => r.GooglePlaceId == restaurantItem.GooglePlaceId);
+
+                if (exists)
+                {
+                    continue; // Skip if restaurant already exists
+                }
+
+                var restaurant = new Restaurant
+                {
+                    GooglePlaceId = restaurantItem.GooglePlaceId,
+                    Name = restaurantItem.Name,
+                    Address = restaurantItem.Address,
+                    Rating = restaurantItem.Rating,
+                    UserRatingCount = restaurantItem.UserRatingCount,
+                    Latitude = restaurantItem.Latitude,
+                    Longitude = restaurantItem.Longitude,
+                    GoogleMapsUri = restaurantItem.GoogleMapsUri,
+                    PriceLevel = restaurantItem.PriceLevel,
+                    Photos = new List<Photo>()
+                };
+
+                // Add photos if they exist
+                if (restaurantItem.Photos != null && restaurantItem.Photos.Count > 0)
+                {
+                    foreach (var photoUrl in restaurantItem.Photos)
+                    {
+                        var photo = new Photo
+                        {
+                            PhotoUrl = photoUrl
+                        };
+                        restaurant.Photos.Add(photo);
+                    }
+                }
+                newRestaurants.Add(restaurant);
+            }
+
+            _context.Restaurants.AddRange(newRestaurants);
+            _context.SaveChanges();
+        }
+
+        private void AddHotelData()
+        {
+            var filePath = Path.Combine(_env.ContentRootPath, "Data", "hotels.json");
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
+            var json = File.ReadAllText(filePath);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+            var hotelList = JsonSerializer.Deserialize<List<HotelDataItem>>(json, options);
+            if (hotelList == null || hotelList.Count == 0)
+            {
+                return;
+            }
+            var newHotels = new List<Hotel>();
+            foreach (var hotelItem in hotelList)
+            {
+                var exists = _context.Hotels.Any(h => h.GooglePlaceId == hotelItem.GooglePlaceId);
+                if (exists)
+                {
+                    continue; // Skip if hotel already exists
+                }
+                var hotel = new Hotel
+                {
+                    GooglePlaceId = hotelItem.GooglePlaceId,
+                    Name = hotelItem.Name,
+                    Address = hotelItem.Address,
+                    Rating = hotelItem.Rating,
+                    UserRatingCount = hotelItem.UserRatingCount,
+                    Latitude = hotelItem.Latitude,
+                    Longitude = hotelItem.Longitude,
+                    GoogleMapsUri = hotelItem.GoogleMapsUri,
+                    PriceLevel = hotelItem.PriceLevel,
+                    Photos = new List<Photo>()
+                };
+                // Add photos if they exist
+                if (hotelItem.Photos != null && hotelItem.Photos.Count > 0)
+                {
+                    foreach (var photoUrl in hotelItem.Photos)
+                    {
+                        var photo = new Photo
+                        {
+                            PhotoUrl = photoUrl
+                        };
+                        hotel.Photos.Add(photo);
+                    }
+                }
+                newHotels.Add(hotel);
+            }
+            _context.Hotels.AddRange(newHotels);
+            _context.SaveChanges();
 
         }
     }

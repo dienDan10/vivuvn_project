@@ -21,5 +21,10 @@ namespace vivuvn_api.Models
 
         public int BudgetTypeId { get; set; }
         public BudgetType BudgetType { get; set; } = null!;
+
+        // Navigation
+        public ItineraryHotel? ItineraryHotel { get; set; }
+        public ItineraryRestaurant? ItineraryRestaurant { get; set; }
+
     }
 }

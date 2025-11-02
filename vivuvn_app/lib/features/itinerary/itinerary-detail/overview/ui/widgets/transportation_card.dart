@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../controller/itinerary_detail_controller.dart';
+import '../../../detail/controller/itinerary_detail_controller.dart';
 
 /// Widget hiển thị và chỉnh sửa phương tiện di chuyển
 class TransportationCard extends ConsumerWidget {
@@ -11,13 +11,11 @@ class TransportationCard extends ConsumerWidget {
     final lowerVehicle = vehicle.toLowerCase();
     if (lowerVehicle.contains('máy bay') || lowerVehicle.contains('plane')) {
       return Icons.flight;
-    } else if (lowerVehicle.contains('ô tô') ||
-        lowerVehicle.contains('xe') ||
-        lowerVehicle.contains('car')) {
+    } else if (lowerVehicle.contains('ô tô') || lowerVehicle.contains('car')) {
       return Icons.directions_car;
     } else if (lowerVehicle.contains('tàu') || lowerVehicle.contains('train')) {
       return Icons.train;
-    } else if (lowerVehicle.contains('xe buýt') ||
+    } else if (lowerVehicle.contains('xe khách') ||
         lowerVehicle.contains('bus')) {
       return Icons.directions_bus;
     } else if (lowerVehicle.contains('xe máy') ||
@@ -46,8 +44,7 @@ class TransportationCard extends ConsumerWidget {
     final icon = _getTransportIcon(vehicle);
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -56,9 +53,14 @@ class TransportationCard extends ConsumerWidget {
         children: [
           // Icon
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.only(
+              left: 10,
+              right: 10,
+              top: 6,
+              bottom: 6,
+            ),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF8A5B).withOpacity(0.1),
+              color: const Color(0xFFFF8A5B).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 24, color: const Color(0xFFFF8A5B)),
@@ -101,7 +103,6 @@ class TransportationCard extends ConsumerWidget {
               color: Colors.grey.shade600,
             ),
             onPressed: () {
-              // TODO: Implement edit transportation
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Chức năng chỉnh sửa sẽ được thêm sau'),

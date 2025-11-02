@@ -25,11 +25,19 @@ class ResponseAgent:
             travel_request = state["travel_request"]
             structured_itinerary = state.get("structured_itinerary")
 
-            logger.info(f"[Node 6/6] Finalizing response")
+            logger.info(
+                "[Node 6/6] Finalizing response",
+                destination=travel_request.destination,
+                duration_days=travel_request.duration_days
+            )
 
             # Check if structured_itinerary is None
             if not structured_itinerary:
-                logger.error(f"[Node 6/6] No structured itinerary available for finalization")
+                logger.error(
+                    "[Node 6/6] No itinerary to finalize",
+                    destination=travel_request.destination,
+                    error_code="NO_ITINERARY"
+                )
                 state["final_response"] = TravelResponse(
                     success=False,
                     message="Không thể tạo lịch trình - không tìm thấy đủ dữ liệu địa điểm",
@@ -82,13 +90,27 @@ class ResponseAgent:
                 )
 
             except Exception as conversion_error:
-                logger.error(f"[Node 6/6] Failed to convert to TravelItinerary: {conversion_error}")
+                logger.error(
+                    "[Node 6/6] Failed to convert to TravelItinerary",
+                    destination=travel_request.destination,
+                    error=str(conversion_error),
+                    error_code="CONVERSION_FAILED",
+                    exc_info=True
+                )
                 state["final_response"] = TravelResponse(
                     success=False,
                     message=f"Lỗi chuyển đổi dữ liệu lịch trình: {str(conversion_error)}",
                     itinerary=None
                 )
                 return state
+
+            logger.info(
+                "[Node 6/6] Response finalized successfully",
+                destination=travel_request.destination,
+                num_days=len(day_itineraries),
+                num_activities=sum(len(day.activities) for day in day_itineraries),
+                total_cost=travel_itinerary.total_cost
+            )
 
             response = TravelResponse(
                 success=True,
@@ -100,7 +122,12 @@ class ResponseAgent:
             return state
 
         except Exception as e:
-            logger.error(f"[Node 6/6] Failed: {e}")
+            logger.error(
+                "[Node 6/6] Failed to finalize response",
+                error=str(e),
+                error_code="FINALIZATION_FAILED",
+                exc_info=True
+            )
             state["final_response"] = TravelResponse(
                 success=False,
                 message=f"Lỗi tạo phản hồi cuối cùng: {str(e)}",

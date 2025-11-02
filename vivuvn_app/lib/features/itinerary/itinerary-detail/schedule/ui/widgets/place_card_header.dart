@@ -1,36 +1,22 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../overview/ui/widgets/place_card_image.dart';
-import '../../controller/itinerary_schedule_controller.dart';
-import '../../model/location.dart';
+import '../../../overview/ui/widgets/favourite_place/place_card_image.dart';
+import '../../model/itinerary_item.dart';
 import 'place_time_editor.dart';
 
 class PlaceCardHeader extends ConsumerWidget {
-  const PlaceCardHeader({
-    super.key,
-    required this.dayId,
-    required this.itemId,
-    required this.location,
-  });
+  const PlaceCardHeader({super.key, required this.item});
 
-  final int dayId;
-  final int itemId;
-  final Location location;
+  final ItineraryItem item;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final state = ref.watch(itineraryScheduleControllerProvider);
-    final currentDay = state.days.firstWhereOrNull((final d) => d.id == dayId);
-    final currentItem = currentDay?.items.firstWhereOrNull(
-      (final i) => i.itineraryItemId == itemId,
-    );
-
-    final timeText =
-        (currentItem?.startTime == null || currentItem?.endTime == null)
+    final timeText = (item.startTime == null || item.endTime == null)
         ? 'Chưa đặt giờ'
-        : '${currentItem!.startTime!.format(context)} - ${currentItem.endTime!.format(context)}';
+        : '${item.startTime!.format(context)} - ${item.endTime!.format(context)}';
+
+    final location = item.location;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -58,7 +44,7 @@ class PlaceCardHeader extends ConsumerWidget {
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(width: 6),
-                  PlaceTimeEditor(dayId: dayId, itemId: itemId),
+                  PlaceTimeEditor(item: item),
                 ],
               ),
             ],

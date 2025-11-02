@@ -59,6 +59,15 @@ namespace vivuvn_api.Controllers
             return Ok(item);
         }
 
+        [HttpPut("{dayId}/items/{itemId}/routes")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItemRouteInfoInDay(int itemId,
+            [FromBody] UpdateItineraryItemRouteInfoRequestDto request)
+        {
+            var item = await _itineraryItemService.UpdateItineraryItemRouteInfoAsync(itemId, request);
+            return Ok(item);
+        }
+
         [HttpDelete("{dayId}/items/{itemId}")]
         [Authorize]
         public async Task<IActionResult> RemoveItemFromDay(int dayId, int itemId)

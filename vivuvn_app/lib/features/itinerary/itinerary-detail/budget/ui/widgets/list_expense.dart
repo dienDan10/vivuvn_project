@@ -22,7 +22,10 @@ class ExpenseList extends ConsumerWidget {
 
     // Loading state
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Container(
+        color: Theme.of(context).colorScheme.onPrimary,
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     // Empty state
@@ -31,21 +34,24 @@ class ExpenseList extends ConsumerWidget {
     }
 
     // List of expenses
-    return ListView.builder(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(
-        horizontal: BudgetConstants.horizontalPadding,
+    return Container(
+      color: Colors.white,
+      child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(
+          horizontal: BudgetConstants.horizontalPadding,
+        ),
+        itemCount: expenses.length,
+        itemBuilder: (final context, final index) {
+          final expense = expenses[index];
+          return BudgetItemTile(
+            item: expense,
+            onTap: () => ExpenseDialogs.showEditForm(context, expense),
+            onDelete: () =>
+                ExpenseDialogs.showDeleteConfirmation(context, ref, expense),
+          );
+        },
       ),
-      itemCount: expenses.length,
-      itemBuilder: (final context, final index) {
-        final expense = expenses[index];
-        return BudgetItemTile(
-          item: expense,
-          onTap: () => ExpenseDialogs.showEditForm(context, expense),
-          onDelete: () =>
-              ExpenseDialogs.showDeleteConfirmation(context, ref, expense),
-        );
-      },
     );
   }
 }
@@ -56,12 +62,15 @@ class _EmptyExpenseState extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(BudgetConstants.sectionSpacing),
-        child: Text(
-          'Chưa có khoản chi tiêu nào',
-          style: TextStyle(color: Colors.grey),
+    return Container(
+      color: Colors.white,
+      child: const Center(
+        child: Padding(
+          padding: EdgeInsets.all(BudgetConstants.sectionSpacing),
+          child: Text(
+            'Chưa có khoản chi tiêu nào',
+            style: TextStyle(color: Colors.grey),
+          ),
         ),
       ),
     );

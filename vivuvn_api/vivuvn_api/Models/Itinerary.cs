@@ -35,5 +35,7 @@ namespace vivuvn_api.Models
         public ICollection<ItineraryDay> Days { get; set; } = new List<ItineraryDay>();
         public Budget? Budget { get; set; }
         public ICollection<FavoritePlace> FavoritePlaces { get; set; } = new List<FavoritePlace>();
+        public ICollection<ItineraryHotel> Hotels { get; set; } = new List<ItineraryHotel>();
+        public ICollection<ItineraryRestaurant> Restaurants { get; set; } = new List<ItineraryRestaurant>();
     }
 }

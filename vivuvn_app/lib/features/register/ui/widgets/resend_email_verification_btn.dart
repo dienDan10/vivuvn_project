@@ -6,9 +6,7 @@ class ResendEmailVerificationButton extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return TextButton(
-      onPressed: () {
-        // TODO: Implement resend verification code
-      },
+      onPressed: () {},
       child: Text(
         'Didn\'t receive the code? Resend',
         style: TextStyle(

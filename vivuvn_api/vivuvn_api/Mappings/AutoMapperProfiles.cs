@@ -27,7 +27,6 @@ namespace vivuvn_api.Mappings
             // Mapping For Itinerary Day
             CreateMap<ItineraryDay, ItineraryDayDto>();
 
-
             // Mapping For Itinerary Item
             CreateMap<ItineraryItem, ItineraryItemDto>();
 
@@ -38,6 +37,11 @@ namespace vivuvn_api.Mappings
 
             // Mapping For Search Location
             CreateMap<Location, SearchLocationDto>();
+
+            // Mapping For Search Place from Google
+            CreateMap<SimplifiedPlace, SearchPlaceDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName != null ? src.DisplayName.Text : string.Empty))
+                .ForMember(dest => dest.FormattedAddress, opt => opt.MapFrom(src => src.FormattedAddress ?? string.Empty));
 
             // Mapping For Restaurant (Restaurant from DB to RestaurantDto)
             CreateMap<Restaurant, RestaurantDto>()
@@ -96,6 +100,14 @@ namespace vivuvn_api.Mappings
 
             // Mapping for Favorite Place
             CreateMap<FavoritePlace, FavoritePlaceDto>();
+
+            // Mapping for Itinerary Hotel
+            CreateMap<ItineraryHotel, ItineraryHotelDto>()
+                .ForMember(dest => dest.Cost, opt => opt.MapFrom(src => src.BudgetItem != null ? src.BudgetItem.Cost : 0));
+
+            // Mapping for Itinerary Restaurant
+            CreateMap<ItineraryRestaurant, ItineraryRestaurantDto>()
+                .ForMember(dest => dest.Cost, opt => opt.MapFrom(src => src.BudgetItem != null ? src.BudgetItem.Cost : 0));
 
             // Mapping for AI Generated Itinerary to Database Models
             CreateMap<AIActivityDto, ItineraryItem>()
