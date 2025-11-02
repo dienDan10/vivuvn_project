@@ -26,6 +26,17 @@ namespace vivuvn_api.Services.Implementations
 
                 var response = await _httpClient.SendAsync(requestMessage);
 
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("=== Route Request Failed ===");
+                    Console.WriteLine($"Status Code : {(int)response.StatusCode} ({response.StatusCode})");
+                    Console.WriteLine($"Reason      : {response.ReasonPhrase}");
+                    Console.WriteLine($"Request URL : {requestMessage.RequestUri}");
+                    Console.WriteLine($"Error Body  : {errorContent}");
+                    Console.WriteLine("=============================");
+                }
+
                 response.EnsureSuccessStatusCode();
 
                 var responseContent = await response.Content.ReadFromJsonAsync<GetRouteInfoResponseDto>();

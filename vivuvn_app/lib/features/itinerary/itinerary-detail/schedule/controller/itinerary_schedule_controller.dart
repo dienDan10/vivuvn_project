@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../detail/controller/itinerary_detail_controller.dart';
 import '../model/itinerary_day.dart';
 import '../service/itinerary_schedule_service.dart';
@@ -183,6 +185,57 @@ class ItineraryScheduleController
       await fetchDays();
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
+    }
+  }
+
+  Future<void> updateTransportationVehicle({
+    required final int itemId,
+    required final String vehicle,
+  }) async {
+    if (itineraryId == null) return;
+    // get day id
+    final dayId = state.days[state.selectedIndex].id;
+    state = state.copyWith(
+      isLoadingUpdateTransportation: true,
+      updateTransportationError: null,
+    );
+    try {
+      final updatedItem = await ref
+          .read(itineraryScheduleServiceProvider)
+          .updateTransportationVehicle(
+            itineraryId: itineraryId!,
+            dayId: dayId,
+            itemId: itemId,
+            vehicle: vehicle,
+          );
+
+      // Cập nhật trực tiếp trong state mà không gọi API lại
+      final updatedDays = state.days.map((final day) {
+        if (day.id != dayId) return day;
+
+        final updatedItems = day.items.map((final item) {
+          if (item.itineraryItemId == updatedItem.itineraryItemId) {
+            return updatedItem;
+          }
+          return item;
+        }).toList();
+        return day.copyWith(items: updatedItems);
+      }).toList();
+
+      state = state.copyWith(days: updatedDays);
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(
+        updateTransportationError: errorMsg,
+        isLoadingUpdateTransportation: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        updateTransportationError: 'unknown error',
+        isLoadingUpdateTransportation: false,
+      );
+    } finally {
+      state = state.copyWith(isLoadingUpdateTransportation: false);
     }
   }
 }

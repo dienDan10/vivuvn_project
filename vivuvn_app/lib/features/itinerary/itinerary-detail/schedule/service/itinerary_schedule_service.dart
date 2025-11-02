@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/api/itinerary_schedule_api.dart';
 import '../data/dto/add_item_to_day_request.dart';
 import '../data/dto/update_item_request.dart';
+import '../data/dto/update_transportation_request.dart';
 import '../model/itinerary_day.dart';
 import '../model/itinerary_item.dart';
 
@@ -93,5 +94,23 @@ class ItineraryScheduleService {
       startDate: startDate,
       endDate: endDate,
     );
+  }
+
+  // update transportation vehicle
+  Future<ItineraryItem> updateTransportationVehicle({
+    required final int itineraryId,
+    required final int dayId,
+    required final int itemId,
+    required final String vehicle,
+  }) async {
+    final request = UpdateTransportationRequest(travelMode: vehicle);
+
+    final updatedItem = await _api.updateTransportationVehicle(
+      itineraryId: itineraryId,
+      dayId: dayId,
+      itemId: itemId,
+      request: request,
+    );
+    return updatedItem;
   }
 }

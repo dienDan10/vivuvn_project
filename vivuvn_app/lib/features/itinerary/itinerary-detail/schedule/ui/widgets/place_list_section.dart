@@ -42,7 +42,7 @@ class PlaceListSection extends ConsumerWidget {
             item: entry.value,
           ),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         const AddPlaceButton(),
       ],
     );

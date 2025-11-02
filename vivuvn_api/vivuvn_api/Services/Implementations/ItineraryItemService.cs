@@ -33,7 +33,14 @@ namespace vivuvn_api.Services.Implementations
 
                 if (prevItem is not null)
                 {
-                    await UpdateTransportationDetailsAsync(prevItem, newItem);
+                    try
+                    {
+                        await UpdateTransportationDetailsAsync(prevItem, newItem);
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
 
@@ -144,7 +151,7 @@ namespace vivuvn_api.Services.Implementations
             }
 
             var item = await _unitOfWork.ItineraryItems
-                .GetOneAsync(i => i.ItineraryItemId == itemId)
+                .GetOneAsync(i => i.ItineraryItemId == itemId, includeProperties: "Location,Location.Photos", tracked: true)
                 ?? throw new KeyNotFoundException($"Itinerary item with id {itemId} not found.");
 
             var dayItems = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == item.ItineraryDayId,
@@ -182,10 +189,12 @@ namespace vivuvn_api.Services.Implementations
 
             var response = await _routeService.GetRouteInformationAsync(request);
 
-            curItem.TransportationDistance = response?.Routes?.FirstOrDefault()?.DistanceMeters ?? 500;
+            if (response is null || response.Routes is null || !response.Routes.Any()) throw new BadHttpRequestException("Cannot retrieve route information.");
+
+            curItem.TransportationDistance = response.Routes?.FirstOrDefault()?.DistanceMeters ?? 500;
             curItem.TransportationVehicle = travelMode ?? Constants.TravelMode_Driving;
 
-            _ = double.TryParse(response?.Routes?.FirstOrDefault()?.Duration.Replace("s", ""), out double durationInSeconds);
+            _ = double.TryParse(response.Routes?.FirstOrDefault()?.Duration.Replace("s", ""), out double durationInSeconds);
 
             curItem.TransportationDuration = durationInSeconds;
         }
