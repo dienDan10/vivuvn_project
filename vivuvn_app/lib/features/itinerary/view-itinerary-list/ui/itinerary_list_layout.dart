@@ -9,30 +9,46 @@ class ItineraryListLayout extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    return Scaffold(
-      body: const SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Text(
-                'Chuyến đi',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: const SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Text(
+                  'Chuyến đi',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
+                  ),
                 ),
               ),
-            ),
-
-            // Itinerary list
-            Expanded(child: ItineraryList()),
-          ],
+              TabBar(
+                isScrollable: false,
+                tabs: [
+                  Tab(text: 'Chuyến đi của tôi'),
+                  Tab(text: 'Chuyến đi tôi tham gia'),
+                ],
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    ItineraryList(isOwner: true),
+                    ItineraryList(isOwner: false),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+        floatingActionButton: const ButtonAddItinerary(),
+        floatingActionButtonLocation: ExpandableFab.location,
       ),
-      floatingActionButton: const ButtonAddItinerary(),
-      floatingActionButtonLocation: ExpandableFab.location,
     );
   }
 }
