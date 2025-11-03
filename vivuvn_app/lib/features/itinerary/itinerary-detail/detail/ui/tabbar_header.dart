@@ -18,9 +18,38 @@ class TabbarHeader extends StatelessWidget {
         ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
         tabs: const [
-          Tab(text: 'Tổng quan'),
-          Tab(text: 'Lịch trình'),
-          Tab(text: 'Ngân sách'),
+          Tab(
+            child: Text(
+              'Tổng quan',
+              style: TextStyle(fontSize: 14.0),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Tab(
+            child: Text(
+              'Lịch trình',
+              style: TextStyle(fontSize: 14.0),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Tab(
+            child: Text(
+              'Ngân sách',
+              style: TextStyle(fontSize: 14.0),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Tab(
+            child: Text(
+              'Thành viên',
+              style: TextStyle(fontSize: 14.0),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
