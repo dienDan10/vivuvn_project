@@ -18,3 +18,8 @@ const String nearbyRestaurantRoute = '/nearby-restaurants';
 
 // hotels routes
 const String nearbyHotelRoute = '/nearby-hotels';
+
+// chat routes
+const String chatRoute = '/itineraries/:id/chat';
+String createChatRoute(final int itineraryId) =>
+    '/itineraries/$itineraryId/chat';

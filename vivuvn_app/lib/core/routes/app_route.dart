@@ -7,6 +7,7 @@ import '../../common/auth/auth_state.dart';
 import '../../features/itinerary/itinerary-detail/schedule/model/location.dart';
 import '../../features/itinerary/location-detail/ui/location_detail_screen.dart';
 import '../../screens/bottom_navigation_screen.dart';
+import '../../screens/chat_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_detail_screen.dart';
 import '../../screens/itinerary_screen.dart';
@@ -103,6 +104,15 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           return NearbyHotelScreen(location: location);
         },
       ),
+
+      GoRoute(
+        path: chatRoute,
+        builder: (final context, final state) {
+          final itineraryId = state.pathParameters['id']!;
+          return ChatScreen(itineraryId: int.parse(itineraryId));
+        },
+      ),
+
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
         builder:

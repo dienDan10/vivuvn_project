@@ -4,34 +4,33 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
-import '../../detail/controller/itinerary_detail_controller.dart';
 import '../data/model/message.dart';
 import '../service/chat_service.dart';
 import '../service/i_chat_service.dart';
 import '../state/chat_state.dart';
 
 final chatControllerProvider =
-    AutoDisposeNotifierProvider<ChatController, ChatState>(
-      () => ChatController(),
+    AutoDisposeNotifierProviderFamily<ChatController, ChatState, int>(
+      ChatController.new,
     );
 
-class ChatController extends AutoDisposeNotifier<ChatState> {
-  late final int itineraryId;
+class ChatController extends AutoDisposeFamilyNotifier<ChatState, int> {
+  late int itineraryId;
   late final IChatService _chatService;
   StreamSubscription<List<Message>>? _messageSubscription;
 
   @override
-  ChatState build() {
+  ChatState build(final int arg) {
     _chatService = ref.watch(chatServiceProvider);
-    itineraryId = ref.read(itineraryDetailControllerProvider).itineraryId!;
+    itineraryId = arg;
 
     // Dispose resources when the controller is disposed
     ref.onDispose(() {
       _dispose();
     });
 
-    // load initial messages
-    loadMessages();
+    // load initial messages after build completes
+    Future.microtask(() => loadMessages());
 
     // listen to new messages stream
     _listenToNewMessages();
@@ -149,7 +148,6 @@ class ChatController extends AutoDisposeNotifier<ChatState> {
         totalPages: response.totalPages,
         totalMessages: updatedMessages.length,
         hasMore: response.hasNextPage,
-        isLoadingMore: false,
       );
     } on DioException catch (e) {
       final String errMessage = DioExceptionHandler.handleException(e);
