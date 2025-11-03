@@ -16,7 +16,9 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId)
         {
             var itineraries = await _unitOfWork.Itineraries
-                .GetAllAsync(i => (i.UserId == userId || i.Members.Any(i => i.UserId == userId)) && !i.DeleteFlag, includeProperties: "StartProvince,DestinationProvince,User");
+                .GetAllAsync(i => (i.UserId == userId
+                || i.Members.Any(m => m.UserId == userId && !m.DeleteFlag))
+                && !i.DeleteFlag, includeProperties: "StartProvince,DestinationProvince,User");
 
             var itineraryDtos = _mapper.Map<IEnumerable<ItineraryDto>>(itineraries);
             foreach (var dto in itineraryDtos)
@@ -251,7 +253,7 @@ namespace vivuvn_api.Services.Implementations
                 Budget = request.Budget,
                 SpecialRequirements = request.SpecialRequirements,
                 TransportationMode = request.TransportationMode
-			};
+            };
 
             var aiResponse = await _aiClient.GenerateItineraryAsync<AutoGenerateItineraryResponse>(aiRequest);
 

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/api/chat_api.dart';
 import '../data/dtos/delete_message_request.dart';
 import '../data/dtos/get_messages_request.dart';
+import '../data/dtos/get_messages_response.dart';
 import '../data/dtos/get_new_messages_request.dart';
 import '../data/dtos/send_message_request.dart';
 import '../data/model/message.dart';
@@ -42,7 +43,7 @@ class ChatService implements IChatService {
       _messageStreamController.stream;
 
   @override
-  Future<List<Message>> getMessages({
+  Future<GetMessagesResponse> getMessages({
     required final int itineraryId,
     final int page = 1,
     final int pageSize = 50,

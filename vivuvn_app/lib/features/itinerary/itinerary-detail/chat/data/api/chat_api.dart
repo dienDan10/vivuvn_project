@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/data/remote/network/network_service.dart';
 import '../dtos/delete_message_request.dart';
 import '../dtos/get_messages_request.dart';
+import '../dtos/get_messages_response.dart';
 import '../dtos/get_new_messages_request.dart';
 import '../dtos/send_message_request.dart';
 import '../model/message.dart';
@@ -12,16 +13,16 @@ class ChatApi {
   final Dio _dio;
   ChatApi(this._dio);
 
-  Future<List<Message>> getMessages(final GetMessagesRequest request) async {
+  Future<GetMessagesResponse> getMessages(
+    final GetMessagesRequest request,
+  ) async {
     final response = await _dio.get(
       '/api/v1/itineraries/${request.itineraryId}/chat',
       queryParameters: {'page': request.page, 'pageSize': request.pageSize},
     );
 
-    final data = response.data as List<dynamic>;
-    return data
-        .map((final e) => Message.fromMap(e as Map<String, dynamic>))
-        .toList();
+    final data = response.data as Map<String, dynamic>;
+    return GetMessagesResponse.fromMap(data);
   }
 
   Future<List<Message>> getNewMessages(

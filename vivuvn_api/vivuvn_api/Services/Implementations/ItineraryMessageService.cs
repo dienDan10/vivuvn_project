@@ -41,13 +41,9 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<List<ItineraryMessageDto>> GetNewMessagesAsync(int itineraryId, int userId, int lastMessageId)
         {
-            var lastMessage = await _unitOfWork.ItineraryMessages
-                .GetOneAsync(
-                m => m.Id == lastMessageId && m.ItineraryId == itineraryId)
-                ?? throw new BadHttpRequestException("Last message not found");
 
             var messages = await _unitOfWork.ItineraryMessages.GetAllAsync(
-                filter: m => m.ItineraryId == itineraryId && m.CreatedAt > lastMessage.CreatedAt,
+                filter: m => m.ItineraryId == itineraryId && m.Id > lastMessageId,
                 includeProperties: "ItineraryMember,ItineraryMember.User",
                 orderBy: q => q.OrderByDescending(m => m.CreatedAt));
 

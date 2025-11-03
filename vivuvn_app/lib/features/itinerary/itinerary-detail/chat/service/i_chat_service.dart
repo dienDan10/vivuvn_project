@@ -1,3 +1,4 @@
+import '../data/dtos/get_messages_response.dart';
 import '../data/model/message.dart';
 
 abstract interface class IChatService {
@@ -5,7 +6,7 @@ abstract interface class IChatService {
   Stream<List<Message>> get newMessagesStream;
 
   // Get paginated messages
-  Future<List<Message>> getMessages({
+  Future<GetMessagesResponse> getMessages({
     required final int itineraryId,
     final int page = 1,
     final int pageSize = 50,
