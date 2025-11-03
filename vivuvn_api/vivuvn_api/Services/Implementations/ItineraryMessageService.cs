@@ -41,6 +41,7 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<List<ItineraryMessageDto>> GetNewMessagesAsync(int itineraryId, int userId, int lastMessageId)
         {
+
             var messages = await _unitOfWork.ItineraryMessages.GetAllAsync(
                 filter: m => m.ItineraryId == itineraryId && m.Id > lastMessageId,
                 includeProperties: "ItineraryMember,ItineraryMember.User",

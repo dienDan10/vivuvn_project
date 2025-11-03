@@ -4,6 +4,7 @@ import 'package:sliver_snap/sliver_snap.dart';
 
 import '../../../../../common/helper/app_constants.dart';
 import '../../budget/ui/budget_tab.dart';
+import '../../member/ui/member_tab.dart';
 import '../../overview/ui/overview_tab_layout.dart';
 import '../../schedule/controller/automically_generate_by_ai_controller.dart';
 import '../../schedule/ui/schedule_tab.dart';
@@ -31,7 +32,7 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     //_registerScrollListener();
     _setupItineraryListener();
     _setupAiTabSwitchListener();
@@ -146,7 +147,9 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
           Expanded(
             child: _tabController.index == 1
                 ? const ScheduleTab()
-                : const BudgetTab(),
+                : _tabController.index == 2
+                ? const BudgetTab()
+                : const MemberTab(),
           ),
         ],
       ),
