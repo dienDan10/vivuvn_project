@@ -8,3 +8,10 @@ const Map<String, String> priceLevelIndicators = {
   'PRICE_LEVEL_EXPENSIVE': 'Expensive',
   'PRICE_LEVEL_VERY_EXPENSIVE': 'Very Expensive',
 };
+// Travel mode labels
+const Map<String, String> travelModeLabels = {
+  'DRIVE': 'Ô tô',
+  'WALK': 'Đi bộ',
+  'TWO_WHEELER': 'Xe máy',
+  'TRANSIT': 'Phương tiện công cộng',
+};

@@ -14,8 +14,8 @@ namespace vivuvn_api.DTOs.Request
         [JsonPropertyName("travelMode")]
         public string TravelMode { get; set; } = Constants.TravelMode_Driving;
 
-        [JsonPropertyName("routingPreference")]
-        public string RoutingPreference { get; set; } = "TRAFFIC_AWARE";
+        //[JsonPropertyName("routingPreference")]
+        //public string RoutingPreference { get; set; } = "TRAFFIC_AWARE";
 
         [JsonPropertyName("languageCode")]
         public string LanguageCode { get; set; } = "vi";

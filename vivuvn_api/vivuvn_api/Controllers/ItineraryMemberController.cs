@@ -24,6 +24,11 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> LeaveItinerary(int itineraryId)
         {
             var userId = GetCurrentUserId();
+            var isOwner = await _memberService.IsOwnerAsync(userId, itineraryId);
+            if (isOwner)
+            {
+                return BadRequest("Owner cannot leave the itinerary.");
+            }
             await _memberService.LeaveItineraryAsync(userId, itineraryId);
             return NoContent();
         }

@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: Optional[str] = None
     GEMINI_MODEL: str = "gemini-2.5-flash"
 
+    # OpenWeather API Configuration
+    OPENWEATHER_API_KEY: Optional[str] = None
+    OPENWEATHER_BASE_URL: str = "https://api.openweathermap.org/data/3.0"
+    OPENWEATHER_TIMEOUT: float = 30.0
+    OPENWEATHER_MAX_CONCURRENT: int = 10
+
     # Server Configuration
     HOST: str = "localhost"
     PORT: int = 8000

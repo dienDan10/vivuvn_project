@@ -2,10 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
+import '../../model/itinerary_item.dart';
 import '../dto/add_item_to_day_request.dart';
 import '../dto/get_items_by_day_response.dart';
 import '../dto/get_itinerary_days_response.dart';
 import '../dto/update_item_request.dart';
+import '../dto/update_transportation_request.dart';
 
 final itineraryScheduleApiProvider = Provider.autoDispose<ItineraryScheduleApi>(
   (final ref) {
@@ -84,5 +86,19 @@ class ItineraryScheduleApi {
       'endDate': endDate.toIso8601String(),
     };
     await _dio.put('/api/v1/itineraries/$itineraryId/dates', data: request);
+  }
+
+  /// PUT: update transportation vehicle for an itinerary item
+  Future<ItineraryItem> updateTransportationVehicle({
+    required final int itineraryId,
+    required final int dayId,
+    required final int itemId,
+    required final UpdateTransportationRequest request,
+  }) async {
+    final response = await _dio.put(
+      '/api/v1/itineraries/$itineraryId/days/$dayId/items/$itemId/routes',
+      data: request.toJson(),
+    );
+    return ItineraryItem.fromJson(response.data as Map<String, dynamic>);
   }
 }

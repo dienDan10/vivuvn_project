@@ -8,7 +8,7 @@ with comprehensive validation and documentation.
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 
 # Import travel models from dedicated module
 from app.models.travel_models import Activity, DayItinerary, TravelItinerary, TransportationSuggestion
@@ -63,22 +63,30 @@ class TravelRequest(BaseModel):
         description="Special requirements or accessibility needs",
         example="Vegetarian meals required"
     )
+    transportation_mode: Optional[str] = Field(
+        None,
+        description="Preferred mode of transportation",
+        example="xe khách"
+    )
     
-    @validator("end_date")
-    def validate_date_range(cls, v, values):
+    @field_validator("end_date")
+    @classmethod
+    def validate_date_range(cls, v, info: ValidationInfo):
         """Validate that end_date is after start_date."""
-        if "start_date" in values and v <= values["start_date"]:
+        if info.data.get("start_date") and v <= info.data["start_date"]:
             raise ValueError("End date must be after start date")
         return v
     
-    @validator("start_date")
+    @field_validator("start_date")
+    @classmethod
     def validate_start_date_not_past(cls, v):
         """Validate that start date is not in the past."""
         if v < date.today():
             raise ValueError("Start date cannot be in the past")
         return v
     
-    @validator("preferences")
+    @field_validator("preferences")
+    @classmethod
     def validate_preferences(cls, v):
         """Validate preference categories (matches Flutter InterestCategory)."""
         valid_preferences = {
@@ -90,7 +98,8 @@ class TravelRequest(BaseModel):
                 raise ValueError(f"Invalid preference: {pref}")
         return [pref.lower() for pref in v]
     
-    @validator("budget")
+    @field_validator("budget")
+    @classmethod
     def validate_budget(cls, v):
         """Validate budget."""
         if v is not None:
@@ -98,7 +107,16 @@ class TravelRequest(BaseModel):
                 raise ValueError("Budget cannot be negative")
             return v
         return v
-    
+
+    @field_validator("transportation_mode")
+    @classmethod
+    def validate_transportation_mode(cls, v):
+        """Validate transportation mode."""
+        valid_modes = {"xe khách", "tàu hỏa", "máy bay", "ô tô cá nhân", "xe máy"}
+        if v is not None and v.lower() not in valid_modes:
+            raise ValueError(f"Invalid transportation mode: {v}")
+        return v
+
     @property
     def duration_days(self) -> int:
         """Calculate trip duration in days."""
@@ -121,11 +139,6 @@ class TravelResponse(BaseModel):
     itinerary: Optional[TravelItinerary] = Field(
         None,
         description="Generated travel itinerary"
-    )
-    weather_info: Optional[str] = Field(
-        None,
-        description="Weather information for the travel period",
-        example="Warm and humid, 26-33°C with occasional rain"
     )
 
 
@@ -178,7 +191,8 @@ class DataInsertRequest(BaseModel):
         }
     )
     
-    @validator('item_type')
+    @field_validator('item_type')
+    @classmethod
     def validate_item_type(cls, v):
         if v not in ['destination', 'attraction', 'activity']:
             raise ValueError('item_type must be one of: destination, attraction, activity')

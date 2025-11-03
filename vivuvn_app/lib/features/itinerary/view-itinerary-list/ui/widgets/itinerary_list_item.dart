@@ -17,7 +17,7 @@ class ItineraryListItem extends StatelessWidget {
       showDragHandle: true,
       useRootNavigator: true,
       builder: (final BuildContext ctx) {
-        return const EditItineraryModal();
+        return EditItineraryModal(itinerary: itinerary);
       },
     );
   }
@@ -26,7 +26,7 @@ class ItineraryListItem extends StatelessWidget {
   Widget build(final BuildContext context) {
     return InkWell(
       onTap: () {
-        context.go(createItineraryDetailRoute(itinerary.id));
+        context.push(createItineraryDetailRoute(itinerary.id));
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

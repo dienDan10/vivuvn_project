@@ -35,5 +35,8 @@ namespace vivuvn_api.DTOs.Request
 
 		[JsonPropertyName("special_requirements")]
 		public string? SpecialRequirements { get; set; }
+
+		[JsonPropertyName("transportation_mode")]
+		public string? TransportationMode { get; set; }
 	}
 }

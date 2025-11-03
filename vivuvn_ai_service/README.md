@@ -13,10 +13,14 @@ Một dịch vụ AI độc lập (standalone) được xây dựng với FastAP
 
 ## 🌟 **Tính năng chính**
 
-- 🤖 **AI-Powered Generation**: Sử dụng Google Gemini với RAG pattern
-- 🇻🇳 **Chuyên biệt Việt Nam**: Kiến thức sâu về du lịch, văn hóa Việt Nam
+- 🤖 **AI-Powered Generation**: Sử dụng Google Gemini với structured output và RAG pattern
+- 🧩 **Modular Agent Architecture**: 6 specialized agents với single responsibility principle
+- 🔍 **Anti-hallucination**: Validation layer đảm bảo chỉ sử dụng địa điểm có trong database
+- �️ **Weather Integration**: Tích hợp OpenWeather API cho dự báo thời tiết chi tiết
+- �🇻🇳 **Chuyên biệt Việt Nam**: Kiến thức sâu về du lịch, văn hóa Việt Nam
 - ⚡ **Vector Search**: Tìm kiếm ngữ nghĩa với Pinecone Serverless
-- 🚀 **Standalone Service**: Không cần database, chỉ cần API keys
+- 🗺️ **Geo-clustering**: Tự động nhóm địa điểm theo vị trí địa lý
+- 🚀 **Standalone Service**: Không cần database riêng, chỉ cần API keys
 - 📊 **Data Management**: API để quản lý dữ liệu du lịch
 - 💰 **Cost Estimation**: Ước tính chi phí thực tế tính bằng VND
 
@@ -33,15 +37,41 @@ Một dịch vụ AI độc lập (standalone) được xây dựng với FastAP
 │  ├── Data Management Endpoints                                │
 │  └── Health Check & Monitoring                                │
 ├────────────────────────────────────────────────────────────────┤
-│  🤖 AI Services                                               │
-│  ├── Google Gemini (Content Generation)                       │
-│  ├── Sentence Transformers (Embeddings)                       │
-│  └── LangChain/LangGraph (Orchestration)                      │
+│  🤖 Modular AI Agents (LangGraph Workflow)                    │
+│  ├── SearchAgent (Place Discovery & Filtering)                │
+│  ├── WeatherAgent (Weather Data Fetching)                     │
+│  ├── ItineraryAgent (LLM-based Generation)                    │
+│  ├── ValidationAgent (Anti-hallucination Checks)              │
+│  └── ResponseAgent (Final Response Building)                  │
+├────────────────────────────────────────────────────────────────┤
+│  🧠 AI Services                                               │
+│  ├── Google Gemini (Content Generation with Structured Output)│
+│  ├── Google Embedding API (Text Embeddings)                   │
+│  └── LangGraph (Workflow Orchestration)                       │
 ├────────────────────────────────────────────────────────────────┤
 │  ☁️ External Services                                         │
-│  ├── Pinecone Serverless (Vector Storage)                     │
-│  └── Google AI API (LLM)                                      │
+│  ├── Pinecone Serverless (Vector Storage & Search)            │
+│  ├── Google AI API (LLM & Embeddings)                         │
+│  └── OpenWeather API (Weather Forecasts)                      │
 └────────────────────────────────────────────────────────────────┘
+```
+
+### **Agent Workflow**
+
+```
+User Request
+    ↓
+[SearchAgent] → Build filters & search places (Pinecone)
+    ↓
+[WeatherAgent] → Fetch weather forecast (OpenWeather)
+    ↓
+[ItineraryAgent] → Generate itinerary (Gemini LLM)
+    ↓
+[ValidationAgent] → Validate against database (Anti-hallucination)
+    ↓
+[ResponseAgent] → Build final response
+    ↓
+JSON Response (Itinerary + Weather)
 ```
 
 ---
@@ -51,24 +81,46 @@ Một dịch vụ AI độc lập (standalone) được xây dựng với FastAP
 ```
 vivuvn_ai_service/
 ├── app/                          # Main application
+│   ├── agents/                   # ⭐ Modular AI agents
+│   │   ├── __init__.py           # Agent exports
+│   │   ├── state.py              # Workflow state definition
+│   │   ├── search_agent.py       # Place search & filtering
+│   │   ├── weather_agent.py      # Weather data fetching
+│   │   ├── itinerary_agent.py    # LLM-based generation
+│   │   ├── validation_agent.py   # Anti-hallucination checks
+│   │   ├── response_agent.py     # Response building
+│   │   └── travel_planning_agent.py # Main orchestrator
 │   ├── api/                      # API routes and schemas
 │   │   ├── routes/               # API endpoints
 │   │   │   ├── travel_planner.py # Travel itinerary generation
 │   │   │   └── data_management.py# Data CRUD operations
 │   │   └── schemas.py            # Pydantic models
+│   ├── clients/                  # External API clients
+│   │   └── openweather_client.py # OpenWeather API
 │   ├── core/                     # Core configuration
 │   │   ├── config.py             # Settings and environment
-│   │   ├── database.py           # Minimal database setup
 │   │   └── exceptions.py         # Custom exceptions
+│   ├── models/                   # Data models
+│   │   ├── travel_models.py      # Travel itinerary models
+│   │   └── weather_models.py     # Weather data models
+│   ├── prompts/                  # LLM prompts
+│   │   └── travel_prompts.py     # Modular prompt system
 │   ├── services/                 # Business logic
 │   │   ├── vector_service.py     # Pinecone vector operations
-│   │   └── travel_agent.py       # AI travel planning
+│   │   ├── embedding_service.py  # Text embeddings
+│   │   └── weather_service.py    # Weather data processing
 │   ├── utils/                    # Utilities
 │   │   ├── data_loader.py        # Data loading into Pinecone
-│   │   └── helpers.py            # Helper functions
+│   │   ├── geo_utils.py          # Geographic clustering
+│   │   ├── helpers.py            # Helper functions
+│   │   └── weather_helpers.py    # Weather formatting
 │   └── main.py                   # FastAPI application
+├── data/                         # Data files
+│   └── location_data.json        # Vietnam locations database
 ├── requirements.txt              # Python dependencies
 ├── pyproject.toml               # Project configuration
+├── Dockerfile                    # Docker configuration
+├── docker-compose.yml            # Docker Compose setup
 ├── .env.example                 # Environment template
 └── README.md                    # This file
 ```

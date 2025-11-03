@@ -8,7 +8,7 @@ namespace vivuvn_api.Controllers
 {
     [Route("api/v1/itineraries")]
     [ApiController]
-    public class ItineraryController(IItineraryService _itineraryService) : ControllerBase
+    public class ItineraryController(IItineraryService _itineraryService, IItineraryMemberService _memberService) : ControllerBase
     {
         // Get all itineraries of the user (include joined itineraries)
         [HttpGet]
@@ -61,6 +61,14 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteItinerary(int id)
         {
+            var userId = GetCurrentUserId();
+            var isOwner = await _memberService.IsOwnerAsync(id, userId);
+
+            if (!isOwner)
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
+
             var result = await _itineraryService.DeleteItineraryByIdAsync(id);
 
             if (!result)

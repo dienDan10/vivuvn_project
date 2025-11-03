@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../detail/ui/btn_ai_gen_itinerary.dart';
 import '../controller/itinerary_schedule_controller.dart';
-import 'widgets/add_hotel_expan.dart';
-import 'widgets/add_restaurant_expan.dart';
 import 'widgets/day_selector_bar.dart';
 import 'widgets/day_title.dart';
 import 'widgets/place_list_section.dart';
@@ -67,8 +65,8 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
               DayTitle(),
               PlaceListSection(),
               SuggestedPlacesTile(),
-              AddHotelTile(),
-              AddRestaurantTile(),
+              // AddHotelTile(),
+              // AddRestaurantTile(),
               SizedBox(height: 80), // Space for FAB
             ],
           ),

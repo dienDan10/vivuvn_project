@@ -28,4 +28,22 @@ class ItineraryController extends AutoDisposeNotifier<ItineraryState> {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  Future<void> deleteItinerary(final int itineraryId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await ref.read(itineraryServiceProvider).deleteItinerary(itineraryId);
+      final updatedItineraries = state.itineraries
+          .where((final itinerary) => itinerary.id != itineraryId)
+          .toList();
+      state = state.copyWith(itineraries: updatedItineraries, isLoading: false);
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(error: errorMsg, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(error: 'unknown error', isLoading: false);
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
 }
