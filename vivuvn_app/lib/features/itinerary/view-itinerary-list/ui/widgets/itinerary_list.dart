@@ -15,14 +15,6 @@ class ItineraryList extends ConsumerStatefulWidget {
 
 class _ItineraryListState extends ConsumerState<ItineraryList> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(itineraryControllerProvider.notifier).fetchItineraries();
-    });
-  }
-
-  @override
   Widget build(final BuildContext context) {
     final state = ref.watch(itineraryControllerProvider);
 
@@ -40,6 +32,14 @@ class _ItineraryListState extends ConsumerState<ItineraryList> {
     }).toList();
 
     if (items.isEmpty) {
+      if (widget.isOwner == false) {
+        return const EmptyItinerary(
+          title: 'Bạn chưa tham gia chuyến đi nào',
+          description:
+              'Hãy tìm kiếm và kết nối với bạn bè để tham gia những chuyến đi thú vị nhé!',
+          icon: Icons.group_outlined,
+        );
+      }
       return const EmptyItinerary();
     }
 

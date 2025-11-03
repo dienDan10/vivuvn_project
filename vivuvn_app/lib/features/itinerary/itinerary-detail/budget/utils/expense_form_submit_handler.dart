@@ -144,7 +144,8 @@ class ExpenseFormSubmitHandler {
             (initialItem.budgetTypeObj?.budgetTypeId ?? 0) &&
         formState.selectedDate?.year == initialItem.date.year &&
         formState.selectedDate?.month == initialItem.date.month &&
-        formState.selectedDate?.day == initialItem.date.day;
+        formState.selectedDate?.day == initialItem.date.day &&
+        (formState.payerMemberId == (initialItem.paidByMember?.memberId));
 
     return !nothingChanged;
   }
@@ -165,7 +166,10 @@ class ExpenseFormSubmitHandler {
       cost: amountInVND,
       budgetTypeId: formState.selectedTypeId,
       date: formState.selectedDate!,
+      payerMemberId: formState.payerMemberId,
     );
+    // ignore: avoid_print
+    print('[Budget] Update payload: ${updateRequest.toMap()}');
     return await controller.updateBudgetItem(updateRequest);
   }
 
@@ -183,7 +187,10 @@ class ExpenseFormSubmitHandler {
       cost: amountInVND,
       budgetTypeId: formState.selectedTypeId,
       date: formState.selectedDate!,
+      payerMemberId: formState.payerMemberId,
     );
+    // ignore: avoid_print
+    print('[Budget] Add payload: ${addRequest.toMap()}');
     return await controller.addBudgetItem(addRequest);
   }
 

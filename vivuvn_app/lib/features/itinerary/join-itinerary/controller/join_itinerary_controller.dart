@@ -37,6 +37,10 @@ class JoinItineraryController extends AutoDisposeNotifier<JoinItineraryState> {
     state = state.copyWith(isScanHandled: handled);
   }
 
+  void setDecodingImage(final bool value) {
+    state = state.copyWith(isDecodingImage: value);
+  }
+
   Future<void> join() async {
     try {
       _validate();
@@ -70,6 +74,9 @@ class JoinItineraryController extends AutoDisposeNotifier<JoinItineraryState> {
 
   Future<void> scanQrAndSetInviteCode(final BuildContext context) async {
     try {
+      // reset previous scan state before opening scanner
+      setPickedImagePath(null);
+      setScanHandled(false);
       final result = await Navigator.of(context).push<String>(
         MaterialPageRoute(
           builder: (final _) => const ScanQrPage(),
@@ -77,6 +84,9 @@ class JoinItineraryController extends AutoDisposeNotifier<JoinItineraryState> {
       );
       if (result != null && result.isNotEmpty) {
         setInviteCode(result);
+        // clear scan state after a successful scan
+        setPickedImagePath(null);
+        setScanHandled(false);
       }
     } catch (e) {
       state = state.copyWith(error: 'Không thể quét QR: $e');
@@ -85,8 +95,8 @@ class JoinItineraryController extends AutoDisposeNotifier<JoinItineraryState> {
 
   Future<void> handleJoinPressed(final BuildContext context) async {
     try {
-      await join();
       final navigator = Navigator.of(context);
+      await join();
       if (navigator.canPop()) {
         navigator.pop();
       }
@@ -103,6 +113,8 @@ class JoinItineraryController extends AutoDisposeNotifier<JoinItineraryState> {
     final raw = codes.first.rawValue;
     if (raw == null || raw.isEmpty) return;
     setScanHandled(true);
+    // Clear preview image before dismissing the scanner UI
+    setPickedImagePath(null);
     Navigator.of(context).pop(raw);
   }
 
@@ -111,6 +123,7 @@ class JoinItineraryController extends AutoDisposeNotifier<JoinItineraryState> {
     required final MobileScannerController scanner,
   }) async {
     try {
+      setDecodingImage(true);
       final picker = ImagePicker();
       final file = await picker.pickImage(source: ImageSource.gallery);
       if (file == null) return;
@@ -129,15 +142,21 @@ class JoinItineraryController extends AutoDisposeNotifier<JoinItineraryState> {
 
       if (!state.isScanHandled) {
         final decoded = await _fallbackDecodeQr(file.path);
-        if (decoded != null && decoded.isNotEmpty) {
+        if (decoded != null && decoded.isNotEmpty && context.mounted) {
           setScanHandled(true);
+          setPickedImagePath(null);
           Navigator.of(context).pop(decoded);
         } else {
+          if (!context.mounted) return;
           GlobalToast.showErrorToast(context, message: 'Ảnh không chứa mã QR hợp lệ');
         }
       }
     } catch (_) {
+      if (!context.mounted) return;
       GlobalToast.showErrorToast(context, message: 'Không thể đọc ảnh QR từ thư viện');
+    }
+    finally {
+      setDecodingImage(false);
     }
   }
 

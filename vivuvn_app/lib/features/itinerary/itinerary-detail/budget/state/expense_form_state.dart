@@ -1,4 +1,5 @@
 class ExpenseFormState {
+  static const Object _unset = Object();
   final String name;
   final String amount;
   final String selectedType;
@@ -7,6 +8,8 @@ class ExpenseFormState {
   final String? dateError;
   final String? typeError;
   final bool isUSD;
+  final int? payerMemberId;
+  final String? payerMemberName;
 
   const ExpenseFormState({
     this.name = '',
@@ -17,6 +20,8 @@ class ExpenseFormState {
     this.dateError,
     this.typeError,
     this.isUSD = false,
+    this.payerMemberId,
+    this.payerMemberName,
   });
 
   ExpenseFormState copyWith({
@@ -28,6 +33,8 @@ class ExpenseFormState {
     final String? dateError,
     final String? typeError,
     final bool? isUSD,
+    final Object? payerMemberId = _unset,
+    final Object? payerMemberName = _unset,
   }) {
     return ExpenseFormState(
       name: name ?? this.name,
@@ -38,6 +45,12 @@ class ExpenseFormState {
       dateError: dateError,
       typeError: typeError,
       isUSD: isUSD ?? this.isUSD,
+      payerMemberId: identical(payerMemberId, _unset)
+          ? this.payerMemberId
+          : payerMemberId as int?,
+      payerMemberName: identical(payerMemberName, _unset)
+          ? this.payerMemberName
+          : payerMemberName as String?,
     );
   }
 

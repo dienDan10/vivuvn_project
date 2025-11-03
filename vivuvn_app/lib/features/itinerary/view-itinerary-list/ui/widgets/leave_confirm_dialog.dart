@@ -7,7 +7,8 @@ import '../../controller/itinerary_controller.dart';
 
 class LeaveConfirmDialog extends ConsumerStatefulWidget {
   final int itineraryId;
-  const LeaveConfirmDialog({super.key, required this.itineraryId});
+  final bool popToList;
+  const LeaveConfirmDialog({super.key, required this.itineraryId, this.popToList = false});
 
   @override
   ConsumerState<LeaveConfirmDialog> createState() => _LeaveConfirmDialogState();
@@ -23,7 +24,11 @@ class _LeaveConfirmDialogState extends ConsumerState<LeaveConfirmDialog> {
         context,
         message: 'Đã rời khỏi chuyến đi',
       );
-      context.pop();
+      final navigator = Navigator.of(context);
+      navigator.pop(); // close dialog
+      if (widget.popToList && navigator.canPop()) {
+        navigator.pop(); // leave detail to list
+      }
     }
   }
 

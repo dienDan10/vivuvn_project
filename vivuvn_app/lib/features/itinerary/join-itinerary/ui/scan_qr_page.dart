@@ -55,13 +55,16 @@ class _ScanQrPageState extends ConsumerState<ScanQrPage> with TickerProviderStat
   @override
   Widget build(final BuildContext context) {
     const overlaySize = 240.0;
+    final isDecoding = ref.watch(
+      joinItineraryControllerProvider.select((final s) => s.isDecodingImage),
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quét mã QR'),
         actions: [
           IconButton(
             tooltip: 'Mở ảnh từ thư viện',
-            onPressed: _pickFromGallery,
+            onPressed: isDecoding ? null : _pickFromGallery,
             icon: const Icon(Icons.photo_library_outlined),
           ),
         ],
@@ -82,10 +85,22 @@ class _ScanQrPageState extends ConsumerState<ScanQrPage> with TickerProviderStat
           ),
           QrOverlayFrame(scanAnimation: _scanController),
           const QrOverlayHint(),
+          if (isDecoding)
+            Positioned.fill(
+              child: AbsorbPointer(
+                absorbing: true,
+                child: Container(
+                  color: Colors.black45,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _pickFromGallery,
+        onPressed: isDecoding ? null : _pickFromGallery,
         icon: const Icon(Icons.photo_library_outlined),
         label: const Text('Chọn ảnh QR'),
       ),

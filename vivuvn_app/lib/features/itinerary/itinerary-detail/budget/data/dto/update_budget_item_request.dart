@@ -20,6 +20,7 @@ class UpdateBudgetItemRequest {
   final int? budgetTypeId;
   final String? budgetType;
   final DateTime? date;
+  final int? payerMemberId;
 
   const UpdateBudgetItemRequest({
     required this.itineraryId,
@@ -29,6 +30,7 @@ class UpdateBudgetItemRequest {
     this.budgetTypeId,
     this.budgetType,
     this.date,
+    this.payerMemberId,
   });
 
   /// Convert to Map, only include non-null fields
@@ -43,6 +45,8 @@ class UpdateBudgetItemRequest {
       else if (budgetType != null)
         'budgetType': budgetType,
       if (date != null) 'date': date!.toIso8601String(),
+      // Always include memberId; explicit null signals clearing the payer
+      'memberId': payerMemberId,
     };
 
     if (map.isEmpty) {

@@ -10,6 +10,7 @@ import 'field_amount.dart';
 import 'field_date.dart';
 import 'field_error_text.dart';
 import 'field_name.dart';
+import 'field_payer_picker.dart';
 import 'field_type_picker.dart';
 
 class AddExpenseForm extends ConsumerStatefulWidget {
@@ -112,6 +113,10 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           FieldName(controller: nameController),
+          const SizedBox(height: 12),
+
+          // Payer picker
+          const FieldPayerPicker(),
           const SizedBox(height: 12),
 
           FieldAmount(

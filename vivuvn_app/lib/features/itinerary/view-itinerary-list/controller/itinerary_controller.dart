@@ -6,11 +6,11 @@ import '../service/itinerary_service.dart';
 import '../state/itinerary_state.dart';
 
 final itineraryControllerProvider =
-    AutoDisposeNotifierProvider<ItineraryController, ItineraryState>(
+    NotifierProvider<ItineraryController, ItineraryState>(
       () => ItineraryController(),
     );
 
-class ItineraryController extends AutoDisposeNotifier<ItineraryState> {
+class ItineraryController extends Notifier<ItineraryState> {
   @override
   ItineraryState build() => ItineraryState();
 

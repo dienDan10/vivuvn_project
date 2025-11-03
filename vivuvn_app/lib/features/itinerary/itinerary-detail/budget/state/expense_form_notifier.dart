@@ -19,6 +19,8 @@ class ExpenseFormNotifier extends StateNotifier<ExpenseFormState> {
       selectedType: item.budgetType,
       selectedTypeId: item.budgetTypeObj?.budgetTypeId ?? 0,
       selectedDate: item.date,
+      payerMemberId: item.paidByMember?.memberId,
+      payerMemberName: item.paidByMember?.username,
     );
   }
 
@@ -57,6 +59,21 @@ class ExpenseFormNotifier extends StateNotifier<ExpenseFormState> {
   /// Update currency toggle
   void setCurrency(final bool isUSD) {
     state = state.copyWith(isUSD: isUSD);
+  }
+
+  void setPayer(final int? memberId, [final String? memberName]) {
+    // Debug log before update
+    // ignore: avoid_print
+    print('[ExpenseForm] setPayer -> id: $memberId, name: ${memberName ?? 'null'}');
+
+    state = state.copyWith(
+      payerMemberId: memberId,
+      payerMemberName: memberName,
+    );
+
+    // Debug log after update
+    // ignore: avoid_print
+    print('[ExpenseForm] updated -> payerMemberId: ${state.payerMemberId?.toString() ?? 'null'}, payerMemberName: ${state.payerMemberName ?? 'null'}');
   }
 
   /// Set date error

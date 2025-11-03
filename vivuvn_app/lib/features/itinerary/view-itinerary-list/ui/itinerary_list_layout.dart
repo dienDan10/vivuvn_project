@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../controller/itinerary_controller.dart';
 import 'widgets/btn_add_itinerary.dart';
 import 'widgets/itinerary_list.dart';
 
-class ItineraryListLayout extends StatelessWidget {
+class ItineraryListLayout extends ConsumerStatefulWidget {
   const ItineraryListLayout({super.key});
+
+  @override
+  ConsumerState<ItineraryListLayout> createState() => _ItineraryListLayoutState();
+}
+
+class _ItineraryListLayoutState extends ConsumerState<ItineraryListLayout> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(itineraryControllerProvider.notifier).fetchItineraries();
+    });
+  }
 
   @override
   Widget build(final BuildContext context) {

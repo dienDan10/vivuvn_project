@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../itinerary/view-itinerary-list/ui/widgets/leave_confirm_dialog.dart';
+import '../../controller/itinerary_detail_controller.dart';
 import 'delete_itinerary_button.dart';
 import 'edit_name_button.dart';
 import 'invite_button.dart';
 import 'privacy_button.dart';
 
-class SettingsModal extends StatelessWidget {
+class SettingsModal extends ConsumerWidget {
   const SettingsModal({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner =
+        ref.watch(itineraryDetailControllerProvider).itinerary?.isOwner ?? false;
+    final itineraryId =
+        ref.watch(itineraryDetailControllerProvider).itineraryId;
     return Stack(
       children: [
         // Background tap area
@@ -69,11 +76,34 @@ class SettingsModal extends StatelessWidget {
                       child: ListView(
                         controller: scrollController,
                         padding: EdgeInsets.zero,
-                        children: const [
-                          EditNameButton(),
-                          PrivacyButton(),
-                          InviteButton(),
-                          DeleteItineraryButton(),
+                        children: [
+                          if (isOwner) ...const [
+                            EditNameButton(),
+                            PrivacyButton(),
+                            InviteButton(),
+                            DeleteItineraryButton(),
+                          ] else ...[
+                            ListTile(
+                              leading: Image.asset(
+                                'assets/icons/exit_icon.png',
+                                width: 20,
+                                height: 20,
+                              ),
+                              title: const Text('Rời khỏi chuyến đi này'),
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                if (itineraryId != null) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (final _) => LeaveConfirmDialog(
+                                      itineraryId: itineraryId,
+                                      popToList: true,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
                         ],
                       ),
                     ),

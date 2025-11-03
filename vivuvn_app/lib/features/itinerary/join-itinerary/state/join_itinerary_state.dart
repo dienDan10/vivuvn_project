@@ -4,6 +4,7 @@ class JoinItineraryState {
   final String inviteCode;
   final String? pickedImagePath;
   final bool isScanHandled;
+  final bool isDecodingImage;
 
   JoinItineraryState({
     this.isLoading = false,
@@ -11,6 +12,7 @@ class JoinItineraryState {
     this.inviteCode = '',
     this.pickedImagePath,
     this.isScanHandled = false,
+    this.isDecodingImage = false,
   });
 
   JoinItineraryState copyWith({
@@ -19,6 +21,7 @@ class JoinItineraryState {
     final String? inviteCode,
     final String? pickedImagePath,
     final bool? isScanHandled,
+    final bool? isDecodingImage,
   }) {
     return JoinItineraryState(
       isLoading: isLoading ?? this.isLoading,
@@ -26,6 +29,7 @@ class JoinItineraryState {
       inviteCode: inviteCode ?? this.inviteCode,
       pickedImagePath: pickedImagePath ?? this.pickedImagePath,
       isScanHandled: isScanHandled ?? this.isScanHandled,
+      isDecodingImage: isDecodingImage ?? this.isDecodingImage,
     );
   }
 }
