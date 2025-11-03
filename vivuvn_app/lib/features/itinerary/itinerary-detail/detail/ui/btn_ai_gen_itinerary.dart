@@ -28,7 +28,9 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
 
   @override
   Widget build(final BuildContext context) {
-    return ExpandableFab(
+    return HeroMode(
+      enabled: false,
+      child: ExpandableFab(
       key: _fabKey,
       overlayStyle: ExpandableFabOverlayStyle(
         color: Colors.black.withValues(alpha: 0.7),
@@ -62,6 +64,7 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
             ),
             const SizedBox(width: 20),
             FloatingActionButton(
+              heroTag: 'detail_fab_ai',
               backgroundColor: Theme.of(context).colorScheme.onPrimary,
               foregroundColor: Theme.of(context).colorScheme.primary,
               shape: RoundedRectangleBorder(
@@ -79,6 +82,7 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
           ],
         ),
       ],
+      ),
     );
   }
 }

@@ -60,6 +60,10 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^11.3.1
   gal: ^2.0.1
+  mobile_scanner: ^5.2.3
+  image_picker: ^1.1.2
+  image: ^4.2.0
+  zxing2: ^0.2.3
 
 
 dev_dependencies:

@@ -41,6 +41,7 @@ class _PlaceCardDetailsState extends ConsumerState<PlaceCardDetails> {
             PlacePhotosSection(
               photos: location.photos,
               locationId: location.id,
+              heroPrefix: 'detail_',
             ),
           ],
           const SizedBox(height: 16),
