@@ -5,22 +5,30 @@ class MemberState {
   final List<Member> members;
   final bool isLoadingMembers;
   final String? loadingMembersError;
+  final bool isKickingMember;
+  final String? kickingMemberError;
 
   MemberState({
     this.members = const [],
     this.isLoadingMembers = false,
     this.loadingMembersError,
+    this.isKickingMember = false,
+    this.kickingMemberError,
   });
 
   MemberState copyWith({
     final List<Member>? members,
     final bool? isLoadingMembers,
     final String? loadingMembersError,
+    final bool? isKickingMember,
+    final String? kickingMemberError,
   }) {
     return MemberState(
       members: members ?? this.members,
       isLoadingMembers: isLoadingMembers ?? this.isLoadingMembers,
-      loadingMembersError: loadingMembersError ?? this.loadingMembersError,
+      loadingMembersError: loadingMembersError,
+      isKickingMember: isKickingMember ?? this.isKickingMember,
+      kickingMemberError: kickingMemberError,
     );
   }
 }

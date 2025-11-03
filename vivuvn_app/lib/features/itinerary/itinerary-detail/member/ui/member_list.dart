@@ -13,6 +13,9 @@ class MemberList extends ConsumerWidget {
     final members = ref.watch(
       memberControllerProvider.select((final state) => state.members),
     );
+    final isLoading = ref.watch(
+      memberControllerProvider.select((final state) => state.isLoadingMembers),
+    );
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -22,15 +25,22 @@ class MemberList extends ConsumerWidget {
           topRight: Radius.circular(30),
         ),
       ),
-      child: ListView.builder(
-        padding: const EdgeInsets.only(top: 12, bottom: 12),
-        physics: const BouncingScrollPhysics(),
-        itemCount: members.length,
-        itemBuilder: (final context, final index) {
-          final member = members[index];
-          return MemberItem(key: ValueKey(member.memberId), member: member);
-        },
-      ),
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(color: colorScheme.onPrimary),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              physics: const BouncingScrollPhysics(),
+              itemCount: members.length,
+              itemBuilder: (final context, final index) {
+                final member = members[index];
+                return MemberItem(
+                  key: ValueKey(member.memberId),
+                  member: member,
+                );
+              },
+            ),
     );
   }
 }

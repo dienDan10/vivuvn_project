@@ -28,20 +28,11 @@ class _MemberTabState extends ConsumerState<MemberTab> {
     final members = ref.watch(
       memberControllerProvider.select((final state) => state.members),
     );
-    final isLoading = ref.watch(
-      memberControllerProvider.select((final state) => state.isLoadingMembers),
-    );
     final loadingError = ref.watch(
       memberControllerProvider.select(
         (final state) => state.loadingMembersError,
       ),
     );
-
-    if (isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: colorScheme.onPrimary),
-      );
-    }
 
     if (loadingError != null) {
       return const LoadMemberError();

@@ -36,6 +36,30 @@ class MemberController extends AutoDisposeNotifier<MemberState> {
       state = state.copyWith(isLoadingMembers: false);
     }
   }
+
+  Future<void> kickMember(final int memberId) async {
+    final itineraryId = ref.read(itineraryDetailControllerProvider).itineraryId;
+    state = state.copyWith(isKickingMember: true, kickingMemberError: null);
+    try {
+      await ref.read(memberServiceProvider).kickMember(itineraryId!, memberId);
+      // Remove member from state
+      final updatedMembers = state.members
+          .where((final member) => member.memberId != memberId)
+          .toList();
+      state = state.copyWith(members: updatedMembers);
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(kickingMemberError: errorMsg);
+    } catch (e) {
+      state = state.copyWith(kickingMemberError: 'unknown error');
+    } finally {
+      state = state.copyWith(isKickingMember: false);
+    }
+  }
+
+  void resetKickingMemberError() {
+    state = state.copyWith(kickingMemberError: null);
+  }
 }
 
 final memberControllerProvider =

@@ -16,6 +16,10 @@ class MemberApi {
         .map((final e) => Member.fromMap(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<void> kickMember(final int itineraryId, final int memberId) async {
+    await _dio.delete('/api/v1/itineraries/$itineraryId/members/$memberId');
+  }
 }
 
 final memberApiProvider = Provider.autoDispose<MemberApi>((final ref) {

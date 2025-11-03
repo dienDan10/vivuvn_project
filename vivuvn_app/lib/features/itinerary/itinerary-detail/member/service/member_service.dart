@@ -12,6 +12,11 @@ class MemberService implements IMemberService {
   Future<List<Member>> fetchMembers(final int itineraryId) async {
     return await _api.getMembers(itineraryId);
   }
+
+  @override
+  Future<void> kickMember(final int itineraryId, final int memberId) async {
+    return await _api.kickMember(itineraryId, memberId);
+  }
 }
 
 final memberServiceProvider = Provider.autoDispose<IMemberService>((final ref) {

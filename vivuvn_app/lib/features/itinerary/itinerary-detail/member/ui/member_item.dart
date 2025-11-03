@@ -1,19 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../common/helper/image_util.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../data/model/member.dart';
+import 'manage_member_modal.dart';
 
-class MemberItem extends StatelessWidget {
+class MemberItem extends ConsumerStatefulWidget {
   final Member member;
   const MemberItem({super.key, required this.member});
 
   @override
+  ConsumerState<MemberItem> createState() => _MemberItemState();
+}
+
+class _MemberItemState extends ConsumerState<MemberItem> {
+  void _openEditMemberDialog() {
+    final bool isOwner =
+        ref.read(itineraryDetailControllerProvider).itinerary?.isOwner ?? false;
+    if (!isOwner) return;
+
+    // Don't allow kicking the owner
+    if (widget.member.role.toLowerCase() == 'owner') return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (final context) => ManageMemberModal(member: widget.member),
+    );
+  }
+
+  @override
   Widget build(final BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bool isOwner = member.role.toLowerCase() == 'owner';
+    final bool isOwner = widget.member.role.toLowerCase() == 'owner';
 
     return Container(
+      margin: const EdgeInsets.only(bottom: 2),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -29,7 +53,7 @@ class MemberItem extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {},
+          onTap: _openEditMemberDialog,
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -47,11 +71,9 @@ class MemberItem extends StatelessWidget {
                           width: 2,
                         ),
                       ),
-                      child: CircleAvatar(
+                      child: ImageUtil.buildAvatarWidget(
+                        imageUrl: widget.member.photo,
                         radius: 28,
-                        backgroundImage: ImageUtil.getImageProvider(
-                          member.photo,
-                        ),
                       ),
                     ),
                     if (isOwner)
@@ -88,7 +110,7 @@ class MemberItem extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              member.username,
+                              widget.member.username,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -134,7 +156,7 @@ class MemberItem extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              member.email,
+                              widget.member.email,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -145,7 +167,7 @@ class MemberItem extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (member.phoneNumber != null) ...[
+                      if (widget.member.phoneNumber != null) ...[
                         const SizedBox(height: 2),
                         Row(
                           children: [
@@ -156,7 +178,7 @@ class MemberItem extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              member.phoneNumber!,
+                              widget.member.phoneNumber!,
                               style: TextStyle(
                                 fontSize: 13,
                                 color: colorScheme.outline,
@@ -181,7 +203,7 @@ class MemberItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('dd/MM').format(member.joinedAt),
+                      DateFormat('dd/MM').format(widget.member.joinedAt),
                       style: TextStyle(
                         color: colorScheme.primary,
                         fontSize: 12,
@@ -189,7 +211,7 @@ class MemberItem extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      DateFormat('yyyy').format(member.joinedAt),
+                      DateFormat('yyyy').format(widget.member.joinedAt),
                       style: TextStyle(
                         color: colorScheme.outline,
                         fontSize: 10,
