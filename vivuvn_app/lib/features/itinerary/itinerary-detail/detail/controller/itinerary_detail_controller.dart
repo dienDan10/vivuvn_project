@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../common/toast/global_toast.dart';
 import '../../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
-import '../../../view-itinerary-list/models/itinerary.dart';
 import '../service/itinerary_detail_service.dart';
 import '../state/itinerary_detail_state.dart';
 
@@ -47,17 +46,9 @@ class ItineraryDetailController
   void setGroupSize(final int newGroupSize) {
     final current = state.itinerary;
     if (current == null) return;
-    final updated = Itinerary(
-      id: current.id,
-      name: current.name,
-      imageUrl: current.imageUrl,
-      startDate: current.startDate,
-      endDate: current.endDate,
-      groupSize: newGroupSize,
-      destinationProvinceName: current.destinationProvinceName,
-      transportationVehicle: current.transportationVehicle,
+    state = state.copyWith(
+      itinerary: current.copyWith(groupSize: newGroupSize),
     );
-    state = state.copyWith(itinerary: updated);
   }
 
   // Group size inline editing flow
@@ -83,9 +74,7 @@ class ItineraryDetailController
     final draft = state.groupSizeDraft;
     if (itineraryId == null) return false;
     // Validate (treat null or empty as invalid)
-    final validationError = Validator.validateGroupSize(
-      draft?.toString(),
-    );
+    final validationError = Validator.validateGroupSize(draft?.toString());
     if (validationError != null) {
       if (context.mounted) {
         GlobalToast.showErrorToast(context, message: validationError);

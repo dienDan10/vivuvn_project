@@ -4,12 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../common/validator/validation_exception.dart';
 import '../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
-import '../../controller/itinerary_detail_controller.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../data/api/automically_generate_by_ai_api.dart';
 import '../data/dto/generate_itinerary_by_ai_request.dart';
 import '../model/interested_category.dart';
 import '../state/automically_generate_by_ai_state.dart';
-import 'itinerary_schedule_controller.dart';
 import 'validate_and_submit_result.dart';
 
 // Provider used to request a tab switch from the AI modal flow. When the

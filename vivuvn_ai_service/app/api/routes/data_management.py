@@ -213,11 +213,11 @@ async def get_data_stats():
         dict: Data statistics
     """
     try:
-        from app.services.vector_service import get_vector_service
-        vector_service = get_vector_service()
-        
+        from app.services.pinecone_service import get_pinecone_service
+        pinecone_service = get_pinecone_service()
+
         # Get index stats (if available)
-        stats = await vector_service.get_index_stats()
+        stats = await pinecone_service.get_index_stats()
         
         return {
             "success": True,
@@ -275,14 +275,14 @@ async def test_pinecone_query():
         dict: Diagnostic information including query results and index stats
     """
     try:
-        from app.services.vector_service import get_vector_service
+        from app.services.pinecone_service import get_pinecone_service
         from app.services.embedding_service import get_embedding_service
 
-        vector_service = get_vector_service()
+        pinecone_service = get_pinecone_service()
         embedding_service = get_embedding_service()
 
         # Get index stats (now returns JSON-serializable dict)
-        stats = await vector_service.get_index_stats()
+        stats = await pinecone_service.get_index_stats()
 
         # Try a test query
         test_query = "Hà Nội travel destinations Vietnam"
@@ -293,7 +293,7 @@ async def test_pinecone_query():
         )
 
         # Query configured namespace (travel_location)
-        results = await vector_service.search(
+        results = await pinecone_service.search(
             vector=test_embedding,
             top_k=5,
             namespace=None,  # Uses PINECONE_DEFAULT_NAMESPACE from settings

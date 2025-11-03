@@ -15,19 +15,28 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId)
         {
-            var itineraries = await _unitOfWork.Itineraries.GetAllAsync(i => i.UserId == userId && !i.DeleteFlag, includeProperties: "StartProvince,DestinationProvince");
+            var itineraries = await _unitOfWork.Itineraries
+                .GetAllAsync(i => (i.UserId == userId || i.Members.Any(i => i.UserId == userId)) && !i.DeleteFlag, includeProperties: "StartProvince,DestinationProvince,User");
 
-            return _mapper.Map<IEnumerable<ItineraryDto>>(itineraries);
+            var itineraryDtos = _mapper.Map<IEnumerable<ItineraryDto>>(itineraries);
+            foreach (var dto in itineraryDtos)
+            {
+                var itinerary = itineraries.First(i => i.Id == dto.Id);
+                dto.IsOwner = itinerary.UserId == userId;
+            }
+
+            return itineraryDtos;
         }
 
-        public async Task<ItineraryDto> GetItineraryByIdAsync(int id)
+        public async Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id && !i.DeleteFlag,
-                includeProperties: "StartProvince,DestinationProvince");
+                includeProperties: "StartProvince,DestinationProvince,User");
 
             if (itinerary == null) throw new KeyNotFoundException($"Itinerary with id {id} not found.");
-
-            return _mapper.Map<ItineraryDto>(itinerary);
+            var dto = _mapper.Map<ItineraryDto>(itinerary);
+            dto.IsOwner = itinerary.UserId == userId;
+            return dto;
         }
 
         public async Task<CreateItineraryResponseDto> CreateItineraryAsync(int userId, CreateItineraryRequestDto request)
@@ -62,7 +71,6 @@ namespace vivuvn_api.Services.Implementations
                 days.Add(itineraryDay);
             }
             await _unitOfWork.ItineraryDays.AddRangeAsync(days);
-            await _unitOfWork.SaveChangesAsync();
 
             // add default budget
             var budget = new Budget
@@ -72,8 +80,18 @@ namespace vivuvn_api.Services.Implementations
                 TotalBudget = 0 // default budget amount
             };
             await _unitOfWork.Budgets.AddAsync(budget);
-            await _unitOfWork.SaveChangesAsync();
 
+            // add owner as member
+            var member = new ItineraryMember
+            {
+                ItineraryId = itinerary.Id,
+                UserId = userId,
+                JoinedAt = DateTime.UtcNow,
+                Role = Constants.ItineraryRole_Owner
+            };
+            await _unitOfWork.ItineraryMembers.AddAsync(member);
+
+            await _unitOfWork.SaveChangesAsync();
             return new CreateItineraryResponseDto { Id = itinerary.Id };
         }
 
@@ -158,6 +176,32 @@ namespace vivuvn_api.Services.Implementations
                 return false;
             }
             itinerary.GroupSize = newGroupSize;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> SetItineraryToPublicAsync(int itineraryId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.IsPublic = true;
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> SetItineraryToPrivateAsync(int itineraryId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.IsPublic = false;
             _unitOfWork.Itineraries.Update(itinerary);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -253,27 +297,27 @@ namespace vivuvn_api.Services.Implementations
                 // Use the budget from the navigation property
                 var budget = itinerary.Budget;
 
-				// Clear existing itinerary items from all days
-				foreach (var day in itinerary.Days)
-				{
-					if (day.Items != null && day.Items.Any())
-					{
-						foreach (var item in day.Items.ToList())
-						{
-							_unitOfWork.ItineraryItems.Remove(item);
-						}
-					}
-				}
+                // Clear existing itinerary items from all days
+                foreach (var day in itinerary.Days)
+                {
+                    if (day.Items != null && day.Items.Any())
+                    {
+                        foreach (var item in day.Items.ToList())
+                        {
+                            _unitOfWork.ItineraryItems.Remove(item);
+                        }
+                    }
+                }
 
-				if (budget?.Items != null)
-				{
-				    // Clear all items from the collection
-					budget.Items.Clear();
-					budget.TotalBudget = 0;
-				}
+                if (budget?.Items != null)
+                {
+                    // Clear all items from the collection
+                    budget.Items.Clear();
+                    budget.TotalBudget = 0;
+                }
 
-				// Batch load all locations
-				var allPlaceIds = travelItinerary.Days
+                // Batch load all locations
+                var allPlaceIds = travelItinerary.Days
                     .SelectMany(d => d.Activities)
                     .Select(a => a.PlaceId)
                     .Where(placeId => !string.IsNullOrEmpty(placeId))
@@ -297,13 +341,13 @@ namespace vivuvn_api.Services.Implementations
                 await ProcessTransportationSuggestionsAsync(travelItinerary.TransportationSuggestions, budget, budgetTypeDict);
 
                 // Update budget total if TotalCost is provided
-				if (travelItinerary.TotalCost > 0 && budget != null)
+                if (travelItinerary.TotalCost > 0 && budget != null)
                 {
                     budget.TotalBudget = travelItinerary.TotalCost;
                 }
 
-				// Single SaveChanges at the end for all changes
-				await _unitOfWork.SaveChangesAsync();
+                // Single SaveChanges at the end for all changes
+                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
 
                 return itinerary;
@@ -332,47 +376,47 @@ namespace vivuvn_api.Services.Implementations
                 var existingDay = existingDays.FirstOrDefault(d => d.DayNumber == aiDay.Day);
 
                 // Process activities for this day
-				int orderIndex = 1;
+                int orderIndex = 1;
 
-				foreach (var activity in aiDay.Activities)
-				{
-					// Look up the location from the pre-loaded dictionary
-					if (!locationDict.TryGetValue(activity.PlaceId, out var location))
-					{
-						throw new KeyNotFoundException($"Location with PlaceId {activity.PlaceId} not found in database.");
-					}
+                foreach (var activity in aiDay.Activities)
+                {
+                    // Look up the location from the pre-loaded dictionary
+                    if (!locationDict.TryGetValue(activity.PlaceId, out var location))
+                    {
+                        throw new KeyNotFoundException($"Location with PlaceId {activity.PlaceId} not found in database.");
+                    }
 
-					// Create itinerary item
-					var itineraryItem = _mapper.Map<ItineraryItem>(activity);
-					itineraryItem.ItineraryDayId = existingDay.Id;
-					itineraryItem.LocationId = location.Id;
-					itineraryItem.OrderIndex = orderIndex++;
-					itineraryItem.TransportationVehicle = Constants.TravelMode_Driving;
-					itineraryItem.TransportationDuration = 500;
-					itineraryItem.TransportationDistance = 278;
+                    // Create itinerary item
+                    var itineraryItem = _mapper.Map<ItineraryItem>(activity);
+                    itineraryItem.ItineraryDayId = existingDay.Id;
+                    itineraryItem.LocationId = location.Id;
+                    itineraryItem.OrderIndex = orderIndex++;
+                    itineraryItem.TransportationVehicle = Constants.TravelMode_Driving;
+                    itineraryItem.TransportationDuration = 500;
+                    itineraryItem.TransportationDistance = 278;
 
-					await _unitOfWork.ItineraryItems.AddAsync(itineraryItem);
+                    await _unitOfWork.ItineraryItems.AddAsync(itineraryItem);
 
-					// Create budget item if activity has cost
-					if (activity.CostEstimate > 0 && budget != null)
-					{
-						var activityBudgetTypeId = budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Activities);
+                    // Create budget item if activity has cost
+                    if (activity.CostEstimate > 0 && budget != null)
+                    {
+                        var activityBudgetTypeId = budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Activities);
 
-						if (activityBudgetTypeId > 0)
-						{
-							var budgetItem = new BudgetItem
-							{
-								BudgetId = budget.BudgetId,
-								Name = activity.Name,
-								Cost = activity.CostEstimate,
-								Date = aiDay.Date,
-								BudgetTypeId = activityBudgetTypeId
-							};
-							budget.Items.Add(budgetItem);
-						}
-					}
-				}
-			}
+                        if (activityBudgetTypeId > 0)
+                        {
+                            var budgetItem = new BudgetItem
+                            {
+                                BudgetId = budget.BudgetId,
+                                Name = activity.Name,
+                                Cost = activity.CostEstimate,
+                                Date = aiDay.Date,
+                                BudgetTypeId = activityBudgetTypeId
+                            };
+                            budget.Items.Add(budgetItem);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -411,8 +455,8 @@ namespace vivuvn_api.Services.Implementations
                             Date = transportation.Date,
                             BudgetTypeId = transportationBudgetTypeId
                         };
-						budget.Items.Add(budgetItem);
-					}
+                        budget.Items.Add(budgetItem);
+                    }
                 }
             }
         }

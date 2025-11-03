@@ -10,6 +10,7 @@ namespace vivuvn_api.Controllers
     [ApiController]
     public class ItineraryController(IItineraryService _itineraryService) : ControllerBase
     {
+        // Get all itineraries of the user (include joined itineraries)
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAllItineraries()
@@ -32,7 +33,8 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> GetItineraryById(int id)
         {
-            var itinerary = await _itineraryService.GetItineraryByIdAsync(id);
+            var userId = GetCurrentUserId();
+            var itinerary = await _itineraryService.GetItineraryByIdAsync(id, userId);
 
             return Ok(itinerary);
         }
@@ -99,6 +101,36 @@ namespace vivuvn_api.Controllers
                 return NotFound(new { message = $"Itinerary with id {id} not found." });
             }
             return Ok();
+        }
+
+        [HttpPut("{id}/public")]
+        [Authorize]
+        public async Task<IActionResult> SetItineraryToPublic(int id)
+        {
+            var result = await _itineraryService.SetItineraryToPublicAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
+        [HttpPut("{id}/private")]
+        [Authorize]
+        public async Task<IActionResult> SetItineraryToPrivate(int id)
+        {
+            var result = await _itineraryService.SetItineraryToPrivateAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim!);
         }
     }
 }

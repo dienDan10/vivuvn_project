@@ -19,6 +19,8 @@ namespace vivuvn_api.Mappings
 
             // Mapping For Itinerary
             CreateMap<Itinerary, ItineraryDto>()
+                .ForMember(dest => dest.IsOwner, opt => opt.MapFrom(src => src.User.Id == src.UserId))
+                .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.StartProvinceName, opt => opt.MapFrom(src => src.StartProvince.Name))
                 .ForMember(dest => dest.DestinationProvinceName, opt => opt.MapFrom(src => src.DestinationProvince.Name))
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl))
@@ -121,9 +123,26 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.Time))
                 .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.Time.AddHours(src.DurationHours)))
                 .ForMember(dest => dest.Note, opt => opt.MapFrom(src => src.Notes))
-				.ForMember(dest => dest.TransportationVehicle, opt => opt.Ignore()) // Will be set by service layer
+                .ForMember(dest => dest.TransportationVehicle, opt => opt.Ignore()) // Will be set by service layer
                 .ForMember(dest => dest.TransportationDuration, opt => opt.Ignore())
                 .ForMember(dest => dest.TransportationDistance, opt => opt.Ignore());
+
+            // Mapping for Itinerary Member
+            CreateMap<ItineraryMember, ItineraryMemberDto>()
+                .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.User.UserPhoto))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.User.PhoneNumber))
+                .ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(src => src.JoinedAt))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role));
+
+            // Mapping for Itinerary Message
+            CreateMap<ItineraryMessage, ItineraryMessageDto>()
+                .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.ItineraryMember.Id))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.ItineraryMember.User.Email))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.ItineraryMember.User.Username))
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.ItineraryMember.User.UserPhoto));
 
         }
     }

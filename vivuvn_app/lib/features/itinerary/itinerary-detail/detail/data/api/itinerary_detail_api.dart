@@ -19,7 +19,7 @@ class ItineraryDetailApi {
     final response = await _dio.get('/api/v1/itineraries/$id');
 
     final data = response.data;
-    return Itinerary.fromJson(data as Map<String, dynamic>);
+    return Itinerary.fromMap(data as Map<String, dynamic>);
   }
 
   Future<void> updateGroupSize({

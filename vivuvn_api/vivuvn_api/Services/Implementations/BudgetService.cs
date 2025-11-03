@@ -11,7 +11,7 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task<BudgetDto?> GetBudgetByItineraryIdAsync(int itineraryId)
         {
-            var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, includeProperties: "Items,Items.BudgetType");
+            var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, includeProperties: "Items,Items.BudgetType,Items.PaidByMember,Items.PaidByMember.User");
 
             if (budget == null)
             {
@@ -38,9 +38,11 @@ namespace vivuvn_api.Services.Implementations
             return _mapper.Map<IEnumerable<BudgetTypeDto>>(budgetTypes);
         }
 
-
-        public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto item)
+        public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto request)
         {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
+                ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
+
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId);
 
             if (budget == null)
@@ -50,12 +52,17 @@ namespace vivuvn_api.Services.Implementations
 
             var budgetItem = new BudgetItem
             {
-                Name = item.Name ?? "New Budget Item",
+                Name = request.Name ?? "New Budget Item",
                 BudgetId = budget.BudgetId,
-                Cost = item.Cost,
-                Date = item.Date,
-                BudgetTypeId = item.BudgetTypeId
+                Cost = request.Cost,
+                Date = request.Date,
+                BudgetTypeId = request.BudgetTypeId,
             };
+
+            if (request.MemberId.HasValue && request.MemberId.Value > 0)
+            {
+                budgetItem.PaidByMemberId = request.MemberId.Value;
+            }
 
             await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);
             await _unitOfWork.SaveChangesAsync();
@@ -67,6 +74,9 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request)
         {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
+                ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
+
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, tracked: true);
             if (budget is null)
             {
@@ -98,6 +108,8 @@ namespace vivuvn_api.Services.Implementations
             if (request.Cost is not null && request.Cost.Value > 0) item.Cost = request.Cost.Value;
 
             if (request.BudgetTypeId is not null) item.BudgetTypeId = request.BudgetTypeId.Value;
+
+            if (request.MemberId.HasValue && request.MemberId.Value > 0) item.PaidByMemberId = request.MemberId;
 
             var updatedItem = await _unitOfWork.Budgets.UpdateBudgetItemAsync(item);
 

@@ -8,5 +8,6 @@
         public DateTime? Date { get; set; }
 
         public int? BudgetTypeId { get; set; }
+        public int? MemberId { get; set; }
     }
 }

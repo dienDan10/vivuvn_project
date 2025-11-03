@@ -15,6 +15,8 @@
         IHotelRepository Hotels { get; }
         IRestaurantRepository Restaurants { get; }
         IBudgetTypeRepository BudgetTypes { get; }
+        IItineraryMemberRepository ItineraryMembers { get; }
+        IItineraryMessageRepository ItineraryMessages { get; }
 
         Task SaveChangesAsync();
 

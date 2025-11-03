@@ -51,5 +51,24 @@
         // Additional 
         public const int DefaultPageSize = 10;
 
+        // Itinerary roles
+        public const string ItineraryRole_Owner = "Owner";
+        public const string ItineraryRole_Member = "Member";
+
+        // Notification types
+        public const string NotificationType_MemberJoined = "MemberJoined";
+        public const string NotificationType_MemberLeft = "MemberLeft";
+        public const string NotificationType_MemberKicked = "MemberKicked";
+        public const string NotificationType_ItineraryUpdated = "ItineraryUpdated";
+        public const string NotificationType_ImportantChange = "ImportantChange";
+        public const string NotificationType_ExpenseAssigned = "ExpenseAssigned";
+
+        // Invite Code Configuration
+        public const int InviteCodeLength = 8; // EX: "VIVU-ABC1"
+        public const string InviteCodePrefix = "VIVU";
+
+        // Message Pagination
+        public const int MessagesPerPage = 50;
+
     }
 }

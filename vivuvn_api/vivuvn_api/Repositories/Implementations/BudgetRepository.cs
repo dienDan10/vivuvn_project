@@ -34,7 +34,10 @@ namespace vivuvn_api.Repositories.Implementations
 
         public async Task<BudgetItem?> GetBudgetItemByIdAsync(int id, bool track = false)
         {
-            IQueryable<BudgetItem> query = _context.BudgetItems.Where(i => i.Id == id).Include(i => i.BudgetType);
+            IQueryable<BudgetItem> query = _context.BudgetItems.Where(i => i.Id == id)
+                .Include(i => i.BudgetType)
+                .Include(i => i.PaidByMember)
+                .ThenInclude(p => p.User);
 
             if (!track)
             {
@@ -49,6 +52,8 @@ namespace vivuvn_api.Repositories.Implementations
             return await _context.BudgetItems
                 .Where(i => i.BudgetId == budgetId)
                 .Include(i => i.BudgetType)
+                .Include(i => i.PaidByMember)
+                .ThenInclude(p => p.User)
                 .ToListAsync();
         }
 
@@ -78,6 +83,7 @@ namespace vivuvn_api.Repositories.Implementations
             existingItem.Date = item.Date;
             existingItem.Cost = item.Cost;
             existingItem.BudgetTypeId = item.BudgetTypeId;
+            existingItem.PaidByMemberId = item.PaidByMemberId;
 
 
             _context.BudgetItems.Update(existingItem);

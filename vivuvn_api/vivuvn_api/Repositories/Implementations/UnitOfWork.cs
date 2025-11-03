@@ -22,6 +22,8 @@ namespace vivuvn_api.Repositories.Implementations
         public IRestaurantRepository Restaurants { get; private set; }
         public IHotelRepository Hotels { get; private set; }
         public IBudgetTypeRepository BudgetTypes { get; private set; }
+        public IItineraryMemberRepository ItineraryMembers { get; private set; }
+        public IItineraryMessageRepository ItineraryMessages { get; private set; }
 
         public UnitOfWork(AppDbContext context,
             IUserRepository userRepository,
@@ -36,7 +38,9 @@ namespace vivuvn_api.Repositories.Implementations
             IItineraryHotelRepository itineraryHotelRepository,
             IRestaurantRepository restaurantRepository,
             IHotelRepository hotelRepository,
-            IBudgetTypeRepository budgetTypeRepository)
+            IBudgetTypeRepository budgetTypeRepository,
+            IItineraryMemberRepository itineraryMemberRepository,
+            IItineraryMessageRepository itineraryMessageRepository)
         {
             _context = context;
             Users = userRepository;
@@ -52,6 +56,8 @@ namespace vivuvn_api.Repositories.Implementations
             Restaurants = restaurantRepository;
             Hotels = hotelRepository;
             BudgetTypes = budgetTypeRepository;
+            ItineraryMembers = itineraryMemberRepository;
+            ItineraryMessages = itineraryMessageRepository;
         }
 
         public async Task SaveChangesAsync()

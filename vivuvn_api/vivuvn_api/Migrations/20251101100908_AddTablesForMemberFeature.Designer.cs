@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vivuvn_api.Data;
 
@@ -11,9 +12,11 @@ using vivuvn_api.Data;
 namespace vivuvn_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251101100908_AddTablesForMemberFeature")]
+    partial class AddTablesForMemberFeature
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -401,11 +404,16 @@ namespace vivuvn_api.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ItineraryId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.HasIndex("ItineraryId", "UserId")
                         .IsUnique();
@@ -423,6 +431,9 @@ namespace vivuvn_api.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("DeleteFlag")
+                        .HasColumnType("bit");
 
                     b.Property<int>("ItineraryId")
                         .HasColumnType("int");
@@ -1002,10 +1013,14 @@ namespace vivuvn_api.Migrations
                         .IsRequired();
 
                     b.HasOne("vivuvn_api.Models.User", "User")
-                        .WithMany("ItineraryMemberships")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("vivuvn_api.Models.User", null)
+                        .WithMany("ItineraryMemberships")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("Itinerary");
 
