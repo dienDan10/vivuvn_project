@@ -12,7 +12,7 @@ from typing import Dict, List, Any
 
 from app.core.config import settings
 from app.core.exceptions import NoResultsError
-from app.services.vector_service import get_vector_service
+from app.services.pinecone_service import get_pinecone_service
 from app.services.embedding_service import get_embedding_service
 from app.utils.geo_utils import simple_kmeans_geo
 from app.utils.helpers import normalize_province_name
@@ -26,8 +26,55 @@ class SearchAgent:
 
     def __init__(self):
         """Initialize search agent."""
-        self.vector_service = get_vector_service()
+        self.pinecone_service = get_pinecone_service()
         self.embedding_service = get_embedding_service()
+
+        # Preference keywords mapping for semantic search
+        # Keywords are words commonly found in place descriptions for each category
+        self.preference_keywords = {
+            "ẩm thực": ["nhà hàng", "quán ăn", "ẩm thực", "đặc sản"],
+            "văn hóa": ["đền", "chùa", "bảo tàng", "di sản", "truyền thống"],
+            "thiên nhiên": ["núi", "thác", "công viên", "hồ", "rừng", "hang động"],
+            "phiêu lưu": ["leo núi", "chèo thuyền", "lặn"],
+            "nhiếp ảnh": ["cảnh đẹp", "cảnh quan", "hoàng hôn", "bình minh"],
+            "mua sắm": ["chợ", "thị trường", "mua sắm", "cửa hàng"],
+            "thư giãn": ["spa", "resort", "biển", "bãi tắm"],
+            "lịch sử": ["di tích", "bảo tàng", "thành cổ", "kiến trúc"],
+            "đời sống về đêm": ["phố đi bộ", "bar", "chợ đêm", "giải trí"],
+        }
+
+    def _get_preference_keywords(self, preference: str) -> List[str]:
+        """Get keywords for a preference category."""
+        return self.preference_keywords.get(preference.lower(), [])
+
+    def _build_semantic_query(self, travel_request) -> str:
+        """
+        Build semantic query focused on preferences.
+
+        Note: Destination filtering is handled by province_filter in Node 1,
+        so this query focuses only on preferences and special requirements.
+        """
+        if not travel_request.preferences:
+            return "địa điểm du lịch"
+
+        query_parts = []
+
+        # Use primary preference as main query focus
+        primary_pref = travel_request.preferences[0]
+        query_parts.append(primary_pref)
+
+        # Add 2-3 relevant keywords for better semantic matching with descriptions
+        keywords = self._get_preference_keywords(primary_pref)
+        query_parts.extend(keywords[:2])
+
+        # Include special requirements if they're brief and focused
+        if travel_request.special_requirements:
+            special_req = travel_request.special_requirements.strip().lower()
+            # Only add if it's a short, meaningful requirement (avoid noise)
+            if special_req and len(special_req) < 50:
+                query_parts.append(special_req)
+
+        return " ".join(query_parts)
 
     def calculate_dynamic_top_k(self, duration_days: int) -> int:
         """
@@ -106,10 +153,8 @@ class SearchAgent:
             duration_days = travel_request.duration_days
             dynamic_top_k = self.calculate_dynamic_top_k(duration_days)
 
-            # Build comprehensive search query
-            search_query = travel_request.destination
-            if travel_request.preferences:
-                search_query += f" {' '.join(travel_request.preferences)} {travel_request.special_requirements}"
+            # Build semantic query focused on preferences
+            search_query = self._build_semantic_query(travel_request)
 
             logger.info(f"[Node 2/6] Searching: {search_query} (duration: {duration_days} days, top_k: {dynamic_top_k})")
 
@@ -118,12 +163,10 @@ class SearchAgent:
                 search_query,
                 task_type=settings.EMBEDDING_TASK_TYPE_QUERY
             )
-            results = await self.vector_service.search_places(
+            results = await self.pinecone_service.search_places(
                 query_embedding=query_embedding,
                 top_k=dynamic_top_k,
                 province_filter=filters.get("province"),
-                min_rating=filters.get("min_rating"),
-                place_ids=filters.get("place_ids", []),
                 filter_dict=filters.get("additional_filters", {})
             )
 

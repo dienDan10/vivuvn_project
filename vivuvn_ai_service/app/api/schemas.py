@@ -43,8 +43,8 @@ class TravelRequest(BaseModel):
     )
     preferences: List[str] = Field(
         default_factory=list,
-        description="List of travel preferences",
-        example=["food", "culture", "nature"]
+        description="List of travel preferences (Vietnamese categories)",
+        example=["ẩm thực", "văn hóa", "thiên nhiên"]
     )
     group_size: int = Field(
         1,
@@ -88,10 +88,10 @@ class TravelRequest(BaseModel):
     @field_validator("preferences")
     @classmethod
     def validate_preferences(cls, v):
-        """Validate preference categories (matches Flutter InterestCategory)."""
+        """Validate preference categories in Vietnamese."""
         valid_preferences = {
-            "culture", "history", "nature", "photography", "food",
-            "shopping", "adventure", "relaxation", "nightlife"
+            "văn hóa", "lịch sử", "thiên nhiên", "nhiếp ảnh", "ẩm thực",
+            "mua sắm", "phiêu lưu", "thư giãn", "đời sống về đêm"
         }
         for pref in v:
             if pref.lower() not in valid_preferences:
