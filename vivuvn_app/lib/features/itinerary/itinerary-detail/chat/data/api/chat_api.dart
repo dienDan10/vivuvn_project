@@ -8,9 +8,9 @@ import '../dtos/get_new_messages_request.dart';
 import '../dtos/send_message_request.dart';
 import '../model/message.dart';
 
-class MessageApi {
+class ChatApi {
   final Dio _dio;
-  MessageApi(this._dio);
+  ChatApi(this._dio);
 
   Future<List<Message>> getMessages(final GetMessagesRequest request) async {
     final response = await _dio.get(
@@ -55,7 +55,7 @@ class MessageApi {
   }
 }
 
-final messageApiProvider = Provider<MessageApi>((final ref) {
+final chatProvider = Provider.autoDispose<ChatApi>((final ref) {
   final dio = ref.watch(networkServiceProvider);
-  return MessageApi(dio);
+  return ChatApi(dio);
 });
