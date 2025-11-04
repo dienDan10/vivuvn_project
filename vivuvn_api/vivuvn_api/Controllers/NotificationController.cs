@@ -16,6 +16,13 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> SendNotification(int itineraryId, [FromBody] CreateNotificationRequestDto request)
         {
             var userId = GetCurrentUserId();
+            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
+
+            if (!isOwner)
+            {
+                return BadRequest("Only onwer can send notification to members");
+            }
+
             var notification = await _notificationService.SendNotificationToItineraryMembersAsync(itineraryId, userId, request);
             return Ok(notification);
         }
@@ -36,6 +43,15 @@ namespace vivuvn_api.Controllers
             var userId = GetCurrentUserId();
             var count = await _notificationService.GetUnreadCountAsync(userId);
             return Ok(count);
+        }
+
+        [HttpPut("notifications/{notificationId}/read")]
+        [Authorize]
+        public async Task<IActionResult> MarkAsRead(int notificationId)
+        {
+            var userId = GetCurrentUserId();
+            await _notificationService.MarkAsReadAsync(notificationId, userId);
+            return Ok();
         }
 
         private int GetCurrentUserId()
