@@ -29,6 +29,15 @@ namespace vivuvn_api.Controllers
             return Ok(notifications);
         }
 
+        [HttpGet("notifications/unread/count")]
+        [Authorize]
+        public async Task<IActionResult> GetUnreadCount()
+        {
+            var userId = GetCurrentUserId();
+            var count = await _notificationService.GetUnreadCountAsync(userId);
+            return Ok(count);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
