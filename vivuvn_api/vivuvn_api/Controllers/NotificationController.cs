@@ -63,6 +63,15 @@ namespace vivuvn_api.Controllers
             return Ok();
         }
 
+        [HttpDelete("notifications/{notificationId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteNotification(int notificationId)
+        {
+            var userId = GetCurrentUserId();
+            await _notificationService.DeleteNotificationAsync(notificationId, userId);
+            return NoContent();
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
