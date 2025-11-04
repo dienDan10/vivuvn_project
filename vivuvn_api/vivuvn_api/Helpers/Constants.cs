@@ -41,8 +41,8 @@
         public const string TransportationMode_PrivateCar = "Ô tô cá nhân";
         public const string TransportationMode_Motorbike = "Xe máy";
 
-		// Travel Modes (for Google Maps routing within city)
-		public const string TravelMode_Driving = "DRIVE";
+        // Travel Modes (for Google Maps routing within city)
+        public const string TravelMode_Driving = "DRIVE";
         public const string TravelMode_Walking = "WALK";
         public const string TravelMode_Bicycling = "BICYCLE";
         public const string TravelMode_Transit = "TRANSIT";
@@ -69,6 +69,14 @@
 
         // Message Pagination
         public const int MessagesPerPage = 50;
+
+        // Device Types
+        public const string DeviceType_Web = "web";
+        public const string DeviceType_iOS = "ios";
+        public const string DeviceType_Android = "android";
+
+        // Notification Types 
+        public const string NotificationType_OwnerAnnouncement = "OwnerAnnouncement";
 
     }
 }
