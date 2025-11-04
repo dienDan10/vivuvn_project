@@ -263,7 +263,7 @@ namespace vivuvn_api.Data
             // Relationship: Notification - User
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.User)
-                .WithMany()
+                .WithMany(u => u.Notifications)   // <- specify inverse navigation
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
