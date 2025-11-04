@@ -55,6 +55,9 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IItineraryMemberService, ItineraryMemberService>();
             services.AddScoped<IItineraryMessageService, ItineraryMessageService>();
             services.AddScoped<IAiClientService, AiClientService>();
+            services.AddScoped<IFcmService, FcmService>();
+            services.AddScoped<IUserDeviceService, UserDeviceService>();
+            services.AddScoped<INotificationService, NotificationService>();
             return services;
         }
 
