@@ -27,6 +27,8 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IBudgetTypeRepository, BudgetTypeRepository>();
             services.AddScoped<IItineraryMemberRepository, ItineraryMemberRepository>();
             services.AddScoped<IItineraryMessageRepository, ItineraryMessageRepository>();
+            services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             return services;
         }
 

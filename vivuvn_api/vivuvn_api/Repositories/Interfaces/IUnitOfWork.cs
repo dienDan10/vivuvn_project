@@ -17,6 +17,8 @@
         IBudgetTypeRepository BudgetTypes { get; }
         IItineraryMemberRepository ItineraryMembers { get; }
         IItineraryMessageRepository ItineraryMessages { get; }
+        IUserDeviceRepository UserDevices { get; }
+        INotificationRepository Notifications { get; }
 
         Task SaveChangesAsync();
 
