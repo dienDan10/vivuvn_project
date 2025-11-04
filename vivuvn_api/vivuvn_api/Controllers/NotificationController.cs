@@ -54,6 +54,15 @@ namespace vivuvn_api.Controllers
             return Ok();
         }
 
+        [HttpPut("notifications/mark-all-read")]
+        [Authorize]
+        public async Task<IActionResult> MarkAllAsRead()
+        {
+            var userId = GetCurrentUserId();
+            await _notificationService.MarkAllAsReadAsync(userId);
+            return Ok();
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
