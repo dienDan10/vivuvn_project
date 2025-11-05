@@ -21,6 +21,7 @@ class ExpenseFormNotifier extends StateNotifier<ExpenseFormState> {
       selectedDate: item.date,
       payerMemberId: item.paidByMember?.memberId,
       payerMemberName: item.paidByMember?.username,
+      details: item.details,
     );
   }
 
@@ -74,6 +75,11 @@ class ExpenseFormNotifier extends StateNotifier<ExpenseFormState> {
     // Debug log after update
     // ignore: avoid_print
     print('[ExpenseForm] updated -> payerMemberId: ${state.payerMemberId?.toString() ?? 'null'}, payerMemberName: ${state.payerMemberName ?? 'null'}');
+  }
+
+  /// Update details (optional)
+  void setDetails(final String? details) {
+    state = state.copyWith(details: details);
   }
 
   /// Set date error

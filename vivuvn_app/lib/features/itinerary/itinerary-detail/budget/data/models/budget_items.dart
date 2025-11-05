@@ -20,6 +20,7 @@ class BudgetItem {
   final BudgetType? budgetTypeObj;
   final DateTime date;
   final Member? paidByMember;
+  final String? details;
 
   const BudgetItem({
     this.id,
@@ -29,6 +30,7 @@ class BudgetItem {
     this.budgetTypeObj,
     required this.date,
     this.paidByMember,
+    this.details,
   });
 
   Map<String, dynamic> toMap() {
@@ -43,6 +45,7 @@ class BudgetItem {
         'budgetType': budgetType,
       'date': date.toIso8601String(),
       if (paidByMember != null) 'memberId': paidByMember!.memberId,
+      if (details != null) 'details': details,
     };
   }
 
@@ -88,6 +91,7 @@ class BudgetItem {
       budgetTypeObj: btObj,
       date: parsedDate,
       paidByMember: paidByMember,
+      details: map['details']?.toString(),
     );
   }
 
@@ -105,6 +109,7 @@ class BudgetItem {
     final BudgetType? budgetTypeObj,
     final DateTime? date,
     final Member? paidByMember,
+    final String? details,
   }) {
     return BudgetItem(
       id: id ?? this.id,
@@ -114,6 +119,7 @@ class BudgetItem {
       budgetTypeObj: budgetTypeObj ?? this.budgetTypeObj,
       date: date ?? this.date,
       paidByMember: paidByMember ?? this.paidByMember,
+      details: details ?? this.details,
     );
   }
 

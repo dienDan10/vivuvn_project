@@ -10,6 +10,9 @@ class FieldName extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return TextFormField(
+      onTapOutside: (final event) {
+        FocusScope.of(context).unfocus();
+      },
       controller: controller,
       autofocus: true,
       decoration: const InputDecoration(

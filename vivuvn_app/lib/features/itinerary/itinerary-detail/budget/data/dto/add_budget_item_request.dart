@@ -15,6 +15,7 @@ class AddBudgetItemRequest {
   final int budgetTypeId;
   final DateTime date;
   final int? payerMemberId;
+  final String? details;
 
   const AddBudgetItemRequest({
     required this.itineraryId,
@@ -23,6 +24,7 @@ class AddBudgetItemRequest {
     required this.budgetTypeId,
     required this.date,
     this.payerMemberId,
+    this.details,
   });
 
   /// Convert to Map for API request
@@ -34,6 +36,7 @@ class AddBudgetItemRequest {
       'date': date.toIso8601String(),
       // Always include memberId; explicit null signals no payer
       'memberId': payerMemberId,
+      'details': details ?? '',
     };
   }
 
