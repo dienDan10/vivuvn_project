@@ -7,7 +7,6 @@ namespace vivuvn_api.DTOs.Request
 		[Required]
 		public string Name { get; set; } = string.Empty;
 		public string ProvinceCode { get; set; } = string.Empty;
-		public string NameNormalized { get; set; } = string.Empty;
 		public IFormFile Image { get; set; } = null!;
 	}
 }

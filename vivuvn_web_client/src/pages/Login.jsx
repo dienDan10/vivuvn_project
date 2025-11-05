@@ -6,6 +6,7 @@ function Login() {
 	const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
 
 	// If user is already authenticated, redirect to manage page
+	// Note: isAuthenticated is only set if user has valid roles (checked in useLogin)
 	if (isAuthenticated) {
 		return <Navigate to="/manage" replace />;
 	}

@@ -24,14 +24,12 @@ export const createProvince = async ({
 	id,
 	name,
 	provinceCode,
-	nameNormalized,
 	imageFile,
 }) => {
 	const formData = new FormData();
 	if (id) formData.append("id", id);
 	if (name) formData.append("name", name);
 	if (provinceCode) formData.append("provinceCode", provinceCode);
-	if (nameNormalized) formData.append("nameNormalized", nameNormalized);
 	if (imageFile) formData.append("image", imageFile);
 
 	const res = await axios.post("/v1/provinces", formData, {
@@ -46,13 +44,11 @@ export const updateProvince = async ({
 	id,
 	name,
 	provinceCode,
-	nameNormalized,
 	imageFile,
 }) => {
 	const formData = new FormData();
 	if (name) formData.append("name", name);
 	if (provinceCode) formData.append("provinceCode", provinceCode);
-	if (nameNormalized) formData.append("nameNormalized", nameNormalized);
 	if (imageFile) formData.append("image", imageFile);
 
 	const res = await axios.put(`/v1/provinces/${id}`, formData, {
