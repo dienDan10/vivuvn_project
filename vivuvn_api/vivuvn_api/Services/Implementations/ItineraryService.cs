@@ -457,8 +457,9 @@ namespace vivuvn_api.Services.Implementations
                             Name = $"{transportation.Mode} - {transportation.Details}",
                             Cost = transportation.EstimatedCost,
                             Date = transportation.Date,
-                            BudgetTypeId = transportationBudgetTypeId
-                        };
+                            BudgetTypeId = transportationBudgetTypeId,
+                            Details = transportation.Details
+						};
                         budget.Items.Add(budgetItem);
                     }
                 }
