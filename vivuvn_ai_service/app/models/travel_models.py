@@ -116,12 +116,12 @@ class TransportationSuggestion(BaseModel):
     )
     date: str = Field(
         ...,
-        description="Date of travel in YYYY-MM-DD format",
+        description="The departure date in YYYY-MM-DD format",
         pattern=r"^\d{4}-\d{2}-\d{2}$"
     )
     details: str = Field(
         ...,
-        description="Route and travel time (e.g., 'Hà Nội → Đà Nẵng, 07:00-08:30, 14h')",
+        description="Route and travel time and reasons of choosing (e.g., 'Hà Nội → Đà Nẵng, 07:00-08:30, 14h')",
         min_length=10,
         max_length=150
     )
