@@ -7,6 +7,8 @@ Handles:
 - Detecting hallucinated content
 """
 
+from typing import Optional, Tuple
+
 import structlog
 
 from app.agents.state import TravelPlanningState
@@ -104,6 +106,10 @@ class ValidationAgent:
                 logger.error(f"[Node 5/6] ❌ CRITICAL: {error_msg}")
                 state["error"] = error_msg
 
+            # Correct total_cost and schedule_unavailable if needed
+            # This ensures cost is calculated correctly and schedule availability is accurate
+            self._correct_cost_and_availability(state)
+
             return state
 
         except Exception as e:
@@ -116,6 +122,133 @@ class ValidationAgent:
             state["validation_passed"] = False
             state["error"] = f"Validation failed: {str(e)}"
             return state
+
+    def _calculate_total_cost(self, itinerary: dict, group_size: int) -> float:
+        """Calculate total cost using correct formula.
+
+        Formula: total_cost = (Σ activity.cost_estimate) × group_size + (Σ transportation.estimated_cost)
+
+        Note: activity cost_estimate is per person, transportation estimated_cost is total for group
+        """
+        try:
+            # Sum all activity costs (per person)
+            activity_costs = 0.0
+            days = itinerary.get('days', [])
+            for day in days:
+                for activity in day.get('activities', []):
+                    cost = activity.get('cost_estimate', 0)
+                    if isinstance(cost, (int, float)):
+                        activity_costs += float(cost)
+
+            # Apply group size multiplier to activity costs
+            total_activity_cost = activity_costs * group_size
+
+            # Sum all transportation costs (already total for group)
+            transportation_costs = 0.0
+            for transport in itinerary.get('transportation_suggestions', []):
+                cost = transport.get('estimated_cost', 0)
+                if isinstance(cost, (int, float)):
+                    transportation_costs += float(cost)
+
+            # Calculate total
+            total_cost = total_activity_cost + transportation_costs
+            return total_cost
+
+        except Exception as e:
+            logger.error(
+                "[Node 5/6] Cost calculation failed",
+                error=str(e),
+                exc_info=True
+            )
+            # Return AI's value as fallback
+            return itinerary.get('total_cost', 0.0)
+
+    def _validate_budget_constraints(
+        self,
+        itinerary: dict,
+        budget: Optional[int],
+        calculated_cost: float
+    ) -> Tuple[bool, str]:
+        """Validate if itinerary respects budget constraints.
+
+        Returns:
+            Tuple of (should_be_unavailable: bool, unavailable_reason: str)
+        """
+        # If no budget specified, no constraint
+        if budget is None:
+            return False, ""
+
+        # Check if cost exceeds budget
+        should_be_unavailable = calculated_cost > budget
+
+        if should_be_unavailable:
+            reason = f"Tổng chi phí {calculated_cost:,.0f} VND vượt ngân sách {budget:,.0f} VND"
+            return True, reason
+
+        return False, ""
+
+    def _correct_cost_and_availability(self, state: TravelPlanningState) -> None:
+        """Correct total_cost and schedule_unavailable fields after validation.
+
+        This method ensures the cost calculation is correct and the schedule availability
+        is accurate based on the corrected cost vs budget.
+        """
+        try:
+            structured_itinerary = state.get("structured_itinerary")
+            travel_request = state.get("travel_request")
+
+            if not structured_itinerary or not travel_request:
+                return
+
+            group_size = travel_request.group_size
+            budget = travel_request.budget
+
+            # Calculate correct total cost
+            calculated_cost = self._calculate_total_cost(structured_itinerary, group_size)
+            ai_total_cost = structured_itinerary.get('total_cost', 0.0)
+
+            # Log if AI's calculation differs
+            cost_diff = abs(calculated_cost - ai_total_cost)
+            if cost_diff > 1000:  # Only log significant differences (>1000 VND)
+                logger.warning(
+                    "[Node 5/6] Cost calculation discrepancy detected",
+                    ai_calculated=ai_total_cost,
+                    recalculated=calculated_cost,
+                    difference=cost_diff,
+                    group_size=group_size
+                )
+
+            # Update with correct cost
+            structured_itinerary['total_cost'] = calculated_cost
+
+            # Validate budget constraints
+            should_be_unavailable, unavailable_reason = self._validate_budget_constraints(
+                structured_itinerary,
+                budget,
+                calculated_cost
+            )
+
+            ai_schedule_unavailable = structured_itinerary.get('schedule_unavailable', False)
+
+            # Check if AI's decision matches correct decision
+            if should_be_unavailable != ai_schedule_unavailable:
+                logger.warning(
+                    "[Node 5/6] Schedule availability mismatch - correcting",
+                    ai_decision=ai_schedule_unavailable,
+                    corrected_decision=should_be_unavailable,
+                    calculated_cost=calculated_cost,
+                    budget=budget
+                )
+                structured_itinerary['schedule_unavailable'] = should_be_unavailable
+                structured_itinerary['unavailable_reason'] = unavailable_reason
+
+        except Exception as e:
+            logger.error(
+                "[Node 5/6] Cost and availability correction failed",
+                error=str(e),
+                exc_info=True
+            )
+            # Continue with AI's original values on error
 
 
 __all__ = ["ValidationAgent"]

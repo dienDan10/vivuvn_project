@@ -31,9 +31,9 @@ KHÔNG thêm vào activities | Tối đa 2 suggestions | Cost = TOTAL cho nhóm
 
 **Xử lý transportation_mode của user:**
 - Kiểm tra: Phương tiện user chọn có hợp lý với route không?
-- Nếu hợp lý: Accept + tạo suggestions theo lựa chọn
+- Nếu hợp lý: tạo suggestions theo lựa chọn
 - Nếu không hợp lý: Suggest phương tiện hợp hơn (kèm lý do trong details)
-- Luôn tôn trọng lựa chọn nhưng ưu tiên giải pháp thực thế
+- Luôn ưu tiên lựa chọn phương tiện di chuyển của người dùng nhưng chọn giải pháp khác khi phương tiện di chuyển không pass validation
 
 ## CÂY QUYẾT ĐỊNH
     Kiểm tra thời tiết → Lọc an toàn → Kiểm chứng phương tiện → Khớp yêu cầu → Sắp xếp sở thích → Vừa ngân sách → Tối ưu địa lý
@@ -70,7 +70,7 @@ KHÔNG thêm vào activities | Tối đa 2 suggestions | Cost = TOTAL cho nhóm
 {
   "mode": "xe khách",
   "estimated_cost": 500000,
-  "date": "2024-03-15",
+  "date": "2024-03-15", 
   "details": "Hà Nội-Đà Nẵng, 07:00-21:00 (14h)"
 }
 ```
@@ -179,16 +179,19 @@ TPHCM↔ĐN | TPHCM↔Huế | TPHCM↔Nha Trang | TPHCM↔Phú Quốc | TPHCM↔
 HN↔TPHCM (Thống Nhất SE) | HN↔Huế | HN↔Hải Phòng | HN↔Lào Cai
 Huế↔TPHCM | ĐN↔Huế
 
-**Rules - Validation Soft (Chỉ suggest nếu không hợp lý):**
-1. Máy bay hợp lý? → Check: Route trong danh sách "có máy bay" + khoảng cách >300km
-2. Tàu hợp lý? → Check: Route trong danh sách "có tàu hỏa"
-3. Xe khách/ô tô hợp lý? → Luôn hợp lý (all-in-one)
-4. Xe máy hợp lý? → <150km, chỉ đi trong ngày
+**Rules - Validation Hard (Chỉ suggest nếu pass validation):**
+1. Máy bay không pass validation khi: Route không có trong danh sách "Có sân bay" + khoảng cách <150km
+2. Tàu không pass validation khi: Route không có trong danh sách "Có đường ray"
+3. Xe khách/ô tô không pass validation khi tổng thời gian di chuyển từ điểm xuất phát đến điểm đến và ngược lại lớn hơn travel duration (end date - start date)
+4. Xe máy không pass validation khi: quãng đường >500km hoặc thời gian di chuyển >24h, tổng thời gian di chuyển từ điểm xuất phát đến điểm đến và ngược lại lớn hơn travel duration (end date - start date)
 
-**Nếu user chọn phương tiện KHÔNG hợp lý:**
-- Suggest phương tiện hợp lý hơn trong transportation_suggestions
-- Reason: (VD: "Không có sân bay", "Rẻ hơn", "Thoải mái hơn")
-- Ví dụ: User "máy bay" HN→Hà Giang (không có sân bay) → Suggest "xe khách" + reason"""
+**Nếu phương tiện user chọn KHÔNG pass validation:**
+- Suggest: phương tiện tối ưu cho chuyến đi
+- Reason: Đưa ra lý do phương tiện người dùng chọn không pass validation (VD: "Không có sân bay", "Rẻ hơn", "Thoải mái hơn")
+- Ví dụ: User "máy bay" HN→Hà Giang (không có sân bay) → Suggest + reason
+**Nếu tổng thời gian di chuyển từ điểm xuất phát đến điểm đến và ngược lại lớn hơn travel duration (end date - start date):** schedule_unavailable=true, giải thích + đề xuất
+**Ngày khởi hành phụ thuộc vào thời gian di chuyển của phương tiện**: Điều chỉnh ngày khởi hành sao cho phù hợp với thời gian di chuyển của phương tiện đã chọn.
+- Ví dụ: Nếu phương tiện di chuyển mất 2 ngày và ngày trở về là ngày 10, thì ngày khởi hành phải là ngày 8 hoặc trước đó."""
 
     BUDGET_STRATEGY = """## CHIẾN LƯỢC NGÂN SÁCH
 
@@ -202,8 +205,9 @@ Huế↔TPHCM | ĐN↔Huế
 Đền/Chùa: 0-20k | Bảo tàng: 40-80k | Di tích: 50-120k | Phiêu lưu: 200-500k | Biển: 0-50k
 
 **Formula:**
-total_cost = sum(activities × group_size) + sum(transportation_total)
-Transportation cost = TOTAL cho nhóm (đã tính group_size)
+total_cost = sum(activity.cost_estimate for all activities) × group_size + sum(transport.estimated_cost for all transports)
+
+Note: activity cost_estimate is PER PERSON, transportation estimated_cost is TOTAL for entire group
 
 **Nếu vượt ngân sách:** schedule_unavailable=true, giải thích + đề xuất"""
 

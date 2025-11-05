@@ -17,6 +17,8 @@ namespace vivuvn_api.Models
 
         public decimal Cost { get; set; }
 
+        public string? Details { get; set; }
+
         [Required]
         public DateTime Date { get; set; }
 
