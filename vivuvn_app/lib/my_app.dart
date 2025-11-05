@@ -3,13 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'common/theme/app_theme.dart';
 import 'core/routes/app_route.dart';
+import 'core/services/fcm_service.dart';
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _requestNotificationPermission();
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    final fcmService = ref.read(fcmServiceProvider);
+    await fcmService.requestPermission();
+  }
+
+  @override
+  Widget build(final BuildContext context) {
     final goRouter = ref.watch(goRouterProvider);
 
     return MaterialApp.router(

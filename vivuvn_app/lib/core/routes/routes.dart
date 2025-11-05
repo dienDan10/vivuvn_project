@@ -5,7 +5,7 @@ const String registerRoute = '/register';
 
 const String homeRoute = '/';
 const String profileRoute = '/profile';
-const String searchRoute = '/search';
+const String notificationRoute = '/notifications';
 
 // itineraries routes
 const String itineraryRoute = '/itineraries';

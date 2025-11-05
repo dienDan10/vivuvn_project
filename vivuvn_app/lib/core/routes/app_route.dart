@@ -148,7 +148,7 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                path: searchRoute,
+                path: notificationRoute,
                 builder: (final context, final state) => const SearchScreen(),
               ),
             ],
