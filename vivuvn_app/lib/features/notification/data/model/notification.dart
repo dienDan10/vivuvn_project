@@ -2,7 +2,7 @@ import 'dart:convert';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class Notification {
-  final String id;
+  final int id;
   final String type;
   final String title;
   final String message;
@@ -23,7 +23,7 @@ class Notification {
   });
 
   Notification copyWith({
-    final String? id,
+    final int? id,
     final String? type,
     final String? title,
     final String? message,
@@ -59,7 +59,7 @@ class Notification {
 
   factory Notification.fromMap(final Map<String, dynamic> map) {
     return Notification(
-      id: map['id'] as String,
+      id: map['id'] as int,
       type: map['type'] as String,
       title: map['title'] as String,
       message: map['message'] as String,

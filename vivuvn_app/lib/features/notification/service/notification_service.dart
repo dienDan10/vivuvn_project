@@ -7,8 +7,8 @@ import '../data/model/notification.dart';
 import 'i_notification_service.dart';
 
 final notificationServiceProvider = Provider<INotificationService>((final ref) {
-  final api = ref.read(notificationApiProvider);
-  final fcmService = ref.read(fcmServiceProvider);
+  final api = ref.watch(notificationApiProvider);
+  final fcmService = ref.watch(fcmServiceProvider);
   return NotificationService(api, fcmService);
 });
 
@@ -23,7 +23,7 @@ class NotificationService implements INotificationService {
     // Get FCM token
     final token = await _fcmService.getToken();
     if (token == null) {
-      throw Exception('Failed to get FCM token');
+      return;
     }
 
     // Get device info

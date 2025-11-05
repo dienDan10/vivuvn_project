@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/auth/auth_controller.dart';
+import '../../../common/auth/service/user_service.dart';
 import '../../../core/data/local/secure_storage/secure_storage_provider.dart';
 import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../core/data/remote/token/token_const.dart';
@@ -39,8 +40,12 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
           .read(secureStorageProvider)
           .write(key: refreshTokenKey, value: result.refreshToken);
 
+      // fetch user profile
+      final userService = ref.read(userServiceProvider);
+      final user = await userService.fetchUserProfile();
+
       // set authenticated state
-      ref.read(authControllerProvider.notifier).setAuthenticated();
+      await ref.read(authControllerProvider.notifier).setAuthenticated(user);
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
     } finally {
@@ -62,10 +67,17 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
           .read(secureStorageProvider)
           .write(key: refreshTokenKey, value: result.refreshToken);
 
+      // fetch user profile
+      final userService = ref.read(userServiceProvider);
+      final user = await userService.fetchUserProfile();
+
       // set authenticated state
-      ref.read(authControllerProvider.notifier).setAuthenticated();
+      await ref.read(authControllerProvider.notifier).setAuthenticated(user);
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
+    } catch (e) {
+      print(e.toString());
+      state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isLoading: false);
     }

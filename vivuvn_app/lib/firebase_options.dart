@@ -50,23 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDo3Yaw7aMc6sxh7jBVnA-kGvkmuY6jVZc',
-    appId: '1:721795337132:android:db3cfae0b515a3d6e40809',
-    messagingSenderId: '721795337132',
-    projectId: 'fir-basic-3901c',
-    databaseURL: 'https://fir-basic-3901c-default-rtdb.asia-southeast1.firebasedatabase.app',
-    storageBucket: 'fir-basic-3901c.firebasestorage.app',
+    apiKey: 'AIzaSyC_YcJ0M4N3IvoeB6GVubRHVsAxBukmiKc',
+    appId: '1:936001839101:android:a55b967da261c27c784394',
+    messagingSenderId: '936001839101',
+    projectId: 'vivuvn-1c556',
+    storageBucket: 'vivuvn-1c556.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBLUt6NpXuhZ-Iv9fTazICkx4_d0End9nA',
-    appId: '1:721795337132:ios:69311afc015b4602e40809',
-    messagingSenderId: '721795337132',
-    projectId: 'fir-basic-3901c',
-    databaseURL: 'https://fir-basic-3901c-default-rtdb.asia-southeast1.firebasedatabase.app',
-    storageBucket: 'fir-basic-3901c.firebasestorage.app',
-    androidClientId: '721795337132-0vq1soe12jjnuolk5ab4ak72re4g39o3.apps.googleusercontent.com',
-    iosClientId: '721795337132-ua6ml3t7fvi0ig7t7bhml3il8enaoc1v.apps.googleusercontent.com',
+    apiKey: 'AIzaSyDSptHVV3qBbGof0RmQQzcRIf1k-64EMus',
+    appId: '1:936001839101:ios:1d91c5ccd137fff8784394',
+    messagingSenderId: '936001839101',
+    projectId: 'vivuvn-1c556',
+    storageBucket: 'vivuvn-1c556.firebasestorage.app',
     iosBundleId: 'com.diendanx.app.vivuvnApp',
   );
+
 }

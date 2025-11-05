@@ -27,7 +27,7 @@
         android:icon="@mipmap/ic_launcher">
 
         <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="AIzaSyAOPACaIN4fcY2iyXr4HD8N6OnM8hPhbos"/>
+               android:value="AIzaSyC_YcJ0M4N3IvoeB6GVubRHVsAxBukmiKc"/>
 
         <!-- FCM Service -->
         <service

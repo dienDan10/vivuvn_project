@@ -14,10 +14,10 @@ import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
 import '../../screens/nearby_hotel_screen.dart';
 import '../../screens/nearby_restaurant_screen.dart';
+import '../../screens/notification_screen.dart';
 import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
-import '../../screens/search_screen.dart';
 import '../../screens/splash_screen.dart';
 import 'go_router_notifier.dart';
 import 'routes.dart';
@@ -149,7 +149,8 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
             routes: <RouteBase>[
               GoRoute(
                 path: notificationRoute,
-                builder: (final context, final state) => const SearchScreen(),
+                builder: (final context, final state) =>
+                    const NotificationScreen(),
               ),
             ],
           ),
