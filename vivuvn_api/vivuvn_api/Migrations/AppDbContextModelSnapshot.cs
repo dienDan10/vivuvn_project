@@ -587,9 +587,6 @@ namespace vivuvn_api.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedAt");
@@ -599,8 +596,6 @@ namespace vivuvn_api.Migrations
                     b.HasIndex("ItineraryId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Notifications");
                 });
@@ -816,6 +811,51 @@ namespace vivuvn_api.Migrations
                         .HasFilter("[RefreshToken] IS NOT NULL");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.UserDevice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DeviceType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("FcmToken")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FcmToken")
+                        .HasDatabaseName("IX_UserDevices_FcmToken");
+
+                    b.HasIndex("UserId", "IsActive")
+                        .HasDatabaseName("IX_UserDevices_UserId_IsActive");
+
+                    b.ToTable("UserDevices");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.UserRole", b =>
@@ -1075,14 +1115,10 @@ namespace vivuvn_api.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("vivuvn_api.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("vivuvn_api.Models.User", null)
-                        .WithMany("Notifications")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("Itinerary");
 
@@ -1122,6 +1158,17 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Location");
 
                     b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.UserDevice", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.User", "User")
+                        .WithMany("Devices")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.UserRole", b =>
@@ -1201,6 +1248,8 @@ namespace vivuvn_api.Migrations
 
             modelBuilder.Entity("vivuvn_api.Models.User", b =>
                 {
+                    b.Navigation("Devices");
+
                     b.Navigation("Itineraries");
 
                     b.Navigation("ItineraryMemberships");

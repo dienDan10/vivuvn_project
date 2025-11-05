@@ -36,6 +36,7 @@ namespace vivuvn_api.Data
         public DbSet<ItineraryMember> ItineraryMembers { get; set; }
         public DbSet<ItineraryMessage> ItineraryMessages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<UserDevice> UserDevices { get; set; }
 
 
 
@@ -263,7 +264,7 @@ namespace vivuvn_api.Data
             // Relationship: Notification - User
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.User)
-                .WithMany()
+                .WithMany(u => u.Notifications)   // <- specify inverse navigation
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
@@ -285,6 +286,24 @@ namespace vivuvn_api.Data
                 .WithMany()
                 .HasForeignKey(bi => bi.PaidByMemberId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // User devices - unique FcmToken per user
+            modelBuilder.Entity<UserDevice>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(d => d.User)
+                      .WithMany(u => u.Devices)
+                      .HasForeignKey(d => d.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Indexes for better query performance
+                entity.HasIndex(d => d.FcmToken)
+                      .HasDatabaseName("IX_UserDevices_FcmToken");
+
+                entity.HasIndex(d => new { d.UserId, d.IsActive })
+                      .HasDatabaseName("IX_UserDevices_UserId_IsActive");
+            });
 
         }
     }

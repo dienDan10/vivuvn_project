@@ -144,6 +144,10 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.ItineraryMember.User.Username))
                 .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.ItineraryMember.User.UserPhoto));
 
+            // Mapping for Notification
+            CreateMap<Notification, NotificationDto>()
+                .ForMember(dest => dest.ItineraryName,
+                    opt => opt.MapFrom(src => src.Itinerary != null ? src.Itinerary.Name : null));
         }
     }
 }

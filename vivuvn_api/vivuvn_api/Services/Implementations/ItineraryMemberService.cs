@@ -110,7 +110,7 @@ namespace vivuvn_api.Services.Implementations
             {
                 throw new UnauthorizedAccessException("Only the itinerary owner can kick members");
             }
-            var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.UserId == memberId && !im.DeleteFlag)
+            var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.Id == memberId && !im.DeleteFlag)
                 ?? throw new ArgumentException("Member not found in this itinerary");
             member.DeleteFlag = true;
             _unitOfWork.ItineraryMembers.Update(member);

@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -85,6 +87,23 @@ builder.Services.AddServices();
 builder.Services.AddRepositories();
 builder.Services.AddUnitOfWork();
 builder.Services.AddCustomHttpClient(builder.Configuration);
+
+// Initialize Firebase
+var firebaseCredPath = Path.Combine(builder.Environment.ContentRootPath,
+    "Secrets",
+    builder.Configuration["Firebase:CredentialFile"] ?? "");
+
+if (File.Exists(firebaseCredPath))
+{
+    FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile(firebaseCredPath)
+    });
+}
+else
+{
+    throw new FileNotFoundException("Firebase credential file not found.", firebaseCredPath);
+}
 
 var app = builder.Build();
 
