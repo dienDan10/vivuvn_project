@@ -296,8 +296,12 @@ namespace vivuvn_api.Services.Implementations
                 // Update itinerary group size
                 itinerary.GroupSize = groupSize;
 
-                // Use the budget from the navigation property
-                var budget = itinerary.Budget;
+				// Update transportation vehicle
+                itinerary.TransportationVehicle = travelItinerary.TransportationSuggestions
+                    .FirstOrDefault()?.Mode ?? null;
+
+				// Use the budget from the navigation property
+				var budget = itinerary.Budget;
 
                 // Clear existing itinerary items from all days
                 foreach (var day in itinerary.Days)
@@ -455,8 +459,9 @@ namespace vivuvn_api.Services.Implementations
                             Name = $"{transportation.Mode} - {transportation.Details}",
                             Cost = transportation.EstimatedCost,
                             Date = transportation.Date,
-                            BudgetTypeId = transportationBudgetTypeId
-                        };
+                            BudgetTypeId = transportationBudgetTypeId,
+                            Details = transportation.Details
+						};
                         budget.Items.Add(budgetItem);
                     }
                 }
