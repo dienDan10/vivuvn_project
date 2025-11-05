@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vivuvn_api.Data;
 
@@ -11,9 +12,11 @@ using vivuvn_api.Data;
 namespace vivuvn_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251104154539_removeUserId1ColumnFromNotification")]
+    partial class removeUserId1ColumnFromNotification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -813,51 +816,6 @@ namespace vivuvn_api.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("vivuvn_api.Models.UserDevice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeviceName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("DeviceType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("FcmToken")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("LastUsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FcmToken")
-                        .HasDatabaseName("IX_UserDevices_FcmToken");
-
-                    b.HasIndex("UserId", "IsActive")
-                        .HasDatabaseName("IX_UserDevices_UserId_IsActive");
-
-                    b.ToTable("UserDevices");
-                });
-
             modelBuilder.Entity("vivuvn_api.Models.UserRole", b =>
                 {
                     b.Property<int>("UserId")
@@ -1160,17 +1118,6 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Restaurant");
                 });
 
-            modelBuilder.Entity("vivuvn_api.Models.UserDevice", b =>
-                {
-                    b.HasOne("vivuvn_api.Models.User", "User")
-                        .WithMany("Devices")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("vivuvn_api.Models.UserRole", b =>
                 {
                     b.HasOne("vivuvn_api.Models.Role", "Role")
@@ -1248,8 +1195,6 @@ namespace vivuvn_api.Migrations
 
             modelBuilder.Entity("vivuvn_api.Models.User", b =>
                 {
-                    b.Navigation("Devices");
-
                     b.Navigation("Itineraries");
 
                     b.Navigation("ItineraryMemberships");

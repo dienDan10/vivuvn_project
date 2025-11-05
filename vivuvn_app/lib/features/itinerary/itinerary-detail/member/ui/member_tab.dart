@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/routes/routes.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../controller/member_controller.dart';
 import 'load_member_error.dart';
 import 'member_list.dart';
@@ -62,7 +65,15 @@ class _MemberTabState extends ConsumerState<MemberTab> {
               ),
 
               // chat icons
-              Icon(Icons.chat, color: colorScheme.onPrimary, size: 24),
+              InkWell(
+                onTap: () {
+                  final itineraryId = ref
+                      .read(itineraryDetailControllerProvider)
+                      .itineraryId!;
+                  context.push(createChatRoute(itineraryId));
+                },
+                child: Icon(Icons.chat, color: colorScheme.onPrimary, size: 24),
+              ),
             ],
           ),
         ),
