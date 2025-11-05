@@ -1,102 +1,107 @@
 """
-Vector service for core Pinecone operations.
+Pinecone service for vector database operations.
 
-This service provides low-level Pinecone vector database operations including:
-- Index management and health checks
-- Vector CRUD operations (upsert, delete, search)
-- Basic embedding generation for compatibility
-
-For optimized embedding generation with Vietnamese chunking and minimal metadata,
-use EmbeddingService instead. The EmbeddingService is the recommended approach
-for new implementations.
+This service provides high-level operations for vector search, indexing, and management.
+It uses the PineconeClient for connection pooling and index access.
 
 Architecture:
-- VectorService: Low-level Pinecone operations
-- EmbeddingService: High-level embedding with chunking and optimization
+- PineconeClient: Low-level Pinecone SDK operations
+- PineconeService: High-level business logic (search, upsert, stats, health checks)
 """
 
 from typing import List, Dict, Any, Optional
 import asyncio
 import structlog
 from app.core.config import settings
+from app.clients.pinecone_client import get_pinecone_client, PineconeClientError
 
 logger = structlog.get_logger(__name__)
 
-try:
-    from pinecone import Pinecone, ServerlessSpec
-    from pinecone.grpc import PineconeGRPC
-except Exception:
-    Pinecone = None
-    ServerlessSpec = None
-    PineconeGRPC = None
 
-class VectorServiceError(Exception):
+class PineconeServiceError(Exception):
+    """Pinecone service-specific exception."""
     pass
 
 
-class VectorService:
+class PineconeService:
     """
-    Simplified vector service focused on core Pinecone operations.
-    
-    This service handles low-level Pinecone operations like index management,
-    vector search, and CRUD operations. For embedding generation with chunking
-    and minimal metadata, use EmbeddingService instead.
-    """
-    
-    def __init__(self, api_key: str, cloud: str = "aws", region: str = "us-east-1", index_name: str = "default"):
-        if Pinecone is None:
-            raise VectorServiceError("pinecone SDK is not installed")
+    High-level Pinecone service for vector database operations.
 
-        self.api_key = api_key
+    This service handles vector search, CRUD operations, index management,
+    and health checks. It uses PineconeClient for connection pooling.
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        cloud: str = "aws",
+        region: str = "us-east-1",
+        index_name: str = "default",
+        pool_threads: int = 50
+    ):
+        """
+        Initialize Pinecone service.
+
+        Args:
+            api_key: Pinecone API key
+            cloud: Cloud provider (aws/gcp/azure)
+            region: Cloud region
+            index_name: Name of the index
+            pool_threads: Connection pool threads
+
+        Raises:
+            PineconeServiceError: If initialization fails
+        """
         self.cloud = cloud
         self.region = region
         self.index_name = index_name
+        self.pool_threads = pool_threads
 
-        # Initialize Pinecone with v6+ API (using gRPC for better performance)
         try:
-            self.pc = PineconeGRPC(api_key=self.api_key) if PineconeGRPC else Pinecone(api_key=self.api_key)
-        except Exception:
-            # Fallback to standard Pinecone client
-            self.pc = Pinecone(api_key=self.api_key)
+            # Get singleton Pinecone client
+            self.pinecone_client = get_pinecone_client()
 
-        # Create serverless index if it doesn't exist
-        self._ensure_index_exists()
+            # Create index if it doesn't exist
+            self._ensure_index_exists()
 
-        # Get index reference
-        self.index = self.pc.Index(self.index_name, pool_threads=50)
+            # Get index reference with connection pooling
+            self.index = self.pinecone_client.get_index(
+                index_name=self.index_name,
+                pool_threads=self.pool_threads
+            )
+
+            logger.info("Pinecone service initialized", index_name=self.index_name)
+
+        except PineconeClientError as e:
+            logger.error("Failed to initialize Pinecone service", error=str(e))
+            raise PineconeServiceError(f"Failed to initialize Pinecone service: {e}")
 
     def _ensure_index_exists(self):
-        """Create serverless index if it doesn't exist."""
+        """Create index if it doesn't exist."""
         try:
-            existing_indexes = [index.name for index in self.pc.list_indexes()]
-            
-            if self.index_name not in existing_indexes:
-                logger.info(f"Creating serverless index: {self.index_name}")
-                self.pc.create_index(
-                    name=self.index_name,
-                    dimension=settings.VECTOR_DIMENSION,
-                    metric="cosine",
-                    spec=ServerlessSpec(
-                        cloud=self.cloud,
-                        region=self.region
-                    )
-                )
-                logger.info(f"Serverless index created: {self.index_name}")
+            created = self.pinecone_client.create_index(
+                name=self.index_name,
+                dimension=settings.VECTOR_DIMENSION,
+                metric="cosine",
+                cloud=self.cloud,
+                region=self.region
+            )
+
+            if created:
+                logger.info("Created new index", index_name=self.index_name)
             else:
-                logger.info(f"Using existing index: {self.index_name}")
-                
-        except Exception as e:
-            logger.error(f"Error ensuring index exists: {e}")
-            raise VectorServiceError(f"Failed to create/access index: {e}")
+                logger.info("Using existing index", index_name=self.index_name)
+
+        except PineconeClientError as e:
+            logger.error("Failed to ensure index exists", error=str(e))
+            raise PineconeServiceError(f"Failed to create/access index: {e}")
 
     async def search_places(
         self,
         query_embedding: List[float],
         top_k: int = 10,
         filter_dict: Optional[Dict[str, Any]] = None,
-        province_filter: Optional[str] = None,
-        min_rating: Optional[float] = None,
-        place_ids: Optional[List[str]] = None
+        province_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Search for places using vector similarity with enhanced filtering.
@@ -119,19 +124,11 @@ class VectorService:
         if province_filter:
             combined_filter["province"] = {"$eq": province_filter}
 
-        # Add rating filter
-        if min_rating is not None:
-            combined_filter["rating"] = {"$gte": min_rating}
-
-        # Add place ID filter
-        if place_ids:
-            combined_filter["place_id"] = {"$in": place_ids}
-
         # Use async search
         return await self.search(
             vector=query_embedding,
             top_k=top_k,
-            namespace=settings.PINECONE_DEFAULT_NAMESPACE,  # Use configured namespace for travel data
+            namespace=settings.PINECONE_DEFAULT_NAMESPACE,
             filter_dict=combined_filter if combined_filter else None,
             include_metadata=True
         )
@@ -303,7 +300,7 @@ class VectorService:
                 )
             else:
                 logger.error(f"[Node 2/6] Pinecone search timeout - Max retries exhausted: {e}")
-                raise VectorServiceError(f"Pinecone search timeout after {max_retries + 1} attempts: {e}")
+                raise PineconeServiceError(f"Pinecone search timeout after {max_retries + 1} attempts: {e}")
 
         except Exception as e:
             # Check if it's a transient service error (503, etc)
@@ -330,7 +327,7 @@ class VectorService:
                 )
             else:
                 logger.error(f"[Node 2/6] Vector search in namespace '{namespace}' failed: {e}")
-                raise VectorServiceError(f"Vector search failed: {e}")
+                raise PineconeServiceError(f"Vector search failed: {e}")
 
     async def query_namespaces(
         self,
@@ -391,7 +388,7 @@ class VectorService:
 
         except Exception as e:
             logger.error(f"Multi-namespace query failed: {e}")
-            raise VectorServiceError(f"Multi-namespace query failed: {e}")
+            raise PineconeServiceError(f"Multi-namespace query failed: {e}")
 
     async def health_check(self) -> bool:
         """
@@ -420,7 +417,7 @@ class VectorService:
                 logger.error(f"Health check failed: index stats error")
                 return False
 
-            logger.info("Vector service health check passed")
+            logger.info("Pinecone service health check passed")
             return True
 
         except Exception as e:
@@ -428,16 +425,16 @@ class VectorService:
             return False
 
 
-_service_instance: Optional[VectorService] = None
+_service_instance: Optional[PineconeService] = None
 
 
-def get_vector_service() -> VectorService:
-    """Get singleton instance of VectorService."""
+def get_pinecone_service() -> PineconeService:
+    """Get singleton instance of PineconeService."""
     global _service_instance
     if _service_instance is None:
         if not settings.PINECONE_API_KEY:
-            raise VectorServiceError("Pinecone API key missing in environment variables")
-        _service_instance = VectorService(
+            raise PineconeServiceError("Pinecone API key missing in environment variables")
+        _service_instance = PineconeService(
             api_key=settings.PINECONE_API_KEY,
             cloud=settings.PINECONE_CLOUD,
             region=settings.PINECONE_REGION,
@@ -446,4 +443,11 @@ def get_vector_service() -> VectorService:
     return _service_instance
 
 
-__all__ = ["VectorService", "get_vector_service", "VectorServiceError"]
+# Backward compatibility alias
+def get_vector_service() -> PineconeService:
+    """Deprecated: Use get_pinecone_service() instead."""
+    logger.warning("get_vector_service() is deprecated, use get_pinecone_service() instead")
+    return get_pinecone_service()
+
+
+__all__ = ["PineconeService", "get_pinecone_service", "get_vector_service", "PineconeServiceError"]
