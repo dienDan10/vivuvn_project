@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DeleteItineraryButton extends StatefulWidget {
+import '../../controller/itinerary_detail_controller.dart';
+
+class DeleteItineraryButton extends ConsumerStatefulWidget {
   const DeleteItineraryButton({super.key});
 
   @override
-  State<DeleteItineraryButton> createState() => _DeleteItineraryButtonState();
+  ConsumerState<DeleteItineraryButton> createState() => _DeleteItineraryButtonState();
 }
 
-class _DeleteItineraryButtonState extends State<DeleteItineraryButton>
+class _DeleteItineraryButtonState extends ConsumerState<DeleteItineraryButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -34,7 +37,7 @@ class _DeleteItineraryButtonState extends State<DeleteItineraryButton>
     _animationController.forward().then((_) {
       _animationController.reverse();
     });
-    // Logic sẽ được thêm sau
+    ref.read(itineraryDetailControllerProvider.notifier).deleteItinerary(context);
   }
 
   @override

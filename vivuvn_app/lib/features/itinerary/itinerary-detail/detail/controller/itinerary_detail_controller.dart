@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../common/toast/global_toast.dart';
 import '../../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../update-itinerary/controller/update_itinerary_controller.dart';
+import '../../../view-itinerary-list/controller/itinerary_controller.dart';
 import '../service/itinerary_detail_service.dart';
 import '../service/qr_code_save_service.dart';
 import '../state/itinerary_detail_state.dart';
@@ -54,6 +56,108 @@ class ItineraryDetailController
     state = state.copyWith(
       itinerary: current.copyWith(groupSize: newGroupSize),
     );
+  }
+
+  /// Update itinerary name locally to reflect immediately after saving
+  void setName(final String newName) {
+    final current = state.itinerary;
+    if (current == null) return;
+    state = state.copyWith(itinerary: current.copyWith(name: newName));
+  }
+
+  /// Update itinerary privacy status locally to reflect immediately after saving
+  void setPublicStatus(final bool isPublic) {
+    final current = state.itinerary;
+    if (current == null) return;
+    state = state.copyWith(itinerary: current.copyWith(isPublic: isPublic));
+  }
+
+  /// Update privacy status with API call and feedback
+  /// Updates UI optimistically first, then sends request
+  Future<void> updatePrivacyStatus(
+    final BuildContext context,
+    final bool isPublic,
+  ) async {
+    final itineraryId = state.itineraryId;
+    if (itineraryId == null) return;
+
+    // Save old state to revert if request fails
+    final oldIsPublic = state.itinerary?.isPublic ?? false;
+
+    // Update UI immediately (optimistic update)
+    setPublicStatus(isPublic);
+
+    final updater = ref.read(updateItineraryControllerProvider.notifier);
+    updater.setItineraryId(itineraryId);
+
+    // Send request without fetching (already updated local state)
+    final ok = isPublic
+        ? await updater.setPublic(shouldFetch: false)
+        : await updater.setPrivate(shouldFetch: false);
+    
+    // Fetch list in background to sync data for list screen
+    if (ok) {
+      ref.read(itineraryControllerProvider.notifier).fetchItineraries();
+    }
+
+    if (!ok) {
+      // Revert UI if request failed
+      setPublicStatus(oldIsPublic);
+      if (context.mounted) {
+        final errorMsg = ref.read(updateItineraryControllerProvider).error ??
+            'Cập nhật trạng thái thất bại';
+        GlobalToast.showErrorToast(context, message: errorMsg);
+      }
+    }
+  }
+
+  // Name inline editing flow
+  void startNameEditing() {
+    final currentName = state.itinerary?.name;
+    state = state.copyWith(
+      isNameEditing: true,
+      isNameSaving: false,
+      nameDraft: currentName,
+    );
+  }
+
+  void cancelNameEditing() {
+    state = state.copyWith(
+      isNameEditing: false,
+      isNameSaving: false,
+      nameDraft: null,
+    );
+  }
+
+  void updateNameDraft(final String value) {
+    state = state.copyWith(nameDraft: value);
+  }
+
+  Future<void> saveName(final BuildContext context) async {
+    final itineraryId = state.itineraryId;
+    final draft = state.nameDraft?.trim() ?? '';
+    final isOwner = state.itinerary?.isOwner ?? false;
+    if (!isOwner) {
+      cancelNameEditing();
+      return;
+    }
+    if (itineraryId == null) {
+      cancelNameEditing();
+      return;
+    }
+
+    // Delegate validation + API + toast to update controller
+    final updater = ref.read(updateItineraryControllerProvider.notifier);
+    updater.setItineraryId(itineraryId);
+
+    state = state.copyWith(isNameSaving: true);
+    final ok = await updater.updateNameWithFeedback(context, draft);
+    if (ok) {
+      setName(draft);
+      cancelNameEditing();
+    } else {
+      state = state.copyWith(isNameSaving: false);
+    }
   }
 
   // Group size inline editing flow
@@ -171,6 +275,72 @@ class ItineraryDetailController
       // Chỉ cần log nếu cần thiết
     } finally {
       state = state.copyWith(isSavingQrCode: false);
+    }
+  }
+
+  /// Delete itinerary with confirmation modal
+  Future<void> deleteItinerary(final BuildContext context) async {
+    final itineraryId = state.itineraryId;
+    if (itineraryId == null) return;
+
+    // Get the detail screen context before closing modal
+    // The context in modal builder is from detail screen (parent)
+    final detailScreenContext = Navigator.of(context, rootNavigator: false).context;
+    if (!detailScreenContext.mounted) return;
+
+    // Close settings modal first
+    Navigator.of(context).pop();
+    
+    // Wait a bit for modal to close, then show confirmation dialog
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    // Check if context is still mounted after pop
+    if (!detailScreenContext.mounted) return;
+
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: detailScreenContext,
+      builder: (final dialogContext) => AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: const Text(
+          'Bạn có chắc chắn muốn xóa hành trình này? Hành động này không thể hoàn tác.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(dialogContext).colorScheme.error,
+            ),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+
+    // If confirmed, delete and navigate back to list
+    if (confirmed == true && detailScreenContext.mounted) {
+      // Delete itinerary using itinerary controller
+      try {
+        await ref.read(itineraryControllerProvider.notifier).deleteItinerary(itineraryId);
+        
+        // Navigate back to itinerary list after successful deletion
+        if (detailScreenContext.mounted) {
+          Navigator.of(detailScreenContext).pop();
+        }
+      } catch (e) {
+        // Error is already handled in itinerary controller state
+        // Show error toast if needed
+        if (detailScreenContext.mounted) {
+          final errorState = ref.read(itineraryControllerProvider).error;
+          if (errorState != null) {
+            GlobalToast.showErrorToast(detailScreenContext, message: errorState);
+          }
+        }
+      }
     }
   }
 }

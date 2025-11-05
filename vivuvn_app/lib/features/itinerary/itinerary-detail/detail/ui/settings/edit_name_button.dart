@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class EditNameButton extends StatefulWidget {
+import '../../controller/itinerary_detail_controller.dart';
+
+class EditNameButton extends ConsumerStatefulWidget {
   const EditNameButton({super.key});
 
   @override
-  State<EditNameButton> createState() => _EditNameButtonState();
+  ConsumerState<EditNameButton> createState() => _EditNameButtonState();
 }
 
-class _EditNameButtonState extends State<EditNameButton>
+class _EditNameButtonState extends ConsumerState<EditNameButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -34,7 +37,8 @@ class _EditNameButtonState extends State<EditNameButton>
     _animationController.forward().then((_) {
       _animationController.reverse();
     });
-    // Logic sẽ được thêm sau
+    Navigator.of(context).pop();
+    ref.read(itineraryDetailControllerProvider.notifier).startNameEditing();
   }
 
   @override

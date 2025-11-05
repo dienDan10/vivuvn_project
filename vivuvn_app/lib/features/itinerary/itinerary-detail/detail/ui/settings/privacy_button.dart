@@ -1,55 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PrivacyButton extends StatefulWidget {
+import '../../../../update-itinerary/controller/update_itinerary_controller.dart';
+import '../../controller/itinerary_detail_controller.dart';
+
+class PrivacyButton extends ConsumerWidget {
   const PrivacyButton({super.key});
 
   @override
-  State<PrivacyButton> createState() => _PrivacyButtonState();
-}
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final isPublic = ref.watch(itineraryDetailControllerProvider)
+            .itinerary?.isPublic ??
+        false;
+    final isLoading = ref.watch(updateItineraryControllerProvider).isLoading;
 
-class _PrivacyButtonState extends State<PrivacyButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _handleTap() {
-    _animationController.forward().then((_) {
-      _animationController.reverse();
-    });
-    // Logic sẽ được thêm sau
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _handleTap,
-          child: const ListTile(
-            leading: Icon(Icons.lock_outline),
-            title: Text('Tùy chọn riêng tư'),
-          ),
-        ),
+    return ListTile(
+      leading: Icon(
+        isPublic ? Icons.public : Icons.lock_outline,
+      ),
+      title: Text(isPublic ? 'Công khai' : 'Riêng tư'),
+      trailing: Switch(
+        value: isPublic,
+        onChanged: isLoading
+            ? null
+            : (final value) {
+                ref
+                    .read(itineraryDetailControllerProvider.notifier)
+                    .updatePrivacyStatus(context, value);
+              },
       ),
     );
   }
