@@ -156,7 +156,6 @@ tmp/
 
 # AI Model cache
 .cache/
-models/
 
 # Data files (keep structure but ignore large data files)
 data/raw/*.csv
@@ -165,4 +164,6 @@ data/processed/*.pkl
 data/processed/*.json
 
 # Keep sample data
-!data/sample_data.json
+Claude.md
+.claude
+/Secrets/

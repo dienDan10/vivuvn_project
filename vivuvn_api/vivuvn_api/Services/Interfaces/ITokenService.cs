@@ -7,5 +7,6 @@ namespace vivuvn_api.Services.Interfaces
         string CreateAccessToken(User user);
         string CreateRefreshToken();
         string CreateEmailVerificationToken();
+        string CreateItineraryInviteToken();
     }
 }

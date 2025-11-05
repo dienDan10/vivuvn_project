@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(C:/Windows/System32/bash.exe -c \"rm lib/features/itinerary/itinerary-detail/overview/controller/hotels_restaurants_controller.dart\")",
+      "Bash(del /F \"lib\\features\\itinerary\\itinerary-detail\\overview\\controller\\hotels_restaurants_controller.dart\")",
+      "Bash(powershell.exe:*)",
+      "Bash(cmd.exe /c \"del /F lib\\features\\itinerary\\itinerary-detail\\overview\\controller\\hotels_restaurants_controller.dart 2>nul\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

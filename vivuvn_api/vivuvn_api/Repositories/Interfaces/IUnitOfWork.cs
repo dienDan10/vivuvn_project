@@ -7,11 +7,18 @@
         IItineraryDayRepository ItineraryDays { get; }
         IItineraryItemRepository ItineraryItems { get; }
         IBudgetRepository Budgets { get; }
-        IBudgetItemRepository BudgetItems { get; }
-        IBudgetTypeRepository BudgetTypes { get; }
         IProvinceRepository Provinces { get; }
         ILocationRepository Locations { get; }
         IFavoritePlaceRepository FavoritePlaces { get; }
+        IItineraryHotelRepository ItineraryHotels { get; }
+        IItineraryRestaurantRepository ItineraryRestaurants { get; }
+        IHotelRepository Hotels { get; }
+        IRestaurantRepository Restaurants { get; }
+        IBudgetTypeRepository BudgetTypes { get; }
+        IItineraryMemberRepository ItineraryMembers { get; }
+        IItineraryMessageRepository ItineraryMessages { get; }
+        IUserDeviceRepository UserDevices { get; }
+        INotificationRepository Notifications { get; }
 
         Task SaveChangesAsync();
 

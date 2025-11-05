@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../controller/itinerary_schedule_controller.dart';
 import 'add_place_bottom_sheet.dart';
 
-class AddPlaceButton extends StatelessWidget {
+class AddPlaceButton extends ConsumerWidget {
   final String label;
   final VoidCallback? onPressed;
 
@@ -12,7 +14,23 @@ class AddPlaceButton extends StatelessWidget {
     this.onPressed,
   });
 
-  void _openAddPlaceBottomSheet(final BuildContext context) {
+  void _openAddPlaceBottomSheet(
+    final BuildContext context,
+    final WidgetRef ref,
+  ) {
+    final dayId = ref.read(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.selectedDayId,
+      ),
+    );
+
+    if (dayId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Chưa chọn ngày để thêm địa điểm')),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -27,23 +45,33 @@ class AddPlaceButton extends StatelessWidget {
   }
 
   @override
-  Widget build(final BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: OutlinedButton.icon(
-          onPressed: onPressed ?? () => _openAddPlaceBottomSheet(context),
-          icon: const Icon(Icons.add_location_alt_outlined, size: 20),
-          label: Text(label),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    return GestureDetector(
+      onTap: onPressed ?? () => _openAddPlaceBottomSheet(context, ref),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(40),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_location_alt_outlined,
+              size: 20,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
-            textStyle: const TextStyle(fontSize: 16),
-          ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

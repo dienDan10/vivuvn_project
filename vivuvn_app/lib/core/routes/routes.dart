@@ -11,3 +11,15 @@ const String searchRoute = '/search';
 const String itineraryRoute = '/itineraries';
 const String itineraryDetailRoute = '/itineraries/:id';
 String createItineraryDetailRoute(final int id) => '/itineraries/$id';
+const String locationDetailRoute = '/location/:id';
+
+// restaurants routes
+const String nearbyRestaurantRoute = '/nearby-restaurants';
+
+// hotels routes
+const String nearbyHotelRoute = '/nearby-hotels';
+
+// chat routes
+const String chatRoute = '/itineraries/:id/chat';
+String createChatRoute(final int itineraryId) =>
+    '/itineraries/$itineraryId/chat';

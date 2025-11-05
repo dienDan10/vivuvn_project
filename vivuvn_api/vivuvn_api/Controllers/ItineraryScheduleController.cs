@@ -18,6 +18,17 @@ namespace vivuvn_api.Controllers
             var schedule = await _itineraryService.GetItineraryScheduleAsync(itineraryId);
             return Ok(schedule);
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("auto-generate")]
+        public async Task<IActionResult> AutoGenerateItinerary(int itineraryId, [FromBody] AutoGenerateItineraryRequest request)
+        {
+            // auto-generate itinerary
+            var response = await _itineraryService.AutoGenerateItineraryAsync(itineraryId, request);
+            return Ok(response);
+        }
+
         #endregion
 
         #region Schedule items
@@ -48,6 +59,15 @@ namespace vivuvn_api.Controllers
             return Ok(item);
         }
 
+        [HttpPut("{dayId}/items/{itemId}/routes")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItemRouteInfoInDay(int itemId,
+            [FromBody] UpdateItineraryItemRouteInfoRequestDto request)
+        {
+            var item = await _itineraryItemService.UpdateItineraryItemRouteInfoAsync(itemId, request);
+            return Ok(item);
+        }
+
         [HttpDelete("{dayId}/items/{itemId}")]
         [Authorize]
         public async Task<IActionResult> RemoveItemFromDay(int dayId, int itemId)
@@ -56,16 +76,6 @@ namespace vivuvn_api.Controllers
             return Ok();
         }
 
-		#endregion
-
-		[HttpPost]
-		[Authorize]
-		[Route("auto-generate")]
-		public async Task<IActionResult> AutoGenerateItinerary(int itineraryId, [FromBody] AutoGenerateItineraryRequest request)
-		{
-			// auto-generate itinerary
-			var response = await _itineraryService.AutoGenerateItineraryAsync(itineraryId, request);
-			return Ok(response);
-		}
-	}
+        #endregion
+    }
 }

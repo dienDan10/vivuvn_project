@@ -27,6 +27,16 @@ class _SelectDateState extends ConsumerState<SelectDate> {
   }
 
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
+      ref
+          .read(createItineraryControllerProvider.notifier)
+          .setDates(_rangeDatePicker[0], _rangeDatePicker[1]);
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(final BuildContext context) {
     return DateRangePickerField(
       initialValue: _rangeDatePicker,

@@ -32,6 +32,8 @@ namespace vivuvn_api.Models
         public bool DeleteFlag { get; set; }
 
         // Navigation
-        public ICollection<LocationPhoto> LocationPhotos { get; set; } = new List<LocationPhoto>();
+        public ICollection<Hotel> NearbyHotels { get; set; } = new List<Hotel>();
+        public ICollection<Restaurant> NearbyRestaurants { get; set; } = new List<Restaurant>();
+        public ICollection<Photo> Photos { get; set; } = new List<Photo>();
     }
 }

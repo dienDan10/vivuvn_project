@@ -1,5 +1,5 @@
-import '../data/dto/search_location_response.dart';
+import '../models/location.dart';
 
 abstract interface class ISearchLocationService {
-  Future<List<SearchLocationResponse>> searchLocation(final String query);
+  Future<List<Location>> searchLocation(final String query);
 }

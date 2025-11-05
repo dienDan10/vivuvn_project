@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using vivuvn_api.DTOs.Request;
 using vivuvn_api.Helpers;
 using vivuvn_api.Services.Interfaces;
 
@@ -24,6 +25,14 @@ namespace vivuvn_api.Controllers
 
             var profile = await _userService.GetProfileAsync(email);
             return Ok(profile);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = $"{Constants.Role_Admin}")]
+        public async Task<IActionResult> GetAllUsers([FromQuery] GetAllUsersRequestDto requestDto)
+        {
+            var users = await _userService.GetAllUsersAsync(requestDto);
+            return Ok(users);
         }
 
         [HttpPut("{userId}/lock")]

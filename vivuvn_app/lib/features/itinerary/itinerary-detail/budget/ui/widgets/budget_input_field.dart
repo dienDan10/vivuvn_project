@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../common/validator/validator.dart';
-
 class BudgetInputField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
+  final void Function(String)? onChanged;
 
   const BudgetInputField({
     super.key,
     required this.controller,
     required this.focusNode,
+    this.onChanged,
   });
 
   @override
@@ -23,7 +23,22 @@ class BudgetInputField extends StatelessWidget {
         border: OutlineInputBorder(),
         labelText: 'Số tiền',
       ),
-      validator: (final value) => Validator.money(value, fieldName: 'Budget'),
+      validator: (final value) {
+        // Allow empty (will be treated as 0)
+        if (value == null || value.trim().isEmpty) {
+          return null;
+        }
+        // Only validate if not empty
+        final amount = double.tryParse(value.replaceAll(',', '').trim());
+        if (amount == null) {
+          return 'Số tiền không hợp lệ';
+        }
+        if (amount < 0) {
+          return 'Số tiền không được âm';
+        }
+        return null;
+      },
+      onChanged: onChanged,
     );
   }
 }

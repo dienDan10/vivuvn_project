@@ -30,7 +30,6 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 			form.setFieldsValue({
 				name: province.name || "",
 				provinceCode: province.provinceCode || "",
-				nameNormalized: province.nameNormalized || "",
 			});
 
 			// Set image preview for existing image URL from database
@@ -63,7 +62,6 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 		const submitValues = {
 			name: values.name,
 			provinceCode: values.provinceCode,
-			nameNormalized: values.nameNormalized,
 			// If new file uploaded, backend will handle it via imageFile
 			// If editing without new file, keep existing imageUrl
 			imageFile: imageFile, // Backend will process this
@@ -159,10 +157,6 @@ function ProvinceForm({ open, onClose, provinceId, mode }) {
 
 					<Form.Item name="provinceCode" label="Province Code">
 						<Input placeholder="Enter province code" />
-					</Form.Item>
-
-					<Form.Item name="nameNormalized" label="Name Normalized">
-						<Input placeholder="Enter name normalized" />
 					</Form.Item>
 
 					{/* Image Upload with Preview */}

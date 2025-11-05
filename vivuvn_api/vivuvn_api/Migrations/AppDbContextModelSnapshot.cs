@@ -22,6 +22,36 @@ namespace vivuvn_api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HotelLocation", b =>
+                {
+                    b.Property<int>("NearbyHotelsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NearbyLocationsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("NearbyHotelsId", "NearbyLocationsId");
+
+                    b.HasIndex("NearbyLocationsId");
+
+                    b.ToTable("LocationHotel", (string)null);
+                });
+
+            modelBuilder.Entity("LocationRestaurant", b =>
+                {
+                    b.Property<int>("NearbyLocationsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NearbyRestaurantsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("NearbyLocationsId", "NearbyRestaurantsId");
+
+                    b.HasIndex("NearbyRestaurantsId");
+
+                    b.ToTable("LocationRestaurant", (string)null);
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.Budget", b =>
                 {
                     b.Property<int>("BudgetId")
@@ -29,6 +59,9 @@ namespace vivuvn_api.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BudgetId"));
+
+                    b.Property<decimal>("EstimatedBudget")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ItineraryId")
                         .HasColumnType("int");
@@ -64,15 +97,23 @@ namespace vivuvn_api.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PaidByMemberId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BudgetId");
 
                     b.HasIndex("BudgetTypeId");
+
+                    b.HasIndex("PaidByMemberId");
 
                     b.ToTable("BudgetItems");
                 });
@@ -92,41 +133,6 @@ namespace vivuvn_api.Migrations
                     b.HasKey("BudgetTypeId");
 
                     b.ToTable("BudgetTypes");
-                });
-
-            modelBuilder.Entity("vivuvn_api.Models.ExternalService", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("GoogleApiUri")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GooglePlaceId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ItineraryDayId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("Rating")
-                        .HasColumnType("float");
-
-                    b.Property<int>("ServiceTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItineraryDayId");
-
-                    b.HasIndex("ServiceTypeId");
-
-                    b.ToTable("ExternalServices");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.FavoritePlace", b =>
@@ -152,6 +158,51 @@ namespace vivuvn_api.Migrations
                     b.ToTable("FavoritePlaces");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.Hotel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("DeleteFlag")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("GoogleMapsUri")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GooglePlaceId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PriceLevel")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Rating")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("UserRatingCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GooglePlaceId");
+
+                    b.ToTable("Hotels");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.Itinerary", b =>
                 {
                     b.Property<int>("Id")
@@ -175,6 +226,16 @@ namespace vivuvn_api.Migrations
                     b.Property<int>("GroupSize")
                         .HasColumnType("int");
 
+                    b.Property<string>("InviteCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("InviteCodeGeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -194,6 +255,10 @@ namespace vivuvn_api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DestinationProvinceId");
+
+                    b.HasIndex("InviteCode")
+                        .IsUnique()
+                        .HasFilter("[InviteCode] IS NOT NULL");
 
                     b.HasIndex("StartProvinceId");
 
@@ -226,6 +291,45 @@ namespace vivuvn_api.Migrations
                     b.HasIndex("ItineraryId", "DayNumber");
 
                     b.ToTable("ItineraryDays");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryHotel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BudgetItemId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("CheckIn")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("CheckOut")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItineraryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BudgetItemId")
+                        .IsUnique()
+                        .HasFilter("[BudgetItemId] IS NOT NULL");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.ToTable("ItineraryHotels");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.ItineraryItem", b =>
@@ -275,6 +379,114 @@ namespace vivuvn_api.Migrations
                     b.ToTable("ItineraryItems");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("DeleteFlag")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItineraryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ItineraryId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("ItineraryMembers");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ItineraryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItineraryMemberId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.HasIndex("ItineraryMemberId");
+
+                    b.ToTable("ItineraryMessages");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryRestaurant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BudgetItemId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("ItineraryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RestaurantId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly?>("Time")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BudgetItemId")
+                        .IsUnique()
+                        .HasFilter("[BudgetItemId] IS NOT NULL");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("ItineraryRestaurants");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.Location", b =>
                 {
                     b.Property<int>("Id")
@@ -296,7 +508,7 @@ namespace vivuvn_api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GooglePlaceId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<double?>("Latitude")
                         .HasColumnType("float");
@@ -332,6 +544,8 @@ namespace vivuvn_api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GooglePlaceId");
+
                     b.HasIndex("NameNormalized");
 
                     b.HasIndex("ProvinceId");
@@ -339,7 +553,7 @@ namespace vivuvn_api.Migrations
                     b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("vivuvn_api.Models.LocationPhoto", b =>
+            modelBuilder.Entity("vivuvn_api.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -347,18 +561,46 @@ namespace vivuvn_api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("LocationId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("DeleteFlag")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ItineraryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PhotoUrl")
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("CreatedAt");
 
-                    b.ToTable("LocationPhotos");
+                    b.HasIndex("IsRead");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.PasswordReset", b =>
@@ -384,6 +626,38 @@ namespace vivuvn_api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PasswordResets");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.Photo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RestaurantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Province", b =>
@@ -420,6 +694,51 @@ namespace vivuvn_api.Migrations
                     b.ToTable("Provinces");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.Restaurant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("DeleteFlag")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("GoogleMapsUri")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GooglePlaceId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PriceLevel")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Rating")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("UserRatingCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GooglePlaceId");
+
+                    b.ToTable("Restaurants");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -435,23 +754,6 @@ namespace vivuvn_api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("vivuvn_api.Models.ServiceType", b =>
-                {
-                    b.Property<int>("ServiceTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceTypeId"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ServiceTypeId");
-
-                    b.ToTable("ServiceTypes");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.User", b =>
@@ -514,6 +816,51 @@ namespace vivuvn_api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.UserDevice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DeviceType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("FcmToken")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FcmToken")
+                        .HasDatabaseName("IX_UserDevices_FcmToken");
+
+                    b.HasIndex("UserId", "IsActive")
+                        .HasDatabaseName("IX_UserDevices_UserId_IsActive");
+
+                    b.ToTable("UserDevices");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.UserRole", b =>
                 {
                     b.Property<int>("UserId")
@@ -527,6 +874,36 @@ namespace vivuvn_api.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("HotelLocation", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.Hotel", null)
+                        .WithMany()
+                        .HasForeignKey("NearbyHotelsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("vivuvn_api.Models.Location", null)
+                        .WithMany()
+                        .HasForeignKey("NearbyLocationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LocationRestaurant", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.Location", null)
+                        .WithMany()
+                        .HasForeignKey("NearbyLocationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("vivuvn_api.Models.Restaurant", null)
+                        .WithMany()
+                        .HasForeignKey("NearbyRestaurantsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Budget", b =>
@@ -552,28 +929,16 @@ namespace vivuvn_api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("vivuvn_api.Models.ItineraryMember", "PaidByMember")
+                        .WithMany()
+                        .HasForeignKey("PaidByMemberId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Budget");
 
                     b.Navigation("BudgetType");
-                });
 
-            modelBuilder.Entity("vivuvn_api.Models.ExternalService", b =>
-                {
-                    b.HasOne("vivuvn_api.Models.ItineraryDay", "ItineraryDay")
-                        .WithMany()
-                        .HasForeignKey("ItineraryDayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("vivuvn_api.Models.ServiceType", "ServiceType")
-                        .WithMany()
-                        .HasForeignKey("ServiceTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ItineraryDay");
-
-                    b.Navigation("ServiceType");
+                    b.Navigation("PaidByMember");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.FavoritePlace", b =>
@@ -629,6 +994,31 @@ namespace vivuvn_api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryHotel", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.BudgetItem", "BudgetItem")
+                        .WithOne("ItineraryHotel")
+                        .HasForeignKey("vivuvn_api.Models.ItineraryHotel", "BudgetItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("vivuvn_api.Models.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("vivuvn_api.Models.Itinerary", "Itinerary")
+                        .WithMany("Hotels")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BudgetItem");
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("Itinerary");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.ItineraryItem", b =>
                 {
                     b.HasOne("vivuvn_api.Models.ItineraryDay", "ItineraryDay")
@@ -646,6 +1036,69 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryMember", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.Itinerary", "Itinerary")
+                        .WithMany("Members")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("vivuvn_api.Models.User", "User")
+                        .WithMany("ItineraryMemberships")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Itinerary");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryMessage", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.Itinerary", "Itinerary")
+                        .WithMany("Messages")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("vivuvn_api.Models.ItineraryMember", "ItineraryMember")
+                        .WithMany()
+                        .HasForeignKey("ItineraryMemberId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Itinerary");
+
+                    b.Navigation("ItineraryMember");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.ItineraryRestaurant", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.BudgetItem", "BudgetItem")
+                        .WithOne("ItineraryRestaurant")
+                        .HasForeignKey("vivuvn_api.Models.ItineraryRestaurant", "BudgetItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("vivuvn_api.Models.Itinerary", "Itinerary")
+                        .WithMany("Restaurants")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("vivuvn_api.Models.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("BudgetItem");
+
+                    b.Navigation("Itinerary");
+
+                    b.Navigation("Restaurant");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.Location", b =>
                 {
                     b.HasOne("vivuvn_api.Models.Province", "Province")
@@ -657,21 +1110,63 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Province");
                 });
 
-            modelBuilder.Entity("vivuvn_api.Models.LocationPhoto", b =>
+            modelBuilder.Entity("vivuvn_api.Models.Notification", b =>
                 {
-                    b.HasOne("vivuvn_api.Models.Location", "Location")
-                        .WithMany("LocationPhotos")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("vivuvn_api.Models.Itinerary", "Itinerary")
+                        .WithMany("Notifications")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("vivuvn_api.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Location");
+                    b.Navigation("Itinerary");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.PasswordReset", b =>
                 {
                     b.HasOne("vivuvn_api.Models.User", "User")
                         .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.Photo", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.Hotel", "Hotel")
+                        .WithMany("Photos")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("vivuvn_api.Models.Location", "Location")
+                        .WithMany("Photos")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("vivuvn_api.Models.Restaurant", "Restaurant")
+                        .WithMany("Photos")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.UserDevice", b =>
+                {
+                    b.HasOne("vivuvn_api.Models.User", "User")
+                        .WithMany("Devices")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -703,6 +1198,18 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("vivuvn_api.Models.BudgetItem", b =>
+                {
+                    b.Navigation("ItineraryHotel");
+
+                    b.Navigation("ItineraryRestaurant");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.Hotel", b =>
+                {
+                    b.Navigation("Photos");
+                });
+
             modelBuilder.Entity("vivuvn_api.Models.Itinerary", b =>
                 {
                     b.Navigation("Budget");
@@ -710,6 +1217,16 @@ namespace vivuvn_api.Migrations
                     b.Navigation("Days");
 
                     b.Navigation("FavoritePlaces");
+
+                    b.Navigation("Hotels");
+
+                    b.Navigation("Members");
+
+                    b.Navigation("Messages");
+
+                    b.Navigation("Notifications");
+
+                    b.Navigation("Restaurants");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.ItineraryDay", b =>
@@ -719,7 +1236,12 @@ namespace vivuvn_api.Migrations
 
             modelBuilder.Entity("vivuvn_api.Models.Location", b =>
                 {
-                    b.Navigation("LocationPhotos");
+                    b.Navigation("Photos");
+                });
+
+            modelBuilder.Entity("vivuvn_api.Models.Restaurant", b =>
+                {
+                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("vivuvn_api.Models.Role", b =>
@@ -729,7 +1251,13 @@ namespace vivuvn_api.Migrations
 
             modelBuilder.Entity("vivuvn_api.Models.User", b =>
                 {
+                    b.Navigation("Devices");
+
                     b.Navigation("Itineraries");
+
+                    b.Navigation("ItineraryMemberships");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("UserRoles");
                 });

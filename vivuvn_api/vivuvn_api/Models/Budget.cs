@@ -12,6 +12,8 @@ namespace vivuvn_api.Models
 
         public decimal TotalBudget { get; set; }
 
+        public decimal EstimatedBudget { get; set; }
+
         // Navigation
         public ICollection<BudgetItem> Items { get; set; } = new List<BudgetItem>();
     }

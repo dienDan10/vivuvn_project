@@ -1,0 +1,18 @@
+﻿using vivuvn_api.DTOs.ValueObjects;
+
+namespace vivuvn_api.Services.Interfaces
+{
+    public interface IItineraryMemberService
+    {
+        Task<InviteCodeDto> GenerateInviteCodeAsync(int itineraryId, int ownerId);
+        Task JoinItineraryByInviteCodeAsync(int userId, string inviteCode);
+        Task<IEnumerable<ItineraryMemberDto>> GetMembersAsync(int itineraryId);
+        Task LeaveItineraryAsync(int userId, int itineraryId);
+        Task KickMemberAsync(int userId, int itineraryId, int memberId);
+
+        // Helper methods
+        Task<bool> IsOwnerAsync(int itineraryId, int userId);
+        Task<bool> IsMemberAsync(int itineraryId, int userId);
+        Task<int> GetCurrentMemberCountAsync(int itineraryId);
+    }
+}

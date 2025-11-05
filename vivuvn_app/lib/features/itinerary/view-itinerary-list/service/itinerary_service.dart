@@ -17,4 +17,8 @@ class ItineraryService {
   Future<List<Itinerary>> getItineraries() async {
     return await _api.getItineraries();
   }
+
+  Future<void> deleteItinerary(final int id) async {
+    return await _api.deleteItinerary(id);
+  }
 }

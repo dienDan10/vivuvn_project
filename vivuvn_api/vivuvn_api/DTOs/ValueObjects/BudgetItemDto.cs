@@ -5,7 +5,9 @@
         public int Id { get; set; }
         public string Name { get; set; }
         public decimal Cost { get; set; }
-        public DateTime Date { get; set; }
+        public string? Details { get; set; }
+		public DateTime Date { get; set; }
         public string? BudgetType { get; set; }
+        public ItineraryMemberDto? PaidByMember { get; set; }
     }
 }

@@ -8,8 +8,9 @@ namespace vivuvn_api.Controllers
 {
     [Route("api/v1/itineraries")]
     [ApiController]
-    public class ItineraryController(IItineraryService _itineraryService) : ControllerBase
+    public class ItineraryController(IItineraryService _itineraryService, IItineraryMemberService _memberService) : ControllerBase
     {
+        // Get all itineraries of the user (include joined itineraries)
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAllItineraries()
@@ -32,7 +33,8 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> GetItineraryById(int id)
         {
-            var itinerary = await _itineraryService.GetItineraryByIdAsync(id);
+            var userId = GetCurrentUserId();
+            var itinerary = await _itineraryService.GetItineraryByIdAsync(id, userId);
 
             return Ok(itinerary);
         }
@@ -54,5 +56,89 @@ namespace vivuvn_api.Controllers
 
             return Ok(response);
         }
-	}
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteItinerary(int id)
+        {
+            var userId = GetCurrentUserId();
+            var isOwner = await _memberService.IsOwnerAsync(id, userId);
+
+            if (!isOwner)
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
+
+            var result = await _itineraryService.DeleteItineraryByIdAsync(id);
+
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}/dates")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryDates(int id, [FromBody] UpdateItineraryDatesRequestDto request)
+        {
+            await _itineraryService.UpdateItineraryDatesAsync(id, request);
+            return Ok();
+        }
+
+        [HttpPut("{id}/name")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryName(int id, [FromBody] UpdateItineraryNameRequestDto request)
+        {
+            var result = await _itineraryService.UpdateItineraryNameAsync(id, request.Name);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
+        [HttpPut("{id}/group-size")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryGroupSize(int id, [FromBody] UpdateItineraryGroupSizeRequestDto request)
+        {
+            var result = await _itineraryService.UpdateItineraryGroupSizeAsync(id, request.GroupSize);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
+        [HttpPut("{id}/public")]
+        [Authorize]
+        public async Task<IActionResult> SetItineraryToPublic(int id)
+        {
+            var result = await _itineraryService.SetItineraryToPublicAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
+        [HttpPut("{id}/private")]
+        [Authorize]
+        public async Task<IActionResult> SetItineraryToPrivate(int id)
+        {
+            var result = await _itineraryService.SetItineraryToPrivateAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim!);
+        }
+    }
 }

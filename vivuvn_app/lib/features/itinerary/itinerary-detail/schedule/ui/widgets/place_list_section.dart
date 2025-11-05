@@ -1,32 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../overview/ui/widgets/place_card.dart';
-import '../schedule_data.dart';
-import 'transport_section.dart';
+import '../../controller/itinerary_schedule_controller.dart';
+import 'add_place_button.dart';
+import 'slidable_place_item.dart';
 
-class PlaceListSection extends StatelessWidget {
+class PlaceListSection extends ConsumerWidget {
   const PlaceListSection({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final days = ref.watch(
+      itineraryScheduleControllerProvider.select((final state) => state.days),
+    );
+    final selectedIndex = ref.watch(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.selectedIndex,
+      ),
+    );
+
+    final selectedDay = (days.isNotEmpty && selectedIndex < days.length)
+        ? days[selectedIndex]
+        : null;
+
+    if (selectedDay == null) return const SizedBox();
+
+    final items = selectedDay.items;
+
+    if (items.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 8),
+        child: AddPlaceButton(),
+      );
+    }
+
     return Column(
       children: [
-        ...samplePlaces.asMap().entries.map((final entry) {
-          final index = entry.key;
-          final place = entry.value;
-
-          return Column(
-            children: [
-              PlaceCard(title: place.title, description: place.description),
-              if (index != samplePlaces.length - 1)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32),
-                  child: TransportSection(),
-                ),
-            ],
-          );
-        }),
-        const SizedBox(height: 8),
+        for (final entry in items.asMap().entries) ...[
+          SlidablePlaceItem(
+            key: ValueKey(entry.value.itineraryItemId),
+            item: entry.value,
+          ),
+        ],
+        const SizedBox(height: 24),
+        const AddPlaceButton(),
       ],
     );
   }

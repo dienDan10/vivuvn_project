@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using LinqKit;
-using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -11,7 +10,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IJsonService _jsonService) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)
@@ -31,7 +30,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<PaginatedResponseDto<LocationDto>> GetAllLocationsAsync(GetAllLocationsRequestDto requestDto)
         {
             // Build filter expression
-            var predicate = PredicateBuilder.New<Location>(l => !l.DeleteFlag);
+            var predicate = PredicateBuilder.New<Location>();
 
             if (!string.IsNullOrEmpty(requestDto.Name))
             {
@@ -67,7 +66,7 @@ namespace vivuvn_api.Services.Implementations
                 orderBy: orderBy,
                 pageNumber: requestDto.PageNumber,
                 pageSize: requestDto.PageSize,
-                includeProperties: "LocationPhotos,Province"
+                includeProperties: "Photos,Province"
             );
 
             var locationDtos = _mapper.Map<IEnumerable<LocationDto>>(items);
@@ -85,22 +84,104 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<LocationDto> GetLocationByIdAsync(int id)
         {
-            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "LocationPhotos");
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "Photos");
             return _mapper.Map<LocationDto>(location);
         }
 
-        private static Expression<Func<T, bool>> CombineFilters<T>(Expression<Func<T, bool>> first,
-            Expression<Func<T, bool>> second)
+        public async Task<IEnumerable<RestaurantDto>> GetRestaurantsByLocationIdAsync(int locationId)
         {
-            var parameter = Expression.Parameter(typeof(T));
-            var combined = Expression.Lambda<Func<T, bool>>(
-                Expression.AndAlso(
-                    Expression.Invoke(first, parameter),
-                    Expression.Invoke(second, parameter)
-                ),
-                parameter
-            );
-            return combined;
+            // Get location and validate
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyRestaurants,NearbyRestaurants.Photos", tracked: true);
+            if (location is null) throw new KeyNotFoundException("Location not found");
+            if (!location.Latitude.HasValue || !location.Longitude.HasValue)
+            {
+                return [];
+            }
+
+            // return restaurants if db contains restaurants
+            if (location.NearbyRestaurants is not null && location.NearbyRestaurants.Any())
+            {
+                return _mapper.Map<IEnumerable<RestaurantDto>>(location.NearbyRestaurants);
+            }
+
+            // Fetch nearby restaurants from Google Maps API
+            var response = await _placeService.FetchNearbyRestaurantsAsync(location);
+
+            if (response is null || response.Places is null || !response.Places.Any())
+            {
+                return [];
+            }
+
+            // Map Place objects to RestaurantDto using AutoMapper
+            var restaurantDtos = _mapper.Map<IEnumerable<RestaurantDto>>(response.Places);
+
+            // add restaurant to location's NearbyRestaurants and save to database
+            var newRestaurants = _mapper.Map<IEnumerable<Restaurant>>(restaurantDtos);
+
+            location.NearbyRestaurants = [.. newRestaurants];
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // save restaurant to json file
+            await _jsonService.SaveRestaurantsToJsonFile(location.GooglePlaceId ?? "", newRestaurants);
+
+            return _mapper.Map<IEnumerable<RestaurantDto>>(newRestaurants);
         }
+
+        public async Task<IEnumerable<HotelDto>> GetHotelsByLocationIdAsync(int locationId)
+        {
+            // Get location and validate
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyHotels,NearbyHotels.Photos", tracked: true);
+            if (location is null) throw new KeyNotFoundException("Location not found");
+            if (!location.Latitude.HasValue || !location.Longitude.HasValue)
+            {
+                return [];
+            }
+
+            // return hotels if db contains hotels
+            if (location.NearbyHotels is not null && location.NearbyHotels.Any())
+            {
+                return _mapper.Map<IEnumerable<HotelDto>>(location.NearbyHotels);
+            }
+
+            // Fetch nearby hotels from Google Maps API
+            var response = await _placeService.FetchNearbyHotelsAsync(location);
+
+            if (response is null || response.Places is null || !response.Places.Any())
+            {
+                return [];
+            }
+
+            // Map Place objects to HotelDto using AutoMapper
+            var hotelDtos = _mapper.Map<IEnumerable<HotelDto>>(response.Places);
+
+            // add hotel to location's NearbyHotels and save to database
+            var newHotels = _mapper.Map<IEnumerable<Hotel>>(hotelDtos);
+
+            location.NearbyHotels = [.. newHotels];
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // save hotel to json file
+            await _jsonService.SaveHotelsToJsonFile(location.GooglePlaceId ?? "", newHotels);
+
+            return _mapper.Map<IEnumerable<HotelDto>>(newHotels);
+        }
+
+        public async Task<IEnumerable<SearchPlaceDto>> SearchRestaurantsByTextAsync(string textQuery, string? provinceName = null)
+        {
+            var response = await _placeService.SearchRestaurantsByTextAsync(textQuery, provinceName);
+            if (response is null || !response.Places.Any()) return [];
+
+            return _mapper.Map<IEnumerable<SearchPlaceDto>>(response.Places);
+        }
+
+        public async Task<IEnumerable<SearchPlaceDto>> SearchHotelsByTextAsync(string textQuery, string? provinceName = null)
+        {
+            var response = await _placeService.SearchHotelsByTextAsync(textQuery, provinceName);
+            if (response is null || !response.Places.Any()) return [];
+            return _mapper.Map<IEnumerable<SearchPlaceDto>>(response.Places);
+        }
+
     }
 }

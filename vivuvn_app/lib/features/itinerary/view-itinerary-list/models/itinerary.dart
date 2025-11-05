@@ -1,25 +1,134 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
+import 'user.dart';
+
 class Itinerary {
   final int id;
+  final User owner;
+  final bool isOwner;
   final String name;
+  final int startProvinceId;
+  final String startProvinceName;
+  final int destinationProvinceId;
+  final String destinationProvinceName;
   final String imageUrl;
   final DateTime startDate;
   final DateTime endDate;
+  final int groupSize;
+  final int daysCount;
+  final String transportationVehicle;
+  final bool isPublic;
+  final String? inviteCode;
 
   Itinerary({
     required this.id,
+    required this.owner,
+    required this.isOwner,
     required this.name,
+    required this.startProvinceId,
+    required this.startProvinceName,
+    required this.destinationProvinceId,
+    required this.destinationProvinceName,
     required this.imageUrl,
     required this.startDate,
     required this.endDate,
+    required this.groupSize,
+    required this.daysCount,
+    required this.transportationVehicle,
+    required this.isPublic,
+    this.inviteCode,
   });
 
-  factory Itinerary.fromJson(final Map<String, dynamic> json) {
+  Itinerary copyWith({
+    final int? id,
+    final User? owner,
+    final bool? isOwner,
+    final String? name,
+    final int? startProvinceId,
+    final String? startProvinceName,
+    final int? destinationProvinceId,
+    final String? destinationProvinceName,
+    final String? imageUrl,
+    final DateTime? startDate,
+    final DateTime? endDate,
+    final int? groupSize,
+    final int? daysCount,
+    final String? transportationVehicle,
+    final bool? isPublic,
+    final String? inviteCode,
+  }) {
     return Itinerary(
-      id: json['id'] as int,
-      name: json['name'] ?? '',
-      imageUrl: json['imageUrl'] ?? 'assets/images/images-placeholder.jpeg',
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
+      id: id ?? this.id,
+      owner: owner ?? this.owner,
+      isOwner: isOwner ?? this.isOwner,
+      name: name ?? this.name,
+      startProvinceId: startProvinceId ?? this.startProvinceId,
+      startProvinceName: startProvinceName ?? this.startProvinceName,
+      destinationProvinceId:
+          destinationProvinceId ?? this.destinationProvinceId,
+      destinationProvinceName:
+          destinationProvinceName ?? this.destinationProvinceName,
+      imageUrl: imageUrl ?? this.imageUrl,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      groupSize: groupSize ?? this.groupSize,
+      daysCount: daysCount ?? this.daysCount,
+      transportationVehicle:
+          transportationVehicle ?? this.transportationVehicle,
+      isPublic: isPublic ?? this.isPublic,
+      inviteCode: inviteCode ?? this.inviteCode,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'owner': owner.toMap(),
+      'isOwner': isOwner,
+      'name': name,
+      'startProvinceId': startProvinceId,
+      'startProvinceName': startProvinceName,
+      'destinationProvinceId': destinationProvinceId,
+      'destinationProvinceName': destinationProvinceName,
+      'imageUrl': imageUrl,
+      'startDate': startDate.millisecondsSinceEpoch,
+      'endDate': endDate.millisecondsSinceEpoch,
+      'groupSize': groupSize,
+      'daysCount': daysCount,
+      'transportationVehicle': transportationVehicle,
+      'isPublic': isPublic,
+      'inviteCode': inviteCode,
+    };
+  }
+
+  factory Itinerary.fromMap(final Map<String, dynamic> map) {
+    return Itinerary(
+      id: map['id'] as int,
+      owner: User.fromMap(map['owner'] as Map<String, dynamic>),
+      isOwner: map['isOwner'] as bool? ?? false,
+      name: map['name'].toString(),
+      startProvinceId: map['startProvinceId'] as int,
+      startProvinceName: map['startProvinceName'].toString(),
+      destinationProvinceId: map['destinationProvinceId'] as int,
+      destinationProvinceName: map['destinationProvinceName'].toString(),
+      imageUrl: map['imageUrl']?.toString() ?? '',
+      startDate: map['startDate'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(map['startDate'] as int)
+          : DateTime.parse(map['startDate'] as String),
+      endDate: map['endDate'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(map['endDate'] as int)
+          : DateTime.parse(map['endDate'] as String),
+      groupSize: map['groupSize'] as int? ?? 1,
+      daysCount: map['daysCount'] as int? ?? 1,
+      transportationVehicle: map['transportationVehicle']?.toString() ?? '',
+      isPublic: map['isPublic'] as bool? ?? false,
+      inviteCode: map['inviteCode']?.toString(),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Itinerary.fromJson(final String source) =>
+      Itinerary.fromMap(json.decode(source) as Map<String, dynamic>);
 }

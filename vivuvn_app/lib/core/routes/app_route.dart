@@ -4,11 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/auth_controller.dart';
 import '../../common/auth/auth_state.dart';
+import '../../features/itinerary/itinerary-detail/schedule/model/location.dart';
+import '../../features/itinerary/location-detail/ui/location_detail_screen.dart';
 import '../../screens/bottom_navigation_screen.dart';
+import '../../screens/chat_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/itinerary_detail_screen.dart';
 import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
+import '../../screens/nearby_hotel_screen.dart';
+import '../../screens/nearby_restaurant_screen.dart';
 import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
@@ -75,6 +80,39 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           return ItineraryDetailScreen(itineraryId: int.parse(itineraryId));
         },
       ),
+
+      GoRoute(
+        path: locationDetailRoute,
+        builder: (final context, final state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return LocationDetailScreen(locationId: id);
+        },
+      ),
+
+      GoRoute(
+        path: nearbyRestaurantRoute,
+        builder: (final context, final state) {
+          final location = state.extra as Location;
+          return NearbyRestaurantScreen(location: location);
+        },
+      ),
+
+      GoRoute(
+        path: nearbyHotelRoute,
+        builder: (final context, final state) {
+          final location = state.extra as Location;
+          return NearbyHotelScreen(location: location);
+        },
+      ),
+
+      GoRoute(
+        path: chatRoute,
+        builder: (final context, final state) {
+          final itineraryId = state.pathParameters['id']!;
+          return ChatScreen(itineraryId: int.parse(itineraryId));
+        },
+      ),
+
       // Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
         builder:

@@ -31,9 +31,20 @@ namespace vivuvn_api.Models
 
         public string? TransportationVehicle { get; set; }
 
+        public bool IsPublic { get; set; } = false;
+
+        [MaxLength(50)]
+        public string? InviteCode { get; set; }
+        public DateTime? InviteCodeGeneratedAt { get; set; }
+
         // Navigation
         public ICollection<ItineraryDay> Days { get; set; } = new List<ItineraryDay>();
         public Budget? Budget { get; set; }
         public ICollection<FavoritePlace> FavoritePlaces { get; set; } = new List<FavoritePlace>();
+        public ICollection<ItineraryHotel> Hotels { get; set; } = new List<ItineraryHotel>();
+        public ICollection<ItineraryRestaurant> Restaurants { get; set; } = new List<ItineraryRestaurant>();
+        public ICollection<ItineraryMember> Members { get; set; } = new List<ItineraryMember>();
+        public ICollection<ItineraryMessage> Messages { get; set; } = new List<ItineraryMessage>();
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }

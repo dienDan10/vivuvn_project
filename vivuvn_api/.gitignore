@@ -362,5 +362,17 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Custom application settings (may contain secrets)
 appsettings.json
+
+# Environment variables and secrets - NEVER COMMIT THESE!
+.env
+.env.local
+.env.production
+.env.docker.local
+.env.*.local
+appsettings.*.local.json
+
+# Docker volume directories
+images/
 

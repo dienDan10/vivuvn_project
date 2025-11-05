@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # AI Service
+  vivuvn-ai-service:
+    image: minhdang1163/vivuvn-ai-service:latest
+    container_name: vivuvn-ai-service
+    env_file:
+      - ../vivuvn_ai_service/.env.docker
+    ports:
+      - "8000:8000"
+    volumes:
+      - model-cache:/home/vivuapp/.cache
+    networks:
+      - vivuvn-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # .NET API service
+  vivuvn-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vivuvn-api
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - SA_PASSWORD=${SA_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - GOOGLE_MAPS_ROUTE_URL=${GOOGLE_MAPS_ROUTE_URL} 
+      - GOOGLE_MAPS_PLACE_URL=${GOOGLE_MAPS_PLACE_URL} 
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL}
+      - ADMIN_PANEL_URL=${ADMIN_PANEL_URL}
+      - DB_SERVER=host.docker.internal  # Key change: use host machine
+      - DB_PORT=1433  # Your local SQL Server port
+    ports:
+      - "5277:80"
+    depends_on:
+      vivuvn-ai-service:
+        condition: service_healthy
+    networks:
+      - vivuvn-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Enable host access
+    restart: unless-stopped
+
+volumes:
+  model-cache:
+    name: vivuvn-model-cache
+    driver: local
+
+networks:
+  vivuvn-network:
+    driver: bridge

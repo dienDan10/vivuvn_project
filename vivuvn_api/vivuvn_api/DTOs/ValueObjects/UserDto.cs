@@ -8,7 +8,8 @@
         public string? UserPhoto { get; set; }
         public string? PhoneNumber { get; set; }
         public string? GoogleIdToken { get; set; }
-        public bool IsLocked { get; set; }
+        public bool IsEmailVerified { get; set; }
+		public bool IsLocked { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
     }
 }

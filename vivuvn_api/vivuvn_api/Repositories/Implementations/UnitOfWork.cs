@@ -8,41 +8,62 @@ namespace vivuvn_api.Repositories.Implementations
     {
         private readonly AppDbContext _context;
         private IDbContextTransaction? _transaction;
-        
+
         public IUserRepository Users { get; private set; }
         public IItineraryRepository Itineraries { get; private set; }
-        public IItineraryDayRepository ItineraryDays { get; set; }
-        public IItineraryItemRepository ItineraryItems { get; set; }
-        public IBudgetRepository Budgets { get; set; }
-        public IBudgetItemRepository BudgetItems { get; private set; }
-        public IBudgetTypeRepository BudgetTypes { get; private set; }
-        public IProvinceRepository Provinces { get; set; }
+        public IItineraryDayRepository ItineraryDays { get; private set; }
+        public IItineraryItemRepository ItineraryItems { get; private set; }
+        public IBudgetRepository Budgets { get; private set; }
+        public IProvinceRepository Provinces { get; private set; }
         public ILocationRepository Locations { get; private set; }
         public IFavoritePlaceRepository FavoritePlaces { get; private set; }
+        public IItineraryRestaurantRepository ItineraryRestaurants { get; private set; }
+        public IItineraryHotelRepository ItineraryHotels { get; private set; }
+        public IRestaurantRepository Restaurants { get; private set; }
+        public IHotelRepository Hotels { get; private set; }
+        public IBudgetTypeRepository BudgetTypes { get; private set; }
+        public IItineraryMemberRepository ItineraryMembers { get; private set; }
+        public IItineraryMessageRepository ItineraryMessages { get; private set; }
+        public INotificationRepository Notifications { get; private set; }
+        public IUserDeviceRepository UserDevices { get; private set; }
 
         public UnitOfWork(AppDbContext context,
             IUserRepository userRepository,
             IItineraryRepository itineraryRepository,
             IItineraryDayRepository itineraryDayRepository,
             IBudgetRepository budgetRepository,
-            IBudgetItemRepository budgetItemRepository,
-            IBudgetTypeRepository budgetTypeRepository,
             IProvinceRepository provinceRepository,
             ILocationRepository locationRepository,
             IFavoritePlaceRepository favoritePlaceRepository,
-            IItineraryItemRepository itineraryItem)
+            IItineraryItemRepository itineraryItem,
+            IItineraryRestaurantRepository itineraryRestaurantRepository,
+            IItineraryHotelRepository itineraryHotelRepository,
+            IRestaurantRepository restaurantRepository,
+            IHotelRepository hotelRepository,
+            IBudgetTypeRepository budgetTypeRepository,
+            IItineraryMemberRepository itineraryMemberRepository,
+            IItineraryMessageRepository itineraryMessageRepository,
+            INotificationRepository notifications,
+            IUserDeviceRepository userDevices)
         {
             _context = context;
             Users = userRepository;
             Itineraries = itineraryRepository;
             ItineraryDays = itineraryDayRepository;
             Budgets = budgetRepository;
-            BudgetItems = budgetItemRepository;
-            BudgetTypes = budgetTypeRepository;
             Provinces = provinceRepository;
             Locations = locationRepository;
             FavoritePlaces = favoritePlaceRepository;
             ItineraryItems = itineraryItem;
+            ItineraryRestaurants = itineraryRestaurantRepository;
+            ItineraryHotels = itineraryHotelRepository;
+            Restaurants = restaurantRepository;
+            Hotels = hotelRepository;
+            BudgetTypes = budgetTypeRepository;
+            ItineraryMembers = itineraryMemberRepository;
+            ItineraryMessages = itineraryMessageRepository;
+            Notifications = notifications;
+            UserDevices = userDevices;
         }
 
         public async Task SaveChangesAsync()
@@ -68,8 +89,10 @@ namespace vivuvn_api.Repositories.Implementations
         {
             try
             {
-                await _context.SaveChangesAsync();
-                await _transaction?.CommitAsync()!;
+                if (_transaction != null)
+                {
+                    await _transaction.CommitAsync();
+                }
             }
             catch
             {

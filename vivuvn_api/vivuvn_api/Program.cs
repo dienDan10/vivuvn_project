@@ -1,6 +1,7 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using sib_api_v3_sdk.Client;
 using vivuvn_api.Data.DbInitializer;
@@ -11,6 +12,9 @@ using vivuvn_api.Helpers;
 using vivuvn_api.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Replace environment variable placeholders in configuration
+builder.ReplaceDockerEnvironmentVariables();
 
 // Add Exception Handlers
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
@@ -84,6 +88,23 @@ builder.Services.AddRepositories();
 builder.Services.AddUnitOfWork();
 builder.Services.AddCustomHttpClient(builder.Configuration);
 
+// Initialize Firebase
+var firebaseCredPath = Path.Combine(builder.Environment.ContentRootPath,
+    "Secrets",
+    builder.Configuration["Firebase:CredentialFile"] ?? "");
+
+if (File.Exists(firebaseCredPath))
+{
+    FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile(firebaseCredPath)
+    });
+}
+else
+{
+    throw new FileNotFoundException("Firebase credential file not found.", firebaseCredPath);
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -99,12 +120,8 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// serving static files
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "images")),
-    RequestPath = "/images"
-});
+// Add health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 app.MapControllers();
 

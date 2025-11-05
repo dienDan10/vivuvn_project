@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
-import '../dto/search_location_response.dart';
+import '../../models/location.dart';
 
 final searchLocationApiProvider = Provider.autoDispose<SearchLocationApi>((
   final ref,
@@ -16,9 +16,7 @@ class SearchLocationApi {
 
   SearchLocationApi(this._dio);
 
-  Future<List<SearchLocationResponse>> searchLocations(
-    final String queryText,
-  ) async {
+  Future<List<Location>> searchLocations(final String queryText) async {
     if (queryText.isEmpty) return [];
 
     final response = await _dio.get('/api/v1/locations/search?name=$queryText');
@@ -27,10 +25,7 @@ class SearchLocationApi {
 
     final List<dynamic> jsonList = response.data as List<dynamic>;
     return jsonList
-        .map(
-          (final json) =>
-              SearchLocationResponse.fromJson(json as Map<String, dynamic>),
-        )
+        .map((final json) => Location.fromJson(json as Map<String, dynamic>))
         .toList();
   }
 }

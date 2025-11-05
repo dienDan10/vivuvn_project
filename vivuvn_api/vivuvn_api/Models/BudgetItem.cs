@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace vivuvn_api.Models
 {
@@ -16,10 +17,21 @@ namespace vivuvn_api.Models
 
         public decimal Cost { get; set; }
 
+        public string? Details { get; set; }
+
         [Required]
         public DateTime Date { get; set; }
 
         public int BudgetTypeId { get; set; }
         public BudgetType BudgetType { get; set; } = null!;
+
+        public int? PaidByMemberId { get; set; }
+        [ForeignKey("PaidByMemberId")]
+        public ItineraryMember? PaidByMember { get; set; }
+
+        // Navigation
+        public ItineraryHotel? ItineraryHotel { get; set; }
+        public ItineraryRestaurant? ItineraryRestaurant { get; set; }
+
     }
 }

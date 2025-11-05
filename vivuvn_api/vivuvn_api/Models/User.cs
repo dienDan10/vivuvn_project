@@ -32,5 +32,9 @@ namespace vivuvn_api.Models
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<Itinerary> Itineraries { get; set; } = new List<Itinerary>();
+
+        public ICollection<ItineraryMember> ItineraryMemberships { get; set; } = new List<ItineraryMember>(); // Itineraries user is a member of
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public ICollection<UserDevice> Devices { get; set; } = new List<UserDevice>();
     }
 }

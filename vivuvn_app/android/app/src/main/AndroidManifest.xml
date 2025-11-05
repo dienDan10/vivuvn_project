@@ -1,12 +1,30 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- queries for url_launcher -->
+    <queries>
+        <!-- opens https URLs -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <!-- opens http URLs -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <!-- opens geo URLs for maps -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+    </queries>
+
     <application
         android:label="vivuvn_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- <meta-data
-            android:name="com.google.android.gms.client.id"
-            android:value="830479318433-49c4as7i8tmrumph58vvnjkqrreaeld6.apps.googleusercontent.com" /> -->
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyAOPACaIN4fcY2iyXr4HD8N6OnM8hPhbos"/>
 
         <activity
             android:name=".MainActivity"

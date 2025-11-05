@@ -14,8 +14,8 @@ namespace vivuvn_api.Services.Implementations
         public ImageService(IWebHostEnvironment env, IConfiguration configuration)
         {
             _env = env;
-            var creadentialsPath = Path.Combine(_env.ContentRootPath, configuration["Firebase:CredentialPath"]);
-            var credentials = GoogleCredential.FromFile(creadentialsPath);
+            var credentialsPath = Path.Combine(_env.ContentRootPath, "Secrets", configuration["Firebase:CredentialFile"]);
+            var credentials = GoogleCredential.FromFile(credentialsPath);
             _storageClient = StorageClient.Create(credentials);
             _bucketName = configuration["Firebase:BucketName"];
         }

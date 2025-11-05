@@ -20,7 +20,11 @@ class ItineraryApi {
 
     final List<dynamic> jsonList = response.data as List<dynamic>;
     return jsonList
-        .map((final json) => Itinerary.fromJson(json as Map<String, dynamic>))
+        .map((final json) => Itinerary.fromMap(json as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<void> deleteItinerary(final int id) async {
+    await _dio.delete('/api/v1/itineraries/$id');
   }
 }

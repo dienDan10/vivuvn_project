@@ -34,11 +34,12 @@
         public const string BudgetType_Groceries = "Tạp hóa";
         public const string BudgetType_Other = "Khác";
 
-        // Transportation Modes (for inter-city/province travel)
+        // Transportation Modes (province travel)
         public const string TransportationMode_Airplane = "Máy bay";
         public const string TransportationMode_Bus = "Xe khách";
         public const string TransportationMode_Train = "Tàu hỏa";
         public const string TransportationMode_PrivateCar = "Ô tô cá nhân";
+        public const string TransportationMode_Motorbike = "Xe máy";
 
         // Travel Modes (for Google Maps routing within city)
         public const string TravelMode_Driving = "DRIVE";
@@ -49,6 +50,33 @@
 
         // Additional 
         public const int DefaultPageSize = 10;
+
+        // Itinerary roles
+        public const string ItineraryRole_Owner = "Owner";
+        public const string ItineraryRole_Member = "Member";
+
+        // Notification types
+        public const string NotificationType_MemberJoined = "MemberJoined";
+        public const string NotificationType_MemberLeft = "MemberLeft";
+        public const string NotificationType_MemberKicked = "MemberKicked";
+        public const string NotificationType_ItineraryUpdated = "ItineraryUpdated";
+        public const string NotificationType_ImportantChange = "ImportantChange";
+        public const string NotificationType_ExpenseAssigned = "ExpenseAssigned";
+
+        // Invite Code Configuration
+        public const int InviteCodeLength = 8; // EX: "VIVU-ABC1"
+        public const string InviteCodePrefix = "VIVU";
+
+        // Message Pagination
+        public const int MessagesPerPage = 50;
+
+        // Device Types
+        public const string DeviceType_Web = "web";
+        public const string DeviceType_iOS = "ios";
+        public const string DeviceType_Android = "android";
+
+        // Notification Types 
+        public const string NotificationType_OwnerAnnouncement = "OwnerAnnouncement";
 
     }
 }

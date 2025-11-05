@@ -16,13 +16,19 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IItineraryRepository, ItineraryRepository>();
             services.AddScoped<IItineraryDayRepository, ItineraryDayRepository>();
             services.AddScoped<IBudgetRepository, BudgetRepository>();
-            services.AddScoped<IBudgetItemRepository, BudgetItemRepository>();
-            services.AddScoped<IBudgetTypeRepository, BudgetTypeRepository>();
             services.AddScoped<IProvinceRepository, ProvinceRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
             services.AddScoped<IFavoritePlaceRepository, FavoritePlaceRepository>();
             services.AddScoped<IItineraryItemRepository, ItineraryItemRepository>();
-            services.AddScoped<IAiClientService, AiClientService>();
+            services.AddScoped<IItineraryRestaurantRepository, ItineraryRestaurantRepository>();
+            services.AddScoped<IItineraryHotelRepository, ItineraryHotelRepository>();
+            services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+            services.AddScoped<IHotelRepository, HotelRepository>();
+            services.AddScoped<IBudgetTypeRepository, BudgetTypeRepository>();
+            services.AddScoped<IItineraryMemberRepository, ItineraryMemberRepository>();
+            services.AddScoped<IItineraryMessageRepository, ItineraryMessageRepository>();
+            services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             return services;
         }
 
@@ -36,11 +42,22 @@ namespace vivuvn_api.Extensions
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IItineraryService, ItineraryService>();
+            services.AddScoped<IitineraryRestaurantService, ItineraryRestaurantService>();
+            services.AddScoped<IitineraryHotelService, ItineraryHotelService>();
             services.AddScoped<IProvinceService, ProvinceService>();
             services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
             services.AddScoped<IItineraryItemService, ItineraryItemService>();
             services.AddScoped<IBudgetService, BudgetService>();
             services.AddScoped<IAiClientService, AiClientService>();
+            services.AddScoped<IGoogleMapRouteService, GoogleMapRouteService>();
+            services.AddScoped<IGoogleMapPlaceService, GoogleMapPlaceService>();
+            services.AddScoped<IJsonService, JsonService>();
+            services.AddScoped<IItineraryMemberService, ItineraryMemberService>();
+            services.AddScoped<IItineraryMessageService, ItineraryMessageService>();
+            services.AddScoped<IAiClientService, AiClientService>();
+            services.AddScoped<IFcmService, FcmService>();
+            services.AddScoped<IUserDeviceService, UserDeviceService>();
+            services.AddScoped<INotificationService, NotificationService>();
             return services;
         }
 
@@ -66,12 +83,16 @@ namespace vivuvn_api.Extensions
                 httpClient.BaseAddress = new Uri(configuration.GetValue<string>("AiService:BaseUrl") ?? "");
             });
 
-            // Google Map Client
+            // Google Route Client
             services.AddHttpClient<IGoogleMapRouteService, GoogleMapRouteService>(httpClient =>
             {
                 httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:RouteUrl") ?? "");
-                httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                httpClient.DefaultRequestHeaders.Add("X-Goog-FieldMask", "routes.duration,routes.distanceMeters");
+            });
+
+            // Google Place Client
+            services.AddHttpClient<IGoogleMapPlaceService, GoogleMapPlaceService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(configuration.GetValue<string>("GoogleMapService:PlaceUrl") ?? "");
             });
 
             return services;

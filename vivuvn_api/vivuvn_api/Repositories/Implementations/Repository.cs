@@ -67,7 +67,7 @@ namespace vivuvn_api.Repositories.Implementations
             int pageSize = 10)
         {
             IQueryable<T> query = dbSet;
-            
+
             if (filter != null)
             {
                 query = query.Where(filter);
@@ -106,10 +106,15 @@ namespace vivuvn_api.Repositories.Implementations
 
             if (!string.IsNullOrEmpty(includeProperties))
             {
-                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries))
+                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(includeProperty);
                 }
+            }
+
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
             }
 
             return await query.FirstOrDefaultAsync(filter);

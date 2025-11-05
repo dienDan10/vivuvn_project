@@ -39,11 +39,7 @@ namespace vivuvn_api.DTOs.ValueObjects
         [JsonPropertyName("cost_estimate")]
         public decimal CostEstimate { get; set; }
 
-        /// <summary>
-        /// Activity category: food, sightseeing, culture, history, nature,
-        /// adventure, shopping, entertainment, relaxation
-        /// </summary>
-        [JsonPropertyName("category")]
-        public string Category { get; set; } = string.Empty;
-    }
+        [JsonPropertyName("notes")]
+        public string Notes { get; set; } = string.Empty;
+	}
 }

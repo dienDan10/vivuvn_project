@@ -34,7 +34,10 @@ namespace vivuvn_api.Repositories.Implementations
 
         public async Task<BudgetItem?> GetBudgetItemByIdAsync(int id, bool track = false)
         {
-            IQueryable<BudgetItem> query = _context.BudgetItems.Where(i => i.Id == id).Include(i => i.BudgetType);
+            IQueryable<BudgetItem> query = _context.BudgetItems.Where(i => i.Id == id)
+                .Include(i => i.BudgetType)
+                .Include(i => i.PaidByMember)
+                .ThenInclude(p => p.User);
 
             if (!track)
             {
@@ -49,6 +52,8 @@ namespace vivuvn_api.Repositories.Implementations
             return await _context.BudgetItems
                 .Where(i => i.BudgetId == budgetId)
                 .Include(i => i.BudgetType)
+                .Include(i => i.PaidByMember)
+                .ThenInclude(p => p.User)
                 .ToListAsync();
         }
 
@@ -56,31 +61,32 @@ namespace vivuvn_api.Repositories.Implementations
         {
             //get the budget from db
             var budget = await _context.Budgets
-                .Include(b => b.Items)
-                .FirstOrDefaultAsync(b => b.BudgetId == item.BudgetId);
+     .Include(b => b.Items)
+    .FirstOrDefaultAsync(b => b.BudgetId == item.BudgetId);
 
-            if (budget == null)
-            {
-                throw new ArgumentException($"Budget with ID {item.BudgetId} does not exist.");
+       if (budget == null)
+         {
+   throw new ArgumentException($"Budget with ID {item.BudgetId} does not exist.");
             }
 
-            // find the existing item in the budget
-            var existingItem = budget.Items.FirstOrDefault(i => i.Id == item.Id);
+ // find the existing item in the budget
+  var existingItem = budget.Items.FirstOrDefault(i => i.Id == item.Id);
             if (existingItem == null)
                 throw new ArgumentException($"Budget item with ID {item.Id} does not exist.");
 
             // update the total budget
             budget.TotalBudget -= existingItem.Cost;
-            budget.TotalBudget += item.Cost;
+         budget.TotalBudget += item.Cost;
 
             // update the item in the budget
-            existingItem.Name = item.Name;
+      existingItem.Name = item.Name;
             existingItem.Date = item.Date;
             existingItem.Cost = item.Cost;
             existingItem.BudgetTypeId = item.BudgetTypeId;
+          existingItem.PaidByMemberId = item.PaidByMemberId;
+      existingItem.Details = item.Details;
 
-
-            _context.BudgetItems.Update(existingItem);
+    _context.BudgetItems.Update(existingItem);
             _context.Budgets.Update(budget);
 
             await _context.SaveChangesAsync();
@@ -93,17 +99,15 @@ namespace vivuvn_api.Repositories.Implementations
         public async Task<BudgetItem?> DeleteBudgetItemAsync(int id)
         {
             var item = await _context.BudgetItems
-                .Include(i => i.BudgetType)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                            .FirstOrDefaultAsync(i => i.Id == id);
 
             if (item == null)
             {
                 throw new ArgumentException($"Budget item with ID {id} does not exist.");
             }
 
-            //get the budget from db
+            // Get the budget from db
             var budget = await _context.Budgets
-                .Include(b => b.Items)
                 .FirstOrDefaultAsync(b => b.BudgetId == item.BudgetId);
 
             if (budget == null)
@@ -111,13 +115,35 @@ namespace vivuvn_api.Repositories.Implementations
                 throw new ArgumentException($"Budget with ID {item.BudgetId} does not exist.");
             }
 
-            // update the total budget
+            // Clear foreign key references before deletion (application-level cascade)
+            var relatedHotel = await _context.ItineraryHotels
+                .FirstOrDefaultAsync(ih => ih.BudgetItemId == id);
+            if (relatedHotel != null)
+            {
+                relatedHotel.BudgetItemId = null;
+            }
+
+            var relatedRestaurant = await _context.ItineraryRestaurants
+                .FirstOrDefaultAsync(ir => ir.BudgetItemId == id);
+            if (relatedRestaurant != null)
+            {
+                relatedRestaurant.BudgetItemId = null;
+            }
+
+            // Update the total budget
             budget.TotalBudget -= item.Cost;
-            // remove the item from the budget
-            budget.Items.Remove(item);
+
+            // Remove the item
             _context.BudgetItems.Remove(item);
-            _context.Budgets.Update(budget);
+
+            await _context.SaveChangesAsync();
             return item;
+        }
+
+        public async Task<IEnumerable<BudgetType>> GetAllBudgetTypesAsync()
+        {
+            var budgetTypes = await _context.BudgetTypes.ToListAsync();
+            return budgetTypes;
         }
     }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/search_location_api.dart';
-import '../data/dto/search_location_response.dart';
+import '../models/location.dart';
 
 final searchLocationServiceProvider =
     Provider.autoDispose<ISearchLocationService>((final ref) {
@@ -10,7 +10,7 @@ final searchLocationServiceProvider =
     });
 
 abstract class ISearchLocationService {
-  Future<List<SearchLocationResponse>> searchLocations(final String queryText);
+  Future<List<Location>> searchLocations(final String queryText);
 }
 
 class SearchLocationService implements ISearchLocationService {
@@ -19,9 +19,7 @@ class SearchLocationService implements ISearchLocationService {
   SearchLocationService(this._searchLocationApi);
 
   @override
-  Future<List<SearchLocationResponse>> searchLocations(
-    final String queryText,
-  ) async {
+  Future<List<Location>> searchLocations(final String queryText) async {
     return await _searchLocationApi.searchLocations(queryText);
   }
 }
