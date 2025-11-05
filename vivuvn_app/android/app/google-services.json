@@ -1,0 +1,171 @@
+{
+  "project_info": {
+    "project_number": "721795337132",
+    "firebase_url": "https://fir-basic-3901c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "fir-basic-3901c",
+    "storage_bucket": "fir-basic-3901c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721795337132:android:04c2f70c4fc03107e40809",
+        "android_client_info": {
+          "package_name": "com.diendanx.air_bnb_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721795337132-v1of1be2r1mfnqh5qmflkbfjdrd2iub0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.diendanx.air_bnb_app",
+            "certificate_hash": "3dc5f9fdfff566d06b3327345c6d0ed05f788ddd"
+          }
+        },
+        {
+          "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo3Yaw7aMc6sxh7jBVnA-kGvkmuY6jVZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "721795337132-3hfbaq956i3de6k6vg0k6q8l27lhfq3f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.simpleChatApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721795337132:android:db3cfae0b515a3d6e40809",
+        "android_client_info": {
+          "package_name": "com.diendanx.app.vivuvn_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo3Yaw7aMc6sxh7jBVnA-kGvkmuY6jVZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "721795337132-3hfbaq956i3de6k6vg0k6q8l27lhfq3f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.simpleChatApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721795337132:android:c360fad78399bed7e40809",
+        "android_client_info": {
+          "package_name": "com.example.simple_chat_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo3Yaw7aMc6sxh7jBVnA-kGvkmuY6jVZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "721795337132-3hfbaq956i3de6k6vg0k6q8l27lhfq3f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.simpleChatApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721795337132:android:f76b065fabdbb36fe40809",
+        "android_client_info": {
+          "package_name": "io.diendanx.firebasebasic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721795337132-0vq1soe12jjnuolk5ab4ak72re4g39o3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.diendanx.firebasebasic",
+            "certificate_hash": "3dc5f9fdfff566d06b3327345c6d0ed05f788ddd"
+          }
+        },
+        {
+          "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo3Yaw7aMc6sxh7jBVnA-kGvkmuY6jVZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721795337132-kv2scpckok3l6bpv82rhq86e994q1k99.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "721795337132-3hfbaq956i3de6k6vg0k6q8l27lhfq3f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.simpleChatApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

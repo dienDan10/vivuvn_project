@@ -56,6 +56,9 @@ dependencies:
   carousel_slider: ^5.1.1
   url_launcher: ^6.3.2
   sliver_snap: ^2.1.1
+  firebase_core: ^4.2.1
+  firebase_messaging: ^16.0.4
+  flutter_local_notifications: ^19.5.0
 
 
 dev_dependencies:

@@ -18,6 +18,9 @@
         </intent>
     </queries>
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:label="vivuvn_app"
         android:name="${applicationName}"
@@ -25,6 +28,25 @@
 
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAOPACaIN4fcY2iyXr4HD8N6OnM8hPhbos"/>
+
+        <!-- FCM Service -->
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        
+        <!-- Default notification channel -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="vivuvn_notifications" />
+
+        <!-- Custom notification icon -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/icon_notification" />
 
         <activity
             android:name=".MainActivity"
