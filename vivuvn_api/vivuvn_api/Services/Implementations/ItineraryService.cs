@@ -456,7 +456,7 @@ namespace vivuvn_api.Services.Implementations
                         var budgetItem = new BudgetItem
                         {
                             BudgetId = budget.BudgetId,
-                            Name = $"{transportation.Mode} - {transportation.Details}",
+                            Name = transportation.Mode,
                             Cost = transportation.EstimatedCost,
                             Date = transportation.Date,
                             BudgetTypeId = transportationBudgetTypeId,
