@@ -283,7 +283,7 @@ namespace vivuvn_api.Services.Implementations
                 // Get the existing itinerary with its days and budget
                 var itinerary = await _unitOfWork.Itineraries.GetOneAsync(
                     i => i.Id == itineraryId,
-                    includeProperties: "Days,Days.Items,Budget,Budget.Items,StartProvince,DestinationProvince",
+                    includeProperties: "Days,Days.Items,Budget,Budget.Items,Budget.Items.ItineraryHotel,Budget.Items.ItineraryRestaurant",
                     tracked: true);
 
                 if (itinerary == null)
@@ -315,10 +315,12 @@ namespace vivuvn_api.Services.Implementations
 
                 if (budget?.Items != null)
                 {
-                    // Clear all items from the collection
-                    budget.Items.Clear();
-                    budget.TotalBudget = 0;
-                }
+					// Clear all items that do not have ItineraryRestaurant and ItineraryHotel from the collection
+                    budget.Items = budget.Items
+                        .Where(bi => bi.ItineraryHotel != null || bi.ItineraryRestaurant != null)
+                        .ToList();
+                    budget.TotalBudget = budget.Items.Sum(bi => bi.Cost);
+				}
 
                 // Batch load all locations
                 var allPlaceIds = travelItinerary.Days
@@ -347,7 +349,7 @@ namespace vivuvn_api.Services.Implementations
                 // Update budget total if TotalCost is provided
                 if (travelItinerary.TotalCost > 0 && budget != null)
                 {
-                    budget.TotalBudget = travelItinerary.TotalCost;
+                    budget.TotalBudget += travelItinerary.TotalCost;
                 }
 
                 // Single SaveChanges at the end for all changes
