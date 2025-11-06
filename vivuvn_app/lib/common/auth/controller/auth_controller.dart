@@ -66,6 +66,8 @@ class AuthController extends Notifier<AuthState> {
     final tokenService = ref.read(tokenServiceProvider(dioInstance));
     await tokenService.clearTokens();
     state = state.copyWith(status: AuthStatus.unauthenticated);
+    final service = ref.read(notificationServiceProvider);
+    await service.deactivateDevice();
   }
 }
 

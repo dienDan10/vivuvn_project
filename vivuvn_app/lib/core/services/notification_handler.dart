@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../common/auth/controller/auth_controller.dart';
 import '../../common/auth/state/auth_state.dart';
+import '../../features/notification/controller/notification_controller.dart';
 import '../../features/notification/data/model/notification_payload.dart';
+import '../routes/app_route.dart';
 import '../routes/routes.dart';
 import 'local_notification_service.dart';
 
@@ -18,7 +18,6 @@ final notificationHandlerProvider = Provider<NotificationHandler>((final ref) {
 
 class NotificationHandler {
   final LocalNotificationService _localNotifications;
-  BuildContext? _context;
   final Ref _ref;
 
   Completer<void>? _authReadyCompleter;
@@ -27,9 +26,7 @@ class NotificationHandler {
   NotificationHandler(this._localNotifications, this._ref);
 
   // Initialize notification handlers
-  Future<void> initialize(final BuildContext context) async {
-    _context = context;
-
+  Future<void> initialize() async {
     // Initialize local notifications
     await _localNotifications.initialize();
 
@@ -69,6 +66,9 @@ class NotificationHandler {
       body: message.notification?.body ?? '',
       payload: _buildPayload(message.data),
     );
+
+    // Optionally, update notification list in app
+    _ref.read(notificationControllerProvider.notifier).refresh();
   }
 
   // Handle background/terminated message tap (navigate to notification tab)
@@ -81,16 +81,12 @@ class NotificationHandler {
 
   // Navigate to notification tab
   void _navigateToNotificationTab() {
-    if (_context == null || !_context!.mounted) {
-      return;
-    }
-
     final authStatus = _ref.read(authControllerProvider).status;
     if (authStatus != AuthStatus.authenticated) {
       return;
     }
-
-    _context!.go(notificationRoute);
+    final router = _ref.read(goRouterProvider);
+    router.go(notificationRoute);
   }
 
   // Build payload string from data
@@ -139,10 +135,5 @@ class NotificationHandler {
         onTimeout: () {},
       );
     } catch (_) {}
-  }
-
-  // Update context (call this if context changes)
-  void updateContext(final BuildContext context) {
-    _context = context;
   }
 }

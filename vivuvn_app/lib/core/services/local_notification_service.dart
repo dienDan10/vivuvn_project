@@ -1,10 +1,13 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../routes/app_route.dart';
+import '../routes/routes.dart';
+
 final localNotificationServiceProvider = Provider<LocalNotificationService>((
   final ref,
 ) {
-  return LocalNotificationService();
+  return LocalNotificationService(ref);
 });
 
 class LocalNotificationService {
@@ -12,6 +15,8 @@ class LocalNotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  final Ref _ref;
+  LocalNotificationService(this._ref);
 
   /// Initialize local notifications
   Future<void> initialize() async {
@@ -76,8 +81,9 @@ class LocalNotificationService {
 
   /// Handle notification tap
   void _onNotificationTapped(final NotificationResponse response) {
-    print('📱 Notification tapped: ${response.payload}');
-    // This will be handled by NotificationHandler
+    final router = _ref.read(goRouterProvider);
+    // Navigate to notification screen if not already there
+    router.go(notificationRoute);
   }
 
   /// Cancel notification

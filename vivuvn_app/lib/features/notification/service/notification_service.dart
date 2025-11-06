@@ -45,7 +45,6 @@ class NotificationService implements INotificationService {
     final token = await _fcmService.getToken();
     if (token != null) {
       await _api.deactivateDevice(token);
-      await _fcmService.deleteToken();
     }
   }
 

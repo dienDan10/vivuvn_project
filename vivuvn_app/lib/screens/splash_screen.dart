@@ -28,7 +28,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _initialize() async {
     // Initialize notification handler because it may need to handle notification taps
     final handler = ref.read(notificationHandlerProvider);
-    await handler.initialize(context);
+    await handler.initialize();
 
     // Check auth status
     await ref.read(authControllerProvider.notifier).checkAuthStatus();
