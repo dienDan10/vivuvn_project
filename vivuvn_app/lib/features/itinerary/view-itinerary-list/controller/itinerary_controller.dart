@@ -6,11 +6,11 @@ import '../service/itinerary_service.dart';
 import '../state/itinerary_state.dart';
 
 final itineraryControllerProvider =
-    AutoDisposeNotifierProvider<ItineraryController, ItineraryState>(
+    NotifierProvider<ItineraryController, ItineraryState>(
       () => ItineraryController(),
     );
 
-class ItineraryController extends AutoDisposeNotifier<ItineraryState> {
+class ItineraryController extends Notifier<ItineraryState> {
   @override
   ItineraryState build() => ItineraryState();
 
@@ -33,10 +33,24 @@ class ItineraryController extends AutoDisposeNotifier<ItineraryState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await ref.read(itineraryServiceProvider).deleteItinerary(itineraryId);
-      final updatedItineraries = state.itineraries
-          .where((final itinerary) => itinerary.id != itineraryId)
-          .toList();
-      state = state.copyWith(itineraries: updatedItineraries, isLoading: false);
+      final refreshed = await ref.read(itineraryServiceProvider).getItineraries();
+      state = state.copyWith(itineraries: refreshed, isLoading: false);
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(error: errorMsg, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(error: 'unknown error', isLoading: false);
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  Future<void> leaveItinerary(final int itineraryId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await ref.read(itineraryServiceProvider).leaveItinerary(itineraryId);
+      final refreshed = await ref.read(itineraryServiceProvider).getItineraries();
+      state = state.copyWith(itineraries: refreshed, isLoading: false);
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
       state = state.copyWith(error: errorMsg, isLoading: false);

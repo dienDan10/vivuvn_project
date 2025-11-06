@@ -57,6 +57,7 @@ namespace vivuvn_api.Services.Implementations
                 Cost = request.Cost,
                 Date = request.Date,
                 BudgetTypeId = request.BudgetTypeId,
+                Details = request.Details
             };
 
             if (request.MemberId.HasValue && request.MemberId.Value > 0)
@@ -110,6 +111,8 @@ namespace vivuvn_api.Services.Implementations
             if (request.BudgetTypeId is not null) item.BudgetTypeId = request.BudgetTypeId.Value;
 
             if (request.MemberId.HasValue && request.MemberId.Value > 0) item.PaidByMemberId = request.MemberId;
+
+            if (request.Details is not null) item.Details = request.Details;
 
             var updatedItem = await _unitOfWork.Budgets.UpdateBudgetItemAsync(item);
 

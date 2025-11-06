@@ -12,6 +12,16 @@ class ItineraryDetailState {
   final bool isGroupSizeEditing;
   final bool isGroupSizeSaving;
   final int? groupSizeDraft;
+  // Name inline edit state
+  final bool isNameEditing;
+  final bool isNameSaving;
+  final String? nameDraft;
+  // Invite code state
+  final String? inviteCode;
+  final bool isInviteCodeLoading;
+  final String? inviteCodeError;
+  // QR code save state
+  final bool isSavingQrCode;
 
   ItineraryDetailState({
     this.itineraryId,
@@ -21,6 +31,13 @@ class ItineraryDetailState {
     this.isGroupSizeEditing = false,
     this.isGroupSizeSaving = false,
     this.groupSizeDraft,
+    this.isNameEditing = false,
+    this.isNameSaving = false,
+    this.nameDraft,
+    this.inviteCode,
+    this.isInviteCodeLoading = false,
+    this.inviteCodeError,
+    this.isSavingQrCode = false,
   });
 
   ItineraryDetailState copyWith({
@@ -31,6 +48,13 @@ class ItineraryDetailState {
     final bool? isGroupSizeEditing,
     final bool? isGroupSizeSaving,
     final Object? groupSizeDraft = _noValue,
+    final bool? isNameEditing,
+    final bool? isNameSaving,
+    final Object? nameDraft = _noValue,
+    final String? inviteCode,
+    final bool? isInviteCodeLoading,
+    final Object? inviteCodeError = _noValue,
+    final bool? isSavingQrCode,
   }) {
     return ItineraryDetailState(
       itineraryId: itineraryId ?? this.itineraryId,
@@ -42,6 +66,16 @@ class ItineraryDetailState {
       groupSizeDraft: identical(groupSizeDraft, _noValue)
           ? this.groupSizeDraft
           : groupSizeDraft as int?,
+      isNameEditing: isNameEditing ?? this.isNameEditing,
+      isNameSaving: isNameSaving ?? this.isNameSaving,
+      nameDraft:
+          identical(nameDraft, _noValue) ? this.nameDraft : nameDraft as String?,
+      inviteCode: inviteCode ?? this.inviteCode,
+      isInviteCodeLoading: isInviteCodeLoading ?? this.isInviteCodeLoading,
+      inviteCodeError: identical(inviteCodeError, _noValue)
+          ? this.inviteCodeError
+          : inviteCodeError as String?,
+      isSavingQrCode: isSavingQrCode ?? this.isSavingQrCode,
     );
   }
 }

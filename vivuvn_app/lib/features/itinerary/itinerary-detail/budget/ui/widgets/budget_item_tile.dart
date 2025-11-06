@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
 
 import '../../data/models/budget_items.dart';
-import '../../utils/budget_constants.dart';
-import '../../utils/budget_type_icons.dart';
+import 'budget_item_amount.dart';
+import 'budget_item_avatar.dart';
+import 'budget_item_subtitle.dart';
+import 'budget_item_title.dart';
 
 /// Widget hiển thị từng item chi tiêu với swipe-to-delete
 class BudgetItemTile extends StatelessWidget {
@@ -58,68 +59,14 @@ class BudgetItemTile extends StatelessWidget {
         ListTile(
           onTap: onTap,
           contentPadding: const EdgeInsets.only(left: 0, right: 8),
-          leading: _buildAvatar(context),
-          title: _buildTitle(),
-          subtitle: _buildSubtitle(),
-          trailing: _buildAmount(context),
+          leading: BudgetItemAvatar(item: item),
+          title: BudgetItemTitle(item: item),
+          subtitle: BudgetItemSubtitle(item: item),
+          trailing: BudgetItemAmount(item: item),
         ),
         const Divider(height: 1),
       ],
     );
   }
 
-  /// Build avatar icon
-  Widget _buildAvatar(final BuildContext context) {
-    final icon = BudgetTypeIcons.getIconForType(item.budgetType);
-
-    return CircleAvatar(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-      child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
-    );
-  }
-
-  /// Build item title
-  Widget _buildTitle() {
-    return Text(
-      item.name,
-      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-    );
-  }
-
-  /// Build item subtitle with date and type
-  Widget _buildSubtitle() {
-    return Text(
-      '${_formatDay(item.date)} • ${item.budgetType}',
-      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-    );
-  }
-
-  /// Build amount display with VND and USD
-  Widget _buildAmount(final BuildContext context) {
-    final formatter = NumberFormat('#,###', 'vi_VN');
-    final usdAmount = item.cost / BudgetConstants.exchangeRate;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          '${formatter.format(item.cost.round())} đ',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          '≈ \$${usdAmount.toStringAsFixed(2)}',
-          style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-        ),
-      ],
-    );
-  }
-
-  /// Format date as day/month
-  String _formatDay(final DateTime dt) => '${dt.day}/${dt.month}';
 }

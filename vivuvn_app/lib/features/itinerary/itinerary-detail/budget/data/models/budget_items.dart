@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../../member/data/model/member.dart';
 import 'budget_type.dart';
 
 /// Model đại diện cho một budget item (khoản chi tiêu)
@@ -18,6 +19,8 @@ class BudgetItem {
   final String budgetType;
   final BudgetType? budgetTypeObj;
   final DateTime date;
+  final Member? paidByMember;
+  final String? details;
 
   const BudgetItem({
     this.id,
@@ -26,6 +29,8 @@ class BudgetItem {
     required this.budgetType,
     this.budgetTypeObj,
     required this.date,
+    this.paidByMember,
+    this.details,
   });
 
   Map<String, dynamic> toMap() {
@@ -39,6 +44,8 @@ class BudgetItem {
       else
         'budgetType': budgetType,
       'date': date.toIso8601String(),
+      if (paidByMember != null) 'memberId': paidByMember!.memberId,
+      if (details != null) 'details': details,
     };
   }
 
@@ -69,6 +76,13 @@ class BudgetItem {
       btName = '';
     }
 
+    // Parse paidByMember if present
+    Member? paidByMember;
+    final paidByMemberField = map['paidByMember'];
+    if (paidByMemberField != null && paidByMemberField is Map<String, dynamic>) {
+      paidByMember = Member.fromMap(paidByMemberField);
+    }
+
     return BudgetItem(
       id: map['id'] is int ? map['id'] as int : null,
       name: map['name'] as String,
@@ -76,6 +90,8 @@ class BudgetItem {
       budgetType: btName,
       budgetTypeObj: btObj,
       date: parsedDate,
+      paidByMember: paidByMember,
+      details: map['details']?.toString(),
     );
   }
 
@@ -92,6 +108,8 @@ class BudgetItem {
     final String? budgetType,
     final BudgetType? budgetTypeObj,
     final DateTime? date,
+    final Member? paidByMember,
+    final String? details,
   }) {
     return BudgetItem(
       id: id ?? this.id,
@@ -100,6 +118,8 @@ class BudgetItem {
       budgetType: budgetType ?? this.budgetType,
       budgetTypeObj: budgetTypeObj ?? this.budgetTypeObj,
       date: date ?? this.date,
+      paidByMember: paidByMember ?? this.paidByMember,
+      details: details ?? this.details,
     );
   }
 
@@ -128,27 +148,4 @@ class BudgetItem {
   String toString() =>
       'BudgetItem(id: $id, name: $name, cost: $cost, type: $budgetType)';
 
-  static List<BudgetItem> sampleItems() {
-    final now = DateTime.now();
-    return [
-      BudgetItem(
-        name: 'Ăn sáng',
-        cost: 12000,
-        budgetType: 'Ăn uống',
-        date: now.subtract(const Duration(days: 2)),
-      ),
-      BudgetItem(
-        name: 'Taxi sân bay',
-        cost: 50000,
-        budgetType: 'Di chuyển',
-        date: now.subtract(const Duration(days: 1)),
-      ),
-      BudgetItem(
-        name: 'Khách sạn',
-        cost: 350000,
-        budgetType: 'Lưu trú',
-        date: now,
-      ),
-    ];
-  }
 }

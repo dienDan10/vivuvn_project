@@ -4,3 +4,5 @@ class ChartData {
   final String category;
   final double value;
 }
+
+

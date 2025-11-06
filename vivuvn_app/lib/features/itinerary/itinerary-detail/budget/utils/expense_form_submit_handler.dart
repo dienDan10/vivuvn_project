@@ -21,6 +21,7 @@ class ExpenseFormSubmitHandler {
     required final GlobalKey<FormState> formKey,
     required final TextEditingController nameController,
     required final TextEditingController amountController,
+    required final TextEditingController detailsController,
     required final BudgetItem? initialItem,
     required final double exchangeRate,
   }) async {
@@ -33,6 +34,7 @@ class ExpenseFormSubmitHandler {
         initialItem: initialItem,
         nameController: nameController,
         amountController: amountController,
+        detailsController: detailsController,
         formState: formState,
         exchangeRate: exchangeRate,
       );
@@ -94,6 +96,7 @@ class ExpenseFormSubmitHandler {
         state: state,
         initialItem: initialItem,
         nameController: nameController,
+        detailsController: detailsController,
         amountInVND: amountInVND,
         formState: formState,
       );
@@ -102,6 +105,7 @@ class ExpenseFormSubmitHandler {
         controller: controller,
         state: state,
         nameController: nameController,
+        detailsController: detailsController,
         amountInVND: amountInVND,
         formState: formState,
       );
@@ -124,6 +128,7 @@ class ExpenseFormSubmitHandler {
     required final BudgetItem initialItem,
     required final TextEditingController nameController,
     required final TextEditingController amountController,
+    required final TextEditingController detailsController,
     required final dynamic formState,
     required final double exchangeRate,
   }) {
@@ -144,7 +149,9 @@ class ExpenseFormSubmitHandler {
             (initialItem.budgetTypeObj?.budgetTypeId ?? 0) &&
         formState.selectedDate?.year == initialItem.date.year &&
         formState.selectedDate?.month == initialItem.date.month &&
-        formState.selectedDate?.day == initialItem.date.day;
+        formState.selectedDate?.day == initialItem.date.day &&
+        (formState.payerMemberId == (initialItem.paidByMember?.memberId)) &&
+        ((detailsController.text.trim()) == (initialItem.details ?? ''));
 
     return !nothingChanged;
   }
@@ -155,6 +162,7 @@ class ExpenseFormSubmitHandler {
     required final dynamic state,
     required final BudgetItem initialItem,
     required final TextEditingController nameController,
+    required final TextEditingController detailsController,
     required final double amountInVND,
     required final dynamic formState,
   }) async {
@@ -165,7 +173,11 @@ class ExpenseFormSubmitHandler {
       cost: amountInVND,
       budgetTypeId: formState.selectedTypeId,
       date: formState.selectedDate!,
+      payerMemberId: formState.payerMemberId,
+      details: detailsController.text.trim(),
     );
+    // ignore: avoid_print
+    print('[Budget] Update payload: ${updateRequest.toMap()}');
     return await controller.updateBudgetItem(updateRequest);
   }
 
@@ -174,6 +186,7 @@ class ExpenseFormSubmitHandler {
     required final dynamic controller,
     required final dynamic state,
     required final TextEditingController nameController,
+    required final TextEditingController detailsController,
     required final double amountInVND,
     required final dynamic formState,
   }) async {
@@ -183,7 +196,11 @@ class ExpenseFormSubmitHandler {
       cost: amountInVND,
       budgetTypeId: formState.selectedTypeId,
       date: formState.selectedDate!,
+      payerMemberId: formState.payerMemberId,
+      details: detailsController.text.trim(),
     );
+    // ignore: avoid_print
+    print('[Budget] Add payload: ${addRequest.toMap()}');
     return await controller.addBudgetItem(addRequest);
   }
 
