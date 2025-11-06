@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../common/auth/auth_controller.dart';
-import '../../common/auth/auth_state.dart';
+import '../../common/auth/controller/auth_controller.dart';
+import '../../common/auth/state/auth_state.dart';
 
 class GoRouterNotifier extends ChangeNotifier {
   GoRouterNotifier(this.ref) {

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../common/dtos/refresh_token_response.dart';
+import '../../../../common/auth/dtos/refresh_token_response.dart';
 import '../../local/secure_storage/isecure_storage.dart';
 import '../../local/secure_storage/secure_storage_provider.dart';
 import 'itoken_service.dart';

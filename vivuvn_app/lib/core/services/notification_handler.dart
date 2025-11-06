@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../common/auth/auth_controller.dart';
-import '../../common/auth/auth_state.dart';
+import '../../common/auth/controller/auth_controller.dart';
+import '../../common/auth/state/auth_state.dart';
 import '../../features/notification/data/model/notification_payload.dart';
 import '../routes/routes.dart';
 import 'local_notification_service.dart';

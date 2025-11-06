@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../common/auth/auth_controller.dart';
+import '../../../common/auth/controller/auth_controller.dart';
 import '../../../common/auth/service/user_service.dart';
 import '../../../core/data/local/secure_storage/secure_storage_provider.dart';
 import '../../../core/data/remote/exception/dio_exception_handler.dart';

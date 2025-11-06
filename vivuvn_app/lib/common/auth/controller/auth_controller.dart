@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/data/remote/network/network_service.dart';
-import '../../core/data/remote/token/token_service.dart';
-import '../../features/itinerary/view-itinerary-list/models/user.dart';
-import '../../features/notification/service/notification_service.dart';
-import 'auth_state.dart';
-import 'service/user_service.dart';
+import '../../../core/data/remote/network/network_service.dart';
+import '../../../core/data/remote/token/token_service.dart';
+import '../../../features/itinerary/view-itinerary-list/models/user.dart';
+import '../../../features/notification/service/notification_service.dart';
+import '../service/user_service.dart';
+import '../state/auth_state.dart';
 
 class AuthController extends Notifier<AuthState> {
   @override

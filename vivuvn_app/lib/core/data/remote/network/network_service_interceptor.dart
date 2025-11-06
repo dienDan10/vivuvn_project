@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../common/auth/auth_controller.dart';
-import '../../../../common/dtos/refresh_token_response.dart';
+import '../../../../common/auth/controller/auth_controller.dart';
+import '../../../../common/auth/dtos/refresh_token_response.dart';
 import '../../../../common/http_status_code/http_status_code.dart';
 import '../token/itoken_service.dart';
 import '../token/token_service.dart';

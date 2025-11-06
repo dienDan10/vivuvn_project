@@ -1,4 +1,4 @@
-import '../../features/itinerary/view-itinerary-list/models/user.dart';
+import '../../../features/itinerary/view-itinerary-list/models/user.dart';
 
 class AuthState {
   final AuthStatus status;
