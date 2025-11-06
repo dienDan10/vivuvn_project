@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../controller/notification_controller.dart';
 import '../data/enum/notification_filter.dart';
 import 'filter_tab.dart';
 
-class NotificationFilterTabs extends StatelessWidget {
-  final NotificationFilter currentFilter;
-  final ValueChanged<NotificationFilter> onFilterChanged;
-
-  const NotificationFilterTabs({
-    super.key,
-    required this.currentFilter,
-    required this.onFilterChanged,
-  });
+class NotificationFilterTabs extends ConsumerWidget {
+  const NotificationFilterTabs({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final currentFilter = ref.watch(
+      notificationControllerProvider.select((final s) => s.currentFilter),
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -30,16 +29,24 @@ class NotificationFilterTabs extends StatelessWidget {
         children: [
           Expanded(
             child: FilterTab(
-              label: 'All',
+              label: 'Tất cả',
               isSelected: currentFilter == NotificationFilter.all,
-              onTap: () => onFilterChanged(NotificationFilter.all),
+              onTap: () => {
+                ref
+                    .read(notificationControllerProvider.notifier)
+                    .setFilter(NotificationFilter.all),
+              },
             ),
           ),
           Expanded(
             child: FilterTab(
-              label: 'Unread',
+              label: 'Chưa đọc',
               isSelected: currentFilter == NotificationFilter.unread,
-              onTap: () => onFilterChanged(NotificationFilter.unread),
+              onTap: () => {
+                ref
+                    .read(notificationControllerProvider.notifier)
+                    .setFilter(NotificationFilter.unread),
+              },
             ),
           ),
         ],

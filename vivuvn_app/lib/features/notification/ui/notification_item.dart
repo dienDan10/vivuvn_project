@@ -1,44 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/routes/routes.dart';
+import '../controller/notification_controller.dart';
 import '../data/model/notification.dart' as model;
 
-class NotificationItem extends StatelessWidget {
+class NotificationItem extends ConsumerStatefulWidget {
   final model.Notification notification;
-  final VoidCallback onTap;
-  final VoidCallback onMarkAsRead;
-  final VoidCallback onDelete;
 
-  const NotificationItem({
-    super.key,
-    required this.notification,
-    required this.onTap,
-    required this.onMarkAsRead,
-    required this.onDelete,
-  });
+  const NotificationItem({super.key, required this.notification});
+
+  @override
+  ConsumerState<NotificationItem> createState() => _NotificationItemState();
+}
+
+class _NotificationItemState extends ConsumerState<NotificationItem> {
+  void onMarkAsRead() {
+    ref
+        .read(notificationControllerProvider.notifier)
+        .markAsRead(widget.notification.id);
+  }
+
+  void onDelete() {
+    ref
+        .read(notificationControllerProvider.notifier)
+        .deleteNotification(widget.notification.id);
+  }
+
+  void onTap() {
+    // Mark as read if unread
+    if (!widget.notification.isRead) {
+      ref
+          .read(notificationControllerProvider.notifier)
+          .markAsRead(widget.notification.id);
+    }
+
+    // Navigate to itinerary detail if itineraryId exists
+    if (widget.notification.itineraryId != null) {
+      context.push(
+        createItineraryDetailRoute(widget.notification.itineraryId!),
+      );
+    }
+  }
 
   @override
   Widget build(final BuildContext context) {
-    return Dismissible(
-      key: Key('notification_${notification.id}'),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.delete, color: Colors.white),
+    return Slidable(
+      key: Key('notification_${widget.notification.id}'),
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          if (!widget.notification.isRead)
+            SlidableAction(
+              onPressed: (_) => onMarkAsRead(),
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              icon: Icons.check,
+              label: 'Đã đọc',
+              borderRadius: BorderRadius.circular(12),
+            ),
+          SlidableAction(
+            onPressed: (_) => onDelete(),
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Xóa',
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ],
       ),
-      onDismissed: (_) => onDelete(),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: notification.isRead ? Colors.white : Colors.blue[50],
+            color: widget.notification.isRead ? Colors.white : Colors.blue[50],
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[200]!, width: 1),
           ),
@@ -57,10 +97,10 @@ class NotificationItem extends StatelessWidget {
                   children: [
                     // Title
                     Text(
-                      notification.title,
+                      widget.notification.title,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: notification.isRead
+                        fontWeight: widget.notification.isRead
                             ? FontWeight.normal
                             : FontWeight.bold,
                       ),
@@ -70,7 +110,7 @@ class NotificationItem extends StatelessWidget {
 
                     // Message
                     Text(
-                      notification.message,
+                      widget.notification.message,
                       style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -88,19 +128,19 @@ class NotificationItem extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _formatTime(notification.createdAt),
+                          _formatTime(widget.notification.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
                           ),
                         ),
-                        if (notification.itineraryName != null) ...[
+                        if (widget.notification.itineraryName != null) ...[
                           const SizedBox(width: 8),
                           Icon(Icons.map, size: 14, color: Colors.grey[500]),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              notification.itineraryName!,
+                              widget.notification.itineraryName!,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[600],
@@ -114,15 +154,6 @@ class NotificationItem extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // Mark as read button
-              if (!notification.isRead)
-                IconButton(
-                  icon: const Icon(Icons.check_circle_outline),
-                  color: Theme.of(context).primaryColor,
-                  onPressed: onMarkAsRead,
-                  tooltip: 'Mark as read',
-                ),
             ],
           ),
         ),
@@ -134,7 +165,7 @@ class NotificationItem extends StatelessWidget {
     IconData icon;
     Color color;
 
-    switch (notification.type) {
+    switch (widget.notification.type) {
       case 'OwnerAnnouncement':
         icon = Icons.campaign;
         color = Colors.blue;
@@ -167,13 +198,13 @@ class NotificationItem extends StatelessWidget {
     final difference = now.difference(time);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return 'Vừa xong';
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
+      return '${difference.inMinutes} phút trước';
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
+      return '${difference.inHours} giờ trước';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return '${difference.inDays} ngày trước';
     } else {
       return DateFormat('dd/MM/yyyy').format(time);
     }

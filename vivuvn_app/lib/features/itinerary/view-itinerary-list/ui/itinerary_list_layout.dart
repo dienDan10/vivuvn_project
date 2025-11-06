@@ -10,7 +10,8 @@ class ItineraryListLayout extends ConsumerStatefulWidget {
   const ItineraryListLayout({super.key});
 
   @override
-  ConsumerState<ItineraryListLayout> createState() => _ItineraryListLayoutState();
+  ConsumerState<ItineraryListLayout> createState() =>
+      _ItineraryListLayoutState();
 }
 
 class _ItineraryListLayoutState extends ConsumerState<ItineraryListLayout> {
@@ -45,8 +46,8 @@ class _ItineraryListLayoutState extends ConsumerState<ItineraryListLayout> {
               TabBar(
                 isScrollable: false,
                 tabs: [
-                  Tab(text: 'Chuyến đi của tôi'),
-                  Tab(text: 'Chuyến đi tôi tham gia'),
+                  Tab(text: 'Của tôi'),
+                  Tab(text: 'Đã tham gia'),
                 ],
               ),
               SizedBox(height: 8),
