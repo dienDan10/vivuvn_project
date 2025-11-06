@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
+import '../dto/send_notification_request.dart';
 import '../model/member.dart';
 
 class MemberApi {
@@ -19,6 +20,16 @@ class MemberApi {
 
   Future<void> kickMember(final int itineraryId, final int memberId) async {
     await _dio.delete('/api/v1/itineraries/$itineraryId/members/$memberId');
+  }
+
+  Future<void> sendNotification(
+    final int itineraryId,
+    final SendNotificationRequest request,
+  ) async {
+    await _dio.post(
+      '/api/v1/itineraries/$itineraryId/notifications',
+      data: request.toMap(),
+    );
   }
 }
 

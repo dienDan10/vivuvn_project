@@ -54,7 +54,7 @@ class LocalNotificationService {
           channelDescription: 'Notifications for trip updates',
           importance: Importance.high,
           priority: Priority.high,
-          icon: '@drawable/ic_notification',
+          icon: '@drawable/icon_notification',
           playSound: true,
           enableVibration: true,
           styleInformation: BigTextStyleInformation(''),

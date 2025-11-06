@@ -64,7 +64,7 @@ class Notification {
       title: map['title'] as String,
       message: map['message'] as String,
       isRead: map['isRead'] as bool,
-      createdAt: DateTime.parse(map['createdAt'] as String),
+      createdAt: DateTime.parse('${map['createdAt'] as String}Z'),
       itineraryId: map['itineraryId'] != null
           ? map['itineraryId'] as int
           : null,

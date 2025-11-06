@@ -7,6 +7,7 @@ import '../../detail/controller/itinerary_detail_controller.dart';
 import '../controller/member_controller.dart';
 import 'load_member_error.dart';
 import 'member_list.dart';
+import 'send_notification_sheet.dart';
 
 class MemberTab extends ConsumerStatefulWidget {
   const MemberTab({super.key});
@@ -23,6 +24,21 @@ class _MemberTabState extends ConsumerState<MemberTab> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(memberControllerProvider.notifier).loadMembers();
     });
+  }
+
+  void openSendNotificationDialog() {
+    final isOwner =
+        ref.read(itineraryDetailControllerProvider).itinerary?.isOwner ?? false;
+
+    if (!isOwner) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (final context) => const SendNotificationSheet(),
+    );
   }
 
   @override
@@ -46,7 +62,6 @@ class _MemberTabState extends ConsumerState<MemberTab> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // number of members
               Row(
@@ -64,6 +79,17 @@ class _MemberTabState extends ConsumerState<MemberTab> {
                 ],
               ),
 
+              const Spacer(),
+              // send notification button
+              InkWell(
+                onTap: openSendNotificationDialog,
+                child: Icon(
+                  Icons.notification_add,
+                  color: colorScheme.onPrimary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 20),
               // chat icons
               InkWell(
                 onTap: () {

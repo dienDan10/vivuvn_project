@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/notification/ui/notification_badge.dart';
+
 class BottomNavigationScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -31,7 +33,7 @@ class BottomNavigationScreen extends StatelessWidget {
             label: 'Lịch trình',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+            icon: NotificationBadge(child: Icon(Icons.notifications)),
             label: 'Thông báo',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
