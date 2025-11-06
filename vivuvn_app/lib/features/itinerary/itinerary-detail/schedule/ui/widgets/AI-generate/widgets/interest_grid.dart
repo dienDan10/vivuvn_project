@@ -30,6 +30,8 @@ class InterestGrid extends ConsumerWidget {
     );
 
     return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: crossAxisSpacing,

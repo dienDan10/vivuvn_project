@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../common/auth/auth_controller.dart';
-import '../../common/auth/auth_state.dart';
+import '../../common/auth/controller/auth_controller.dart';
+import '../../common/auth/state/auth_state.dart';
 import '../../features/itinerary/itinerary-detail/schedule/model/location.dart';
 import '../../features/itinerary/location-detail/ui/location_detail_screen.dart';
 import '../../screens/bottom_navigation_screen.dart';
@@ -14,10 +14,10 @@ import '../../screens/itinerary_screen.dart';
 import '../../screens/login_screen.dart';
 import '../../screens/nearby_hotel_screen.dart';
 import '../../screens/nearby_restaurant_screen.dart';
+import '../../screens/notification_screen.dart';
 import '../../screens/profile_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
-import '../../screens/search_screen.dart';
 import '../../screens/splash_screen.dart';
 import 'go_router_notifier.dart';
 import 'routes.dart';
@@ -148,8 +148,9 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                path: searchRoute,
-                builder: (final context, final state) => const SearchScreen(),
+                path: notificationRoute,
+                builder: (final context, final state) =>
+                    const NotificationScreen(),
               ),
             ],
           ),

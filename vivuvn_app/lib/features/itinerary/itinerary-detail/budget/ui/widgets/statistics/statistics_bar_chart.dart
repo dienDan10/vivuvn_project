@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../utils/budget_type_icons.dart';
-import 'chart_data.dart';
+import 'controller/statistics_controller.dart';
 
 /// Statistics bar chart với avatar icons
-class StatisticsBarChart extends StatelessWidget {
-  const StatisticsBarChart({
-    required this.chartData,
-    required this.selectedKey,
-    required this.onBarTap,
-    super.key,
-  });
-
-  final List<ChartData> chartData;
-  final String? selectedKey;
-  final ValueChanged<String> onBarTap;
+class StatisticsBarChart extends ConsumerWidget {
+  const StatisticsBarChart({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final state = ref.watch(statisticsProvider);
+    final controller = ref.read(statisticsProvider.notifier);
+    final chartData = state.chartData;
+    final selectedKey = state.selectedKey;
     if (chartData.isEmpty) return const SizedBox.shrink();
 
     // Tìm giá trị max để scale bars
@@ -43,7 +39,7 @@ class StatisticsBarChart extends StatelessWidget {
           icon: icon,
           isSelected: isSelected,
           barWidth: barWidth,
-          onTap: () => onBarTap(data.category),
+          onTap: () => controller.selectKey(data.category),
         );
       },
     );

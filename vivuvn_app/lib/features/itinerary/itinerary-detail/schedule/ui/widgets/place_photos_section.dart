@@ -8,14 +8,17 @@ class PlacePhotosSection extends StatelessWidget {
     super.key,
     required this.photos,
     required this.locationId,
+    this.heroPrefix = '',
   });
 
   final List<String> photos;
   final int locationId;
+  final String heroPrefix;
 
   void _openImageGallery(final BuildContext context, final int initialIndex) {
     showDialog(
       context: context,
+      useRootNavigator: true,
       barrierDismissible: true, // ấn ra ngoài để thoát
       builder: (_) {
         return GestureDetector(
@@ -33,7 +36,7 @@ class PlacePhotosSection extends StatelessWidget {
                   itemBuilder: (final context, final index) {
                     final photoUrl = photos[index];
                     return Hero(
-                      tag: 'photo_${locationId}_$index',
+                      tag: '${heroPrefix}photo_${locationId}_$index',
                       child: InteractiveViewer(
                         clipBehavior: Clip.none,
                         panEnabled: true,
@@ -88,7 +91,7 @@ class PlacePhotosSection extends StatelessWidget {
         itemBuilder: (final context, final index) => GestureDetector(
           onTap: () => _openImageGallery(context, index),
           child: Hero(
-            tag: 'photo_${locationId}_$index',
+            tag: '${heroPrefix}photo_${locationId}_$index',
             child: PlaceCardImage(imageUrl: photos[index], size: 80),
           ),
         ),

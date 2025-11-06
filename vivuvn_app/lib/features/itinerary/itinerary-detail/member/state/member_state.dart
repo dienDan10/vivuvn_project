@@ -7,6 +7,8 @@ class MemberState {
   final String? loadingMembersError;
   final bool isKickingMember;
   final String? kickingMemberError;
+  final bool isSendingNotification;
+  final String? sendingNotificationError;
 
   MemberState({
     this.members = const [],
@@ -14,6 +16,8 @@ class MemberState {
     this.loadingMembersError,
     this.isKickingMember = false,
     this.kickingMemberError,
+    this.isSendingNotification = false,
+    this.sendingNotificationError,
   });
 
   MemberState copyWith({
@@ -22,6 +26,8 @@ class MemberState {
     final String? loadingMembersError,
     final bool? isKickingMember,
     final String? kickingMemberError,
+    final bool? isSendingNotification,
+    final String? sendingNotificationError,
   }) {
     return MemberState(
       members: members ?? this.members,
@@ -29,6 +35,9 @@ class MemberState {
       loadingMembersError: loadingMembersError,
       isKickingMember: isKickingMember ?? this.isKickingMember,
       kickingMemberError: kickingMemberError,
+      isSendingNotification:
+          isSendingNotification ?? this.isSendingNotification,
+      sendingNotificationError: sendingNotificationError,
     );
   }
 }

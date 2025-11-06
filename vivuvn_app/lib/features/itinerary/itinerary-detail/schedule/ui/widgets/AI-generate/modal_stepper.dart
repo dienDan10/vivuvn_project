@@ -6,6 +6,7 @@ import 'widgets/budget_field.dart';
 import 'widgets/group_size_field.dart';
 import 'widgets/interest_selection_step.dart';
 import 'widgets/note_field.dart';
+import 'widgets/transportation_mode_field.dart';
 
 /// The Stepper area of the New AI modal.
 /// This widget reads the controller's state directly (no props) and
@@ -38,7 +39,12 @@ class ModalStepperWidget extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [SizedBox(height: 8), BudgetField()],
+              children: [
+                SizedBox(height: 8),
+                BudgetField(),
+                SizedBox(height: 16),
+                TransportationModeField(),
+              ],
             ),
           ),
         ),

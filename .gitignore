@@ -1,3 +1,5 @@
 vivuvn_api/vivuvn_api/Secrets/
 vivuvn_web_client/.claude/
 vivuvn_api/.env
+vivuvn_app/android/app/google-services.json
+vivuvn_app/lib/firebase_options.dart

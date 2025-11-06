@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/data/remote/network/network_service.dart';
-import '../../core/data/remote/token/token_service.dart';
-import 'auth_state.dart';
+import '../../../core/data/remote/network/network_service.dart';
+import '../../../core/data/remote/token/token_service.dart';
+import '../../../features/itinerary/view-itinerary-list/models/user.dart';
+import '../../../features/notification/service/notification_service.dart';
+import '../service/user_service.dart';
+import '../state/auth_state.dart';
 
 class AuthController extends Notifier<AuthState> {
   @override
@@ -37,21 +40,25 @@ class AuthController extends Notifier<AuthState> {
         refreshToken: refreshTokenResponse.refreshToken,
       );
 
+      // fetch user profile
+      final userService = ref.read(userServiceProvider);
+      final user = await userService.fetchUserProfile();
+
       // If successful, update the state accordingly
-      state = state.copyWith(
-        status: AuthStatus.authenticated,
-        isLoading: false,
-      );
+      await setAuthenticated(user);
     } on DioException catch (_) {
-      state = state.copyWith(
-        isLoading: false,
-        status: AuthStatus.unauthenticated,
-      );
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+    } catch (_) {
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
   }
 
-  void setAuthenticated() {
-    state = state.copyWith(status: AuthStatus.authenticated);
+  Future<void> setAuthenticated(final User user) async {
+    state = state.copyWith(status: AuthStatus.authenticated, user: user);
+    final service = ref.read(notificationServiceProvider);
+    await service.registerDevice();
   }
 
   Future<void> logout() async {
@@ -59,6 +66,8 @@ class AuthController extends Notifier<AuthState> {
     final tokenService = ref.read(tokenServiceProvider(dioInstance));
     await tokenService.clearTokens();
     state = state.copyWith(status: AuthStatus.unauthenticated);
+    final service = ref.read(notificationServiceProvider);
+    await service.deactivateDevice();
   }
 }
 

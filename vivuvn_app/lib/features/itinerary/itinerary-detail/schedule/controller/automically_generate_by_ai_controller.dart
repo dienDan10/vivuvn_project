@@ -120,6 +120,10 @@ class AutomaticallyGenerateByAiController
     state = state.copyWith(specialRequirements: note);
   }
 
+  void setTransportationMode(final String? mode) {
+    state = state.copyWith(transportationMode: mode);
+  }
+
   void setCurrency(final String currency) {
     state = state.copyWith(currency: currency);
     _recomputeConvertedVnd(currency, state.budget);
@@ -166,10 +170,11 @@ class AutomaticallyGenerateByAiController
 
       final request = GenerateItineraryByAiRequest(
         itineraryId: itineraryId,
-        preferences: state.selectedInterests.map((final e) => e.name).toList(),
+        preferences: state.selectedInterests.map((final e) => e.vNameseName).toList(),
         groupSize: state.groupSize,
         budget: budgetToSend,
         specialRequirements: state.specialRequirements,
+        transportationMode: state.transportationMode,
       );
       await api.generateItineraryByAi(request: request);
       state = state.copyWith(isGenerated: true);
@@ -199,6 +204,14 @@ class AutomaticallyGenerateByAiController
     );
   }
 
+  /// Return a validation error message for transportation mode, or null when valid.
+  String? validateTransportationMode() {
+    if (state.transportationMode == null || state.transportationMode!.isEmpty) {
+      return 'Vui lòng chọn phương tiện di chuyển';
+    }
+    return null;
+  }
+
   /// Validate current step and, if it's the final step, submit the request.
   ///
   /// Returns a [ValidateAndSubmitResult] describing whether the UI should
@@ -208,10 +221,12 @@ class AutomaticallyGenerateByAiController
     const int lastStep = 2;
     final int step = state.step;
 
-    // Step 1: budget validation
+    // Step 1: budget and transportation mode validation
     if (step == 1) {
-      final err = validateBudget();
-      if (err != null) return ValidateAndSubmitResult.validationError(err);
+      final budgetErr = validateBudget();
+      if (budgetErr != null) return ValidateAndSubmitResult.validationError(budgetErr);
+      final transportErr = validateTransportationMode();
+      if (transportErr != null) return ValidateAndSubmitResult.validationError(transportErr);
       return ValidateAndSubmitResult.advance();
     }
 

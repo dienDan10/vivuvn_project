@@ -76,7 +76,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(int userId, bool unreadOnly = false)
         {
             var notifications = await _unitOfWork.Notifications.GetAllAsync(
-                filter: n => n.UserId == userId && (!unreadOnly || !n.IsRead),
+                filter: n => n.UserId == userId && (!unreadOnly || !n.IsRead) && !n.DeleteFlag,
                 orderBy: q => q.OrderByDescending(n => n.CreatedAt),
                 includeProperties: "Itinerary"
             );

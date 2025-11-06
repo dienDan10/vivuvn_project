@@ -43,6 +43,9 @@ class _FieldAmountState extends State<FieldAmount> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextFormField(
+          onTapOutside: (final event) {
+            FocusScope.of(context).unfocus();
+          },
           controller: widget.controller,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(

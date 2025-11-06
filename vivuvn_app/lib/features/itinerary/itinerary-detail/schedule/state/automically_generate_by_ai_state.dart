@@ -17,6 +17,8 @@ class AutomaticallyGenerateByAiState {
   // UI currency selection and derived converted value (USD -> VND)
   final String currency;
   final String? convertedVnd;
+  // Transportation mode selection (optional)
+  final String? transportationMode;
 
   AutomaticallyGenerateByAiState({
     this.isLoading = false,
@@ -32,6 +34,7 @@ class AutomaticallyGenerateByAiState {
     this.isGenerated = false,
     this.currency = 'VND',
     this.convertedVnd,
+    this.transportationMode,
   });
 
   AutomaticallyGenerateByAiState copyWith({
@@ -49,6 +52,7 @@ class AutomaticallyGenerateByAiState {
     final String? convertedVnd,
     final bool clearConvertedVnd =
         false, // Add flag to explicitly clear convertedVnd
+    final String? transportationMode,
   }) {
     return AutomaticallyGenerateByAiState(
       isLoading: isLoading ?? this.isLoading,
@@ -65,6 +69,7 @@ class AutomaticallyGenerateByAiState {
       convertedVnd: clearConvertedVnd
           ? null
           : (convertedVnd ?? this.convertedVnd),
+      transportationMode: transportationMode ?? this.transportationMode,
     );
   }
 }

@@ -27,12 +27,8 @@ namespace vivuvn_api.Services.Implementations
                     if (ex.MessagingErrorCode == MessagingErrorCode.Unregistered)
                     {
                         await _deviceService.DeactivateDeviceAsync(device.FcmToken);
-                        Console.WriteLine($"❌ Deactivated invalid token for UserId: {userId}");
                     }
-                    else
-                    {
-                        Console.WriteLine($"❌ FCM error: {ex.Message}");
-                    }
+
                 }
             }
         }
@@ -74,8 +70,6 @@ namespace vivuvn_api.Services.Implementations
                 {
                     var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(multicastMessage);
 
-                    Console.WriteLine($"✅ Successfully sent {response.SuccessCount}/{batch.Count()} notifications");
-
                     // Handle failed tokens
                     if (response.FailureCount > 0)
                     {
@@ -95,7 +89,7 @@ namespace vivuvn_api.Services.Implementations
                 }
                 catch (FirebaseMessagingException ex)
                 {
-                    Console.WriteLine($"❌ Multicast error: {ex.Message}");
+
                 }
             }
         }
@@ -127,11 +121,9 @@ namespace vivuvn_api.Services.Implementations
             try
             {
                 string response = await FirebaseMessaging.DefaultInstance.SendAsync(messagePayload);
-                Console.WriteLine($"✅ Successfully sent notification: {response}");
             }
             catch (FirebaseMessagingException ex)
             {
-                Console.WriteLine($"❌ Failed to send notification: {ex.Message}");
                 throw; // Re-throw to handle in calling method
             }
         }

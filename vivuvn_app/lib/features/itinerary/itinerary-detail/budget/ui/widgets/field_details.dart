@@ -1,0 +1,30 @@
+import 'package:flutter/material.dart';
+
+class FieldDetails extends StatelessWidget {
+  final TextEditingController controller;
+
+  const FieldDetails({super.key, required this.controller});
+
+  @override
+  Widget build(final BuildContext context) {
+    return TextFormField(
+      onTapOutside: (final event) {
+        FocusScope.of(context).unfocus();
+      },
+      controller: controller,
+      maxLines: 3,
+      decoration: const InputDecoration(
+        labelText: 'Ghi chú',
+        border: InputBorder.none,
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey, width: 0.5),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue, width: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+

@@ -61,32 +61,32 @@ namespace vivuvn_api.Repositories.Implementations
         {
             //get the budget from db
             var budget = await _context.Budgets
-     .Include(b => b.Items)
-    .FirstOrDefaultAsync(b => b.BudgetId == item.BudgetId);
+                 .Include(b => b.Items)
+                .FirstOrDefaultAsync(b => b.BudgetId == item.BudgetId);
 
-       if (budget == null)
-         {
-   throw new ArgumentException($"Budget with ID {item.BudgetId} does not exist.");
+            if (budget == null)
+            {
+                throw new ArgumentException($"Budget with ID {item.BudgetId} does not exist.");
             }
 
- // find the existing item in the budget
-  var existingItem = budget.Items.FirstOrDefault(i => i.Id == item.Id);
+            // find the existing item in the budget
+            var existingItem = budget.Items.FirstOrDefault(i => i.Id == item.Id);
             if (existingItem == null)
                 throw new ArgumentException($"Budget item with ID {item.Id} does not exist.");
 
             // update the total budget
             budget.TotalBudget -= existingItem.Cost;
-         budget.TotalBudget += item.Cost;
+            budget.TotalBudget += item.Cost;
 
             // update the item in the budget
-      existingItem.Name = item.Name;
+            existingItem.Name = item.Name;
             existingItem.Date = item.Date;
             existingItem.Cost = item.Cost;
             existingItem.BudgetTypeId = item.BudgetTypeId;
-          existingItem.PaidByMemberId = item.PaidByMemberId;
-      existingItem.Details = item.Details;
+            existingItem.PaidByMemberId = item.PaidByMemberId;
+            existingItem.Details = item.Details;
 
-    _context.BudgetItems.Update(existingItem);
+            _context.BudgetItems.Update(existingItem);
             _context.Budgets.Update(budget);
 
             await _context.SaveChangesAsync();

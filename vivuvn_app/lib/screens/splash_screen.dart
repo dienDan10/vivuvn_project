@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../common/auth/auth_controller.dart';
-import '../common/auth/auth_state.dart';
+import '../common/auth/controller/auth_controller.dart';
+import '../common/auth/state/auth_state.dart';
 import '../core/routes/routes.dart';
+import '../core/services/notification_handler.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -14,18 +15,23 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
-  Future<void> _checkAuthStatus() async {
-    ref.read(authControllerProvider.notifier).checkAuthStatus();
-  }
-
   @override
   void initState() {
     // check auth status when the screen is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthStatus();
+      _initialize();
     });
 
     super.initState();
+  }
+
+  Future<void> _initialize() async {
+    // Initialize notification handler because it may need to handle notification taps
+    final handler = ref.read(notificationHandlerProvider);
+    await handler.initialize();
+
+    // Check auth status
+    await ref.read(authControllerProvider.notifier).checkAuthStatus();
   }
 
   void _listener() {

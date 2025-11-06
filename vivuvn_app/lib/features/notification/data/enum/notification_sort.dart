@@ -1,0 +1,1 @@
+enum NotificationSort { newest, oldest }

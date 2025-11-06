@@ -23,4 +23,8 @@ class ItineraryDetailService {
   }) async {
     await _api.updateGroupSize(itineraryId: itineraryId, groupSize: groupSize);
   }
+
+  Future<String> getInviteCode(final int itineraryId) async {
+    return await _api.getInviteCode(itineraryId);
+  }
 }
