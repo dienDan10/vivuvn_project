@@ -30,6 +30,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IItineraryMessageRepository, ItineraryMessageRepository>();
             services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
             return services;
         }
 

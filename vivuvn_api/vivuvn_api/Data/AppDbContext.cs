@@ -55,6 +55,7 @@ namespace vivuvn_api.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.RefreshToken).IsUnique();
 
+
             modelBuilder.Entity<Itinerary>()
                 .HasIndex(i => i.UserId);
 

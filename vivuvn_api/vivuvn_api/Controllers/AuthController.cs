@@ -71,6 +71,26 @@ namespace vivuvn_api.Controllers
             });
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+        {
+            await _authService.RequestPasswordResetAsync(request);
+            return Ok(new
+            {
+                Message = "Nếu email tồn tại trong hệ thống, một email đặt lại mật khẩu đã được gửi."
+            });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            await _authService.ResetPasswordAsync(request);
+            return Ok(new
+            {
+                Message = "Đặt lại mật khẩu thành công!"
+            });
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

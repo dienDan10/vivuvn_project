@@ -208,6 +208,71 @@ namespace vivuvn_api.Services.Implementations
             await _unitOfWork.SaveChangesAsync();
         }
 
+        public async Task RequestPasswordResetAsync(ForgotPasswordRequestDto request)
+        {
+            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email);
+
+            if (user is null) return;
+
+            // check if user register via google
+            if (user.GoogleIdToken is not null)
+            {
+                await _emailService.SendPasswordResetNotAvailableEmailAsync(user.Email);
+                return;
+            }
+
+            // check if there's an existing password reset token
+            var existingReset = await _unitOfWork.PasswordResets
+                .GetOneAsync(pr => pr.UserId == user.Id);
+
+            // Create password reset token
+            var resetToken = _tokenService.CreatePasswordResetToken();
+
+            if (existingReset is not null)
+            {
+                existingReset.PasswordResetToken = resetToken;
+                existingReset.ExpireDate = DateTime.UtcNow.AddMinutes(Constants.PasswordResetTokenExpirationMinutes);
+                _unitOfWork.PasswordResets.Update(existingReset);
+            }
+            else
+            {
+                var passwordReset = new PasswordReset
+                {
+                    UserId = user.Id,
+                    PasswordResetToken = resetToken,
+                    ExpireDate = DateTime.UtcNow.AddMinutes(Constants.PasswordResetTokenExpirationMinutes)
+                };
+
+                await _unitOfWork.PasswordResets.AddAsync(passwordReset);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            // Send Email to User
+            await _emailService.SendPasswordResetEmailAsync(user.Email, user.Username, resetToken);
+        }
+
+        public async Task ResetPasswordAsync(ResetPasswordRequestDto request)
+        {
+            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == request.Email)
+                ?? throw new BadHttpRequestException("Đặt lại mật khẩu không thành công");
+
+            var passwordReset = await _unitOfWork.PasswordResets
+                .GetOneAsync(pr => pr.PasswordResetToken == request.Token
+                && pr.UserId == user.Id
+                && pr.ExpireDate > DateTime.UtcNow);
+
+            if (passwordReset is null)
+            {
+                throw new BadHttpRequestException("Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn");
+            }
+
+            user.PasswordHash = HashPassword(user, request.NewPassword);
+            _unitOfWork.Users.Update(user);
+            // Remove password reset token
+            _unitOfWork.PasswordResets.Remove(passwordReset);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
         private string HashPassword(User user, string password)
         {
             return new PasswordHasher<User>().HashPassword(user, password);

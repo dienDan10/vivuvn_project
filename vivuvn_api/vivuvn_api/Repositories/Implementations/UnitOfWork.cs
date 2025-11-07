@@ -27,6 +27,7 @@ namespace vivuvn_api.Repositories.Implementations
         public IItineraryMessageRepository ItineraryMessages { get; private set; }
         public INotificationRepository Notifications { get; private set; }
         public IUserDeviceRepository UserDevices { get; private set; }
+        public IPasswordResetRepository PasswordResets { get; set; }
 
         public UnitOfWork(AppDbContext context,
             IUserRepository userRepository,
@@ -46,7 +47,8 @@ namespace vivuvn_api.Repositories.Implementations
             IItineraryMemberRepository itineraryMemberRepository,
             IItineraryMessageRepository itineraryMessageRepository,
             INotificationRepository notifications,
-            IUserDeviceRepository userDevices)
+            IUserDeviceRepository userDevices,
+            IPasswordResetRepository passwordResets)
         {
             _context = context;
             Users = userRepository;
@@ -67,6 +69,7 @@ namespace vivuvn_api.Repositories.Implementations
             ItineraryMessages = itineraryMessageRepository;
             Notifications = notifications;
             UserDevices = userDevices;
+            PasswordResets = passwordResets;
         }
 
         public async Task SaveChangesAsync()

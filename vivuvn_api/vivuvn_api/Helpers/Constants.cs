@@ -13,6 +13,7 @@
 
         // Token Configuration
         public const int EmailVerificationTokenExpirationMinutes = 5;
+        public const int PasswordResetTokenExpirationMinutes = 10;
         public static readonly string[] ValidImageExtensions = [".jpg", ".jpeg", ".png", ".gif"];
 
         // Image Configuration

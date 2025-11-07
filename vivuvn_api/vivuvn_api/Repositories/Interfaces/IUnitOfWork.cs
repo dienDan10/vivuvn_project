@@ -20,6 +20,7 @@
         IItineraryMessageRepository ItineraryMessages { get; }
         IUserDeviceRepository UserDevices { get; }
         INotificationRepository Notifications { get; }
+        IPasswordResetRepository PasswordResets { get; }
 
         Task SaveChangesAsync();
 
