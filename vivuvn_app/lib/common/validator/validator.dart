@@ -35,7 +35,9 @@ class Validator {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName không được để trống';
     }
-    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    // Using comma as thousands separator; keep dot as decimal
+    final sanitized = value.replaceAll(',', '').trim();
+    final amount = double.tryParse(sanitized);
     if (amount == null || amount <= 0) {
       return '$fieldName không hợp lệ';
     }
@@ -48,7 +50,8 @@ class Validator {
     final String currency = 'VND',
   }) {
     if (value == null || value.trim().isEmpty) return 'Xin hãy nhập ngân sách';
-    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    final sanitized = value.replaceAll(',', '').trim();
+    final amount = double.tryParse(sanitized);
     if (amount == null || amount <= 0) return 'Ngân sách phải là một số dương';
     // Optional: enforce minimum reasonable amount (e.g., 1)
     if (currency == 'USD' && amount < 1) return 'Ngân sách phải ít nhất 1 USD';
@@ -123,7 +126,8 @@ class Validator {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName không được để trống';
     }
-    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    final sanitized = value.replaceAll(',', '').trim();
+    final amount = double.tryParse(sanitized);
     if (amount == null || amount < 0) {
       return '$fieldName không hợp lệ';
     }

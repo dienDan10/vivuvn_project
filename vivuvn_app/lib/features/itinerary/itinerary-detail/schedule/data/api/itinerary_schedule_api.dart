@@ -6,6 +6,7 @@ import '../../model/itinerary_item.dart';
 import '../dto/add_item_to_day_request.dart';
 import '../dto/get_items_by_day_response.dart';
 import '../dto/get_itinerary_days_response.dart';
+import '../dto/get_locations_response.dart';
 import '../dto/update_item_request.dart';
 import '../dto/update_transportation_request.dart';
 
@@ -100,5 +101,26 @@ class ItineraryScheduleApi {
       data: request.toJson(),
     );
     return ItineraryItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<GetLocationsResponse> getSuggestedLocations({
+    required final int provinceId,
+    final int pageNumber = 1,
+    final int pageSize = 5,
+    final String sortBy = 'Rating',
+    final bool isDescending = true,
+  }) async {
+    final response = await _dio.get(
+      '/api/v1/locations',
+      queryParameters: {
+        'provinceId': provinceId,
+        'sortBy': sortBy,
+        'isDescending': isDescending,
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
+      },
+    );
+
+    return GetLocationsResponse.fromJson(response.data as Map<String, dynamic>);
   }
 }

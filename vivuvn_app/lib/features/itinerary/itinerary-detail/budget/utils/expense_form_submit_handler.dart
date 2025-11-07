@@ -71,7 +71,8 @@ class ExpenseFormSubmitHandler {
       return false;
     }
 
-    final amount = double.tryParse(amountController.text.trim());
+    final sanitized = amountController.text.replaceAll(',', '').trim();
+    final amount = double.tryParse(sanitized);
     if (amount == null) {
       if (context.mounted) {
         GlobalToast.showErrorToast(
@@ -133,7 +134,9 @@ class ExpenseFormSubmitHandler {
     required final double exchangeRate,
   }) {
     final currentName = nameController.text.trim();
-    final currentAmount = double.tryParse(amountController.text.trim());
+    final currentAmount = double.tryParse(
+      amountController.text.replaceAll(',', '').trim(),
+    );
 
     // Convert current amount to VND if needed
     final currentAmountInVND = currentAmount != null

@@ -7,6 +7,7 @@ import '../../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../update-itinerary/controller/update_itinerary_controller.dart';
 import '../../../view-itinerary-list/controller/itinerary_controller.dart';
+import '../../schedule/model/transportation_mode.dart';
 import '../service/itinerary_detail_service.dart';
 import '../service/qr_code_save_service.dart';
 import '../state/itinerary_detail_state.dart';
@@ -56,6 +57,99 @@ class ItineraryDetailController
     state = state.copyWith(
       itinerary: current.copyWith(groupSize: newGroupSize),
     );
+  }
+
+  // Transportation draft management (UI state only)
+  void setTransportationVehicleDraft(final String? vehicle) {
+    if (vehicle == null) {
+      state = state.copyWith(transportationVehicleDraft: null);
+      return;
+    }
+    final normalized = TransportationMode.normalizeLabel(vehicle);
+    state = state.copyWith(transportationVehicleDraft: normalized);
+  }
+
+  void startTransportationSelection() {
+    final current = state.itinerary?.transportationVehicle;
+    if (current == null || current.isEmpty) {
+      state = state.copyWith(transportationVehicleDraft: null);
+      return;
+    }
+    final normalized = TransportationMode.normalizeLabel(current);
+    state = state.copyWith(transportationVehicleDraft: normalized);
+  }
+
+  void clearTransportationVehicleDraft() {
+    state = state.copyWith(transportationVehicleDraft: null);
+  }
+
+  Future<void> saveTransportationVehicle(
+    final BuildContext context,
+    final String vehicle,
+  ) async {
+    final itineraryId = state.itineraryId;
+    final itinerary = state.itinerary;
+    if (itineraryId == null || itinerary == null) return;
+
+    final normalized = TransportationMode.normalizeLabel(vehicle);
+    final apiTransportation = TransportationMode.toApiValue(normalized);
+    final previousVehicle = itinerary.transportationVehicle;
+
+    state = state.copyWith(
+      isTransportationSaving: true,
+      transportationVehicleDraft: normalized,
+      error: null,
+    );
+
+    try {
+      await ref
+          .read(itineraryDetailServiceProvider)
+          .updateTransportation(
+            itineraryId: itineraryId,
+            transportation: apiTransportation,
+          );
+
+      final updatedItinerary = itinerary.copyWith(
+        transportationVehicle: normalized,
+      );
+
+      state = state.copyWith(
+        itinerary: updatedItinerary,
+        transportationVehicleDraft: null,
+        isTransportationSaving: false,
+      );
+
+      if (context.mounted) {
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Cập nhật phương tiện thành công',
+        );
+      }
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(
+        isTransportationSaving: false,
+        transportationVehicleDraft: null,
+        itinerary: itinerary.copyWith(transportationVehicle: previousVehicle),
+        error: errorMsg,
+      );
+      if (context.mounted) {
+        GlobalToast.showErrorToast(context, message: errorMsg);
+      }
+    } catch (_) {
+      state = state.copyWith(
+        isTransportationSaving: false,
+        transportationVehicleDraft: null,
+        itinerary: itinerary.copyWith(transportationVehicle: previousVehicle),
+        error: 'unknown error',
+      );
+      if (context.mounted) {
+        GlobalToast.showErrorToast(
+          context,
+          message: 'Đã xảy ra lỗi, vui lòng thử lại',
+        );
+      }
+    }
   }
 
   /// Update itinerary name locally to reflect immediately after saving

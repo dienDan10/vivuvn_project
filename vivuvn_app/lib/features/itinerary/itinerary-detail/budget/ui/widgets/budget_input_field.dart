@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../common/helper/number_format_helper.dart';
+
 class BudgetInputField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -18,6 +20,7 @@ class BudgetInputField extends StatelessWidget {
       controller: controller,
       focusNode: focusNode,
       keyboardType: TextInputType.number,
+      inputFormatters: [ThousandsSeparatorInputFormatter()],
       decoration: const InputDecoration(
         prefixIcon: Icon(Icons.attach_money),
         border: OutlineInputBorder(),
@@ -29,7 +32,9 @@ class BudgetInputField extends StatelessWidget {
           return null;
         }
         // Only validate if not empty
-        final amount = double.tryParse(value.replaceAll(',', '').trim());
+        final amount = double.tryParse(
+          value.replaceAll(',', '').trim(),
+        );
         if (amount == null) {
           return 'Số tiền không hợp lệ';
         }

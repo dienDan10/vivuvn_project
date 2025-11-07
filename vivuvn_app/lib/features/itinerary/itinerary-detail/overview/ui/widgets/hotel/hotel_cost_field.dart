@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../../common/helper/number_format_helper.dart';
 import '../../../../../../../common/toast/global_toast.dart';
 import '../../../controller/hotels_controller.dart';
 import '../../../state/hotels_state.dart';
@@ -27,7 +28,9 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
   void initState() {
     super.initState();
     _controller = TextEditingController(
-      text: widget.initialCost != null ? widget.initialCost!.toString() : '',
+      text: widget.initialCost != null
+          ? formatWithThousandsFromNum(widget.initialCost!)
+          : '',
     );
     _focusNode = FocusNode();
     _focusNode.addListener(_onFocusChange);
@@ -37,8 +40,9 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
   void didUpdateWidget(final HotelCostField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialCost != widget.initialCost) {
-      _controller.text =
-          widget.initialCost != null ? widget.initialCost!.toString() : '';
+      _controller.text = widget.initialCost != null
+          ? formatWithThousandsFromNum(widget.initialCost!)
+          : '';
     }
   }
 
@@ -61,7 +65,8 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
 
     if (mounted) FocusScope.of(context).unfocus();
 
-    final parsed = double.tryParse(text.replaceAll(',', '.'));
+    final cleaned = text.replaceAll(',', '');
+    final parsed = double.tryParse(cleaned);
     if (parsed == null) {
       if (mounted) {
         GlobalToast.showErrorToast(
@@ -93,9 +98,8 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
     return TextFormField(
       controller: _controller,
       focusNode: _focusNode,
-      keyboardType: const TextInputType.numberWithOptions(
-        decimal: true,
-      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [ThousandsSeparatorInputFormatter()],
       decoration: InputDecoration(
         hintText: 'Chi phí',
         prefixIcon: const Icon(Icons.attach_money),

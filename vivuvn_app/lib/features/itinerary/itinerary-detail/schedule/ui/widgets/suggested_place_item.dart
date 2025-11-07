@@ -2,16 +2,57 @@ import 'package:flutter/material.dart';
 
 class SuggestedPlaceItem extends StatelessWidget {
   final String title;
+  final String? imageUrl;
   final VoidCallback? onTap;
 
-  const SuggestedPlaceItem({super.key, required this.title, this.onTap});
+  const SuggestedPlaceItem({
+    super.key,
+    required this.title,
+    this.imageUrl,
+    this.onTap,
+  });
 
   @override
   Widget build(final BuildContext context) {
+    Widget buildImage() {
+      if (imageUrl != null && imageUrl!.isNotEmpty) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            imageUrl!,
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+            errorBuilder: (final context, final error, final stackTrace) {
+              return Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.lightBlue[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.image, size: 28, color: Colors.white),
+              );
+            },
+          ),
+        );
+      }
+
+      return Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: Colors.lightBlue[200],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(Icons.image, size: 28, color: Colors.white),
+      );
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 160,
+        width: 180,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade400),
@@ -19,16 +60,7 @@ class SuggestedPlaceItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Ảnh bên trái
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.lightBlue[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.image, size: 28, color: Colors.white),
-            ),
+            buildImage(),
 
             const SizedBox(width: 8),
 
