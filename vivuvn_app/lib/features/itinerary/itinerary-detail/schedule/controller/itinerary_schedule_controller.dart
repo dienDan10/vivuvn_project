@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../detail/controller/itinerary_detail_controller.dart';
+import '../model/add_location_result.dart';
 import '../model/itinerary_day.dart';
 import '../service/itinerary_schedule_service.dart';
 import '../state/itinerary_schedule_state.dart';
@@ -24,12 +25,15 @@ class ItineraryScheduleController
 
   // === Lấy danh sách ngày ===
   Future<void> fetchDays() async {
-    state = state.copyWith(isLoading: true);
+    final id = itineraryId;
+    if (id == null) return;
+
+    state = state.copyWith(isLoading: true, itineraryId: id);
 
     try {
       final days = await ref
           .read(itineraryScheduleServiceProvider)
-          .getItineraryDays(itineraryId!);
+          .getItineraryDays(id);
 
       state = state.copyWith(
         isLoading: false,
@@ -70,15 +74,17 @@ class ItineraryScheduleController
   }
 
   // === Thêm item vào ngày ===
-  Future<void> addItemToDay(final int dayId, final int locationId) async {
-    if (itineraryId == null) return;
+  Future<bool> addItemToDay(final int dayId, final int locationId) async {
+    if (itineraryId == null) return false;
     try {
       await ref
           .read(itineraryScheduleServiceProvider)
           .addItemToDay(itineraryId!, dayId, locationId);
       await fetchItemsByDay(dayId);
+      return true;
     } catch (e) {
       state = state.copyWith(error: e.toString());
+      return false;
     }
   }
 
@@ -112,6 +118,25 @@ class ItineraryScheduleController
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
+  }
+
+  Future<AddLocationResult> addLocationToSelectedDay({
+    required final int locationId,
+    required final String locationName,
+  }) async {
+    final selectedDayId = state.selectedDayId;
+
+    if (selectedDayId == null) {
+      return AddLocationResult.failure('Vui lòng chọn ngày trước khi thêm địa điểm.');
+    }
+
+    final success = await addItemToDay(selectedDayId, locationId);
+
+    if (success) {
+      return AddLocationResult.success('Đã thêm "$locationName" vào lịch trình.');
+    }
+
+    return AddLocationResult.failure('Không thể thêm địa điểm vào lịch trình.');
   }
 
   // === State helper ===
@@ -185,6 +210,58 @@ class ItineraryScheduleController
       await fetchDays();
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
+    }
+  }
+
+  Future<void> fetchSuggestedLocations({
+    final int? provinceId,
+    final bool forceRefresh = false,
+  }) async {
+    final itineraryState = ref.read(itineraryDetailControllerProvider);
+    final int? targetProvinceId = provinceId ??
+        itineraryState.itinerary?.destinationProvinceId ??
+        itineraryState.itinerary?.startProvinceId;
+
+    if (targetProvinceId == null) {
+      return;
+    }
+
+    if (!forceRefresh &&
+        state.suggestedProvinceId == targetProvinceId &&
+        state.suggestedLocations.isNotEmpty &&
+        state.suggestedLocationsError == null) {
+      return;
+    }
+
+    state = state.copyWith(
+      isLoadingSuggestedLocations: true,
+      suggestedLocationsError: null,
+      suggestedProvinceId: targetProvinceId,
+    );
+
+    try {
+      final locations = await ref
+          .read(itineraryScheduleServiceProvider)
+          .getSuggestedLocations(provinceId: targetProvinceId);
+
+      state = state.copyWith(
+        isLoadingSuggestedLocations: false,
+        suggestedLocations: locations,
+        suggestedProvinceId: targetProvinceId,
+      );
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(
+        isLoadingSuggestedLocations: false,
+        suggestedLocationsError: errorMsg,
+        suggestedProvinceId: targetProvinceId,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        isLoadingSuggestedLocations: false,
+        suggestedLocationsError: 'unknown error',
+        suggestedProvinceId: targetProvinceId,
+      );
     }
   }
 
