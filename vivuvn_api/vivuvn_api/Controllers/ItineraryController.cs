@@ -20,7 +20,7 @@ namespace vivuvn_api.Controllers
 
             if (userId == null)
             {
-                return Unauthorized(new { message = "User ID claim is missing." });
+                return Unauthorized(new { message = "Thiếu thông tin định danh người dùng." });
             }
 
             // get all itineraries by user id
@@ -48,7 +48,7 @@ namespace vivuvn_api.Controllers
 
             if (userId == null)
             {
-                return Unauthorized(new { message = "User ID claim is missing." });
+                return Unauthorized(new { message = "Thiếu thông tin định danh người dùng." });
             }
 
             // create itinerary

@@ -20,7 +20,7 @@ namespace vivuvn_api.Controllers
             bool isMember = await _memberService.IsMemberAsync(itineraryId, userId);
             if (!isMember)
             {
-                return BadRequest("You are not a member of this itinerary.");
+                return BadRequest("Bạn không phải là thành viên của lịch trình này.");
             }
             var messagePage = await _messageService.GetMessagesAsync(itineraryId, userId, page, pageSize);
             return Ok(messagePage);
@@ -36,7 +36,7 @@ namespace vivuvn_api.Controllers
             bool isMember = await _memberService.IsMemberAsync(itineraryId, userId);
             if (!isMember)
             {
-                return BadRequest("You are not a member of this itinerary.");
+                return BadRequest("Bạn không phải là thành viên của lịch trình này.");
             }
             var newMessages = await _messageService.GetNewMessagesAsync(itineraryId, userId, lastMessageId);
             return Ok(newMessages);
@@ -52,7 +52,7 @@ namespace vivuvn_api.Controllers
             bool isMember = await _memberService.IsMemberAsync(itineraryId, userId);
             if (!isMember)
             {
-                return BadRequest("You are not a member of this itinerary.");
+                return BadRequest("Bạn không phải là thành viên của lịch trình này.");
             }
             var message = await _messageService.SendMessageAsync(itineraryId, userId, request);
             return Ok(message);
@@ -68,7 +68,7 @@ namespace vivuvn_api.Controllers
             bool isMember = await _memberService.IsMemberAsync(itineraryId, userId);
             if (!isMember)
             {
-                return BadRequest("You are not a member of this itinerary.");
+                return BadRequest("Bạn không phải là thành viên của lịch trình này.");
             }
             await _messageService.DeleteMessageAsync(messageId, userId);
             return NoContent();

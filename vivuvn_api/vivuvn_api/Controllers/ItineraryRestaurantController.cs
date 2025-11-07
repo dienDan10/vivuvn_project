@@ -23,7 +23,7 @@ namespace vivuvn_api.Controllers
         {
             await _itineraryRestaurantService.AddRestaurantToItineraryFromSuggestionAsync(itineraryId, request);
 
-            return Ok(new { message = "Restaurant added to itinerary successfully." });
+            return Ok(new { message = "Đã thêm nhà hàng vào lịch trình thành công." });
         }
 
         [HttpPost("search")]
@@ -31,7 +31,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> AddRestaurantToItineraryFromSearch(int itineraryId, [FromBody] AddRestaurantToItineraryFromSearch request)
         {
             await _itineraryRestaurantService.AddRestaurantToItineraryFromSearchAsync(itineraryId, request);
-            return Ok(new { message = "Restaurant added to itinerary successfully." });
+            return Ok(new { message = "Đã thêm nhà hàng vào lịch trình thành công." });
         }
 
         [HttpPut("{itineraryRestaurantId}/notes")]
@@ -39,7 +39,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> UpdateItineraryRestaurant(int itineraryId, int itineraryRestaurantId, [FromBody] UpdateNoteRequestDto requestDto)
         {
             await _itineraryRestaurantService.UpdateNotesAsync(itineraryId, itineraryRestaurantId, requestDto.Notes);
-            return Ok(new { message = "Itinerary restaurant updated successfully." });
+            return Ok(new { message = "Đã cập nhật nhà hàng thành công." });
         }
 
         [HttpPut("{itineraryRestaurantId}/dates")]
@@ -47,7 +47,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> UpdateItineraryRestaurantDateTime(int itineraryId, int itineraryRestaurantId, [FromBody] UpdateDateRequestDto request)
         {
             await _itineraryRestaurantService.UpdateDateAsync(itineraryId, itineraryRestaurantId, request.Date);
-            return Ok(new { message = "Itinerary restaurant date and time updated successfully." });
+            return Ok(new { message = "Đã cập nhật ngày và giờ nhà hàng thành công." });
         }
 
         [HttpPut("{itineraryRestaurantId}/times")]
@@ -55,7 +55,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> UpdateItineraryRestaurantTime(int itineraryId, int itineraryRestaurantId, [FromBody] UpdateTimeRequestDto request)
         {
             await _itineraryRestaurantService.UpdateTimeAsync(itineraryId, itineraryRestaurantId, request.Time);
-            return Ok(new { message = "Itinerary restaurant time updated successfully." });
+            return Ok(new { message = "Đã cập nhật giờ nhà hàng thành công." });
         }
 
         [HttpPut("{itineraryRestaurantId}/costs")]
@@ -64,11 +64,11 @@ namespace vivuvn_api.Controllers
         {
             if (request.Cost == 0)
             {
-                return BadRequest("Cost must be greater than 0");
+                return BadRequest("Chi phí phải lớn hơn 0");
             }
 
             await _itineraryRestaurantService.UpdateCostAsync(itineraryId, itineraryRestaurantId, request.Cost);
-            return Ok(new { message = "Itinerary restaurant cost updated successfully." });
+            return Ok(new { message = "Đã cập nhật chi phí nhà hàng thành công." });
 
         }
 
@@ -77,7 +77,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> DeleteItineraryRestaurant(int itineraryId, int itineraryRestaurantId)
         {
             await _itineraryRestaurantService.DeleteItineraryRestaurantAsync(itineraryId, itineraryRestaurantId);
-            return Ok(new { message = "Itinerary restaurant deleted successfully." });
+            return Ok(new { message = "Đã xóa nhà hàng khỏi lịch trình thành công." });
         }
     }
 }

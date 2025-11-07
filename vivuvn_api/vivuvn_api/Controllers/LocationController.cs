@@ -29,7 +29,7 @@ namespace vivuvn_api.Controllers
 
             if (locations is null)
             {
-                return NotFound("Location not found");
+                return NotFound("Không tìm thấy địa điểm");
             }
 
             return Ok(locations);

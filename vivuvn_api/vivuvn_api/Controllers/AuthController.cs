@@ -29,7 +29,7 @@ namespace vivuvn_api.Controllers
             await _authService.RegisterAsync(request);
             return Ok(new
             {
-                Message = "Register successful!. Check you email to confirm email registration"
+                Message = "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận đăng ký."
             });
         }
 
@@ -39,7 +39,7 @@ namespace vivuvn_api.Controllers
             await _authService.VerifyEmailAsync(request);
             return Ok(new
             {
-                Message = "Email verify successful!"
+                Message = "Xác thực email thành công!"
             });
         }
 
