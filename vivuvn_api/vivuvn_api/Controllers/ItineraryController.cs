@@ -63,14 +63,14 @@ namespace vivuvn_api.Controllers
         {
             if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
 
             var result = await _itineraryService.DeleteItineraryByIdAsync(id);
 
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
 
             return NoContent();
@@ -82,7 +82,7 @@ namespace vivuvn_api.Controllers
         {
             if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
             await _itineraryService.UpdateItineraryDatesAsync(id, request);
             return Ok();
@@ -94,12 +94,12 @@ namespace vivuvn_api.Controllers
         {
             if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
             var result = await _itineraryService.UpdateItineraryNameAsync(id, request.Name);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu" });
             }
             return Ok();
         }
@@ -110,12 +110,12 @@ namespace vivuvn_api.Controllers
         {
             if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
             var result = await _itineraryService.UpdateItineraryGroupSizeAsync(id, request.GroupSize);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
             return Ok();
         }
@@ -126,12 +126,12 @@ namespace vivuvn_api.Controllers
         {
             if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
             var result = await _itineraryService.UpdateItineraryTransportationAsync(id, request.Transportation);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
             return Ok();
         }
@@ -142,12 +142,12 @@ namespace vivuvn_api.Controllers
         {
             if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
             var result = await _itineraryService.SetItineraryToPublicAsync(id);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
             return Ok();
         }
@@ -158,12 +158,12 @@ namespace vivuvn_api.Controllers
         {
             if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
             var result = await _itineraryService.SetItineraryToPrivateAsync(id);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
             return Ok();
         }

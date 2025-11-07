@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using vivuvn_api.DTOs.Request;
@@ -39,11 +39,9 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> CreateBudgetItem(int itineraryId, CreateBudgetItemRequestDto request)
         {
-            var userId = GetCurrentUserId();
-            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
-            if (!isOwner)
+            if (!await IsOwner(itineraryId))
             {
-                return Forbid("Only itinerary owner can add budget items.");
+                return BadRequest("Chỉ có chủ lịch trình mới tạo được mục ngân sách.");
             }
             var budgetItem = await _budgetService.AddBudgetItemAsync(itineraryId, request);
             return Ok(budgetItem);
@@ -53,11 +51,9 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateBudget(int itineraryId, [FromBody] UpdateBudgetRequestDto request)
         {
-            var userId = GetCurrentUserId();
-            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
-            if (!isOwner)
+            if (!await IsOwner(itineraryId))
             {
-                return Forbid("Only itinerary owner can add budget items.");
+                return BadRequest("Chỉ có chủ lịch trình mới cập nhật được ngân sách.");
             }
             var budget = await _budgetService.UpdateBudgetAsync(itineraryId, request);
             return Ok(budget);
@@ -68,11 +64,9 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateBudgetItem(int itineraryId, int itemId, UpdateBudgetItemRequestDto request)
         {
-            var userId = GetCurrentUserId();
-            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
-            if (!isOwner)
+            if (!await IsOwner(itineraryId))
             {
-                return Forbid("Only itinerary owner can update budget items.");
+                return BadRequest("Chỉ có chủ lịch trình mới cập nhật được mục ngân sách.");
             }
             var budgetItem = await _budgetService.UpdateBudgetItemAsync(itemId, request);
             return Ok(budgetItem);
@@ -82,14 +76,18 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteBudgetItem(int itineraryId, int itemId)
         {
-            var userId = GetCurrentUserId();
-            var isOwner = await _memberService.IsOwnerAsync(itineraryId, userId);
-            if (!isOwner)
+            if (!await IsOwner(itineraryId))
             {
-                return Forbid("Only itinerary owner can delete budget items.");
+                return BadRequest("Chỉ có chủ lịch trình mới xóa được mục ngân sách.");
             }
             var budgetItem = await _budgetService.DeleteBudgetItemAsync(itemId);
             return Ok(budgetItem);
+        }
+
+        private async Task<bool> IsOwner(int itineraryId)
+        {
+            var userId = GetCurrentUserId();
+            return await _memberService.IsOwnerAsync(itineraryId, userId);
         }
 
         private int GetCurrentUserId()
