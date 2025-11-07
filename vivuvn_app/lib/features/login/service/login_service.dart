@@ -6,6 +6,7 @@ import '../data/api/login_api.dart';
 import '../data/dto/google_login_request.dart';
 import '../data/dto/login_request.dart';
 import '../data/dto/login_response.dart';
+import '../data/dto/reset_password_request.dart';
 import 'ilogin_service.dart';
 
 final loginServiceProvider = Provider.autoDispose<ILoginService>((final ref) {
@@ -39,5 +40,24 @@ final class LoginService implements ILoginService {
     final loginRequest = GoogleLoginRequest(idToken: idToken!);
 
     return await _loginApi.loginWithGoogle(loginRequest);
+  }
+
+  @override
+  Future<void> forgotPassword(final String email) async {
+    await _loginApi.forgotPassword(email);
+  }
+
+  @override
+  Future<void> resetPassword(
+    final String email,
+    final String newPassword,
+    final String token,
+  ) async {
+    final request = ResetPasswordRequest(
+      email: email,
+      newPassword: newPassword,
+      token: token,
+    );
+    await _loginApi.resetPassword(request);
   }
 }
