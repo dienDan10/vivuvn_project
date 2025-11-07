@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.Services.Interfaces;
 
@@ -55,6 +57,24 @@ namespace vivuvn_api.Controllers
         {
             var result = await _authService.RefreshTokenAsync(request);
             return Ok(result);
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+        {
+            int userId = GetCurrentUserId();
+            await _authService.ChangePasswordAsync(userId, request);
+            return Ok(new
+            {
+                Message = "Đổi mật khẩu thành công!"
+            });
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim!);
         }
 
     }

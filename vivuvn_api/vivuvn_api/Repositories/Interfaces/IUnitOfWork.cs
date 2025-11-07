@@ -3,6 +3,7 @@
     public interface IUnitOfWork : IDisposable
     {
         IUserRepository Users { get; }
+        IRoleRepository Roles { get; }
         IItineraryRepository Itineraries { get; }
         IItineraryDayRepository ItineraryDays { get; }
         IItineraryItemRepository ItineraryItems { get; }
