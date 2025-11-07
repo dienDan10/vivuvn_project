@@ -111,6 +111,18 @@ namespace vivuvn_api.Controllers
             return Ok();
         }
 
+        [HttpPut("{id}/transportation")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryTransportation(int id, [FromBody] UpdateItineraryTransportationRequestDto request)
+        {
+            var result = await _itineraryService.UpdateItineraryTransportationAsync(id, request.Transportation);
+            if (!result)
+            {
+                return NotFound(new { message = $"Itinerary with id {id} not found." });
+            }
+            return Ok();
+        }
+
         [HttpPut("{id}/public")]
         [Authorize]
         public async Task<IActionResult> SetItineraryToPublic(int id)

@@ -2,6 +2,7 @@
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
+using vivuvn_api.Extensions;
 using vivuvn_api.Helpers;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
@@ -209,6 +210,19 @@ namespace vivuvn_api.Services.Implementations
             return true;
         }
 
+        public async Task<bool> UpdateItineraryTransportationAsync(int itineraryId, TransportationMode transportation)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.TransportationVehicle = TransportationModeExtensions.ToVietnameseString(transportation);
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
         #endregion
 
         #region Itinerary Schedule Methods
@@ -296,12 +310,12 @@ namespace vivuvn_api.Services.Implementations
                 // Update itinerary group size
                 itinerary.GroupSize = groupSize;
 
-				// Update transportation vehicle
+                // Update transportation vehicle
                 itinerary.TransportationVehicle = travelItinerary.TransportationSuggestions
                     .FirstOrDefault()?.Mode ?? null;
 
-				// Use the budget from the navigation property
-				var budget = itinerary.Budget;
+                // Use the budget from the navigation property
+                var budget = itinerary.Budget;
 
                 // Clear existing itinerary items from all days
                 foreach (var day in itinerary.Days)
@@ -317,12 +331,12 @@ namespace vivuvn_api.Services.Implementations
 
                 if (budget?.Items != null)
                 {
-					// Clear all items that do not have ItineraryRestaurant and ItineraryHotel from the collection
+                    // Clear all items that do not have ItineraryRestaurant and ItineraryHotel from the collection
                     budget.Items = budget.Items
                         .Where(bi => bi.ItineraryHotel != null || bi.ItineraryRestaurant != null)
                         .ToList();
                     budget.TotalBudget = budget.Items.Sum(bi => bi.Cost);
-				}
+                }
 
                 // Batch load all locations
                 var allPlaceIds = travelItinerary.Days
@@ -463,7 +477,7 @@ namespace vivuvn_api.Services.Implementations
                             Date = transportation.Date,
                             BudgetTypeId = transportationBudgetTypeId,
                             Details = transportation.Details
-						};
+                        };
                         budget.Items.Add(budgetItem);
                     }
                 }
