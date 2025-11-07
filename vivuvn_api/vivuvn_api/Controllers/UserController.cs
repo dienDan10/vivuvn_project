@@ -58,5 +58,13 @@ namespace vivuvn_api.Controllers
             }
             return Ok(new { message = "Đã mở khóa tài khoản người dùng thành công." });
         }
+
+        [HttpPost("operator")]
+        [Authorize(Roles = $"{Constants.Role_Admin}")]
+        public async Task<IActionResult> CreateOperator([FromBody] CreateOperatorRequestDto requestDto)
+        {
+            var newOperator = await _userService.CreateOperatorAsync(requestDto);
+			return Ok(newOperator);
+        }
     }
 }

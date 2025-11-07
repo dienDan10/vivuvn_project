@@ -13,5 +13,9 @@ namespace vivuvn_api.Services.Interfaces
         Task<IEnumerable<HotelDto>> GetHotelsByLocationIdAsync(int locationId);
         Task<IEnumerable<SearchPlaceDto>> SearchRestaurantsByTextAsync(string textQuery, string? provinceName = null);
         Task<IEnumerable<SearchPlaceDto>> SearchHotelsByTextAsync(string textQuery, string? provinceName = null);
+        Task<LocationDto> CreateLocationAsync(CreateLocationRequestDto requestDto);
+        Task<LocationDto> UpdateLocationAsync(int id, UpdateLocationRequestDto requestDto);
+        Task DeleteLocationAsync(int id);
+        Task<LocationDto> RestoreLocationAsync(int id);
     }
 }

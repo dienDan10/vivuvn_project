@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LinqKit;
+using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -10,7 +11,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IJsonService _jsonService) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IJsonService _jsonService, IImageService _imageService) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)
@@ -30,22 +31,18 @@ namespace vivuvn_api.Services.Implementations
         public async Task<PaginatedResponseDto<LocationDto>> GetAllLocationsAsync(GetAllLocationsRequestDto requestDto)
         {
             // Build filter expression
-            var predicate = PredicateBuilder.New<Location>();
+            Expression<Func<Location, bool>>? filter= null;
 
-            if (!string.IsNullOrEmpty(requestDto.Name))
+            if (!string.IsNullOrEmpty(requestDto.Name) || requestDto.ProvinceId.HasValue)
             {
-                var searchQueryNormalized = TextHelper.ToSearchFriendly(requestDto.Name);
-                predicate = predicate.And(l => l.NameNormalized.Contains(searchQueryNormalized));
-            }
-
-            if (requestDto.ProvinceId.HasValue)
-            {
-                predicate = predicate.And(l => l.ProvinceId == requestDto.ProvinceId.Value);
-            }
+                filter = l =>
+                    (string.IsNullOrEmpty(requestDto.Name) || l.NameNormalized.Contains(TextHelper.ToSearchFriendly(requestDto.Name))) &&
+                    (!requestDto.ProvinceId.HasValue || l.ProvinceId == requestDto.ProvinceId.Value);
+			}
 
 
-            // Build order by expression
-            Func<IQueryable<Location>, IOrderedQueryable<Location>>? orderBy = null;
+			// Build order by expression
+			Func<IQueryable<Location>, IOrderedQueryable<Location>>? orderBy = null;
             if (!string.IsNullOrEmpty(requestDto.SortBy))
             {
                 orderBy = requestDto.SortBy.ToLower() switch
@@ -62,7 +59,7 @@ namespace vivuvn_api.Services.Implementations
 
             // Get paginated data
             var (items, totalCount) = await _unitOfWork.Locations.GetPagedAsync(
-                filter: predicate,
+                filter: filter,
                 orderBy: orderBy,
                 pageNumber: requestDto.PageNumber,
                 pageSize: requestDto.PageSize,
@@ -84,7 +81,7 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<LocationDto> GetLocationByIdAsync(int id)
         {
-            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "Photos");
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id, includeProperties: "Photos,Province");
             return _mapper.Map<LocationDto>(location);
         }
 
@@ -181,6 +178,121 @@ namespace vivuvn_api.Services.Implementations
             var response = await _placeService.SearchHotelsByTextAsync(textQuery, provinceName);
             if (response is null || !response.Places.Any()) return [];
             return _mapper.Map<IEnumerable<SearchPlaceDto>>(response.Places);
+        }
+
+        // CRUD Operations
+        public async Task<LocationDto> CreateLocationAsync(CreateLocationRequestDto requestDto)
+        {
+            var location = _mapper.Map<Location>(requestDto);
+
+            // Handle multiple image uploads
+            if (requestDto.Images != null && requestDto.Images.Any())
+            {
+                var photos = new List<vivuvn_api.Models.Photo>();
+                foreach (var image in requestDto.Images)
+                {
+                    var imageUrl = await _imageService.UploadImageAsync(image);
+                    photos.Add(new vivuvn_api.Models.Photo { PhotoUrl = imageUrl });
+                }
+                location.Photos = photos;
+            }
+
+            // Set NameNormalized for search
+            location.NameNormalized = TextHelper.ToSearchFriendly(requestDto.Name);
+            location.DeleteFlag = false;
+
+            await _unitOfWork.Locations.AddAsync(location);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Fetch the created location with its relationships
+            var createdLocation = await _unitOfWork.Locations.GetOneAsync(
+                l => l.Id == location.Id,
+                includeProperties: "Photos,Province"
+            );
+
+            return _mapper.Map<LocationDto>(createdLocation);
+        }
+
+        public async Task<LocationDto> UpdateLocationAsync(int id, UpdateLocationRequestDto requestDto)
+        {
+            var location = await _unitOfWork.Locations.GetOneAsync(
+                l => l.Id == id,
+                includeProperties: "Photos,Province"
+            );
+
+            if (location == null)
+            {
+                throw new KeyNotFoundException($"Location with id {id} not found.");
+            }
+
+            // Map basic properties
+            _mapper.Map(requestDto, location);
+
+            // Update NameNormalized if name changed
+            if (!string.IsNullOrEmpty(requestDto.Name))
+            {
+                location.NameNormalized = TextHelper.ToSearchFriendly(requestDto.Name);
+            }
+
+            // Handle image uploads (replace existing images if new images provided)
+            if (requestDto.Images != null && requestDto.Images.Any())
+            {
+                // Clear existing photos
+                location.Photos.Clear();
+
+                // Upload new images
+                var photos = new List<vivuvn_api.Models.Photo>();
+                foreach (var image in requestDto.Images)
+                {
+                    var imageUrl = await _imageService.UploadImageAsync(image);
+                    photos.Add(new vivuvn_api.Models.Photo { PhotoUrl = imageUrl });
+                }
+                location.Photos = photos;
+            }
+
+            _unitOfWork.Locations.Update(location);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Fetch updated location with relationships
+            var updatedLocation = await _unitOfWork.Locations.GetOneAsync(
+                l => l.Id == id,
+                includeProperties: "Photos,Province"
+            );
+
+            return _mapper.Map<LocationDto>(updatedLocation);
+        }
+
+        public async Task DeleteLocationAsync(int id)
+        {
+            var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == id);
+
+            if (location == null)
+            {
+                throw new KeyNotFoundException($"Location with id {id} not found.");
+            }
+
+            location.DeleteFlag = true;
+            _unitOfWork.Locations.Update(location);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<LocationDto> RestoreLocationAsync(int id)
+        {
+            var location = await _unitOfWork.Locations.GetOneAsync(
+                l => l.Id == id,
+                includeProperties: "Photos,Province"
+            );
+
+            if (location == null)
+            {
+                throw new KeyNotFoundException($"Location with id {id} not found.");
+            }
+
+            location.DeleteFlag = false;
+            _unitOfWork.Locations.Update(location);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<LocationDto>(location);
         }
 
     }

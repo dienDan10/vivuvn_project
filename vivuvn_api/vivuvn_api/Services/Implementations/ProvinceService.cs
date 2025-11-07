@@ -12,6 +12,16 @@ namespace vivuvn_api.Services.Implementations
 {
 	public class ProvinceService(IMapper _mapper, IUnitOfWork _unitOfWork, IImageService _imageService) : IProvinceService
 	{
+		public async Task<IEnumerable<ProvinceDto>> GetAllProvincesWithoutPaginationAsync()
+		{
+			var provinces = await _unitOfWork.Provinces.GetAllAsync(
+				filter: p => !p.DeleteFlag,
+				orderBy: q => q.OrderBy(p => p.Name)
+			);
+
+			return _mapper.Map<IEnumerable<ProvinceDto>>(provinces);
+		}
+
 		public async Task<PaginatedResponseDto<ProvinceDto>> GetAllProvincesAsync(GetAllProvincesRequestDto requestDto)
 		{
 			// Build filter expression
@@ -39,7 +49,7 @@ namespace vivuvn_api.Services.Implementations
 			}
 			else
 			{
-				orderBy = q => q.OrderBy(p => p.Id);
+				orderBy = q => q.OrderBy(p => p.NameNormalized);
 			}
 
 			// Get paginated data
