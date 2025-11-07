@@ -1,21 +1,23 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { ROLE_ADMIN, ROLE_OPERATOR } from "../../utils/constant";
+import AccessDenied from "../pages/AccessDenied";
+import { ROLE_ADMIN, ROLE_OPERATOR } from "../utils/constant";
 
 function RoleBaseRoute({ children }) {
 	const { isAuthenticated, user } = useSelector((state) => state.user);
 
-	// Check if user is authenticated
+	// Redirect to login if not authenticated
 	if (!isAuthenticated) {
-		return <Navigate to="/access-denied" replace />;
+		return <Navigate to="/login" replace />;
 	}
 
 	// Check if user has required roles (Admin or Operator)
 	const userRoles = user?.roles || [];
 	const hasRequiredRole = userRoles.includes(ROLE_ADMIN) || userRoles.includes(ROLE_OPERATOR);
 
+	// Show access denied if authenticated but lacks required role
 	if (!hasRequiredRole) {
-		return <Navigate to="/access-denied" replace />;
+		return <AccessDenied />;
 	}
 
 	return children;

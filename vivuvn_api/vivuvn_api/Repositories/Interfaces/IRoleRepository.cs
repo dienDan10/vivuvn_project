@@ -1,4 +1,4 @@
-﻿using vivuvn_api.Models;
+using vivuvn_api.Models;
 
 namespace vivuvn_api.Repositories.Interfaces
 {

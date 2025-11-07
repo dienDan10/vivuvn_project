@@ -9,6 +9,7 @@ namespace vivuvn_api.Services.Interfaces
 		Task<ProvinceDto> CreateProvinceAsync(CreateProvinceRequestDto requestDto);
 		Task DeleteProvinceAsync(int id);
 		Task<PaginatedResponseDto<ProvinceDto>> GetAllProvincesAsync(GetAllProvincesRequestDto requestDto);
+		Task<IEnumerable<ProvinceDto>> GetAllProvincesWithoutPaginationAsync();
 		Task<ProvinceDto> GetProvinceByIdAsync(int id);
 		Task<ProvinceDto> RestoreProvinceAsync(int id);
 		Task<IEnumerable<ProvinceDto>> SearchProvinceAsync(string? queryString, int? limit);

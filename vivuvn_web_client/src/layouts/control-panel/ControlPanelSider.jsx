@@ -19,8 +19,7 @@ function ControlPanelSider({ collapsed }) {
 		if (pathname.includes("operators")) return "3";
 		if (pathname.includes("travelers")) return "4";
 		if (pathname.includes("destinations")) return "5";
-		if (pathname.includes("itineraries")) return "6";
-		if (pathname.includes("provinces")) return "7";
+		if (pathname.includes("provinces")) return "6";
 	};
 
 	const selectedKey = calcSelectedKey();
@@ -33,7 +32,7 @@ function ControlPanelSider({ collapsed }) {
 			className="h-screen sticky! top-0 left-0 bottom-0 bg-gray-900"
 		>
 			<div className="h-16 text-gray-50 font-bold tracking-wider text-2xl flex items-center justify-center mb-2">
-				{collapsed ? "✈️" : "VIVUVN"}
+				{collapsed ? "V" : "VIVUVN"}
 			</div>
 			<Menu
 				className="bg-gray-900! text-white tracking-wide space-y-2"
@@ -60,18 +59,13 @@ function ControlPanelSider({ collapsed }) {
 							},
 						],
 					},
-					isAdmin && {
+					isOperator && {
 						key: "5",
 						icon: <FaMapLocationDot />,
 						label: <Link to="/manage/destinations">Destinations</Link>,
 					},
 					isAdmin && {
 						key: "6",
-						icon: <BiTrip />,
-						label: <Link to="/manage/itineraries">Itineraries</Link>,
-					},
-					isAdmin && {
-						key: "7",
 						icon: <FaLocationDot />,
 						label: <Link to="/manage/provinces">Provinces</Link>,
 					},
