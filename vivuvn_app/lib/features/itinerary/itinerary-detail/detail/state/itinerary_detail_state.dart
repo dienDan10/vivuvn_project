@@ -24,6 +24,7 @@ class ItineraryDetailState {
   final bool isSavingQrCode;
   // Transportation selection draft (UI-only until saved)
   final String? transportationVehicleDraft;
+  final bool isTransportationSaving;
 
   ItineraryDetailState({
     this.itineraryId,
@@ -41,6 +42,7 @@ class ItineraryDetailState {
     this.inviteCodeError,
     this.isSavingQrCode = false,
     this.transportationVehicleDraft,
+    this.isTransportationSaving = false,
   });
 
   ItineraryDetailState copyWith({
@@ -59,6 +61,7 @@ class ItineraryDetailState {
     final Object? inviteCodeError = _noValue,
     final bool? isSavingQrCode,
     final Object? transportationVehicleDraft = _noValue,
+    final bool? isTransportationSaving,
   }) {
     return ItineraryDetailState(
       itineraryId: itineraryId ?? this.itineraryId,
@@ -83,6 +86,8 @@ class ItineraryDetailState {
       transportationVehicleDraft: identical(transportationVehicleDraft, _noValue)
           ? this.transportationVehicleDraft
           : transportationVehicleDraft as String?,
+      isTransportationSaving:
+          isTransportationSaving ?? this.isTransportationSaving,
     );
   }
 }

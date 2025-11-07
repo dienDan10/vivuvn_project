@@ -58,7 +58,7 @@ class TransportationOptionTile extends ConsumerWidget {
         ref
             .read(itineraryDetailControllerProvider.notifier)
             .setTransportationVehicleDraft(mode);
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(mode);
       },
     );
   }

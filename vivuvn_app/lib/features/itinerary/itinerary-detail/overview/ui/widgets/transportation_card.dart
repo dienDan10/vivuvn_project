@@ -19,6 +19,12 @@ class TransportationCard extends ConsumerWidget {
       itineraryDetailControllerProvider.select((final state) => state.itinerary),
     );
 
+    final isTransportationSaving = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.isTransportationSaving,
+      ),
+    );
+
     // Không hiển thị gì nếu chưa có dữ liệu
     if (itinerary == null) {
       return const SizedBox.shrink();
@@ -95,24 +101,44 @@ class TransportationCard extends ConsumerWidget {
           ),
           // Edit button (placeholder for future CRUD)
           IconButton(
-            icon: Icon(
-              Icons.edit_outlined,
-              size: 20,
-              color: Colors.grey.shade600,
-            ),
-            onPressed: () {
-              ref
-                  .read(itineraryDetailControllerProvider.notifier)
-                  .startTransportationSelection();
-              showModalBottomSheet<void>(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                builder: (final _) => const TransportationSelectionBottomSheet(),
-              );
-            },
+            icon: isTransportationSaving
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.grey.shade600,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.edit_outlined,
+                    size: 20,
+                    color: Colors.grey.shade600,
+                  ),
+            onPressed: isTransportationSaving
+                ? null
+                : () async {
+                    final notifier =
+                        ref.read(itineraryDetailControllerProvider.notifier);
+                    notifier.startTransportationSelection();
+                    final selected = await showModalBottomSheet<String>(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      builder: (final _) => const TransportationSelectionBottomSheet(),
+                    );
+
+                    if (selected != null) {
+                      await notifier.saveTransportationVehicle(context, selected);
+                    } else {
+                      notifier.clearTransportationVehicleDraft();
+                    }
+                  },
           ),
         ],
       ),

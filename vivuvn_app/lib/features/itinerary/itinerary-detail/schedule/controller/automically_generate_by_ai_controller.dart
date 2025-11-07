@@ -94,7 +94,12 @@ class AutomaticallyGenerateByAiController
       setBudget(0.0);
       return;
     }
-    final value = double.tryParse(text);
+    final sanitized = text.replaceAll(RegExp(r'[\s,]'), '');
+    if (sanitized.isEmpty) {
+      setBudget(0.0);
+      return;
+    }
+    final value = double.tryParse(sanitized);
     if (value != null && value > 0) {
       setBudget(value);
     } else {

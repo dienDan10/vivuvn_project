@@ -83,6 +83,75 @@ class ItineraryDetailController
     state = state.copyWith(transportationVehicleDraft: null);
   }
 
+  Future<void> saveTransportationVehicle(
+    final BuildContext context,
+    final String vehicle,
+  ) async {
+    final itineraryId = state.itineraryId;
+    final itinerary = state.itinerary;
+    if (itineraryId == null || itinerary == null) return;
+
+    final normalized = TransportationMode.normalizeLabel(vehicle);
+    final apiTransportation = TransportationMode.toApiValue(normalized);
+    final previousVehicle = itinerary.transportationVehicle;
+
+    state = state.copyWith(
+      isTransportationSaving: true,
+      transportationVehicleDraft: normalized,
+      error: null,
+    );
+
+    try {
+      await ref
+          .read(itineraryDetailServiceProvider)
+          .updateTransportation(
+            itineraryId: itineraryId,
+            transportation: apiTransportation,
+          );
+
+      final updatedItinerary = itinerary.copyWith(
+        transportationVehicle: normalized,
+      );
+
+      state = state.copyWith(
+        itinerary: updatedItinerary,
+        transportationVehicleDraft: null,
+        isTransportationSaving: false,
+      );
+
+      if (context.mounted) {
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Cập nhật phương tiện thành công',
+        );
+      }
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(
+        isTransportationSaving: false,
+        transportationVehicleDraft: null,
+        itinerary: itinerary.copyWith(transportationVehicle: previousVehicle),
+        error: errorMsg,
+      );
+      if (context.mounted) {
+        GlobalToast.showErrorToast(context, message: errorMsg);
+      }
+    } catch (_) {
+      state = state.copyWith(
+        isTransportationSaving: false,
+        transportationVehicleDraft: null,
+        itinerary: itinerary.copyWith(transportationVehicle: previousVehicle),
+        error: 'unknown error',
+      );
+      if (context.mounted) {
+        GlobalToast.showErrorToast(
+          context,
+          message: 'Đã xảy ra lỗi, vui lòng thử lại',
+        );
+      }
+    }
+  }
+
   /// Update itinerary name locally to reflect immediately after saving
   void setName(final String newName) {
     final current = state.itinerary;
