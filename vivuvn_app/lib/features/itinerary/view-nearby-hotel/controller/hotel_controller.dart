@@ -2,9 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../common/toast/global_toast.dart';
 import '../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../itinerary-detail/detail/controller/itinerary_detail_controller.dart';
 import '../../view-nearby-restaurant/service/icon_service.dart';
-import '../model/hotel.dart';
+import '../data/model/hotel.dart';
 import '../service/hotel_service.dart';
 import '../state/nearby_hotel_state.dart';
 
@@ -62,6 +64,37 @@ class HotelController extends AutoDisposeNotifier<NearbyHotelState> {
 
   void setCurrentHotelIndex(final int index) {
     state = state.copyWith(currentHotelIndex: index);
+  }
+
+  Future<void> addHotelToItinerary(final int hotelId, final context) async {
+    state = state.copyWith(
+      isAddingToItinerary: true,
+      addToItineraryErrorMessage: null,
+    );
+    final int itineraryId = ref
+        .read(itineraryDetailControllerProvider)
+        .itinerary!
+        .id;
+    try {
+      await ref
+          .read(hotelServiceProvider)
+          .addHotelToItinerary(hotelId, itineraryId);
+
+      GlobalToast.showSuccessToast(
+        context,
+        message: 'Đã thêm khách sạn vào hành trình',
+      );
+    } on DioException catch (e) {
+      state = state.copyWith(
+        addToItineraryErrorMessage: DioExceptionHandler.handleException(e),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        addToItineraryErrorMessage: 'Đã xảy ra lỗi không mong muốn',
+      );
+    } finally {
+      state = state.copyWith(isAddingToItinerary: false);
+    }
   }
 }
 
