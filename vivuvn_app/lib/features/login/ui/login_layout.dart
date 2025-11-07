@@ -78,7 +78,7 @@ class LoginLayout extends ConsumerWidget {
                     const SizedBox(height: 30),
                     const LoginForm(),
                     const ForgotPasswordBtn(),
-                    const SizedBox(height: 80),
+                    const SizedBox(height: 60),
                     Text(
                       '- Hoặc đăng nhập bằng -',
                       style: TextStyle(
