@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../../../common/helper/number_format_helper.dart';
 import '../../controller/budget_controller.dart';
 import '../../data/dto/update_budget_request.dart';
 import 'budget_input_field.dart';
@@ -31,7 +32,7 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
     final initialBudget = widget.initialEstimatedBudget;
     _amountController = TextEditingController(
       text: initialBudget != null && initialBudget > 0
-          ? initialBudget.toStringAsFixed(0)
+          ? formatWithThousandsFromNum(initialBudget)
           : '',
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,7 +49,7 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
 
   double? get _vndEquivalent {
     if (_selectedCurrency != 'USD') return null;
-    final amount = double.tryParse(_amountController.text.trim());
+    final amount = double.tryParse(_amountController.text.replaceAll(',', '').trim());
     if (amount == null) return null;
     return amount * _fixedExchangeRate;
   }
@@ -57,7 +58,7 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
     if (!_formKey.currentState!.validate()) return;
 
     // If empty, treat as 0
-    final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    final amount = double.tryParse(_amountController.text.replaceAll(',', '').trim()) ?? 0.0;
 
     // Convert to VND if USD selected
     double vndAmount = amount;

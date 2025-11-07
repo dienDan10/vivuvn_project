@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../common/helper/number_format_helper.dart';
 import '../../controller/budget_controller.dart';
 import '../../data/models/budget_items.dart';
 import '../../state/expense_form_notifier.dart';
@@ -75,7 +76,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
         final formNotifier = ref.read(expenseFormProvider.notifier);
 
         nameController.text = item.name;
-        amountController.text = item.cost.toStringAsFixed(0);
+        amountController.text = formatWithThousandsFromNum(item.cost);
         detailsController.text = item.details ?? '';
 
         // Initialize form state with item data

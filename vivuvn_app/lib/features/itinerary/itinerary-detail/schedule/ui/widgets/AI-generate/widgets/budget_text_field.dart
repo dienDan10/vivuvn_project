@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../../../common/helper/number_format_helper.dart';
 // validator moved to controller-level; no import needed here
 import '../../../../controller/automically_generate_by_ai_controller.dart';
 
@@ -51,7 +52,8 @@ class _BudgetTextFieldState extends ConsumerState<BudgetTextField> {
     return TextField(
       controller: _controller,
       onTapOutside: (final event) => FocusScope.of(context).unfocus(),
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: TextInputType.number,
+      inputFormatters: [ThousandsSeparatorInputFormatter()],
       decoration: const InputDecoration(
         labelText: 'Nhập ngân sách...',
         border: InputBorder.none,

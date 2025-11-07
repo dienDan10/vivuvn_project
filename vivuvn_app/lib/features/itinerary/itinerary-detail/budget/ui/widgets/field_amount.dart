@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../../../common/helper/number_format_helper.dart';
 import '../../../../../../common/validator/validator.dart';
 import '../../utils/budget_constants.dart';
 
@@ -36,7 +37,9 @@ class _FieldAmountState extends State<FieldAmount> {
 
   @override
   Widget build(final BuildContext context) {
-    final amount = double.tryParse(widget.controller.text.trim());
+    final amount = double.tryParse(
+      widget.controller.text.replaceAll(',', '').trim(),
+    );
     final showConversion = amount != null && amount > 0;
 
     return Column(
@@ -48,6 +51,7 @@ class _FieldAmountState extends State<FieldAmount> {
           },
           controller: widget.controller,
           keyboardType: TextInputType.number,
+          inputFormatters: [ThousandsSeparatorInputFormatter()],
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.attach_money),
             labelText: 'Số tiền',
