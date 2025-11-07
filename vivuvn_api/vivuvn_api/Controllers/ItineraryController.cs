@@ -61,10 +61,7 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteItinerary(int id)
         {
-            var userId = GetCurrentUserId();
-            var isOwner = await _memberService.IsOwnerAsync(id, userId);
-
-            if (!isOwner)
+            if (!await IsOwner(id))
             {
                 return BadRequest("You are not the owner of this itinerary.");
             }
@@ -83,6 +80,10 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateItineraryDates(int id, [FromBody] UpdateItineraryDatesRequestDto request)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
             await _itineraryService.UpdateItineraryDatesAsync(id, request);
             return Ok();
         }
@@ -91,6 +92,10 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateItineraryName(int id, [FromBody] UpdateItineraryNameRequestDto request)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
             var result = await _itineraryService.UpdateItineraryNameAsync(id, request.Name);
             if (!result)
             {
@@ -103,6 +108,10 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateItineraryGroupSize(int id, [FromBody] UpdateItineraryGroupSizeRequestDto request)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
             var result = await _itineraryService.UpdateItineraryGroupSizeAsync(id, request.GroupSize);
             if (!result)
             {
@@ -115,6 +124,10 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateItineraryTransportation(int id, [FromBody] UpdateItineraryTransportationRequestDto request)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
             var result = await _itineraryService.UpdateItineraryTransportationAsync(id, request.Transportation);
             if (!result)
             {
@@ -127,6 +140,10 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> SetItineraryToPublic(int id)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
             var result = await _itineraryService.SetItineraryToPublicAsync(id);
             if (!result)
             {
@@ -139,12 +156,22 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> SetItineraryToPrivate(int id)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("You are not the owner of this itinerary.");
+            }
             var result = await _itineraryService.SetItineraryToPrivateAsync(id);
             if (!result)
             {
                 return NotFound(new { message = $"Itinerary with id {id} not found." });
             }
             return Ok();
+        }
+
+        private async Task<bool> IsOwner(int itineraryId)
+        {
+            var userId = GetCurrentUserId();
+            return await _memberService.IsOwnerAsync(itineraryId, userId);
         }
 
         private int GetCurrentUserId()
