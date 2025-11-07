@@ -3,16 +3,12 @@ import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../model/location.dart';
-
 class PlaceActionButtonWebsite extends StatelessWidget {
-  final Location location;
-  const PlaceActionButtonWebsite({super.key, required this.location});
+  final String url;
+  const PlaceActionButtonWebsite({super.key, required this.url});
 
   Future<void> _openWebsite(final BuildContext context) async {
-    final url = location.websiteUri;
-
-    if (url == null || url.isEmpty) {
+    if (url.isEmpty) {
       if (context.mounted) {
         CherryToast.error(
           title: const Text('Không có địa chỉ website'),

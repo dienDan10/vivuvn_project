@@ -102,11 +102,15 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  PlaceActionButtonDirection(location: location),
+                  if (location.directionsUri != null)
+                    PlaceActionButtonDirection(
+                      url: location.directionsUri ?? '',
+                    ),
                   const SizedBox(width: 16),
                   PlaceActionButtonLocation(url: location.placeUri ?? ''),
                   const SizedBox(width: 16),
-                  PlaceActionButtonWebsite(location: location),
+                  if (location.websiteUri != null)
+                    PlaceActionButtonWebsite(url: location.websiteUri ?? ''),
                 ],
               ),
             ),
