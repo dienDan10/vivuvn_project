@@ -7,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../itinerary-detail/schedule/model/location.dart';
 import '../../../view-nearby-restaurant/service/icon_service.dart';
 import '../../controller/hotel_controller.dart';
-import '../../model/hotel.dart';
+import '../../data/model/hotel.dart';
 
 class MapHotel extends ConsumerStatefulWidget {
   final Location location;

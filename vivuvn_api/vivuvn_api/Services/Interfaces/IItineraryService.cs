@@ -16,6 +16,7 @@ namespace vivuvn_api.Services.Interfaces
         Task<bool> UpdateItineraryGroupSizeAsync(int itineraryId, int newGroupSize);
         Task<bool> SetItineraryToPublicAsync(int itineraryId);
         Task<bool> SetItineraryToPrivateAsync(int itineraryId);
+        Task<bool> UpdateItineraryTransportationAsync(int itineraryId, TransportationMode transportation);
 
         Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request);
     }

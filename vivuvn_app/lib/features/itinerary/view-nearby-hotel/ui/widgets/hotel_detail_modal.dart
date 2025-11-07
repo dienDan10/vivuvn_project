@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../common/helper/app_constants.dart';
 import '../../../view-nearby-restaurant/ui/widgets/btn_open_map.dart';
-import '../../model/hotel.dart';
+import '../../data/model/hotel.dart';
+import 'btn_add_to_itinerary.dart';
 
 class HotelDetailModal extends StatelessWidget {
   final Hotel hotel;
@@ -178,7 +179,7 @@ class HotelDetailModal extends StatelessWidget {
                 const SizedBox(width: 12),
 
                 // Add to Itinerary Button
-                //const ButtonAddToItinerary(),
+                ButtonAddToItinerary(hotel: hotel),
               ],
             ),
           ],

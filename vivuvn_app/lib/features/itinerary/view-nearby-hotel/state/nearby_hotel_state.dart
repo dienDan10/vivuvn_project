@@ -1,6 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../model/hotel.dart';
+import '../data/model/hotel.dart';
 
 class NearbyHotelState {
   final bool isLoading;
@@ -8,6 +8,8 @@ class NearbyHotelState {
   final List<Hotel> hotels;
   final List<Marker> markers;
   final int currentHotelIndex;
+  final bool isAddingToItinerary;
+  final String? addToItineraryErrorMessage;
 
   NearbyHotelState({
     this.isLoading = false,
@@ -15,6 +17,8 @@ class NearbyHotelState {
     this.hotels = const [],
     this.markers = const [],
     this.currentHotelIndex = 0,
+    this.isAddingToItinerary = false,
+    this.addToItineraryErrorMessage,
   });
 
   NearbyHotelState copyWith({
@@ -23,6 +27,8 @@ class NearbyHotelState {
     final List<Hotel>? hotels,
     final List<Marker>? markers,
     final int? currentHotelIndex,
+    final bool? isAddingToItinerary,
+    final String? addToItineraryErrorMessage,
   }) {
     return NearbyHotelState(
       isLoading: isLoading ?? this.isLoading,
@@ -30,6 +36,9 @@ class NearbyHotelState {
       hotels: hotels ?? this.hotels,
       markers: markers ?? this.markers,
       currentHotelIndex: currentHotelIndex ?? this.currentHotelIndex,
+      isAddingToItinerary: isAddingToItinerary ?? this.isAddingToItinerary,
+      addToItineraryErrorMessage:
+          addToItineraryErrorMessage ?? this.addToItineraryErrorMessage,
     );
   }
 }

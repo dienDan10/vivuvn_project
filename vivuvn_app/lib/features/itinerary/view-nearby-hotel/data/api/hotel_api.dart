@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/network/network_service.dart';
-import '../../model/hotel.dart';
+import '../dto/add_hotel_to_itinerary_request.dart';
+import '../model/hotel.dart';
 
 class HotelApi {
   final Dio _dio;
@@ -13,6 +14,16 @@ class HotelApi {
 
     final data = response.data as List<dynamic>;
     return data.map((final item) => Hotel.fromMap(item)).toList();
+  }
+
+  Future<void> addHotelToItinerary(
+    final int itineraryId,
+    final AddHotelToItineraryRequest request,
+  ) async {
+    await _dio.post(
+      '/api/v1/itineraries/$itineraryId/hotels/suggestions',
+      data: request.toMap(),
+    );
   }
 }
 
