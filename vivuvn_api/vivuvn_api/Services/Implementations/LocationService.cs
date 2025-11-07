@@ -92,7 +92,7 @@ namespace vivuvn_api.Services.Implementations
         {
             // Get location and validate
             var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyRestaurants,NearbyRestaurants.Photos", tracked: true);
-            if (location is null) throw new KeyNotFoundException("Location not found");
+            if (location is null) throw new KeyNotFoundException("Không tìm thấy địa điểm");
             if (!location.Latitude.HasValue || !location.Longitude.HasValue)
             {
                 return [];
@@ -132,7 +132,7 @@ namespace vivuvn_api.Services.Implementations
         {
             // Get location and validate
             var location = await _unitOfWork.Locations.GetOneAsync(l => l.Id == locationId, includeProperties: "NearbyHotels,NearbyHotels.Photos", tracked: true);
-            if (location is null) throw new KeyNotFoundException("Location not found");
+            if (location is null) throw new KeyNotFoundException("Không tìm thấy địa điểm");
             if (!location.Latitude.HasValue || !location.Longitude.HasValue)
             {
                 return [];

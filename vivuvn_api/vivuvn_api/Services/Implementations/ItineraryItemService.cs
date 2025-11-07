@@ -66,7 +66,7 @@ namespace vivuvn_api.Services.Implementations
             {
                 var item = await _unitOfWork.ItineraryItems
                     .GetOneAsync(i => i.ItineraryItemId == itemId && i.ItineraryDayId == dayId)
-                    ?? throw new KeyNotFoundException($"Itinerary item with id {itemId} not found in day {dayId}.");
+                    ?? throw new KeyNotFoundException($"Không tìm thấy mục lịch trình có ID {itemId} trong ngày {dayId}.");
 
                 var itemsToUpdate = await _unitOfWork.ItineraryItems.GetAllAsync(
                     i => i.ItineraryDayId == dayId && i.OrderIndex > item.OrderIndex,
@@ -109,7 +109,7 @@ namespace vivuvn_api.Services.Implementations
             catch
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                throw new BadHttpRequestException("Something went wrong when trying to remove item form days");
+                throw new BadHttpRequestException("Đã xảy ra lỗi khi cố gắng xóa mục khỏi các ngày");
             }
         }
 
@@ -117,7 +117,7 @@ namespace vivuvn_api.Services.Implementations
         {
             var item = await _unitOfWork.ItineraryItems.GetOneAsync(i => i.ItineraryItemId == itemId);
 
-            if (item is null) throw new KeyNotFoundException($"Itinerary item with id {itemId} not found.");
+            if (item is null) throw new KeyNotFoundException($"Không tìm thấy mục lịch trình có ID {itemId}.");
 
             if (request.Note is not null)
             {
@@ -128,7 +128,7 @@ namespace vivuvn_api.Services.Implementations
             {
                 if (request.EndTime <= request.StartTime)
                 {
-                    throw new ArgumentException("End time must be after start time.");
+                    throw new ArgumentException("Thời gian kết thúc phải sau thời gian bắt đầu.");
                 }
                 item.StartTime = request.StartTime;
                 item.EndTime = request.EndTime;
@@ -147,12 +147,12 @@ namespace vivuvn_api.Services.Implementations
         {
             if (!IsValidTravelMode(request.TravelMode))
             {
-                throw new ArgumentException($"Invalid travel mode: {request.TravelMode}");
+                throw new ArgumentException($"Chế độ di chuyển không hợp lệ: {request.TravelMode}");
             }
 
             var item = await _unitOfWork.ItineraryItems
                 .GetOneAsync(i => i.ItineraryItemId == itemId, includeProperties: "Location,Location.Photos", tracked: true)
-                ?? throw new KeyNotFoundException($"Itinerary item with id {itemId} not found.");
+                ?? throw new KeyNotFoundException($"Không tìm thấy mục lịch trình có ID {itemId}.");
 
             var dayItems = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == item.ItineraryDayId,
                 orderBy: q => q.OrderBy(i => i.OrderIndex));
@@ -189,7 +189,7 @@ namespace vivuvn_api.Services.Implementations
 
             var response = await _routeService.GetRouteInformationAsync(request);
 
-            if (response is null || response.Routes is null || !response.Routes.Any()) throw new BadHttpRequestException("Cannot retrieve route information.");
+            if (response is null || response.Routes is null || !response.Routes.Any()) throw new BadHttpRequestException("Không thể lấy thông tin tuyến đường.");
 
             curItem.TransportationDistance = response.Routes?.FirstOrDefault()?.DistanceMeters ?? 500;
             curItem.TransportationVehicle = travelMode ?? Constants.TravelMode_Driving;

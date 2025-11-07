@@ -13,7 +13,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (user == null)
             {
-                throw new KeyNotFoundException("User not found.");
+                throw new KeyNotFoundException("Không tìm thấy người dùng.");
             }
             return _mapper.Map<UserDto>(user);
         }

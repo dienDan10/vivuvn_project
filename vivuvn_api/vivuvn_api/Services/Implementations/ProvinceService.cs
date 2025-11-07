@@ -70,7 +70,7 @@ namespace vivuvn_api.Services.Implementations
 
 			if (province == null)
 			{
-				throw new KeyNotFoundException($"Province with id {id} not found.");
+				throw new KeyNotFoundException($"Không tìm thấy tỉnh/thành phố có ID {id}.");
 			}
 
 			province.DeleteFlag = false;
@@ -85,7 +85,7 @@ namespace vivuvn_api.Services.Implementations
 
 			if (province == null)
 			{
-				throw new KeyNotFoundException($"Province with id {id} not found.");
+				throw new KeyNotFoundException($"Không tìm thấy tỉnh/thành phố có ID {id}.");
 			}
 
 			province.DeleteFlag = true;
@@ -113,7 +113,7 @@ namespace vivuvn_api.Services.Implementations
 
 			if (province == null)
 			{
-				throw new KeyNotFoundException($"Province with id {id} not found.");
+				throw new KeyNotFoundException($"Không tìm thấy tỉnh/thành phố có ID {id}.");
 			}
 
 			return _mapper.Map<ProvinceDto>(province);
@@ -145,7 +145,7 @@ namespace vivuvn_api.Services.Implementations
 
 			if (province == null)
 			{
-				throw new KeyNotFoundException($"Province with id {id} not found.");
+				throw new KeyNotFoundException($"Không tìm thấy tỉnh/thành phố có ID {id}.");
 			}
 
 			_mapper.Map(requestDto, province);

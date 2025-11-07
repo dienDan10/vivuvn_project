@@ -15,7 +15,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (budget == null)
             {
-                throw new ArgumentException($"Budget for Itinerary ID {itineraryId} does not exist.");
+                throw new ArgumentException($"Ngân sách cho lịch trình có ID {itineraryId} không tồn tại.");
             }
             return _mapper.Map<BudgetDto>(budget);
         }
@@ -25,7 +25,7 @@ namespace vivuvn_api.Services.Implementations
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId);
             if (budget == null)
             {
-                throw new ArgumentException($"Budget for Itinerary ID {itineraryId} does not exist.");
+                throw new ArgumentException($"Ngân sách cho lịch trình có ID {itineraryId} không tồn tại.");
             }
             var budgetItems = await _unitOfWork.Budgets.GetBudgetItemsByBudgetIdAsync(budget.BudgetId);
 
@@ -41,13 +41,13 @@ namespace vivuvn_api.Services.Implementations
         public async Task<BudgetItemDto?> AddBudgetItemAsync(int itineraryId, CreateBudgetItemRequestDto request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
-                ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
+                ?? throw new ArgumentException($"Lịch trình có ID {itineraryId} không tồn tại.");
 
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId);
 
             if (budget == null)
             {
-                throw new ArgumentException($"Budget for Itinerary ID {itineraryId} does not exist.");
+                throw new ArgumentException($"Ngân sách cho lịch trình có ID {itineraryId} không tồn tại.");
             }
 
             var budgetItem = new BudgetItem
@@ -72,12 +72,12 @@ namespace vivuvn_api.Services.Implementations
         public async Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag)
-                ?? throw new ArgumentException($"Itinerary with ID {itineraryId} does not exist.");
+                ?? throw new ArgumentException($"Lịch trình có ID {itineraryId} không tồn tại.");
 
             var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, tracked: true);
             if (budget is null)
             {
-                throw new ArgumentException($"Budget for Itinerary ID {itineraryId} does not exist.");
+                throw new ArgumentException($"Ngân sách cho lịch trình có ID {itineraryId} không tồn tại.");
             }
 
             if (request.EstimatedBudget.HasValue && request.EstimatedBudget.Value >= 0)
@@ -95,7 +95,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (item is null)
             {
-                throw new ArgumentException($"Budget item with ID {itemId} does not exist.");
+                throw new ArgumentException($"Mục ngân sách có ID {itemId} không tồn tại.");
             }
 
             if (request.Name is not null) item.Name = request.Name;

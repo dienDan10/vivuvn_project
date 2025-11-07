@@ -21,17 +21,17 @@ namespace vivuvn_api.Services.Implementations
                 .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            if (user == null) throw new BadHttpRequestException("Email or Password incorrect");
+            if (user == null) throw new BadHttpRequestException("Email hoặc mật khẩu không đúng");
 
             var passwordVerificationResult = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password);
 
-            if (passwordVerificationResult == PasswordVerificationResult.Failed) throw new BadHttpRequestException("Email or Password incorrect");
+            if (passwordVerificationResult == PasswordVerificationResult.Failed) throw new BadHttpRequestException("Email hoặc mật khẩu không đúng");
 
             // Check if user is locked
-            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow) throw new BadHttpRequestException("This account is locked");
+            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow) throw new BadHttpRequestException("Tài khoản này đã bị khóa");
 
             // Check if email is verified
-            if (!user.IsEmailVerified) throw new BadHttpRequestException("Email has not been verified");
+            if (!user.IsEmailVerified) throw new BadHttpRequestException("Email chưa được xác thực");
 
             return await CreateTokenResponse(user);
         }
@@ -75,7 +75,7 @@ namespace vivuvn_api.Services.Implementations
                     var travelerRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == Constants.Role_Traveler);
                     if (travelerRole == null)
                     {
-                        throw new Exception("An unexpected error has occurred");
+                        throw new Exception("Đã xảy ra lỗi không mong đợi");
                     }
                     user.UserRoles = new List<UserRole> { new UserRole { RoleId = travelerRole.Id } };
                     await _context.Users.AddAsync(user);
@@ -88,11 +88,11 @@ namespace vivuvn_api.Services.Implementations
             }
             catch (InvalidJwtException)
             {
-                throw new UnauthorizedAccessException("Invalid Google token");
+                throw new UnauthorizedAccessException("Token Google không hợp lệ");
             }
             catch (Exception ex)
             {
-                throw new BadHttpRequestException("Fail to login with google");
+                throw new BadHttpRequestException("Đăng nhập bằng Google thất bại");
             }
         }
 
@@ -114,7 +114,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (user is not null)
             {
-                throw new BadHttpRequestException("Email is already in use");
+                throw new BadHttpRequestException("Email đã được sử dụng");
             }
 
             var newUser = new User
@@ -131,7 +131,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (travelerRole == null)
             {
-                throw new Exception("An unexpected error has occurred");
+                throw new Exception("Đã xảy ra lỗi không mong đợi");
             }
 
             newUser.UserRoles = new List<UserRole> { new UserRole { RoleId = travelerRole.Id } };
@@ -150,12 +150,12 @@ namespace vivuvn_api.Services.Implementations
         public async Task VerifyEmailAsync(VerifyEmailRequestDto request)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            if (user == null) throw new BadHttpRequestException("User not found");
+            if (user == null) throw new BadHttpRequestException("Không tìm thấy người dùng");
             if (user.IsEmailVerified) return;
             if (user.EmailVerificationToken != request.Token || user.EmailVerificationTokenExpireDate <= DateTime.UtcNow)
             {
 
-                throw new BadHttpRequestException("Invalid or expired verification token");
+                throw new BadHttpRequestException("Mã xác thực không hợp lệ hoặc đã hết hạn");
             }
             user.IsEmailVerified = true;
             user.EmailVerificationToken = null;
@@ -167,7 +167,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task ResendEmailVerificationAsync(ResendEmailVerificationRequestDto request)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            if (user == null) throw new BadHttpRequestException("User not found");
+            if (user == null) throw new BadHttpRequestException("Không tìm thấy người dùng");
             if (user.IsEmailVerified) return;
             await CreateAndSendEmailVerificationToken(user);
         }
@@ -176,7 +176,7 @@ namespace vivuvn_api.Services.Implementations
         {
             var user = await ValidateRefreshTokenAsync(request.RefreshToken);
 
-            if (user == null) throw new BadHttpRequestException("Invalid refresh token");
+            if (user == null) throw new BadHttpRequestException("Refresh token không hợp lệ");
 
             return await CreateTokenResponse(user);
         }

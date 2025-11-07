@@ -42,13 +42,13 @@ namespace vivuvn_api.Services.Implementations
         {
             if (file.Length > Constants.MaxImageSizeBytes)
             {
-                throw new BadHttpRequestException($"Image size exceeds the maximum limit of {Constants.MaxImageSizeBytes} MB.");
+                throw new BadHttpRequestException($"Kích thước hình ảnh vượt quá giới hạn tối đa là {Constants.MaxImageSizeBytes} MB.");
             }
 
             var fileExtension = Path.GetExtension(file.FileName).ToLower();
             if (!Constants.ValidImageExtensions.Contains(fileExtension))
             {
-                throw new BadHttpRequestException("Unsupported file extension.");
+                throw new BadHttpRequestException("Định dạng tệp không được hỗ trợ.");
             }
 
             return true;

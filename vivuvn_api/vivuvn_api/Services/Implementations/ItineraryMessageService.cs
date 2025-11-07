@@ -83,7 +83,7 @@ namespace vivuvn_api.Services.Implementations
         {
             var message = await _unitOfWork.ItineraryMessages.GetOneAsync(
                 m => m.Id == messageId && m.ItineraryMember.UserId == userId)
-                ?? throw new BadHttpRequestException("Message not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy tin nhắn");
 
             _unitOfWork.ItineraryMessages.Remove(message);
             await _unitOfWork.SaveChangesAsync();

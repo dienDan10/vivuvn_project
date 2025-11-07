@@ -20,7 +20,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task AddHotelToItineraryFromSuggestionAsync(int itineraryId, AddHotelToItineraryFromSuggestionDto request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
-                ?? throw new BadHttpRequestException("Itinerary not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy lịch trình");
 
             var itineraryHotel = new ItineraryHotel
             {
@@ -35,7 +35,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task AddHotelToItineraryFromSearchAsync(int itineraryId, AddHotelToItineraryFromSearch request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
-                ?? throw new BadHttpRequestException("Itinerary not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy lịch trình");
 
             var hotel = await _unitOfWork.Hotels.GetOneAsync(h => h.GooglePlaceId == request.GooglePlaceId);
 
@@ -55,7 +55,7 @@ namespace vivuvn_api.Services.Implementations
 
             // else, fetch from google place api and add to db
             var place = await _placeService.FetchPlaceDetailsByIdAsync(request.GooglePlaceId)
-                ?? throw new BadHttpRequestException("Fail to add hotel. Cannot find hotel data");
+                ?? throw new BadHttpRequestException("Không thể thêm khách sạn. Không tìm thấy dữ liệu khách sạn");
 
             var hotelDto = _mapper.Map<HotelDto>(place);
 
@@ -81,7 +81,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task UpdateNotesAsync(int itineraryId, int itineraryHotelId, string notes)
         {
             var itineraryHotel = await _unitOfWork.ItineraryHotels.GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId)
-                ?? throw new BadHttpRequestException("Itinerary hotel not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy khách sạn trong lịch trình");
             itineraryHotel.Notes = notes;
             _unitOfWork.ItineraryHotels.Update(itineraryHotel);
             await _unitOfWork.SaveChangesAsync();
@@ -91,7 +91,7 @@ namespace vivuvn_api.Services.Implementations
         {
             var itineraryHotel = await _unitOfWork.ItineraryHotels
                 .GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId)
-                ?? throw new BadHttpRequestException("Itinerary hotel not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy khách sạn trong lịch trình");
 
             itineraryHotel.CheckIn = checkIn;
             itineraryHotel.CheckOut = checkOut;
@@ -103,7 +103,7 @@ namespace vivuvn_api.Services.Implementations
         {
             var itineraryHotel = await _unitOfWork.ItineraryHotels
                 .GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId, includeProperties: "BudgetItem,Hotel")
-                ?? throw new BadHttpRequestException("Itinerary hotel not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy khách sạn trong lịch trình");
 
             // if budget item exists, update cost
             if (itineraryHotel.BudgetItem != null)
@@ -117,11 +117,11 @@ namespace vivuvn_api.Services.Implementations
             // else, create new budget item
             var budget = await _unitOfWork.Budgets
                 .GetOneAsync(b => b.ItineraryId == itineraryId)
-                ?? throw new BadHttpRequestException("Budget not found for this itinerary");
+                ?? throw new BadHttpRequestException("Không tìm thấy ngân sách cho lịch trình này");
 
             var budgetType = await _unitOfWork.BudgetTypes
                 .GetOneAsync(bt => bt.Name == Constants.BudgetType_Lodging)
-                ?? throw new BadHttpRequestException("Budget type 'Lodging' not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy loại ngân sách 'Chỗ ở'");
 
             var budgetItem = new BudgetItem
             {
@@ -146,7 +146,7 @@ namespace vivuvn_api.Services.Implementations
             var itineraryHotel = await _unitOfWork.ItineraryHotels
                 .GetOneAsync(ih => ih.Id == itineraryHotelId && ih.ItineraryId == itineraryId,
                              includeProperties: "BudgetItem")
-                ?? throw new BadHttpRequestException("Itinerary hotel not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy khách sạn trong lịch trình");
 
             // Delete the related budget item if it exists
             if (itineraryHotel.BudgetItemId.HasValue)
