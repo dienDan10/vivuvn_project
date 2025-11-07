@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../../view-nearby-restaurant/ui/widgets/btn_add_to_itinerary.dart';
 import '../../../view-nearby-restaurant/ui/widgets/btn_open_map.dart';
 import '../../model/hotel.dart';
 import 'hotel_detail_modal.dart';
@@ -160,7 +159,7 @@ class HotelCarouselItem extends StatelessWidget {
                   const SizedBox(width: 12),
 
                   // Add to Itinerary Button
-                  const ButtonAddToItinerary(),
+                  //const ButtonAddToItinerary(),
                 ],
               ),
             ),

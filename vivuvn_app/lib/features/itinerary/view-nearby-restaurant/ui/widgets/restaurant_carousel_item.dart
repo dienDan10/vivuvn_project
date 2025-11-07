@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../model/restaurant.dart';
+import '../../data/model/restaurant.dart';
 import 'btn_add_to_itinerary.dart';
 import 'btn_open_map.dart';
 import 'restaurant_detail_modal.dart';
@@ -160,7 +160,7 @@ class RestaurantCarouselItem extends StatelessWidget {
                   const SizedBox(width: 12),
 
                   // Add to Itinerary Button
-                  const ButtonAddToItinerary(),
+                  ButtonAddToItinerary(restaurant: restaurant),
                 ],
               ),
             ),

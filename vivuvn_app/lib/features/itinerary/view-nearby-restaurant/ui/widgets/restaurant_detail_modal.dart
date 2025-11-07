@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../common/helper/app_constants.dart';
-import '../../model/restaurant.dart';
+import '../../data/model/restaurant.dart';
 import 'btn_add_to_itinerary.dart';
 import 'btn_open_map.dart';
 
@@ -179,7 +179,7 @@ class RestaurantDetailModal extends StatelessWidget {
                 const SizedBox(width: 12),
 
                 // Add to Itinerary Button
-                const ButtonAddToItinerary(),
+                ButtonAddToItinerary(restaurant: restaurant),
               ],
             ),
           ],

@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../common/toast/global_toast.dart';
 import '../../../../core/data/remote/exception/dio_exception_handler.dart';
-import '../model/restaurant.dart';
+import '../../itinerary-detail/detail/controller/itinerary_detail_controller.dart';
+import '../data/model/restaurant.dart';
 import '../service/icon_service.dart';
 import '../service/restaurant_service.dart';
 import '../state/neary_by_restaurant_state.dart';
@@ -67,6 +70,36 @@ class RestaurantController extends AutoDisposeNotifier<NearbyRestaurantState> {
 
   void setCurrentRestaurantIndex(final int index) {
     state = state.copyWith(currentRestaurantIndex: index);
+  }
+
+  Future<void> addRestaurantToItinerary(
+    final int restaurantId,
+    final BuildContext context,
+  ) async {
+    state = state.copyWith(isAddingToItinerary: true, errorMessage: null);
+    final int itineraryId = ref
+        .read(itineraryDetailControllerProvider)
+        .itinerary!
+        .id;
+    try {
+      await ref
+          .read(restaurantServiceProvider)
+          .addRestaurantToItinerary(restaurantId, itineraryId);
+      if (context.mounted) {
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Đã thêm nhà hàng vào hành trình',
+        );
+      }
+    } on DioException catch (e) {
+      state = state.copyWith(
+        errorMessage: DioExceptionHandler.handleException(e),
+      );
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'An unexpected error occurred');
+    } finally {
+      state = state.copyWith(isAddingToItinerary: false);
+    }
   }
 }
 

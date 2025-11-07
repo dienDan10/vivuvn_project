@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/restaurant_api.dart';
-import '../model/restaurant.dart';
+import '../data/dtos/add_to_itinerary_request.dart';
+import '../data/model/restaurant.dart';
 import 'irestaurant_service.dart';
 
 class RestaurantService implements IrestaurantService {
@@ -12,6 +13,17 @@ class RestaurantService implements IrestaurantService {
   @override
   Future<List<Restaurant>> fetchNearbyRestaurants(final int locationId) async {
     return await _restaurantApi.fetchNearbyRestaurants(locationId);
+  }
+
+  @override
+  Future<void> addRestaurantToItinerary(
+    final int restaurantId,
+    final int itineraryId,
+  ) async {
+    return await _restaurantApi.addRestaurantToItinerary(
+      itineraryId,
+      AddToItineraryRequest(restaurantId: restaurantId),
+    );
   }
 }
 

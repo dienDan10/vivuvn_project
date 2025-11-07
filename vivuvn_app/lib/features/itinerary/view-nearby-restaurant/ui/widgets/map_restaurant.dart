@@ -6,7 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../itinerary-detail/schedule/model/location.dart';
 import '../../controller/restaurant_controller.dart';
-import '../../model/restaurant.dart';
+import '../../data/model/restaurant.dart';
 import '../../service/icon_service.dart';
 
 class MapRestaurant extends ConsumerStatefulWidget {
