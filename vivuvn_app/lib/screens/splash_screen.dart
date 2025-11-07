@@ -52,55 +52,86 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(final BuildContext context) {
     _listener();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      // Let scaffold use the app theme background
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App logo or name (you can replace this with your actual logo)
+            // Circular logo with subtle gradient and shadow using theme colors
             Container(
-              width: 120,
-              height: 120,
+              width: 160,
+              height: 160,
               decoration: BoxDecoration(
-                color: Colors.blue.shade100,
-                borderRadius: BorderRadius.circular(60),
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary.withValues(alpha: 0.18),
+                    colorScheme.primary.withValues(alpha: 0.06),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.primary.withValues(alpha: 0.14),
+                    blurRadius: 14,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              child: Icon(
-                Icons.travel_explore,
-                size: 60,
-                color: Colors.blue.shade600,
+              child: ClipOval(
+                child: Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Image.asset(
+                    'assets/images/app-logo.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 40),
 
-            // App name
+            const SizedBox(height: 28),
+
+            // App name using theme text styles
             Text(
               'ViVuVN',
-              style: TextStyle(
-                fontSize: 32,
+              style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.blue.shade800,
+                color: colorScheme.primary,
+                letterSpacing: 0.6,
               ),
             ),
-            const SizedBox(height: 8),
-
+            const SizedBox(height: 6),
             Text(
-              'Travel Vietnam',
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+              'Du lịch Việt Nam',
+              style: textTheme.bodyMedium?.copyWith(
+                color:
+                    textTheme.bodySmall?.color?.withValues(alpha: 0.85) ??
+                    colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
             ),
-            const SizedBox(height: 60),
 
-            // Loading indicator
+            const SizedBox(height: 40),
+
+            // Loading indicator using theme primary color
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
               strokeWidth: 3,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
             Text(
-              'Loading...',
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+              'Đang tải...',
+              style: textTheme.bodyMedium?.copyWith(
+                color:
+                    textTheme.bodySmall?.color?.withValues(alpha: 0.75) ??
+                    colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
           ],
         ),

@@ -13,6 +13,7 @@ class LoginLayout extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isLoading = ref.watch(
       loginControllerProvider.select((final state) => state.isLoading),
     );
@@ -29,12 +30,35 @@ class LoginLayout extends ConsumerWidget {
                   children: [
                     // Logo
                     Container(
-                      margin: const EdgeInsets.only(top: 30, bottom: 20),
                       width: 160,
                       height: 160,
-                      child: Image.asset(
-                        'assets/images/app-logo.png',
-                        fit: BoxFit.contain,
+                      margin: const EdgeInsets.only(bottom: 30, top: 50),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            colorScheme.primary.withValues(alpha: 0.18),
+                            colorScheme.primary.withValues(alpha: 0.06),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withValues(alpha: 0.14),
+                            blurRadius: 14,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: Image.asset(
+                            'assets/images/app-logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
                     ),
                     Container(

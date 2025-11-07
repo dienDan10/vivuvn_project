@@ -64,6 +64,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
 
   @override
   Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     _registerListener();
     _emailVerificationListener();
 
@@ -101,12 +102,35 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
 
                   // Logo and Title
                   Container(
-                    margin: const EdgeInsets.only(bottom: 20),
                     width: 160,
                     height: 160,
-                    child: Image.asset(
-                      'assets/images/app-logo.png',
-                      fit: BoxFit.contain,
+                    margin: const EdgeInsets.only(bottom: 30),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          colorScheme.primary.withValues(alpha: 0.18),
+                          colorScheme.primary.withValues(alpha: 0.06),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withValues(alpha: 0.14),
+                          blurRadius: 14,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Image.asset(
+                          'assets/images/app-logo.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                   ),
                   Container(
