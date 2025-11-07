@@ -76,8 +76,7 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
     } catch (e) {
-      print(e.toString());
-      state = state.copyWith(error: e.toString());
+      //state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isLoading: false);
     }

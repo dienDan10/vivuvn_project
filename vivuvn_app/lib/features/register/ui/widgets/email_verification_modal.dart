@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../common/toast/global_toast.dart';
 import '../../controller/register_controller.dart';
 import 'email_verification_modal_header.dart';
 import 'email_verify_code_input.dart';
@@ -25,17 +26,30 @@ class _EmailVerificationModalState
     6,
     (final index) => FocusNode(),
   );
+  final TextEditingController _emailController = TextEditingController();
   bool isCodeComplete = false;
 
   @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_updateButtonState);
+  }
+
+  @override
   void dispose() {
+    _emailController.removeListener(_updateButtonState);
     for (final controller in _controllers) {
       controller.dispose();
     }
     for (final focusNode in _focusNodes) {
       focusNode.dispose();
     }
+    _emailController.dispose();
     super.dispose();
+  }
+
+  void _updateButtonState() {
+    setState(() {});
   }
 
   void _onChanged(final String value, final int index) {
@@ -58,16 +72,35 @@ class _EmailVerificationModalState
 
   void _verifyEmail() {
     final code = _getVerificationCode();
-    if (code.length < 6) {
+    final email = _emailController.text.trim();
+
+    if (code.length < 6 || email.isEmpty) {
       return;
     }
 
-    ref.read(registerControllerProvider.notifier).verifyEmail(code);
+    ref.read(registerControllerProvider.notifier).verifyEmail(code, email);
+  }
+
+  void _resendVerificationEmail() {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      GlobalToast.showErrorToast(
+        context,
+        message: 'Vui lòng nhập email để gửi lại mã xác thực.',
+      );
+      return;
+    }
+
+    ref
+        .read(registerControllerProvider.notifier)
+        .resendVerificationEmail(email, context);
   }
 
   @override
   Widget build(final BuildContext context) {
-    final registerState = ref.watch(registerControllerProvider);
+    final verifyEmailError = ref.watch(
+      registerControllerProvider.select((final s) => s.verifyEmailError),
+    );
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -78,10 +111,42 @@ class _EmailVerificationModalState
         mainAxisSize: MainAxisSize.min,
         children: [
           // Header
-          EmailVerificationModalHeader(
-            email: registerState.registerData['email']!,
+          const EmailVerificationModalHeader(),
+          const SizedBox(height: 24),
+
+          // Email Input
+          TextField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Nhập email của bạn',
+              filled: false,
+              prefixIcon: const Icon(Icons.email_outlined),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+
+          // OTP Input Label
+          Text(
+            'Nhập mã xác thực',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
 
           // OTP Input
           Row(
@@ -97,11 +162,11 @@ class _EmailVerificationModalState
           const SizedBox(height: 24),
 
           // Error message
-          if (registerState.error != null)
+          if (verifyEmailError != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
-                registerState.error!,
+                verifyEmailError,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.error,
                   fontSize: 14,
@@ -111,11 +176,17 @@ class _EmailVerificationModalState
             ),
 
           // Verify button
-          VerifyEmailButton(onPressed: isCodeComplete ? _verifyEmail : null),
+          VerifyEmailButton(
+            onPressed: isCodeComplete && _emailController.text.trim().isNotEmpty
+                ? _verifyEmail
+                : null,
+          ),
           const SizedBox(height: 16),
 
           // Resend code
-          const ResendEmailVerificationButton(),
+          ResendEmailVerificationButton(onClick: _resendVerificationEmail),
+
+          const SizedBox(height: 16),
 
           // Add bottom padding for safe area
           SizedBox(height: MediaQuery.of(context).viewInsets.bottom),

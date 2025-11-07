@@ -21,7 +21,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      isDismissible: false,
+      isDismissible: true,
       enableDrag: false,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
@@ -34,7 +34,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
   // Add listeners for registration and email verification state changes
   void _registerListener() {
     ref.listen(
-      registerControllerProvider.select((final state) => state.isSuccess),
+      registerControllerProvider.select((final state) => state.registerSuccess),
       (final previous, final next) {
         if (previous != next && next) {
           _showEmailVerificationModal();
@@ -45,7 +45,9 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
 
   void _emailVerificationListener() {
     ref.listen(
-      registerControllerProvider.select((final state) => state.isEmailVerified),
+      registerControllerProvider.select(
+        (final state) => state.verifingEmailSuccess,
+      ),
       (final previous, final next) {
         if (previous != next && next) {
           context.pop(); // Close modal
@@ -53,7 +55,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
           // display success toast
           GlobalToast.showSuccessToast(
             context,
-            message: 'Email verified successfully! Please log in.',
+            message: 'Xác thực email thành công! Vui lòng đăng nhập.',
           );
         }
       },
@@ -66,7 +68,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
     _emailVerificationListener();
 
     final isLoading = ref.watch(
-      registerControllerProvider.select((final s) => s.isLoading),
+      registerControllerProvider.select((final s) => s.registering),
     );
 
     return Stack(
@@ -98,21 +100,19 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
                   ),
 
                   // Logo and Title
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10, bottom: 50),
-                    child: Text(
-                      'Logo',
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    width: 160,
+                    height: 160,
+                    child: Image.asset(
+                      'assets/images/app-logo.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                   Container(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      'Create your Account',
+                      'Tạo tài khoản mới',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
@@ -130,7 +130,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account? ',
+                        'Đã có tài khoản? ',
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).colorScheme.onSurface,
@@ -141,7 +141,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
                           context.pop();
                         },
                         child: Text(
-                          'Sign In',
+                          'Đăng nhập',
                           style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).colorScheme.primary,
@@ -157,8 +157,7 @@ class _RegisterLayoutState extends ConsumerState<RegisterLayout> {
           ),
         ),
 
-        if (isLoading)
-          const LoadingOverlay(loadingText: 'Registering, please wait...'),
+        if (isLoading) const LoadingOverlay(loadingText: 'Đang xử lý...'),
       ],
     );
   }

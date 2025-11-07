@@ -1,8 +1,7 @@
-import 'package:cherry_toast/cherry_toast.dart';
-import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../common/toast/global_toast.dart';
 import '../../../../common/validator/validator.dart';
 import '../../controller/login_controller.dart';
 import 'btn_submit.dart';
@@ -58,12 +57,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     ) {
       if (next != null && next.isNotEmpty) {
         // show toast error message
-        CherryToast.error(
-          title: const Text('Login Failed'),
-          displayCloseButton: true,
-          description: Text(next),
-          toastPosition: Position.top,
-        ).show(context);
+        GlobalToast.showErrorToast(context, message: next);
       }
     });
   }
@@ -87,7 +81,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
           // Password field
           PasswordInputGlobal(
-            hintText: 'Password',
+            hintText: 'Mật khẩu',
             keyboardType: TextInputType.text,
             controller: _passwordController,
             validator: (final value) => Validator.validatePassword(value),
@@ -95,7 +89,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           const SizedBox(height: 24),
 
           // Submit button
-          ButtonSubmit(text: 'Sign In', onPressed: _submitForm),
+          ButtonSubmit(text: 'Đăng nhập', onPressed: _submitForm),
         ],
       ),
     );

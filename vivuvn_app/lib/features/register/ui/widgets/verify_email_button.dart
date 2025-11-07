@@ -10,7 +10,7 @@ class VerifyEmailButton extends ConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final isLoading = ref.watch(
-      registerControllerProvider.select((final state) => state.isLoading),
+      registerControllerProvider.select((final state) => state.verifingEmail),
     );
 
     return SizedBox(
@@ -33,7 +33,7 @@ class VerifyEmailButton extends ConsumerWidget {
                 ),
               )
             : const Text(
-                'Verify Email',
+                'Xác thực Email',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),

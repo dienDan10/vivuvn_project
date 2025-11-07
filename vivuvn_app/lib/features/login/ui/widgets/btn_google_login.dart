@@ -38,7 +38,7 @@ class _ButtonGoogleLoginState extends ConsumerState<ButtonGoogleLogin> {
             SizedBox(
               width: double.infinity,
               child: Text(
-                'Continue with Google',
+                'Đăng nhập với Google',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.secondary,
                   fontWeight: FontWeight.w600,

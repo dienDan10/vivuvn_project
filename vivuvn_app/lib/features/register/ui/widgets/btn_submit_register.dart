@@ -16,7 +16,7 @@ class ButtonSubmitRegister extends ConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final isLoading = ref.watch(
-      registerControllerProvider.select((final s) => s.isLoading),
+      registerControllerProvider.select((final s) => s.registering),
     );
 
     return InkWell(

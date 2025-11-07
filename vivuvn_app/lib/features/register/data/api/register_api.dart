@@ -21,4 +21,8 @@ final class RegisterApi {
   Future<void> verifyEmail(final VerifyEmailRequest request) async {
     await _dio.post('/api/v1/auth/verify-email', data: request.toMap());
   }
+
+  Future<void> resendVerificationEmail(final String email) async {
+    await _dio.post('/api/v1/auth/resend-verification', data: {'email': email});
+  }
 }

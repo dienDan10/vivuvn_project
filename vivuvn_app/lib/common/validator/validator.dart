@@ -4,26 +4,26 @@ class Validator {
 
   static String? validateEmail(final String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email';
+      return 'Email không được để trống';
     }
     // Simple email regex
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
     if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
+      return 'Email không hợp lệ';
     }
     return null;
   }
 
   static String? validatePassword(final String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your password';
+      return 'Mật khẩu không được để trống';
     }
     return null;
   }
 
   static String? notEmpty(final String? value, {final String fieldName = ''}) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName must not be empty';
+      return '$fieldName không được để trống';
     }
     return null;
   }
@@ -33,11 +33,11 @@ class Validator {
     final String fieldName = 'Số tiền',
   }) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName must not be empty';
+      return '$fieldName không được để trống';
     }
     final amount = double.tryParse(value.replaceAll(',', '').trim());
     if (amount == null || amount <= 0) {
-      return '$fieldName is not valid';
+      return '$fieldName không hợp lệ';
     }
     return null;
   }

@@ -10,11 +10,11 @@ class UsernameInput extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return TextInputGlobal(
-      hintText: 'Username',
+      hintText: 'Tên người dùng',
       keyboardType: TextInputType.text,
       controller: controller,
       validator: (final value) =>
-          value == null || value.isEmpty ? 'Enter username' : null,
+          value == null || value.isEmpty ? 'Nhập tên người dùng' : null,
     );
   }
 }

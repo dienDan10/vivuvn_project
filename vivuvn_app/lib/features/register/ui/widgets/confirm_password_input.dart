@@ -15,15 +15,15 @@ class ConfirmPasswordInput extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return PasswordInputGlobal(
-      hintText: 'Confirm Password',
+      hintText: 'Xác nhận mật khẩu',
       keyboardType: TextInputType.text,
       controller: controller,
       validator: (final value) {
         if (value == null || value.isEmpty) {
-          return 'Please confirm your password';
+          return 'Vui lòng xác nhận mật khẩu của bạn';
         }
         if (value != passwordController.text) {
-          return 'Passwords do not match';
+          return 'Mật khẩu không khớp';
         }
         return null;
       },
