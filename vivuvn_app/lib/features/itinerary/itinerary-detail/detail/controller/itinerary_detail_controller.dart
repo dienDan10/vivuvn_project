@@ -7,6 +7,7 @@ import '../../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../update-itinerary/controller/update_itinerary_controller.dart';
 import '../../../view-itinerary-list/controller/itinerary_controller.dart';
+import '../../schedule/model/transportation_mode.dart';
 import '../service/itinerary_detail_service.dart';
 import '../service/qr_code_save_service.dart';
 import '../state/itinerary_detail_state.dart';
@@ -56,6 +57,30 @@ class ItineraryDetailController
     state = state.copyWith(
       itinerary: current.copyWith(groupSize: newGroupSize),
     );
+  }
+
+  // Transportation draft management (UI state only)
+  void setTransportationVehicleDraft(final String? vehicle) {
+    if (vehicle == null) {
+      state = state.copyWith(transportationVehicleDraft: null);
+      return;
+    }
+    final normalized = TransportationMode.normalizeLabel(vehicle);
+    state = state.copyWith(transportationVehicleDraft: normalized);
+  }
+
+  void startTransportationSelection() {
+    final current = state.itinerary?.transportationVehicle;
+    if (current == null || current.isEmpty) {
+      state = state.copyWith(transportationVehicleDraft: null);
+      return;
+    }
+    final normalized = TransportationMode.normalizeLabel(current);
+    state = state.copyWith(transportationVehicleDraft: normalized);
+  }
+
+  void clearTransportationVehicleDraft() {
+    state = state.copyWith(transportationVehicleDraft: null);
   }
 
   /// Update itinerary name locally to reflect immediately after saving

@@ -17,9 +17,27 @@ class TransportationMode {
     motorbike,
   ];
 
+  /// Compare two transportation mode labels ignoring case.
+  static bool equalsIgnoreCase(final String? a, final String? b) {
+    if (a == null || b == null) return false;
+    return a.trim().toLowerCase() == b.trim().toLowerCase();
+  }
+
+  /// Return the canonical label (matching the entries in [all])
+  /// for the given [mode], comparing labels case-insensitively.
+  /// If no match is found, the original value is returned.
+  static String normalizeLabel(final String mode) {
+    final lower = mode.trim().toLowerCase();
+    return all.firstWhere(
+      (final item) => item.toLowerCase() == lower,
+      orElse: () => mode,
+    );
+  }
+
   /// Get icon for transportation mode
   static IconData getIcon(final String mode) {
-    switch (mode) {
+    final normalizedMode = normalizeLabel(mode);
+    switch (normalizedMode) {
       case airplane:
         return Icons.flight;
       case bus:
