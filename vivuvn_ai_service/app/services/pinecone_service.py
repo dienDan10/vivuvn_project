@@ -9,9 +9,10 @@ Architecture:
 - PineconeService: High-level business logic (search, upsert, stats, health checks)
 """
 
-from typing import List, Dict, Any, Optional
 import asyncio
 import structlog
+from typing import List, Dict, Any, Optional
+
 from app.core.config import settings
 from app.clients.pinecone_client import get_pinecone_client, PineconeClientError
 
@@ -389,6 +390,74 @@ class PineconeService:
         except Exception as e:
             logger.error(f"Multi-namespace query failed: {e}")
             raise PineconeServiceError(f"Multi-namespace query failed: {e}")
+
+    async def query_by_metadata(
+        self,
+        place_id: str,
+        namespace: Optional[str] = None
+    ) -> List[str]:
+        """
+        Query Pinecone to find all vector IDs matching a place_id in metadata.
+
+        This is used by the delete operation to find all chunks (vectors) associated
+        with a place before deletion. This fixes the bug in the original data_loader
+        that hardcoded a max of 10 chunks.
+
+        Args:
+            place_id: Google Place ID to search for
+            namespace: Pinecone namespace (default: uses PINECONE_DEFAULT_NAMESPACE)
+
+        Returns:
+            List of vector IDs matching the place_id
+        """
+        try:
+            if namespace is None:
+                namespace = settings.PINECONE_DEFAULT_NAMESPACE
+
+            logger.info(
+                "Querying vectors by place_id",
+                place_id=place_id,
+                namespace=namespace,
+            )
+
+            # Use index.query with filter on place_id metadata
+            # We'll use a dummy vector and rely on metadata filtering
+            dummy_vector = [0.0] * settings.VECTOR_DIMENSION
+
+            response = await asyncio.to_thread(
+                self.index.query,
+                vector=dummy_vector,
+                top_k=1000,  # Max limit to ensure we get all vectors
+                namespace=namespace,
+                filter={"place_id": {"$eq": place_id}},
+                include_metadata=False,
+                include_values=False,
+                show_progress=False
+            )
+
+            # Extract vector IDs from response
+            matches = response.get('matches', []) if isinstance(response, dict) else getattr(response, 'matches', [])
+            vector_ids = [
+                match.get('id') if isinstance(match, dict) else getattr(match, 'id')
+                for match in matches
+            ]
+
+            logger.info(
+                "Found vectors by place_id",
+                place_id=place_id,
+                vector_count=len(vector_ids),
+            )
+
+            return vector_ids
+
+        except Exception as e:
+            logger.error(
+                "Failed to query vectors by place_id",
+                place_id=place_id,
+                namespace=namespace,
+                error=str(e),
+            )
+            return []
 
     async def health_check(self) -> bool:
         """

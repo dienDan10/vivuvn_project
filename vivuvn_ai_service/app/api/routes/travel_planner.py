@@ -7,7 +7,6 @@ and related operations.
 
 import structlog
 from datetime import datetime
-
 from fastapi import APIRouter, Depends
 
 from app.api.schemas import (
@@ -19,11 +18,9 @@ from app.agents import get_travel_agent
 
 logger = structlog.get_logger(__name__)
 
-# Create router
 router = APIRouter()
 
 
-# Dependency to get travel agent
 async def get_travel_planning_agent():
     """Dependency to get travel planning agent."""
     return get_travel_agent()

@@ -6,10 +6,9 @@ Handles HTTP communication, error handling, retries, and rate limiting.
 """
 
 import asyncio
-from typing import List, Optional
-
 import httpx
 import structlog
+from typing import List, Optional
 
 logger = structlog.get_logger(__name__)
 

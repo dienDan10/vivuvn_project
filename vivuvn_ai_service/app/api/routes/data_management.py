@@ -9,10 +9,12 @@ from fastapi import APIRouter, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.utils.data_loader import get_data_loader
+from app.services.data_management_service import get_data_management_service
 from app.api.schemas import (
-    DataInsertRequest,
-    DataInsertResponse,
+    PlaceInsertRequest,
+    PlaceInsertResponse,
+    PlaceUpdateRequest,
+    PlaceUpdateResponse,
     DataDeleteRequest,
     DataDeleteResponse,
     DataBatchUploadResponse
@@ -23,40 +25,81 @@ logger = structlog.get_logger(__name__)
 router = APIRouter()
 
 
-@router.post("/insert", response_model=DataInsertResponse)
-async def insert_data_item(request: DataInsertRequest):
+@router.post("/insert", response_model=PlaceInsertResponse)
+async def insert_place(request: PlaceInsertRequest):
     """
-    Insert or update a single data item in Pinecone using optimized embedding service.
+    Insert or upsert a single place in Pinecone using optimized embedding service.
+
+    Uses Pinecone's upsert operation which automatically handles:
+    - Inserting new places
+    - Overwriting existing places (if googlePlaceId already exists)
 
     Args:
-        request: Data item to insert (currently supports 'place' type)
+        request: Place data to insert
 
     Returns:
-        DataInsertResponse: Success status and item ID
+        PlaceInsertResponse: Success status and place ID
     """
-    logger.info(f"Inserting {request.item_type}", item_type=request.item_type)
+    place_name = request.place.name
+    place_id = request.place.googlePlaceId
 
-    data_loader = get_data_loader()
+    logger.info(f"Inserting place", place_name=place_name, place_id=place_id)
 
-    # Only support 'place' type in optimized version
-    if request.item_type != "place":
-        raise ValueError("Only 'place' item type is supported in optimized version")
+    dm_service = get_data_management_service()
 
-    success = await data_loader.insert_single_item(
-        item_type=request.item_type,
-        item_data=request.data
-    )
+    # Convert PlaceData to dict for service
+    place_dict = request.place.model_dump()
+
+    success = await dm_service.upsert_place(place_data=place_dict)
 
     if not success:
-        raise ValueError(f"Failed to insert {request.item_type}")
+        raise ValueError(f"Failed to insert place: {place_name}")
 
-    logger.info(f"Successfully inserted {request.item_type}", item_id=request.data.get("googlePlaceId"))
+    logger.info(f"Successfully inserted place", place_id=place_id, place_name=place_name)
 
-    return DataInsertResponse(
+    return PlaceInsertResponse(
         success=True,
-        message=f"Successfully inserted {request.item_type}",
-        item_id=request.data.get("googlePlaceId") or request.data.get("id"),
-        item_type=request.item_type
+        message=f"Successfully inserted place: {place_name}",
+        place_id=place_id
+    )
+
+
+@router.put("/update", response_model=PlaceUpdateResponse)
+async def update_place(request: PlaceUpdateRequest):
+    """
+    Update a single place in Pinecone using upsert operation.
+
+    Uses Pinecone's upsert operation which automatically overwrites existing vectors
+    if the googlePlaceId already exists in the database.
+
+    Args:
+        request: Updated place data
+
+    Returns:
+        PlaceUpdateResponse: Success status and place ID
+    """
+    place_name = request.place.name
+    place_id = request.place.googlePlaceId
+
+    logger.info(f"Updating place", place_name=place_name, place_id=place_id)
+
+    dm_service = get_data_management_service()
+
+    # Convert PlaceData to dict for service
+    place_dict = request.place.model_dump()
+
+    # Use upsert_place which automatically handles updates via Pinecone's upsert
+    success = await dm_service.upsert_place(place_data=place_dict)
+
+    if not success:
+        raise ValueError(f"Failed to update place: {place_name}")
+
+    logger.info(f"Successfully updated place", place_id=place_id, place_name=place_name)
+
+    return PlaceUpdateResponse(
+        success=True,
+        message=f"Successfully updated place: {place_name}",
+        place_id=place_id
     )
 
 
@@ -73,8 +116,8 @@ async def delete_data_item(request: DataDeleteRequest):
     """
     logger.info(f"Deleting item {request.item_id}", item_id=request.item_id)
 
-    data_loader = get_data_loader()
-    success = await data_loader.delete_item(request.item_id)
+    dm_service = get_data_management_service()
+    success = await dm_service.delete_place(request.item_id)
 
     if not success:
         raise ValueError(f"Item {request.item_id} not found or could not be deleted")
@@ -119,10 +162,10 @@ async def batch_upload_from_json(
         temp_file_path = tmp_file.name
 
     try:
-        data_loader = get_data_loader()
+        dm_service = get_data_management_service()
 
         # Load places data with optimized chunking
-        loaded_count = await data_loader.load_places_from_json(temp_file_path)
+        loaded_count = await dm_service.load_from_json_file(temp_file_path)
 
         logger.info(
             f"Successfully uploaded {loaded_count} {data_type}",
@@ -156,7 +199,7 @@ async def load_location_data_file():
     """
     logger.info("Loading location data from file")
 
-    data_loader = get_data_loader()
+    dm_service = get_data_management_service()
 
     # Path to the location data file
     file_path = "d:/FU/SEP490/vivuvn_project/vivuvn_api/vivuvn_api/Data/location_data.json"
@@ -167,7 +210,7 @@ async def load_location_data_file():
         raise FileNotFoundError("location_data.json file not found")
 
     # Load places from the location data file
-    loaded_count = await data_loader.load_places_from_json(file_path)
+    loaded_count = await dm_service.load_from_json_file(file_path)
 
     logger.info(
         f"Successfully loaded {loaded_count} places from location_data.json",
@@ -193,8 +236,13 @@ async def initialize_vector_index():
     """
     logger.info("Initializing vector index")
 
-    data_loader = get_data_loader()
-    await data_loader.create_vector_index()
+    dm_service = get_data_management_service()
+
+    # Health check implicitly verifies the index is accessible
+    is_healthy = await dm_service.health_check()
+
+    if not is_healthy:
+        raise RuntimeError("Failed to initialize or verify Pinecone vector index")
 
     logger.info("Vector index initialized successfully")
 
@@ -238,22 +286,22 @@ async def get_data_stats():
 async def get_chunking_stats():
     """
     Get statistics about chunking configuration and embedding service.
-    
+
     Returns:
         dict: Chunking statistics and configuration
     """
     try:
-        data_loader = get_data_loader()
-        
-        # Get chunking stats
-        stats = await data_loader.get_chunking_stats()
-        
+        dm_service = get_data_management_service()
+
+        # Get combined stats
+        stats = await dm_service.get_stats()
+
         return {
             "success": True,
             "message": "Chunking statistics retrieved",
             "stats": stats
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting chunking stats: {e}")
         return {
