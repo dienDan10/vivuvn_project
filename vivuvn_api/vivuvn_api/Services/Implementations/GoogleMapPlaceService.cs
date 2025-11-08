@@ -250,6 +250,76 @@ namespace vivuvn_api.Services.Implementations
             }
         }
 
+        public async Task<PlaceDetailDto?> FetchPlaceDetailsByTextAsync(string name, string provinceName, string? address = null)
+        {
+            string apiKey = _config.GetValue<string>("GoogleMapService:ApiKey") ?? "";
+
+            // Build the search query
+            var fullQuery = string.IsNullOrEmpty(address)
+                ? $"{name} in {provinceName}, Việt Nam"
+                : $"{name}, {address}, {provinceName}, Việt Nam";
+
+            var request = new SearchGooglePlaceTextRequestDto
+            {
+                TextQuery = fullQuery,
+                MaxResultCount = 1 // We only need the first result
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var jsonBody = JsonSerializer.Serialize(request, jsonOptions);
+            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, "./v1/places:searchText")
+                {
+                    Content = content
+                };
+
+                requestMessage.Headers.Add("X-Goog-Api-Key", apiKey);
+                // Request all necessary fields including directions and reviews URIs
+                requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.googleMapsUri,places.googleMapsLinks");
+
+                var response = await _httpClient.SendAsync(requestMessage);
+
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadFromJsonAsync<FetchGoogleRestaurantResponseDto>();
+
+                if (responseContent?.Places == null || !responseContent.Places.Any())
+                {
+                    return null;
+                }
+
+                var place = responseContent.Places.First();
+
+                // Map to PlaceDetailDto
+                var placeDetail = new PlaceDetailDto
+                {
+                    PlaceId = place.Id,
+                    Name = place.DisplayName?.Text ?? name,
+                    FormattedAddress = place.FormattedAddress,
+                    Latitude = place.Location?.Latitude,
+                    Longitude = place.Location?.Longitude,
+                    Rating = place.Rating,
+                    UserRatingCount = place.UserRatingCount,
+                    GoogleMapsUri = place.GoogleMapsUri,
+                    DirectionsUri = place.GoogleMapsLinks?.DirectionsUri,
+                    ReviewsUri = place.GoogleMapsLinks?.ReviewsUri
+                };
+
+                return placeDetail;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         private async Task FetchPlacesPhotosAsync(IEnumerable<Place> places)
         {
             foreach (var place in places)

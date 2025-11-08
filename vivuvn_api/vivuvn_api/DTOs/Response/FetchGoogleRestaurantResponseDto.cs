@@ -31,6 +31,9 @@ namespace vivuvn_api.DTOs.Response
         [JsonPropertyName("googleMapsUri")]
         public string? GoogleMapsUri { get; set; }
 
+        [JsonPropertyName("googleMapsLinks")]
+        public GoogleMapsLinksResponse? GoogleMapsLinks { get; set; }
+
         [JsonPropertyName("priceLevel")]
         public string? PriceLevel { get; set; }
 
@@ -54,6 +57,24 @@ namespace vivuvn_api.DTOs.Response
 
         [JsonPropertyName("longitude")]
         public double Longitude { get; set; }
+    }
+
+    public class GoogleMapsLinksResponse
+    {
+        [JsonPropertyName("directionsUri")]
+        public string? DirectionsUri { get; set; }
+
+        [JsonPropertyName("reviewsUri")]
+        public string? ReviewsUri { get; set; }
+
+        [JsonPropertyName("photosUri")]
+        public string? PhotosUri { get; set; }
+
+        [JsonPropertyName("placeUri")]
+        public string? PlaceUri { get; set; }
+
+        [JsonPropertyName("writeAReviewUri")]
+        public string? WriteAReviewUri { get; set; }
     }
 
     public class Photo

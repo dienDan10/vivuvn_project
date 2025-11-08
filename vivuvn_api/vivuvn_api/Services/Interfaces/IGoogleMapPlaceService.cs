@@ -10,6 +10,7 @@ namespace vivuvn_api.Services.Interfaces
         Task<FetchGooglePlaceSimplifiedResponseDto?> SearchRestaurantsByTextAsync(string searchText, string? provinceName = null);
         Task<FetchGooglePlaceSimplifiedResponseDto?> SearchHotelsByTextAsync(string searchText, string? provinceName = null);
         Task<Place?> FetchPlaceDetailsByIdAsync(string googlePlaceId);
+        Task<PlaceDetailDto?> FetchPlaceDetailsByTextAsync(string name, string provinceName, string? address = null);
         Task<string?> GetPhotoUrlAsync(string photoName, int? maxHeight = 400, int? maxWidth = 400);
     }
 }
