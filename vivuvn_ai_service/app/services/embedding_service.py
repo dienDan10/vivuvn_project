@@ -8,18 +8,10 @@ Uses Google Gemini embedding model (gemini-embedding-001) with task-specific opt
 """
 
 import structlog
-from typing import List, Dict, Optional, Any
 import uuid
+from typing import List, Dict, Optional, Any
 
-try:
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
-except ImportError:
-    RecursiveCharacterTextSplitter = None
-
-try:
-    from google.genai import types
-except ImportError:
-    types = None
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.core.config import settings
 from app.clients.gemini_client import get_gemini_client
@@ -54,11 +46,9 @@ class EmbeddingService:
         """Initialize embedding service with shared Gemini client and text splitter."""
         logger.info("Initializing EmbeddingService...")
 
-        # Check dependencies
         if not RecursiveCharacterTextSplitter:
             raise EmbeddingServiceError("langchain library not available")
 
-        # Get shared Gemini client (singleton)
         try:
             logger.info(f"Using shared Gemini client with model: {settings.EMBEDDING_MODEL}")
             self.gemini_client = get_gemini_client()
@@ -67,7 +57,6 @@ class EmbeddingService:
             logger.error(f"Failed to get Gemini client: {e}")
             raise EmbeddingServiceError(f"Failed to initialize Gemini: {e}")
 
-        # Initialize LangChain text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1200,
             chunk_overlap=100,

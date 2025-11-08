@@ -34,21 +34,18 @@ class TravelPlanningAgent:
 
     def __init__(self):
         """Initialize main agent and all specialized agents."""
-        # Initialize specialized agents
         self.search_agent = SearchAgent()
         self.weather_agent = WeatherAgent()
         self.itinerary_agent = ItineraryAgent()
         self.validation_agent = ValidationAgent()
         self.response_agent = ResponseAgent()
 
-        # Build workflow
         self.workflow = self._build_workflow()
 
     def _build_workflow(self) -> StateGraph:
         """Build LangGraph workflow with all nodes and error-handling branches."""
         workflow = StateGraph(TravelPlanningState)
 
-        # Add nodes (delegate to specialized agents)
         workflow.add_node("build_filters", self.search_agent.build_search_filters)
         workflow.add_node("search_places", self.search_agent.search_places)
         workflow.add_node("fetch_weather_data", self.weather_agent.fetch_weather_data)
@@ -56,7 +53,6 @@ class TravelPlanningAgent:
         workflow.add_node("validate_output", self.validation_agent.validate_output)
         workflow.add_node("finalize_response", self.response_agent.finalize_response)
 
-        # Define workflow edges with error handling
         workflow.set_entry_point("build_filters")
         workflow.add_edge("build_filters", "search_places")
 
@@ -140,7 +136,6 @@ class TravelPlanningAgent:
         try:
             logger.info(f"🚀 Starting workflow for {travel_request.destination}")
 
-            # Initialize state
             initial_state: TravelPlanningState = {
                 "travel_request": travel_request,
                 "search_filters": {},
@@ -155,10 +150,8 @@ class TravelPlanningAgent:
                 "validation_passed": False
             }
 
-            # Run workflow
             final_state = await self.workflow.ainvoke(initial_state)
 
-            # Check for errors
             if final_state.get("error"):
                 raise TravelPlanningError(final_state["error"])
 

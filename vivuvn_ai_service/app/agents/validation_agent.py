@@ -7,9 +7,8 @@ Handles:
 - Detecting hallucinated content
 """
 
-from typing import Optional, Tuple
-
 import structlog
+from typing import Optional, Tuple
 
 from app.agents.state import TravelPlanningState
 

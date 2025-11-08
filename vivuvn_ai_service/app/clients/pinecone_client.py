@@ -6,21 +6,13 @@ Provides index creation, list, describe, and reference retrieval operations.
 Uses gRPC protocol (v6+) for better performance.
 """
 
-from typing import Optional, List, Dict, Any
-
 import structlog
-
+from typing import Optional, List, Dict, Any
 from app.core.config import settings
+from pinecone import Pinecone, ServerlessSpec
+from pinecone.grpc import PineconeGRPC
 
 logger = structlog.get_logger(__name__)
-
-try:
-    from pinecone import Pinecone, ServerlessSpec
-    from pinecone.grpc import PineconeGRPC
-except Exception:
-    Pinecone = None
-    ServerlessSpec = None
-    PineconeGRPC = None
 
 
 class PineconeClientError(Exception):
