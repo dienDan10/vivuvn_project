@@ -47,5 +47,40 @@ namespace vivuvn_api.Services.Implementations
 
             return Task.CompletedTask;
         }
+
+        public async Task SendPasswordResetEmailAsync(string email, string username, string resetToken)
+        {
+            var subject = "Password Reset Request";
+            var htmlContent = $@"
+                <html>
+                <body>
+                    <h2>Password Reset</h2>
+                    <p>Hi {username},</p>
+                    <p>You requested to reset your password. Use the following code to reset your password:</p>
+                    <h1 style='color: #4CAF50; letter-spacing: 5px;'>{resetToken}</h1>
+                    <p>This code will expire in 1 hour.</p>
+                    <p>If you didn't request this, please ignore this email.</p>
+                </body>
+                </html>
+            ";
+
+            await SendEmailAsync(email, subject, htmlContent);
+        }
+
+        public async Task SendPasswordResetNotAvailableEmailAsync(string email)
+        {
+            var subject = "Password Reset Not Available";
+            var htmlContent = $@"
+                <html>
+                <body>
+                    <h2>Password Reset Request</h2>
+                    <p>You requested to reset your password, but your account uses Google Sign-In.</p>
+                    <p>Please continue logging in with your Google account.</p>
+                </body>
+                </html>
+            ";
+
+            await SendEmailAsync(email, subject, htmlContent);
+        }
     }
 }

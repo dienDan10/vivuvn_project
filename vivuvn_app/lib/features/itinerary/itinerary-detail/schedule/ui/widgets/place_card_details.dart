@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../model/itinerary_item.dart';
+import 'place_action_button_direction.dart';
 import 'place_action_button_hotel.dart';
 import 'place_action_button_info.dart';
 import 'place_action_button_location.dart';
@@ -41,6 +42,7 @@ class _PlaceCardDetailsState extends ConsumerState<PlaceCardDetails> {
             PlacePhotosSection(
               photos: location.photos,
               locationId: location.id,
+              heroPrefix: 'detail_',
             ),
           ],
           const SizedBox(height: 16),
@@ -52,6 +54,11 @@ class _PlaceCardDetailsState extends ConsumerState<PlaceCardDetails> {
               children: [
                 // Btn thông tin chi tiết
                 PlaceActionButtonInfo(location: location),
+                const SizedBox(width: 8),
+
+                // Btn directions
+                if (location.directionsUri != null)
+                  PlaceActionButtonDirection(url: location.directionsUri ?? ''),
                 const SizedBox(width: 8),
 
                 // Btn vị trí trên bản đồ

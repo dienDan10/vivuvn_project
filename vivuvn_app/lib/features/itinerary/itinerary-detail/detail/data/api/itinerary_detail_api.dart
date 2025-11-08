@@ -31,4 +31,20 @@ class ItineraryDetailApi {
       data: {'groupSize': groupSize},
     );
   }
+
+  Future<String> getInviteCode(final int itineraryId) async {
+    final response = await _dio.post('/api/v1/itineraries/$itineraryId/invite-code');
+    final data = response.data as Map<String, dynamic>;
+    return data['inviteCode'] as String;
+  }
+
+  Future<void> updateTransportation({
+    required final int itineraryId,
+    required final String transportation,
+  }) async {
+    await _dio.put(
+      '/api/v1/itineraries/$itineraryId/transportation',
+      data: {'transportation': transportation},
+    );
+  }
 }

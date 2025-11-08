@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-/// Subtitle text hiển thị số tiền được chọn
-class StatisticsSubtitle extends StatelessWidget {
-  const StatisticsSubtitle({
-    required this.selectedKey,
-    required this.dataMap,
-    super.key,
-  });
+import 'controller/statistics_controller.dart';
 
-  final String? selectedKey;
-  final Map<String, double> dataMap;
+/// Subtitle text hiển thị số tiền được chọn
+class StatisticsSubtitle extends ConsumerWidget {
+  const StatisticsSubtitle({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final state = ref.watch(statisticsProvider);
+    final selectedKey = state.selectedKey;
+    final dataMap = state.showByMember
+        ? state.dataByMember
+        : (state.showByType ? state.dataByType : state.dataByDay);
     return Text(
       selectedKey == null
           ? 'Chọn một mục để xem chi tiết'

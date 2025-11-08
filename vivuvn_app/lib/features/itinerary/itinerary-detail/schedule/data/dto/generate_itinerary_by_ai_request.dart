@@ -6,6 +6,7 @@ class GenerateItineraryByAiRequest {
   final int groupSize;
   final double budget;
   final String? specialRequirements;
+  final String? transportationMode;
 
   GenerateItineraryByAiRequest({
     required this.itineraryId,
@@ -13,6 +14,7 @@ class GenerateItineraryByAiRequest {
     required this.groupSize,
     required this.budget,
     this.specialRequirements,
+    this.transportationMode,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,6 +24,7 @@ class GenerateItineraryByAiRequest {
       // Server expects an integer (Int64) for Budget.
       'Budget': budget.round(),
       'SpecialRequirements': specialRequirements ?? '',
+      'TransportationMode': transportationMode ?? '',
     };
   }
 

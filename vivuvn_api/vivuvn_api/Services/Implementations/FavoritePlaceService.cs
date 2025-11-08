@@ -27,7 +27,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (favoritePlace is null)
             {
-                throw new KeyNotFoundException("Favorite place not found.");
+                throw new KeyNotFoundException("Không tìm thấy địa điểm yêu thích.");
             }
 
             _unitOfWork.FavoritePlaces.Remove(favoritePlace);

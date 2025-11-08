@@ -1,0 +1,1 @@
+enum NotificationFilter { all, unread }

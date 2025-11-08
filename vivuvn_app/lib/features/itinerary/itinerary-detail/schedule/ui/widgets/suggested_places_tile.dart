@@ -1,48 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../schedule_data.dart';
-import 'add_place_bottom_sheet.dart';
-import 'suggested_place_item.dart';
+import '../../../detail/controller/itinerary_detail_controller.dart';
+import '../../controller/itinerary_schedule_controller.dart';
+import 'suggested_places_content.dart';
 
-class SuggestedPlacesTile extends ConsumerWidget {
+class SuggestedPlacesTile extends ConsumerStatefulWidget {
   const SuggestedPlacesTile({super.key});
 
-  void _openAddPlaceSheet(final BuildContext context, final WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => const FractionallySizedBox(
-        heightFactor: 0.8,
-        child: AddPlaceBottomSheet(type: 'place'),
+  @override
+  ConsumerState<SuggestedPlacesTile> createState() => _SuggestedPlacesTileState();
+}
+
+class _SuggestedPlacesTileState extends ConsumerState<SuggestedPlacesTile> {
+  int? _lastProvinceId;
+  ProviderSubscription<int?>? _provinceListener;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final initialProvinceId = ref.read(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.destinationProvinceId,
       ),
     );
+
+    if (initialProvinceId != null) {
+      _lastProvinceId = initialProvinceId;
+    }
+
+    _provinceListener = ref.listenManual<int?>(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.destinationProvinceId,
+      ),
+      (final previous, final next) {
+        if (next != null && next != _lastProvinceId) {
+          _lastProvinceId = next;
+          ref
+              .read(itineraryScheduleControllerProvider.notifier)
+              .fetchSuggestedLocations(provinceId: next);
+        }
+      },
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
+      ref
+          .read(itineraryScheduleControllerProvider.notifier)
+          .fetchSuggestedLocations(provinceId: _lastProvinceId);
+    });
   }
 
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    return ExpansionTile(
-      title: const Text('Địa điểm gợi ý'),
+  void dispose() {
+    _provinceListener?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    return const ExpansionTile(
+      title: Text('Địa điểm gợi ý'),
       children: [
-        SizedBox(
-          height: 100,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: samplePlaces.length,
-            separatorBuilder: (_, final __) => const SizedBox(width: 12),
-            itemBuilder: (final context, final index) {
-              final place = samplePlaces[index];
-              return SuggestedPlaceItem(
-                title: place.title,
-                onTap: () => _openAddPlaceSheet(context, ref),
-              );
-            },
-          ),
-        ),
+        SuggestedPlacesContent(),
       ],
     );
   }

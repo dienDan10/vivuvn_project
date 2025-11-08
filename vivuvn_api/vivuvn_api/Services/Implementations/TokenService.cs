@@ -63,5 +63,11 @@ namespace vivuvn_api.Services.Implementations
             return $"{Constants.InviteCodePrefix}-{code}";
 
         }
+
+        public string CreatePasswordResetToken()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
     }
 }

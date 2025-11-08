@@ -17,6 +17,7 @@ class InterestSelectionStep extends ConsumerWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Title and description
         const Text(
@@ -32,11 +33,8 @@ class InterestSelectionStep extends ConsumerWidget {
         ),
         const SizedBox(height: 30),
 
-        // Grid
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.45,
-          child: const InterestGrid(),
-        ),
+        // Grid - tự điều chỉnh chiều cao với shrinkWrap
+        const InterestGrid(),
       ],
     );
   }

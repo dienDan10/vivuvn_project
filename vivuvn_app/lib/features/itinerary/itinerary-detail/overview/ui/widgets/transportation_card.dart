@@ -2,46 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../detail/controller/itinerary_detail_controller.dart';
+import '../../../schedule/model/transportation_mode.dart';
+import 'transportation_selection_bottom_sheet.dart';
 
 /// Widget hiển thị và chỉnh sửa phương tiện di chuyển
 class TransportationCard extends ConsumerWidget {
   const TransportationCard({super.key});
 
   IconData _getTransportIcon(final String vehicle) {
-    final lowerVehicle = vehicle.toLowerCase();
-    if (lowerVehicle.contains('máy bay') || lowerVehicle.contains('plane')) {
-      return Icons.flight;
-    } else if (lowerVehicle.contains('ô tô') || lowerVehicle.contains('car')) {
-      return Icons.directions_car;
-    } else if (lowerVehicle.contains('tàu') || lowerVehicle.contains('train')) {
-      return Icons.train;
-    } else if (lowerVehicle.contains('xe khách') ||
-        lowerVehicle.contains('bus')) {
-      return Icons.directions_bus;
-    } else if (lowerVehicle.contains('xe máy') ||
-        lowerVehicle.contains('motor')) {
-      return Icons.two_wheeler;
-    } else if (lowerVehicle.contains('đi bộ') ||
-        lowerVehicle.contains('walk')) {
-      return Icons.directions_walk;
-    }
-    return Icons.directions_car; // Default icon
+    return TransportationMode.getIcon(vehicle);
   }
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final itineraryState = ref.watch(itineraryDetailControllerProvider);
-    final itinerary = itineraryState.itinerary;
+    final itinerary = ref.watch(
+      itineraryDetailControllerProvider.select((final state) => state.itinerary),
+    );
+
+    final isTransportationSaving = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.isTransportationSaving,
+      ),
+    );
 
     // Không hiển thị gì nếu chưa có dữ liệu
     if (itinerary == null) {
       return const SizedBox.shrink();
     }
 
-    final vehicle = itinerary.transportationVehicle.isEmpty
-        ? 'Chưa xác định'
-        : itinerary.transportationVehicle;
-    final icon = _getTransportIcon(vehicle);
+    final activeVehicle = ref.watch(
+      itineraryDetailControllerProvider.select((final state) {
+        final draft = state.transportationVehicleDraft;
+        final itineraryVehicle = state.itinerary?.transportationVehicle ?? '';
+        final effective = (draft != null && draft.isNotEmpty)
+            ? draft
+            : itineraryVehicle;
+        if (effective.isEmpty) {
+          return null;
+        }
+        return TransportationMode.normalizeLabel(effective);
+      }),
+    );
+
+    final vehicleLabel = activeVehicle ?? 'Chưa xác định';
+    final icon = _getTransportIcon(vehicleLabel);
 
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
@@ -81,11 +85,11 @@ class TransportationCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  vehicle,
+                  vehicleLabel,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: itinerary.transportationVehicle.isEmpty
+                    color: activeVehicle == null
                         ? Colors.grey.shade500
                         : Colors.black87,
                   ),
@@ -97,19 +101,44 @@ class TransportationCard extends ConsumerWidget {
           ),
           // Edit button (placeholder for future CRUD)
           IconButton(
-            icon: Icon(
-              Icons.edit_outlined,
-              size: 20,
-              color: Colors.grey.shade600,
-            ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Chức năng chỉnh sửa sẽ được thêm sau'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
+            icon: isTransportationSaving
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.grey.shade600,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.edit_outlined,
+                    size: 20,
+                    color: Colors.grey.shade600,
+                  ),
+            onPressed: isTransportationSaving
+                ? null
+                : () async {
+                    final notifier =
+                        ref.read(itineraryDetailControllerProvider.notifier);
+                    notifier.startTransportationSelection();
+                    final selected = await showModalBottomSheet<String>(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      builder: (final _) => const TransportationSelectionBottomSheet(),
+                    );
+
+                    if (selected != null) {
+                      await notifier.saveTransportationVehicle(context, selected);
+                    } else {
+                      notifier.clearTransportationVehicleDraft();
+                    }
+                  },
           ),
         ],
       ),

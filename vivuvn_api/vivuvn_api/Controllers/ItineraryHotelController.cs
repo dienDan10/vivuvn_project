@@ -23,7 +23,7 @@ namespace vivuvn_api.Controllers
         {
             await _itineraryHotelService.AddHotelToItineraryFromSuggestionAsync(itineraryId, request);
 
-            return Ok(new { message = "Hotel added to itinerary successfully." });
+            return Ok(new { message = "Đã thêm khách sạn vào lịch trình thành công." });
         }
 
         [HttpPost("search")]
@@ -31,7 +31,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> AddHotelToItineraryFromSearch(int itineraryId, [FromBody] AddHotelToItineraryFromSearch request)
         {
             await _itineraryHotelService.AddHotelToItineraryFromSearchAsync(itineraryId, request);
-            return Ok(new { message = "Hotel added to itinerary successfully." });
+            return Ok(new { message = "Đã thêm khách sạn vào lịch trình thành công." });
         }
 
         [HttpPut("{itineraryHotelId}/notes")]
@@ -39,7 +39,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> UpdateItineraryHotelNotes(int itineraryId, int itineraryHotelId, [FromBody] UpdateNoteRequestDto requestDto)
         {
             await _itineraryHotelService.UpdateNotesAsync(itineraryId, itineraryHotelId, requestDto.Notes);
-            return Ok(new { message = "Itinerary hotel notes updated successfully." });
+            return Ok(new { message = "Đã cập nhật ghi chú khách sạn thành công." });
         }
 
         [HttpPut("{itineraryHotelId}/dates")]
@@ -47,7 +47,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> UpdateItineraryHotelDates(int itineraryId, int itineraryHotelId, [FromBody] UpdateHotelCheckInCheckOutDateRequestDto request)
         {
             await _itineraryHotelService.UpdateCheckInCheckOutAsync(itineraryId, itineraryHotelId, request.CheckIn, request.CheckOut);
-            return Ok(new { message = "Itinerary hotel check-in and check-out dates updated successfully." });
+            return Ok(new { message = "Đã cập nhật ngày nhận phòng và trả phòng thành công." });
         }
 
         [HttpPut("{itineraryHotelId}/costs")]
@@ -56,11 +56,11 @@ namespace vivuvn_api.Controllers
         {
             if (request.Cost == 0)
             {
-                return BadRequest("Cost must be greater than 0");
+                return BadRequest("Chi phí phải lớn hơn 0");
             }
 
             await _itineraryHotelService.UpdateCostAsync(itineraryId, itineraryHotelId, request.Cost);
-            return Ok(new { message = "Itinerary hotel cost updated successfully." });
+            return Ok(new { message = "Đã cập nhật chi phí khách sạn thành công." });
         }
 
         [HttpDelete("{itineraryHotelId}")]
@@ -68,7 +68,7 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> DeleteItineraryHotel(int itineraryId, int itineraryHotelId)
         {
             await _itineraryHotelService.DeleteItineraryHotelAsync(itineraryId, itineraryHotelId);
-            return Ok(new { message = "Itinerary hotel deleted successfully." });
+            return Ok(new { message = "Đã xóa khách sạn khỏi lịch trình thành công." });
         }
     }
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class EmailVerificationModalHeader extends StatelessWidget {
-  final String email;
-  const EmailVerificationModalHeader({super.key, required this.email});
+  const EmailVerificationModalHeader({super.key});
 
   @override
   Widget build(final BuildContext context) {
@@ -21,7 +20,7 @@ class EmailVerificationModalHeader extends StatelessWidget {
 
         // Icon
         Icon(
-          Icons.email_outlined,
+          Icons.verified_user_outlined,
           size: 64,
           color: Theme.of(context).colorScheme.primary,
         ),
@@ -29,7 +28,7 @@ class EmailVerificationModalHeader extends StatelessWidget {
 
         // Title
         Text(
-          'Verify Your Email',
+          'Xác thực Email',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -40,10 +39,10 @@ class EmailVerificationModalHeader extends StatelessWidget {
 
         // Description
         Text(
-          'We sent a verification code to\n$email',
+          'Nhập mã xác thực đã được gửi đến email của bạn.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             color: Theme.of(
               context,
             ).colorScheme.onSurface.withValues(alpha: 0.7),

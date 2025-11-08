@@ -15,6 +15,11 @@ export const getAllProvinces = async (filters = {}) => {
 	return res;
 };
 
+export const getAllProvincesNoPagination = async () => {
+	const res = await axios.get("/v1/provinces/all");
+	return res;
+}
+
 export const getProvinceById = async (id) => {
 	const res = await axios.get(`/v1/provinces/${id}`);
 	return res;

@@ -31,7 +31,7 @@ namespace vivuvn_api.Controllers
         {
             var userId = GetCurrentUserId();
             await _memberService.JoinItineraryByInviteCodeAsync(userId, request.InviteCode);
-            return Ok(new { message = "Successfully joined the itinerary." });
+            return Ok(new { message = "Tham gia lịch trình thành công." });
         }
     }
 }

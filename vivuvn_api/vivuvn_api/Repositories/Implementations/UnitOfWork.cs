@@ -10,6 +10,7 @@ namespace vivuvn_api.Repositories.Implementations
         private IDbContextTransaction? _transaction;
 
         public IUserRepository Users { get; private set; }
+        public IRoleRepository Roles { get; private set; }
         public IItineraryRepository Itineraries { get; private set; }
         public IItineraryDayRepository ItineraryDays { get; private set; }
         public IItineraryItemRepository ItineraryItems { get; private set; }
@@ -26,9 +27,11 @@ namespace vivuvn_api.Repositories.Implementations
         public IItineraryMessageRepository ItineraryMessages { get; private set; }
         public INotificationRepository Notifications { get; private set; }
         public IUserDeviceRepository UserDevices { get; private set; }
+        public IPasswordResetRepository PasswordResets { get; set; }
 
         public UnitOfWork(AppDbContext context,
             IUserRepository userRepository,
+            IRoleRepository roleRepository,
             IItineraryRepository itineraryRepository,
             IItineraryDayRepository itineraryDayRepository,
             IBudgetRepository budgetRepository,
@@ -44,10 +47,12 @@ namespace vivuvn_api.Repositories.Implementations
             IItineraryMemberRepository itineraryMemberRepository,
             IItineraryMessageRepository itineraryMessageRepository,
             INotificationRepository notifications,
-            IUserDeviceRepository userDevices)
+            IUserDeviceRepository userDevices,
+            IPasswordResetRepository passwordResets)
         {
             _context = context;
             Users = userRepository;
+            Roles = roleRepository;
             Itineraries = itineraryRepository;
             ItineraryDays = itineraryDayRepository;
             Budgets = budgetRepository;
@@ -64,6 +69,7 @@ namespace vivuvn_api.Repositories.Implementations
             ItineraryMessages = itineraryMessageRepository;
             Notifications = notifications;
             UserDevices = userDevices;
+            PasswordResets = passwordResets;
         }
 
         public async Task SaveChangesAsync()

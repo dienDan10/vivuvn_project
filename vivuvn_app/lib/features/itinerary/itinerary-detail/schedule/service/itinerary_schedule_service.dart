@@ -7,6 +7,7 @@ import '../data/dto/update_item_request.dart';
 import '../data/dto/update_transportation_request.dart';
 import '../model/itinerary_day.dart';
 import '../model/itinerary_item.dart';
+import '../model/location.dart';
 
 final itineraryScheduleServiceProvider =
     Provider.autoDispose<ItineraryScheduleService>((final ref) {
@@ -112,5 +113,18 @@ class ItineraryScheduleService {
       request: request,
     );
     return updatedItem;
+  }
+
+  Future<List<Location>> getSuggestedLocations({
+    required final int provinceId,
+    final int pageNumber = 1,
+    final int pageSize = 5,
+  }) async {
+    final response = await _api.getSuggestedLocations(
+      provinceId: provinceId,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+    return response.locations;
   }
 }

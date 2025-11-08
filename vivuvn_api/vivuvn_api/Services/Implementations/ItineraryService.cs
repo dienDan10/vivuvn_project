@@ -2,6 +2,7 @@
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
+using vivuvn_api.Extensions;
 using vivuvn_api.Helpers;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
@@ -35,7 +36,7 @@ namespace vivuvn_api.Services.Implementations
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id && !i.DeleteFlag,
                 includeProperties: "StartProvince,DestinationProvince,User");
 
-            if (itinerary == null) throw new KeyNotFoundException($"Itinerary with id {id} not found.");
+            if (itinerary == null) throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {id}.");
             var dto = _mapper.Map<ItineraryDto>(itinerary);
             dto.IsOwner = itinerary.UserId == userId;
             return dto;
@@ -113,7 +114,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (itinerary == null)
             {
-                throw new KeyNotFoundException($"Itinerary with id {itineraryId} not found.");
+                throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {itineraryId}.");
             }
 
             itinerary.StartDate = request.StartDate;
@@ -209,6 +210,19 @@ namespace vivuvn_api.Services.Implementations
             return true;
         }
 
+        public async Task<bool> UpdateItineraryTransportationAsync(int itineraryId, TransportationMode transportation)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && !i.DeleteFlag);
+            if (itinerary == null)
+            {
+                return false;
+            }
+            itinerary.TransportationVehicle = TransportationModeExtensions.ToVietnameseString(transportation);
+            _unitOfWork.Itineraries.Update(itinerary);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
         #endregion
 
         #region Itinerary Schedule Methods
@@ -232,13 +246,13 @@ namespace vivuvn_api.Services.Implementations
 
             if (itinerary == null)
             {
-                throw new KeyNotFoundException($"Itinerary with id {itineraryId} not found.");
+                throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {itineraryId}.");
             }
 
             var daysCount = (itinerary.EndDate - itinerary.StartDate).Days + 1;
             if (daysCount > 10 || daysCount < 1)
             {
-                throw new ArgumentException("Auto-generation is only supported for itineraries from 1 to 10 days.");
+                throw new ArgumentException("Tự động tạo lịch trình chỉ hỗ trợ từ 1 đến 10 ngày.");
             }
 
             // Generate itinerary from AI service
@@ -259,7 +273,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (aiResponse?.Itinerary == null)
             {
-                throw new InvalidOperationException("Failed to generate itinerary from AI service.");
+                throw new InvalidOperationException("Không thể tạo lịch trình từ dịch vụ AI.");
             }
 
             if (aiResponse.Itinerary.ScheduleUnavailable)
@@ -285,23 +299,23 @@ namespace vivuvn_api.Services.Implementations
                 // Get the existing itinerary with its days and budget
                 var itinerary = await _unitOfWork.Itineraries.GetOneAsync(
                     i => i.Id == itineraryId,
-                    includeProperties: "Days,Days.Items,Budget,Budget.Items,StartProvince,DestinationProvince",
+                    includeProperties: "Days,Days.Items,Budget,Budget.Items,Budget.Items.ItineraryHotel,Budget.Items.ItineraryRestaurant",
                     tracked: true);
 
                 if (itinerary == null)
                 {
-                    throw new KeyNotFoundException($"Itinerary with id {itineraryId} not found.");
+                    throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {itineraryId}.");
                 }
 
                 // Update itinerary group size
                 itinerary.GroupSize = groupSize;
 
-				// Update transportation vehicle
+                // Update transportation vehicle
                 itinerary.TransportationVehicle = travelItinerary.TransportationSuggestions
                     .FirstOrDefault()?.Mode ?? null;
 
-				// Use the budget from the navigation property
-				var budget = itinerary.Budget;
+                // Use the budget from the navigation property
+                var budget = itinerary.Budget;
 
                 // Clear existing itinerary items from all days
                 foreach (var day in itinerary.Days)
@@ -317,9 +331,11 @@ namespace vivuvn_api.Services.Implementations
 
                 if (budget?.Items != null)
                 {
-                    // Clear all items from the collection
-                    budget.Items.Clear();
-                    budget.TotalBudget = 0;
+                    // Clear all items that do not have ItineraryRestaurant and ItineraryHotel from the collection
+                    budget.Items = budget.Items
+                        .Where(bi => bi.ItineraryHotel != null || bi.ItineraryRestaurant != null)
+                        .ToList();
+                    budget.TotalBudget = budget.Items.Sum(bi => bi.Cost);
                 }
 
                 // Batch load all locations
@@ -349,7 +365,7 @@ namespace vivuvn_api.Services.Implementations
                 // Update budget total if TotalCost is provided
                 if (travelItinerary.TotalCost > 0 && budget != null)
                 {
-                    budget.TotalBudget = travelItinerary.TotalCost;
+                    budget.TotalBudget += travelItinerary.TotalCost;
                 }
 
                 // Single SaveChanges at the end for all changes
@@ -389,7 +405,7 @@ namespace vivuvn_api.Services.Implementations
                     // Look up the location from the pre-loaded dictionary
                     if (!locationDict.TryGetValue(activity.PlaceId, out var location))
                     {
-                        throw new KeyNotFoundException($"Location with PlaceId {activity.PlaceId} not found in database.");
+                        throw new KeyNotFoundException($"Không tìm thấy địa điểm có PlaceId {activity.PlaceId} trong cơ sở dữ liệu.");
                     }
 
                     // Create itinerary item
@@ -456,12 +472,12 @@ namespace vivuvn_api.Services.Implementations
                         var budgetItem = new BudgetItem
                         {
                             BudgetId = budget.BudgetId,
-                            Name = $"{transportation.Mode} - {transportation.Details}",
+                            Name = transportation.Mode,
                             Cost = transportation.EstimatedCost,
                             Date = transportation.Date,
                             BudgetTypeId = transportationBudgetTypeId,
                             Details = transportation.Details
-						};
+                        };
                         budget.Items.Add(budgetItem);
                     }
                 }

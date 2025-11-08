@@ -20,7 +20,7 @@ namespace vivuvn_api.Controllers
 
             if (userId == null)
             {
-                return Unauthorized(new { message = "User ID claim is missing." });
+                return Unauthorized(new { message = "Thiếu thông tin định danh người dùng." });
             }
 
             // get all itineraries by user id
@@ -48,7 +48,7 @@ namespace vivuvn_api.Controllers
 
             if (userId == null)
             {
-                return Unauthorized(new { message = "User ID claim is missing." });
+                return Unauthorized(new { message = "Thiếu thông tin định danh người dùng." });
             }
 
             // create itinerary
@@ -61,19 +61,16 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteItinerary(int id)
         {
-            var userId = GetCurrentUserId();
-            var isOwner = await _memberService.IsOwnerAsync(id, userId);
-
-            if (!isOwner)
+            if (!await IsOwner(id))
             {
-                return BadRequest("You are not the owner of this itinerary.");
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
             }
 
             var result = await _itineraryService.DeleteItineraryByIdAsync(id);
 
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
 
             return NoContent();
@@ -83,6 +80,10 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateItineraryDates(int id, [FromBody] UpdateItineraryDatesRequestDto request)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
+            }
             await _itineraryService.UpdateItineraryDatesAsync(id, request);
             return Ok();
         }
@@ -91,10 +92,14 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateItineraryName(int id, [FromBody] UpdateItineraryNameRequestDto request)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
+            }
             var result = await _itineraryService.UpdateItineraryNameAsync(id, request.Name);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu" });
             }
             return Ok();
         }
@@ -103,10 +108,30 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateItineraryGroupSize(int id, [FromBody] UpdateItineraryGroupSizeRequestDto request)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
+            }
             var result = await _itineraryService.UpdateItineraryGroupSizeAsync(id, request.GroupSize);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
+            }
+            return Ok();
+        }
+
+        [HttpPut("{id}/transportation")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItineraryTransportation(int id, [FromBody] UpdateItineraryTransportationRequestDto request)
+        {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
+            }
+            var result = await _itineraryService.UpdateItineraryTransportationAsync(id, request.Transportation);
+            if (!result)
+            {
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
             return Ok();
         }
@@ -115,10 +140,14 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> SetItineraryToPublic(int id)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
+            }
             var result = await _itineraryService.SetItineraryToPublicAsync(id);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
             return Ok();
         }
@@ -127,12 +156,22 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> SetItineraryToPrivate(int id)
         {
+            if (!await IsOwner(id))
+            {
+                return BadRequest("Bạn không phải là chủ của lịch trình này.");
+            }
             var result = await _itineraryService.SetItineraryToPrivateAsync(id);
             if (!result)
             {
-                return NotFound(new { message = $"Itinerary with id {id} not found." });
+                return NotFound(new { message = $"Không tìm thấy lịch trình yêu cầu." });
             }
             return Ok();
+        }
+
+        private async Task<bool> IsOwner(int itineraryId)
+        {
+            var userId = GetCurrentUserId();
+            return await _memberService.IsOwnerAsync(itineraryId, userId);
         }
 
         private int GetCurrentUserId()

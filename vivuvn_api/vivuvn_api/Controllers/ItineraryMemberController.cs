@@ -27,7 +27,7 @@ namespace vivuvn_api.Controllers
             var isOwner = await _memberService.IsOwnerAsync(userId, itineraryId);
             if (isOwner)
             {
-                return BadRequest("Owner cannot leave the itinerary.");
+                return BadRequest("Chủ lịch trình không thể rời khỏi lịch trình.");
             }
             await _memberService.LeaveItineraryAsync(userId, itineraryId);
             return NoContent();

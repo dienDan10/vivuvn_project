@@ -13,6 +13,7 @@ class LoginLayout extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isLoading = ref.watch(
       loginControllerProvider.select((final state) => state.isLoading),
     );
@@ -28,21 +29,42 @@ class LoginLayout extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Logo
-                    Padding(
-                      padding: const EdgeInsets.only(top: 50, bottom: 50),
-                      child: Text(
-                        'Logo',
-                        style: TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.secondary,
+                    Container(
+                      width: 160,
+                      height: 160,
+                      margin: const EdgeInsets.only(bottom: 30, top: 50),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            colorScheme.primary.withValues(alpha: 0.18),
+                            colorScheme.primary.withValues(alpha: 0.06),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withValues(alpha: 0.14),
+                            blurRadius: 14,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: Image.asset(
+                            'assets/images/app-logo.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
                     Container(
                       alignment: Alignment.topLeft,
                       child: Text(
-                        'Login to your Account',
+                        'Đăng nhập',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
@@ -56,7 +78,7 @@ class LoginLayout extends ConsumerWidget {
                     const LoginForm(),
                     const SizedBox(height: 80),
                     Text(
-                      '- Or sign in with -',
+                      '- Hoặc đăng nhập bằng -',
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).colorScheme.secondary,
@@ -71,7 +93,7 @@ class LoginLayout extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account? ",
+                          'Chưa có tài khoản? ',
                           style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -82,7 +104,7 @@ class LoginLayout extends ConsumerWidget {
                             context.push(registerRoute);
                           },
                           child: Text(
-                            'Sign Up',
+                            'Đăng ký',
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).colorScheme.primary,
@@ -102,7 +124,7 @@ class LoginLayout extends ConsumerWidget {
         ),
 
         if (isLoading)
-          const LoadingOverlay(loadingText: 'Logging in, please wait...'),
+          const LoadingOverlay(loadingText: 'Đang đăng nhập, vui lòng chờ...'),
       ],
     );
   }

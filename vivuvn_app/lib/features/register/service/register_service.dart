@@ -14,6 +14,7 @@ final registerServiceProvider = Provider.autoDispose<IRegisterService>((
 abstract interface class IRegisterService {
   Future<void> register(final RegisterRequest request);
   Future<void> verifyEmail(final VerifyEmailRequest request);
+  Future<void> resendVerificationEmail(final String email);
 }
 
 final class RegisterService implements IRegisterService {
@@ -28,5 +29,10 @@ final class RegisterService implements IRegisterService {
   @override
   Future<void> verifyEmail(final VerifyEmailRequest request) async {
     await _api.verifyEmail(request);
+  }
+
+  @override
+  Future<void> resendVerificationEmail(final String email) async {
+    await _api.resendVerificationEmail(email);
   }
 }

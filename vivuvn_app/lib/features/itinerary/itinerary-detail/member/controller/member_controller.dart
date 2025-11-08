@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../common/toast/global_toast.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../detail/controller/itinerary_detail_controller.dart';
 import '../service/member_service.dart';
@@ -51,9 +54,41 @@ class MemberController extends AutoDisposeNotifier<MemberState> {
       final errorMsg = DioExceptionHandler.handleException(e);
       state = state.copyWith(kickingMemberError: errorMsg);
     } catch (e) {
-      state = state.copyWith(kickingMemberError: 'unknown error');
+      state = state.copyWith(kickingMemberError: 'Có lỗi xảy ra');
     } finally {
       state = state.copyWith(isKickingMember: false);
+    }
+  }
+
+  Future<void> sendNotificationToAllMembers(
+    final String title,
+    final String message, {
+    final bool? sendEmail = false,
+    required final BuildContext context,
+  }) async {
+    final itineraryId = ref.read(itineraryDetailControllerProvider).itineraryId;
+    state = state.copyWith(
+      isSendingNotification: true,
+      sendingNotificationError: null,
+    );
+    try {
+      await ref
+          .read(memberServiceProvider)
+          .sendNotification(itineraryId!, title, message, sendEmail: sendEmail);
+      if (context.mounted) {
+        context.pop();
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Gửi thông báo thành công',
+        );
+      }
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(sendingNotificationError: errorMsg);
+    } catch (e) {
+      state = state.copyWith(sendingNotificationError: 'Có lỗi xảy ra');
+    } finally {
+      state = state.copyWith(isSendingNotification: false);
     }
   }
 

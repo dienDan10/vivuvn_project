@@ -39,10 +39,9 @@ function ProvinceLayout() {
 			<Space direction="vertical" size="large" style={{ width: "100%" }}>
 				<Space
 					direction="horizontal"
-					justify="space-between"
-					style={{ width: "100%" }}
+					style={{ width: "100%", justifyContent: "space-between" }}
 				>
-					<Title level={2}>Provinces</Title>
+					<Title level={2} style={{ margin: 0 }}>Provinces</Title>
 					<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
 						Add Province
 					</Button>

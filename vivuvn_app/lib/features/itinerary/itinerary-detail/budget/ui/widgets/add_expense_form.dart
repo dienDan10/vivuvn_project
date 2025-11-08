@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../common/helper/number_format_helper.dart';
 import '../../controller/budget_controller.dart';
 import '../../data/models/budget_items.dart';
 import '../../state/expense_form_notifier.dart';
@@ -8,8 +9,10 @@ import '../../utils/budget_constants.dart';
 import '../../utils/expense_form_submit_handler.dart';
 import 'field_amount.dart';
 import 'field_date.dart';
+import 'field_details.dart';
 import 'field_error_text.dart';
 import 'field_name.dart';
+import 'field_payer_picker.dart';
 import 'field_type_picker.dart';
 
 class AddExpenseForm extends ConsumerStatefulWidget {
@@ -30,6 +33,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final amountController = TextEditingController();
+  final detailsController = TextEditingController();
 
   /// Submit form thông qua ExpenseFormSubmitHandler
   Future<void> _submit() async {
@@ -39,6 +43,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
       formKey: _formKey,
       nameController: nameController,
       amountController: amountController,
+      detailsController: detailsController,
       initialItem: widget.initialItem,
       exchangeRate: BudgetConstants.exchangeRate,
     );
@@ -52,6 +57,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
   void dispose() {
     nameController.dispose();
     amountController.dispose();
+    detailsController.dispose();
     super.dispose();
   }
 
@@ -70,7 +76,8 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
         final formNotifier = ref.read(expenseFormProvider.notifier);
 
         nameController.text = item.name;
-        amountController.text = item.cost.toStringAsFixed(0);
+        amountController.text = formatWithThousandsFromNum(item.cost);
+        detailsController.text = item.details ?? '';
 
         // Initialize form state with item data
         formNotifier.initializeWithItem(item);
@@ -106,57 +113,74 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
     final formState = ref.watch(expenseFormProvider);
     final formNotifier = ref.read(expenseFormProvider.notifier);
 
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          FieldName(controller: nameController),
-          const SizedBox(height: 12),
-
-          FieldAmount(
-            controller: amountController,
-            onCurrencyChanged: (final isUSDSelected) {
-              formNotifier.setCurrency(isUSDSelected);
-            },
-          ),
-          const SizedBox(height: 12),
-
-          Consumer(
-            builder: (final context, final ref, final child) {
-              final types = ref.watch(budgetControllerProvider).types;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FieldTypePicker(
-                    selectedType: formState.selectedType,
-                    budgetTypes: types,
-                    onSelected: (final typeId, final typeName) {
-                      formNotifier.setType(typeId!, typeName);
-                    },
-                  ),
-                  FieldErrorText(errorMessage: formState.typeError),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 8,
+          right: 8,
+          bottom: 12 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              FieldDate(
-                selectedDate: formState.selectedDate,
-                onSelected: (final date) {
-                  if (date != null) {
-                    formNotifier.setDate(date);
-                  }
+              FieldName(controller: nameController),
+              const SizedBox(height: 12),
+
+              // Payer picker
+              const FieldPayerPicker(),
+              const SizedBox(height: 12),
+
+              FieldAmount(
+                controller: amountController,
+                onCurrencyChanged: (final isUSDSelected) {
+                  formNotifier.setCurrency(isUSDSelected);
                 },
               ),
-              FieldErrorText(errorMessage: formState.dateError),
+              const SizedBox(height: 4),
+
+              Consumer(
+                builder: (final context, final ref, final child) {
+                  final types = ref.watch(budgetControllerProvider).types;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FieldTypePicker(
+                        selectedType: formState.selectedType,
+                        budgetTypes: types,
+                        onSelected: (final typeId, final typeName) {
+                          formNotifier.setType(typeId!, typeName);
+                        },
+                      ),
+                      FieldErrorText(errorMessage: formState.typeError),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 4),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FieldDate(
+                    selectedDate: formState.selectedDate,
+                    onSelected: (final date) {
+                      if (date != null) {
+                        formNotifier.setDate(date);
+                      }
+                    },
+                  ),
+                  FieldErrorText(errorMessage: formState.dateError),
+                ],
+              ),
+              const SizedBox(height: 4),
+
+              // Optional details field
+              FieldDetails(controller: detailsController),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

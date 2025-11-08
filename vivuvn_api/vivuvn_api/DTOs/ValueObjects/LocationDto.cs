@@ -2,6 +2,7 @@
 {
     public class LocationDto
     {
+        public bool DeleteFlag { get; set; }
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
 

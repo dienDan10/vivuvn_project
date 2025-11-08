@@ -46,20 +46,18 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
     if (!_formKey.currentState!.validate()) return;
 
     FocusScope.of(context).unfocus();
-
-    ref
+    await ref
         .read(registerControllerProvider.notifier)
-        .updateRegisterData(
+        .register(
           _emailController.text,
           _usernameController.text,
           _passwordController.text,
         );
-    await ref.read(registerControllerProvider.notifier).register();
   }
 
   void _errorListener() {
     ref.listen(
-      registerControllerProvider.select((final state) => state.error),
+      registerControllerProvider.select((final state) => state.registerError),
       (final previous, final next) {
         if (next != null && next.isNotEmpty) {
           // show toast error message
@@ -87,7 +85,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
             passwordController: _passwordController,
           ),
           const SizedBox(height: 24),
-          ButtonSubmitRegister(text: 'Sign Up', onPressed: _submitForm),
+          ButtonSubmitRegister(text: 'Đăng ký', onPressed: _submitForm),
         ],
       ),
     );

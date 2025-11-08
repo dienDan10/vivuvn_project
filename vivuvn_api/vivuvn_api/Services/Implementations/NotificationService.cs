@@ -18,7 +18,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<NotificationDto> SendNotificationToItineraryMembersAsync(int itineraryId, int senderId, CreateNotificationRequestDto request)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
-                ?? throw new BadHttpRequestException("Itinerary not found");
+                ?? throw new BadHttpRequestException("Không tìm thấy lịch trình");
 
             // get all members except owner
             var members = await _unitOfWork.ItineraryMembers.GetAllAsync(im => im.ItineraryId == itineraryId && !im.DeleteFlag);
@@ -76,7 +76,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(int userId, bool unreadOnly = false)
         {
             var notifications = await _unitOfWork.Notifications.GetAllAsync(
-                filter: n => n.UserId == userId && (!unreadOnly || !n.IsRead),
+                filter: n => n.UserId == userId && (!unreadOnly || !n.IsRead) && !n.DeleteFlag,
                 orderBy: q => q.OrderByDescending(n => n.CreatedAt),
                 includeProperties: "Itinerary"
             );
@@ -94,7 +94,7 @@ namespace vivuvn_api.Services.Implementations
         {
             var notification = await _unitOfWork.Notifications
                 .GetOneAsync(n => n.Id == notificationId && n.UserId == userId)
-                ?? throw new ArgumentException("Notification not found");
+                ?? throw new ArgumentException("Không tìm thấy thông báo");
 
 
             notification.IsRead = true;
@@ -119,7 +119,7 @@ namespace vivuvn_api.Services.Implementations
         {
             var notification = await _unitOfWork.Notifications
                 .GetOneAsync(n => n.Id == notificationId && n.UserId == userId)
-                ?? throw new ArgumentException("Notification not found");
+                ?? throw new ArgumentException("Không tìm thấy thông báo");
 
             notification.DeleteFlag = true;
             _unitOfWork.Notifications.Update(notification);

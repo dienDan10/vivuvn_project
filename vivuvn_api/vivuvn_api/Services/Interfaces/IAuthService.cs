@@ -11,5 +11,8 @@ namespace vivuvn_api.Services.Interfaces
         Task VerifyEmailAsync(VerifyEmailRequestDto request);
         Task ResendEmailVerificationAsync(ResendEmailVerificationRequestDto request);
         Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
+        Task ChangePasswordAsync(int userId, ChangePasswordRequestDto request);
+        Task RequestPasswordResetAsync(ForgotPasswordRequestDto request);
+        Task ResetPasswordAsync(ResetPasswordRequestDto request);
     }
 }

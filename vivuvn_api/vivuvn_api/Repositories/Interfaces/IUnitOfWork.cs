@@ -3,6 +3,7 @@
     public interface IUnitOfWork : IDisposable
     {
         IUserRepository Users { get; }
+        IRoleRepository Roles { get; }
         IItineraryRepository Itineraries { get; }
         IItineraryDayRepository ItineraryDays { get; }
         IItineraryItemRepository ItineraryItems { get; }
@@ -19,6 +20,7 @@
         IItineraryMessageRepository ItineraryMessages { get; }
         IUserDeviceRepository UserDevices { get; }
         INotificationRepository Notifications { get; }
+        IPasswordResetRepository PasswordResets { get; }
 
         Task SaveChangesAsync();
 

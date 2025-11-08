@@ -23,4 +23,18 @@ class ItineraryDetailService {
   }) async {
     await _api.updateGroupSize(itineraryId: itineraryId, groupSize: groupSize);
   }
+
+  Future<String> getInviteCode(final int itineraryId) async {
+    return await _api.getInviteCode(itineraryId);
+  }
+
+  Future<void> updateTransportation({
+    required final int itineraryId,
+    required final String transportation,
+  }) async {
+    await _api.updateTransportation(
+      itineraryId: itineraryId,
+      transportation: transportation,
+    );
+  }
 }

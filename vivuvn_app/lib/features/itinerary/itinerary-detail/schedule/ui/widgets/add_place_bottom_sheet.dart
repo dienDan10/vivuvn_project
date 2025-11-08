@@ -44,31 +44,23 @@ class AddPlaceBottomSheet extends ConsumerWidget {
               child: SearchLocationField(
                 hintText: _getHintText(),
                 onSelected: (final location) async {
-                  final messenger = ScaffoldMessenger.of(context);
-                  final navigator = Navigator.of(context);
-
-                  final dayId = ref.read(
-                    itineraryScheduleControllerProvider.select(
-                      (final s) => s.selectedDayId,
-                    ),
-                  );
-
-                  if (dayId == null) {
-                    messenger.showSnackBar(
-                      const SnackBar(content: Text('Chưa chọn ngày nào')),
-                    );
-                    return;
-                  }
-
-                  await ref
+                  final result = await ref
                       .read(itineraryScheduleControllerProvider.notifier)
-                      .addItemToDay(dayId, location.id);
+                      .addLocationToSelectedDay(
+                        locationId: location.id,
+                        locationName: location.name,
+                      );
 
                   if (!context.mounted) return;
+
+                  final messenger = ScaffoldMessenger.of(context);
                   messenger.showSnackBar(
-                    SnackBar(content: Text('Đã thêm: ${location.name}')),
+                    SnackBar(content: Text(result.message)),
                   );
-                  navigator.pop();
+
+                  if (result.isSuccess) {
+                    Navigator.of(context).pop();
+                  }
                 },
               ),
             ),

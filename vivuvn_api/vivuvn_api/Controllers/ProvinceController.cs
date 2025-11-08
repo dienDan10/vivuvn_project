@@ -18,6 +18,14 @@ namespace vivuvn_api.Controllers
             return Ok(provinces);
         }
 
+        [HttpGet("all")]
+        [Authorize(Roles = $"{Constants.Role_Admin},{Constants.Role_Operator}")]
+        public async Task<IActionResult> GetAllProvincesWithoutPagination()
+        {
+            var provinces = await _provinceService.GetAllProvincesWithoutPaginationAsync();
+            return Ok(provinces);
+        }
+
         [HttpGet]
         [Authorize(Roles = $"{Constants.Role_Admin}")]
         public async Task<IActionResult> GetAllProvinces([FromQuery] GetAllProvincesRequestDto requestDto)

@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 
 class EmptyItinerary extends StatelessWidget {
-  const EmptyItinerary({super.key});
+  final String title;
+  final String description;
+  final IconData icon;
+
+  const EmptyItinerary({
+    super.key,
+    this.title = 'Lập kế hoạch theo cách của bạn',
+    this.description =
+        'Xây dựng chuyến đi bằng các mục đã lưu hoặc sử dụng AI để nhận đề xuất tùy chỉnh, cộng tác với bạn bè và sắp xếp ý tưởng cho chuyến đi.',
+    this.icon = Icons.map_outlined,
+  });
 
   @override
   Widget build(final BuildContext context) {
@@ -36,9 +46,10 @@ class EmptyItinerary extends StatelessWidget {
             ],
           ),
           padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               // Animated icon container
               Container(
                 padding: const EdgeInsets.all(20),
@@ -52,13 +63,13 @@ class EmptyItinerary extends StatelessWidget {
                   ),
                 ),
                 child: Icon(
-                  Icons.map_outlined,
+                  icon,
                   size: 64,
                   color: colorScheme.primary,
                 ),
               ),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
               // Icon row with theme colors
               Row(
@@ -84,11 +95,11 @@ class EmptyItinerary extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
               // Title
               Text(
-                'Lập kế hoạch theo cách của bạn',
+                title,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -97,11 +108,11 @@ class EmptyItinerary extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
               // Description
               Text(
-                'Xây dựng chuyến đi bằng các mục đã lưu hoặc sử dụng AI để nhận đề xuất tùy chỉnh, cộng tác với bạn bè và sắp xếp ý tưởng cho chuyến đi.',
+                description,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
@@ -109,8 +120,9 @@ class EmptyItinerary extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),

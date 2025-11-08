@@ -27,4 +27,8 @@ class ItineraryApi {
   Future<void> deleteItinerary(final int id) async {
     await _dio.delete('/api/v1/itineraries/$id');
   }
+
+  Future<void> leaveItinerary(final int id) async {
+    await _dio.post('/api/v1/itineraries/$id/members/leave');
+  }
 }

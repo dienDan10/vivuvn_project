@@ -4,26 +4,26 @@ class Validator {
 
   static String? validateEmail(final String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email';
+      return 'Email không được để trống';
     }
     // Simple email regex
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
     if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
+      return 'Email không hợp lệ';
     }
     return null;
   }
 
   static String? validatePassword(final String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your password';
+      return 'Mật khẩu không được để trống';
     }
     return null;
   }
 
   static String? notEmpty(final String? value, {final String fieldName = ''}) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName must not be empty';
+      return '$fieldName không được để trống';
     }
     return null;
   }
@@ -33,11 +33,13 @@ class Validator {
     final String fieldName = 'Số tiền',
   }) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName must not be empty';
+      return '$fieldName không được để trống';
     }
-    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    // Using comma as thousands separator; keep dot as decimal
+    final sanitized = value.replaceAll(',', '').trim();
+    final amount = double.tryParse(sanitized);
     if (amount == null || amount <= 0) {
-      return '$fieldName is not valid';
+      return '$fieldName không hợp lệ';
     }
     return null;
   }
@@ -48,7 +50,8 @@ class Validator {
     final String currency = 'VND',
   }) {
     if (value == null || value.trim().isEmpty) return 'Xin hãy nhập ngân sách';
-    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    final sanitized = value.replaceAll(',', '').trim();
+    final amount = double.tryParse(sanitized);
     if (amount == null || amount <= 0) return 'Ngân sách phải là một số dương';
     // Optional: enforce minimum reasonable amount (e.g., 1)
     if (currency == 'USD' && amount < 1) return 'Ngân sách phải ít nhất 1 USD';
@@ -123,7 +126,8 @@ class Validator {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName không được để trống';
     }
-    final amount = double.tryParse(value.replaceAll(',', '').trim());
+    final sanitized = value.replaceAll(',', '').trim();
+    final amount = double.tryParse(sanitized);
     if (amount == null || amount < 0) {
       return '$fieldName không hợp lệ';
     }

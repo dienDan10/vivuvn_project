@@ -41,15 +41,15 @@ namespace vivuvn_api.Services.Implementations
 				// Deserialize the response to the requested type
 				var result = JsonSerializer.Deserialize<T>(jsonResponse, _jsonOptions);
 
-				return result ?? throw new InvalidOperationException("Failed to deserialize AI service response");
+				return result ?? throw new InvalidOperationException("Không th? gi?i tu?n t? hóa ph?n h?i t? d?ch v? AI");
 			}
 			catch (HttpRequestException ex)
 			{
-				throw new HttpRequestException($"Failed to communicate with AI service: {ex.Message}", ex);
+				throw new HttpRequestException($"Không th? giao ti?p v?i d?ch v? AI: {ex.Message}", ex);
 			}
 			catch (JsonException ex)
 			{
-				throw new InvalidOperationException($"Failed to process AI service response: {ex.Message}", ex);
+				throw new InvalidOperationException($"Không th? x? lý ph?n h?i t? d?ch v? AI: {ex.Message}", ex);
 			}
 		}
 
@@ -108,11 +108,11 @@ namespace vivuvn_api.Services.Implementations
 
 					throw statusCode switch
 					{
-						400 => new ArgumentException($"AI Service Error ({errorType}): {errorMessage}"),
-						404 => new KeyNotFoundException($"AI Service Error ({errorType}): {errorMessage}"),
-						401 or 403 => new UnauthorizedAccessException($"AI Service Error ({errorType}): {errorMessage}"),
-						502 or 503 => new InvalidOperationException($"AI Service temporarily unavailable ({errorType}): {errorMessage}"),
-						_ => new InvalidOperationException($"AI Service Error ({errorType}): {errorMessage}")
+						400 => new ArgumentException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
+						404 => new KeyNotFoundException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
+						401 or 403 => new UnauthorizedAccessException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
+						502 or 503 => new InvalidOperationException($"D?ch v? AI t?m th?i không kh? d?ng ({errorType}): {errorMessage}"),
+						_ => new InvalidOperationException($"L?i d?ch v? AI ({errorType}): {errorMessage}")
 					};
 				}
 			}
@@ -122,7 +122,7 @@ namespace vivuvn_api.Services.Implementations
 			}
 
 			// Fallback: throw generic error with status code
-			throw new InvalidOperationException($"AI service returned error: {response.StatusCode} - {response.ReasonPhrase}");
+			throw new InvalidOperationException($"D?ch v? AI tr? v? l?i: {response.StatusCode} - {response.ReasonPhrase}");
 		}
 	}
 }

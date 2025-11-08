@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.Services.Interfaces;
 
@@ -29,7 +31,7 @@ namespace vivuvn_api.Controllers
             await _authService.RegisterAsync(request);
             return Ok(new
             {
-                Message = "Register successful!. Check you email to confirm email registration"
+                Message = "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận đăng ký."
             });
         }
 
@@ -39,7 +41,7 @@ namespace vivuvn_api.Controllers
             await _authService.VerifyEmailAsync(request);
             return Ok(new
             {
-                Message = "Email verify successful!"
+                Message = "Xác thực email thành công!"
             });
         }
 
@@ -55,6 +57,44 @@ namespace vivuvn_api.Controllers
         {
             var result = await _authService.RefreshTokenAsync(request);
             return Ok(result);
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+        {
+            int userId = GetCurrentUserId();
+            await _authService.ChangePasswordAsync(userId, request);
+            return Ok(new
+            {
+                Message = "Đổi mật khẩu thành công!"
+            });
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+        {
+            await _authService.RequestPasswordResetAsync(request);
+            return Ok(new
+            {
+                Message = "Nếu email tồn tại trong hệ thống, một email đặt lại mật khẩu đã được gửi."
+            });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            await _authService.ResetPasswordAsync(request);
+            return Ok(new
+            {
+                Message = "Đặt lại mật khẩu thành công!"
+            });
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim!);
         }
 
     }

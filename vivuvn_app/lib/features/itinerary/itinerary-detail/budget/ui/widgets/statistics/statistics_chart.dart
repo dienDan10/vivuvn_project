@@ -1,27 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../utils/budget_type_icons.dart';
-import 'chart_data.dart';
+import 'controller/statistics_controller.dart';
+import 'models/chart_data.dart';
 
 /// Chart widget sử dụng Syncfusion
-class StatisticsChart extends StatelessWidget {
-  const StatisticsChart({
-    required this.chartData,
-    required this.selectedKey,
-    required this.showByType,
-    required this.onBarTap,
-    super.key,
-  });
-
-  final List<ChartData> chartData;
-  final String? selectedKey;
-  final bool showByType;
-  final ValueChanged<String> onBarTap;
+class StatisticsChart extends ConsumerWidget {
+  const StatisticsChart({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final state = ref.watch(statisticsProvider);
+    final chartData = state.chartData;
+    final selectedKey = state.selectedKey;
+    final showByType = state.showByType;
+    final controller = ref.read(statisticsProvider.notifier);
     return SfCartesianChart(
       plotAreaBorderWidth: 0,
       primaryXAxis: CategoryAxis(
@@ -71,7 +67,7 @@ class StatisticsChart extends StatelessWidget {
           animationDuration: 0,
           onPointTap: (final details) {
             final tappedKey = chartData[details.pointIndex!].category;
-            onBarTap(tappedKey);
+            controller.selectKey(tappedKey);
           },
         ),
       ],

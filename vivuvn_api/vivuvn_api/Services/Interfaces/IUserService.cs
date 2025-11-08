@@ -10,5 +10,6 @@ namespace vivuvn_api.Services.Interfaces
         Task<UserDto?> LockUserAccountAsync(int userId);
         Task<UserDto?> UnlockUserAccountAsync(int userId);
         Task<PaginatedResponseDto<UserDto>> GetAllUsersAsync(GetAllUsersRequestDto requestDto);
+        Task<UserDto> CreateOperatorAsync(CreateOperatorRequestDto requestDto);
     }
 }

@@ -11,11 +11,11 @@ namespace vivuvn_api.Services.Implementations
         public async Task<InviteCodeDto> GenerateInviteCodeAsync(int itineraryId, int ownerId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
-                ?? throw new ArgumentException("Itinerary not found");
+                ?? throw new ArgumentException("Không tìm thấy lịch trình");
 
             if (itinerary.UserId != ownerId)
             {
-                throw new UnauthorizedAccessException("Only the itinerary owner can generate invite codes");
+                throw new UnauthorizedAccessException("Chỉ chủ lịch trình mới có thể tạo mã mời");
             }
 
             var inviteCode = new InviteCodeDto
@@ -35,13 +35,13 @@ namespace vivuvn_api.Services.Implementations
         public async Task JoinItineraryByInviteCodeAsync(int userId, string inviteCode)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.InviteCode == inviteCode)
-                ?? throw new ArgumentException("Invalid invite code");
+                ?? throw new ArgumentException("Mã mời không hợp lệ");
 
             // count the number of member and check for full
             var membersCount = await _unitOfWork.ItineraryMembers.CountAsync(itinerary.Id);
             if (membersCount >= itinerary.GroupSize)
             {
-                throw new BadHttpRequestException("Members of this itinerary is full. Cannot join.");
+                throw new BadHttpRequestException("Lịch trình này đã đủ thành viên. Không thể tham gia.");
             }
 
             // check if user is already a member
@@ -49,7 +49,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (existingMember is not null && !existingMember.DeleteFlag) // active member exists
             {
-                throw new BadHttpRequestException("User is already a member of this itinerary");
+                throw new BadHttpRequestException("Người dùng đã là thành viên của lịch trình này");
             }
 
             if (existingMember is not null && existingMember.DeleteFlag) // inactive member exists
@@ -75,7 +75,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<ItineraryMemberDto>> GetMembersAsync(int itineraryId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
-                ?? throw new ArgumentException("Itinerary not found");
+                ?? throw new ArgumentException("Không tìm thấy lịch trình");
 
             var members = await _unitOfWork.ItineraryMembers.GetAllAsync(
                 filter: im => im.ItineraryId == itineraryId && !im.DeleteFlag,
@@ -88,15 +88,15 @@ namespace vivuvn_api.Services.Implementations
         public async Task LeaveItineraryAsync(int userId, int itineraryId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
-                ?? throw new ArgumentException("Itinerary not found");
+                ?? throw new ArgumentException("Không tìm thấy lịch trình");
 
             if (itinerary.UserId == userId)
             {
-                throw new InvalidOperationException("Itinerary owner cannot leave the itinerary");
+                throw new InvalidOperationException("Chủ lịch trình không thể rời khỏi lịch trình");
             }
 
             var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.UserId == userId && !im.DeleteFlag)
-                ?? throw new ArgumentException("User is not a member of this itinerary");
+                ?? throw new ArgumentException("Người dùng không phải là thành viên của lịch trình này");
             member.DeleteFlag = true;
             _unitOfWork.ItineraryMembers.Update(member);
             await _unitOfWork.SaveChangesAsync();
@@ -105,13 +105,13 @@ namespace vivuvn_api.Services.Implementations
         public async Task KickMemberAsync(int userId, int itineraryId, int memberId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
-                ?? throw new ArgumentException("Itinerary not found");
+                ?? throw new ArgumentException("Không tìm thấy lịch trình");
             if (itinerary.UserId != userId)
             {
-                throw new UnauthorizedAccessException("Only the itinerary owner can kick members");
+                throw new UnauthorizedAccessException("Chỉ chủ lịch trình mới có thể đuổi thành viên");
             }
             var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.Id == memberId && !im.DeleteFlag)
-                ?? throw new ArgumentException("Member not found in this itinerary");
+                ?? throw new ArgumentException("Không tìm thấy thành viên trong lịch trình này");
             member.DeleteFlag = true;
             _unitOfWork.ItineraryMembers.Update(member);
             await _unitOfWork.SaveChangesAsync();

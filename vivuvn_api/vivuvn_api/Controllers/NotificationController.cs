@@ -20,7 +20,7 @@ namespace vivuvn_api.Controllers
 
             if (!isOwner)
             {
-                return BadRequest("Only onwer can send notification to members");
+                return BadRequest("Chỉ có chủ lịch trình mới có thể gửi thông báo");
             }
 
             var notification = await _notificationService.SendNotificationToItineraryMembersAsync(itineraryId, userId, request);

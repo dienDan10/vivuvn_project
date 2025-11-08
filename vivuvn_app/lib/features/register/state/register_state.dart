@@ -1,31 +1,35 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 class RegisterState {
-  final bool isLoading;
-  final bool isSuccess;
-  final bool isEmailVerified;
-  final String? error;
-  final Map<String, String> registerData;
-
-  const RegisterState({
-    this.isLoading = false,
-    this.isSuccess = false,
-    this.isEmailVerified = false,
-    this.error,
-    this.registerData = const {},
+  final bool registering;
+  final bool registerSuccess;
+  final bool verifingEmail;
+  final bool verifingEmailSuccess;
+  final String? registerError;
+  final String? verifyEmailError;
+  RegisterState({
+    this.registering = false,
+    this.registerSuccess = false,
+    this.verifingEmail = false,
+    this.verifingEmailSuccess = false,
+    this.registerError,
+    this.verifyEmailError,
   });
 
   RegisterState copyWith({
-    final bool? isLoading,
-    final bool? isSuccess,
-    final bool? isEmailVerified,
-    final String? error,
-    final Map<String, String>? registerData,
+    final bool? registering,
+    final bool? registerSuccess,
+    final bool? verifingEmail,
+    final bool? verifingEmailSuccess,
+    final String? registerError,
+    final String? verifyEmailError,
   }) {
     return RegisterState(
-      isLoading: isLoading ?? this.isLoading,
-      isSuccess: isSuccess ?? this.isSuccess,
-      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
-      error: error,
-      registerData: registerData ?? this.registerData,
+      registering: registering ?? this.registering,
+      registerSuccess: registerSuccess ?? this.registerSuccess,
+      verifingEmail: verifingEmail ?? this.verifingEmail,
+      verifingEmailSuccess: verifingEmailSuccess ?? this.verifingEmailSuccess,
+      registerError: registerError ?? this.registerError,
+      verifyEmailError: verifyEmailError ?? this.verifyEmailError,
     );
   }
 }

@@ -20,7 +20,7 @@ namespace vivuvn_api.Controllers
 
             if (email == null)
             {
-                return Unauthorized(new { message = "Email claim is missing." });
+                return Unauthorized(new { message = "Thiếu thông tin email." });
             }
 
             var profile = await _userService.GetProfileAsync(email);
@@ -42,9 +42,9 @@ namespace vivuvn_api.Controllers
             var result = await _userService.LockUserAccountAsync(userId);
             if (result is null)
             {
-                return NotFound(new { message = "User not found." });
+                return NotFound(new { message = "Không tìm thấy người dùng." });
             }
-            return Ok(new { message = "User account locked successfully." });
+            return Ok(new { message = "Đã khóa tài khoản người dùng thành công." });
         }
 
         [HttpPut("{userId}/unlock")]
@@ -54,9 +54,17 @@ namespace vivuvn_api.Controllers
             var result = await _userService.UnlockUserAccountAsync(userId);
             if (result is null)
             {
-                return NotFound(new { message = "User not found." });
+                return NotFound(new { message = "Không tìm thấy người dùng." });
             }
-            return Ok(new { message = "User account unlocked successfully." });
+            return Ok(new { message = "Đã mở khóa tài khoản người dùng thành công." });
+        }
+
+        [HttpPost("operator")]
+        [Authorize(Roles = $"{Constants.Role_Admin}")]
+        public async Task<IActionResult> CreateOperator([FromBody] CreateOperatorRequestDto requestDto)
+        {
+            var newOperator = await _userService.CreateOperatorAsync(requestDto);
+			return Ok(newOperator);
         }
     }
 }
