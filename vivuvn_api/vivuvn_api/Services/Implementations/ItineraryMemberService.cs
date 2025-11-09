@@ -121,15 +121,16 @@ namespace vivuvn_api.Services.Implementations
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
                 ?? throw new ArgumentException("Không tìm thấy lịch trình");
-            if (itinerary.UserId != userId)
-            {
-                throw new UnauthorizedAccessException("Chỉ chủ lịch trình mới có thể đuổi thành viên");
-            }
+
             var member = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itineraryId && im.Id == memberId && !im.DeleteFlag)
                 ?? throw new ArgumentException("Không tìm thấy thành viên trong lịch trình này");
             member.DeleteFlag = true;
             _unitOfWork.ItineraryMembers.Update(member);
             await _unitOfWork.SaveChangesAsync();
+
+            await _fcmService.SendNotificationToUserAsync(member.UserId,
+                "Bạn đã bị kick khỏi lịch trình",
+                $"Bạn đã bị kick khỏi lịch trình {itinerary.Name} bởi chủ lịch trình.");
         }
 
         public async Task<bool> IsOwnerAsync(int itineraryId, int userId)
