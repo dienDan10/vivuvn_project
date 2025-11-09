@@ -171,6 +171,10 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.EmailVerificationToken, opt => opt.Ignore())
                 .ForMember(dest => dest.EmailVerificationTokenExpireDate, opt => opt.Ignore())
                 .ForMember(dest => dest.LockoutEnd, opt => opt.Ignore());
+
+			// Mapping for Place Upsert Request
+            CreateMap<Location, PlaceUpsertRequestDto>()
+                .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty));
 		}
 	}
 }

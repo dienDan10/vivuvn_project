@@ -100,44 +100,25 @@ class PlaceData(BaseModel):
         }
 
 
-class PlaceInsertRequest(BaseModel):
-    """Request schema for inserting a place."""
+class PlaceUpsertRequest(BaseModel):
+    """Request schema for upserting a place."""
 
     place: PlaceData = Field(
         ...,
-        description="Place data to insert"
+        description="Place data to upsert"
     )
 
 
-class PlaceInsertResponse(BaseModel):
-    """Response schema for place insert operations."""
+class PlaceUpsertResponse(BaseModel):
+    """Response schema for place upsert operations."""
 
     success: bool = Field(..., description="Operation success status")
     message: str = Field(..., description="Result message")
-    place_id: str = Field(..., description="Google Place ID of inserted place")
-
-
-class PlaceUpdateRequest(BaseModel):
-    """Request schema for updating a place."""
-
-    place: PlaceData = Field(
-        ...,
-        description="Updated place data"
-    )
-
-
-class PlaceUpdateResponse(BaseModel):
-    """Response schema for place update operations."""
-
-    success: bool = Field(..., description="Operation success status")
-    message: str = Field(..., description="Result message")
-    place_id: str = Field(..., description="Google Place ID of updated place")
+    place_id: str = Field(..., description="Google Place ID of upserted place")
 
 
 __all__ = [
     "PlaceData",
-    "PlaceInsertRequest",
-    "PlaceInsertResponse",
-    "PlaceUpdateRequest",
-    "PlaceUpdateResponse",
+    "PlaceUpsertRequest",
+    "PlaceUpsertResponse",
 ]

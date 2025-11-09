@@ -41,15 +41,102 @@ namespace vivuvn_api.Services.Implementations
 				// Deserialize the response to the requested type
 				var result = JsonSerializer.Deserialize<T>(jsonResponse, _jsonOptions);
 
-				return result ?? throw new InvalidOperationException("Kh�ng th? gi?i tu?n t? h�a ph?n h?i t? d?ch v? AI");
+				return result ?? throw new InvalidOperationException("Kh�ng th? gi?i tu?n t? h�a ph?n h?i t? d?ch v? AI");
 			}
 			catch (HttpRequestException ex)
 			{
-				throw new HttpRequestException($"Kh�ng th? giao ti?p v?i d?ch v? AI: {ex.Message}", ex);
+				throw new HttpRequestException($"Kh�ng th? giao ti?p v?i d?ch v? AI: {ex.Message}", ex);
 			}
 			catch (JsonException ex)
 			{
-				throw new InvalidOperationException($"Kh�ng th? x? l� ph?n h?i t? d?ch v? AI: {ex.Message}", ex);
+				throw new InvalidOperationException($"Kh�ng th? x? l� ph?n h?i t? d?ch v? AI: {ex.Message}", ex);
+			}
+		}
+
+		public async Task<PlaceUpsertResponseDto> InsertPlaceAsync(PlaceUpsertRequestDto placeData)
+		{
+			try
+			{
+				var requestWrapper = new { place = placeData };
+				var jsonRequest = JsonSerializer.Serialize(requestWrapper, _jsonOptions);
+				var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+				var response = await _httpClient.PostAsync("/api/v1/place/insert", content);
+				var jsonResponse = await response.Content.ReadAsStringAsync();
+
+				if (!response.IsSuccessStatusCode)
+				{
+					await HandleAiServiceErrorAsync(response, jsonResponse);
+				}
+
+				var result = JsonSerializer.Deserialize<PlaceUpsertResponseDto>(jsonResponse, _jsonOptions);
+				return result ?? throw new InvalidOperationException("Không thể giải tuần tự hóa phản hồi từ dịch vụ AI");
+			}
+			catch (HttpRequestException ex)
+			{
+				throw new HttpRequestException($"Không thể giao tiếp với dịch vụ AI: {ex.Message}", ex);
+			}
+			catch (JsonException ex)
+			{
+				throw new InvalidOperationException($"Không thể xử lý phản hồi từ dịch vụ AI: {ex.Message}", ex);
+			}
+		}
+
+		public async Task<PlaceUpsertResponseDto> UpdatePlaceAsync(PlaceUpsertRequestDto placeData)
+		{
+			try
+			{
+				var requestWrapper = new { place = placeData };
+				var jsonRequest = JsonSerializer.Serialize(requestWrapper, _jsonOptions);
+				var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+				var response = await _httpClient.PutAsync("/api/v1/place/update", content);
+				var jsonResponse = await response.Content.ReadAsStringAsync();
+
+				if (!response.IsSuccessStatusCode)
+				{
+					await HandleAiServiceErrorAsync(response, jsonResponse);
+				}
+
+				var result = JsonSerializer.Deserialize<PlaceUpsertResponseDto>(jsonResponse, _jsonOptions);
+				return result ?? throw new InvalidOperationException("Không thể giải tuần tự hóa phản hồi từ dịch vụ AI");
+			}
+			catch (HttpRequestException ex)
+			{
+				throw new HttpRequestException($"Không thể giao tiếp với dịch vụ AI: {ex.Message}", ex);
+			}
+			catch (JsonException ex)
+			{
+				throw new InvalidOperationException($"Không thể xử lý phản hồi từ dịch vụ AI: {ex.Message}", ex);
+			}
+		}
+
+		public async Task<PlaceDeleteResponseDto> DeletePlaceAsync(string itemId)
+		{
+			try
+			{
+				var requestDto = new PlaceDeleteRequestDto { ItemId = itemId };
+				var jsonRequest = JsonSerializer.Serialize(requestDto, _jsonOptions);
+				var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+				var response = await _httpClient.DeleteAsync("/api/v1/place/delete");
+				var jsonResponse = await response.Content.ReadAsStringAsync();
+
+				if (!response.IsSuccessStatusCode)
+				{
+					await HandleAiServiceErrorAsync(response, jsonResponse);
+				}
+
+				var result = JsonSerializer.Deserialize<PlaceDeleteResponseDto>(jsonResponse, _jsonOptions);
+				return result ?? throw new InvalidOperationException("Không thể giải tuần tự hóa phản hồi từ dịch vụ AI");
+			}
+			catch (HttpRequestException ex)
+			{
+				throw new HttpRequestException($"Không thể giao tiếp với dịch vụ AI: {ex.Message}", ex);
+			}
+			catch (JsonException ex)
+			{
+				throw new InvalidOperationException($"Không thể xử lý phản hồi từ dịch vụ AI: {ex.Message}", ex);
 			}
 		}
 
@@ -111,7 +198,7 @@ namespace vivuvn_api.Services.Implementations
 						400 => new ArgumentException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
 						404 => new KeyNotFoundException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
 						401 or 403 => new UnauthorizedAccessException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
-						502 or 503 => new InvalidOperationException($"D?ch v? AI t?m th?i kh�ng kh? d?ng ({errorType}): {errorMessage}"),
+						502 or 503 => new InvalidOperationException($"D?ch v? AI t?m th?i kh�ng kh? d?ng ({errorType}): {errorMessage}"),
 						_ => new InvalidOperationException($"L?i d?ch v? AI ({errorType}): {errorMessage}")
 					};
 				}
