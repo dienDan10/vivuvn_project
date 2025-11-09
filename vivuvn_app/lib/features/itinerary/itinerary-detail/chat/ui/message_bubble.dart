@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../common/helper/image_util.dart';
 import '../data/model/message.dart';
@@ -99,12 +100,25 @@ class MessageBubble extends StatelessWidget {
                 maxWidth: MediaQuery.of(context).size.width * 0.7,
               ),
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-              child: Text(
-                message.message,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: isMe ? Colors.white : Colors.black,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.message,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isMe ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  if (isAloneInSequence || isFirstInSequence)
+                    Text(
+                      DateFormat('HH:mm').format(message.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isMe ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
