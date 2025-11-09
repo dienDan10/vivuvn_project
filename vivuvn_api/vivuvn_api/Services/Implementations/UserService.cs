@@ -61,5 +61,18 @@ namespace vivuvn_api.Services.Implementations
 
             return avatarUrl;
         }
+
+        public async Task<string?> ChangeUsername(int userId, string name)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null)
+            {
+                return null;
+            }
+            user.Username = name;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+            return name;
+        }
     }
 }

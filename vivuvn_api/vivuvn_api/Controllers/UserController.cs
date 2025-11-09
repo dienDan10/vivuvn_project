@@ -62,5 +62,18 @@ namespace vivuvn_api.Controllers
             }
             return Ok(new { message = "Đã thay đổi avatar thành công.", Url = result });
         }
+
+        [HttpPut("{userId}/username")]
+        [Authorize]
+        public async Task<IActionResult> ChangeUsername(int userId, [FromBody] ChangeUsernameRequest request)
+        {
+            var result = await _userService.ChangeUsername(userId, request.Username);
+            if (result is null)
+            {
+                return NotFound(new { message = "Không tìm thấy người dùng hoặc bạn không có quyền thay đổi tên người dùng này." });
+            }
+            return Ok(new { message = "Đã thay đổi tên người dùng thành công.", NewName = result });
+        }
+
     }
 }
