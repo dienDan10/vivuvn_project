@@ -104,6 +104,11 @@ class Validator {
       'prostitute',
       'pussy',
       'dick',
+      'bitch',
+      'bastard',
+      'asshole',
+      'motherfucker',
+      'cunt',
     ];
     for (final word in prohibited) {
       if (lower.contains(word)) return true;
