@@ -75,5 +75,17 @@ namespace vivuvn_api.Controllers
             return Ok(new { message = "Đã thay đổi tên người dùng thành công.", NewName = result });
         }
 
+        [HttpPut("{userId}/phone-number")]
+        [Authorize]
+        public async Task<IActionResult> ChangePhoneNumber(int userId, [FromBody] ChangePhoneNumberRequest request)
+        {
+            var result = await _userService.ChangePhoneNumber(userId, request.PhoneNumber);
+            if (result is null)
+            {
+                return NotFound(new { message = "Không tìm thấy người dùng hoặc bạn không có quyền thay đổi số điện thoại này." });
+            }
+            return Ok(new { message = "Đã thay đổi số điện thoại thành công.", NewPhoneNumber = result });
+        }
+
     }
 }

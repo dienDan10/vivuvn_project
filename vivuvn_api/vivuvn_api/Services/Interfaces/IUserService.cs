@@ -9,5 +9,6 @@ namespace vivuvn_api.Services.Interfaces
         Task<UserDto?> UnlockUserAccountAsync(int userId);
         Task<string?> ChangeAvatarAsync(int userId, IFormFile avatar);
         Task<string?> ChangeUsername(int userId, string name);
+        Task<string?> ChangePhoneNumber(int userId, string phoneNumber);
     }
 }

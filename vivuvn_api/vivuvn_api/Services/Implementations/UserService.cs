@@ -74,5 +74,18 @@ namespace vivuvn_api.Services.Implementations
             await _unitOfWork.SaveChangesAsync();
             return name;
         }
+
+        public async Task<string?> ChangePhoneNumber(int userId, string phoneNumber)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null)
+            {
+                return null;
+            }
+            user.PhoneNumber = phoneNumber;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+            return phoneNumber;
+        }
     }
 }
