@@ -107,7 +107,9 @@ class MessageBubble extends StatelessWidget {
                     message.message,
                     style: TextStyle(
                       fontSize: 16,
-                      color: isMe ? Colors.white : Colors.black,
+                      color: isMe
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                   ),
                   if (isAloneInSequence || isFirstInSequence)
@@ -115,7 +117,12 @@ class MessageBubble extends StatelessWidget {
                       DateFormat('HH:mm').format(message.createdAt),
                       style: TextStyle(
                         fontSize: 12,
-                        color: isMe ? Colors.white70 : Colors.black54,
+                        color: isMe
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.onPrimary.withValues(alpha: 0.7)
+                            : Theme.of(context).colorScheme.onPrimaryContainer
+                                  .withValues(alpha: 0.7),
                       ),
                     ),
                 ],

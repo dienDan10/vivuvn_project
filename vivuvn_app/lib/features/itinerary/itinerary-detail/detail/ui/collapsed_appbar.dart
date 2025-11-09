@@ -17,7 +17,7 @@ class CollapsedAppbar extends ConsumerWidget {
     );
 
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.onPrimary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top,
         left: 12,
@@ -30,8 +30,8 @@ class CollapsedAppbar extends ConsumerWidget {
           Expanded(
             child: Text(
               itinerary.name,
-              style: const TextStyle(
-                color: Colors.black,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
