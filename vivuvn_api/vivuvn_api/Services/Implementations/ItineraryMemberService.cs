@@ -4,6 +4,8 @@ using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
 
+using Constants = vivuvn_api.Helpers.Constants;
+
 namespace vivuvn_api.Services.Implementations
 {
     public class ItineraryMemberService(ITokenService _tokenService, IUnitOfWork _unitOfWork, IMapper _mapper, IFcmService _fcmService) : IItineraryMemberService
@@ -56,30 +58,44 @@ namespace vivuvn_api.Services.Implementations
             {
                 existingMember.DeleteFlag = false;
                 _unitOfWork.ItineraryMembers.Update(existingMember);
-                await _unitOfWork.SaveChangesAsync();
-                await _fcmService.SendNotificationToUserAsync(itinerary.UserId,
-                    "Có thành viên mới tham gia",
-                    $"{existingMember.User.Username} đã tham gia vào lịch trình {itinerary.Name} của bạn.");
-                return;
+            }
+            else
+            {
+                // add new member
+                var newMember = new ItineraryMember
+                {
+                    UserId = userId,
+                    ItineraryId = itinerary.Id,
+                    JoinedAt = DateTime.UtcNow,
+                    DeleteFlag = false
+                };
+                await _unitOfWork.ItineraryMembers.AddAsync(newMember);
             }
 
-            // add new member
-            var newMember = new ItineraryMember
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            // create notification for owner
+            var notification = new Notification
             {
-                UserId = userId,
+                UserId = itinerary.UserId,
                 ItineraryId = itinerary.Id,
-                JoinedAt = DateTime.UtcNow,
-                DeleteFlag = false
+                Type = Constants.NotificationType_MemberJoined,
+                Title = "Có thành viên mới tham gia",
+                Message = $"{user?.Username ?? "Có thành viên mới"} đã tham gia vào lịch trình {itinerary.Name} của bạn.",
+                CreatedAt = DateTime.UtcNow,
             };
-            await _unitOfWork.ItineraryMembers.AddAsync(newMember);
+            await _unitOfWork.Notifications.AddAsync(notification);
             await _unitOfWork.SaveChangesAsync();
 
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-
             // send notification to owner
+            var fcmData = new Dictionary<string, string>
+            {
+                {"itineraryId", itinerary.Id.ToString(),
+                {"type", Constants.NotificationType_MemberJoined },
+            };
+
             await _fcmService.SendNotificationToUserAsync(itinerary.UserId,
                 "Có thành viên mới tham gia",
-                $"{user?.Username ?? "Có thành viên mới"} đã tham gia vào lịch trình {itinerary.Name} của bạn.");
+                $"{user?.Username ?? "Có thành viên mới"} đã tham gia vào lịch trình {itinerary.Name} của bạn.", fcmData);
         }
 
         public async Task<IEnumerable<ItineraryMemberDto>> GetMembersAsync(int itineraryId)
@@ -109,12 +125,32 @@ namespace vivuvn_api.Services.Implementations
                 ?? throw new ArgumentException("Người dùng không phải là thành viên của lịch trình này");
             member.DeleteFlag = true;
             _unitOfWork.ItineraryMembers.Update(member);
+
+            // create notification for owner
+            var notification = new Notification
+            {
+                UserId = itinerary.UserId,
+                ItineraryId = itinerary.Id,
+                Type = Constants.NotificationType_MemberLeft,
+                Title = "Thành viên rời lịch trình",
+                Message = $"Thành viên {member.User.Username} đã rời lịch trình {itinerary.Name}",
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            await _unitOfWork.Notifications.AddAsync(notification);
             await _unitOfWork.SaveChangesAsync();
 
             // Send notification to owner
+            var fcmData = new Dictionary<string, string>
+            {
+                {"itineraryId", itinerary.Id.ToString() },
+                {"type", Constants.NotificationType_MemberLeft },
+            };
+
             await _fcmService.SendNotificationToUserAsync(itinerary.UserId,
                 "Thành viên rời lịch trình",
-                $"Thành viên {member.User.Username} đã rời lịch trình {itinerary.Name}");
+                $"Thành viên {member.User.Username} đã rời lịch trình {itinerary.Name}",
+                fcmData);
         }
 
         public async Task KickMemberAsync(int userId, int itineraryId, int memberId)
@@ -126,11 +162,30 @@ namespace vivuvn_api.Services.Implementations
                 ?? throw new ArgumentException("Không tìm thấy thành viên trong lịch trình này");
             member.DeleteFlag = true;
             _unitOfWork.ItineraryMembers.Update(member);
+
+            // create notification for kicked member
+            var notification = new Notification
+            {
+                UserId = member.UserId,
+                ItineraryId = itinerary.Id,
+                Type = Constants.NotificationType_MemberKicked,
+                Title = "Bạn đã bị kick khỏi lịch trình",
+                Message = $"Bạn đã bị kick khỏi lịch trình {itinerary.Name} bởi chủ lịch trình.",
+                CreatedAt = DateTime.UtcNow,
+            };
+            await _unitOfWork.Notifications.AddAsync(notification);
             await _unitOfWork.SaveChangesAsync();
 
+            // send notification to kicked member
+            var fcmData = new Dictionary<string, string>
+            {
+                {"itineraryId", itinerary.Id.ToString() },
+                {"type", Constants.NotificationType_MemberKicked },
+            };
             await _fcmService.SendNotificationToUserAsync(member.UserId,
                 "Bạn đã bị kick khỏi lịch trình",
-                $"Bạn đã bị kick khỏi lịch trình {itinerary.Name} bởi chủ lịch trình.");
+                $"Bạn đã bị kick khỏi lịch trình {itinerary.Name} bởi chủ lịch trình.",
+                fcmData);
         }
 
         public async Task<bool> IsOwnerAsync(int itineraryId, int userId)
@@ -143,7 +198,6 @@ namespace vivuvn_api.Services.Implementations
         {
             return await _unitOfWork.ItineraryMembers.IsMemberAsync(itineraryId, userId);
         }
-
         public async Task<int> GetCurrentMemberCountAsync(int itineraryId)
         {
             return await _unitOfWork.ItineraryMembers.CountAsync(itineraryId);

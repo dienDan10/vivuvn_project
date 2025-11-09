@@ -178,6 +178,10 @@ class _NotificationItemState extends ConsumerState<NotificationItem> {
         icon = Icons.person_remove;
         color = Colors.orange;
         break;
+      case 'MemberKicked':
+        icon = Icons.block;
+        color = Colors.red;
+        break;
       case 'ItineraryUpdated':
         icon = Icons.edit;
         color = Colors.purple;
