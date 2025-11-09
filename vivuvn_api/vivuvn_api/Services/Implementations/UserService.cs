@@ -5,7 +5,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class UserService(IUnitOfWork _unitOfWork, IMapper _mapper) : IUserService
+    public class UserService(IUnitOfWork _unitOfWork, IMapper _mapper, IImageService _imageService) : IUserService
     {
         public async Task<UserDto> GetProfileAsync(string email)
         {
@@ -42,6 +42,24 @@ namespace vivuvn_api.Services.Implementations
             _unitOfWork.Users.Update(user);
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<UserDto>(user);
+        }
+
+        public async Task<string?> ChangeAvatarAsync(int userId, IFormFile avatar)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null)
+            {
+                return null;
+            }
+
+            var avatarUrl = await _imageService.UploadImageAsync(avatar);
+
+            // update user avatar
+            user.UserPhoto = avatarUrl;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return avatarUrl;
         }
     }
 }

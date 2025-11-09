@@ -89,7 +89,7 @@ namespace vivuvn_api.Services.Implementations
             // send notification to owner
             var fcmData = new Dictionary<string, string>
             {
-                {"itineraryId", itinerary.Id.ToString(),
+                {"itineraryId", itinerary.Id.ToString() },
                 {"type", Constants.NotificationType_MemberJoined },
             };
 

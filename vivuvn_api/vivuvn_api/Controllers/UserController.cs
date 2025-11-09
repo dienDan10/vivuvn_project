@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using vivuvn_api.DTOs.Request;
 using vivuvn_api.Helpers;
 using vivuvn_api.Services.Interfaces;
 
@@ -48,6 +49,18 @@ namespace vivuvn_api.Controllers
                 return NotFound(new { message = "Không tìm thấy người dùng." });
             }
             return Ok(new { message = "Đã mở khóa tài khoản người dùng thành công." });
+        }
+
+        [HttpPut("{userId}/avatar")]
+        [Authorize]
+        public async Task<IActionResult> ChangeAvatar(int userId, [FromForm] ChangeAvatarRequest request)
+        {
+            var result = await _userService.ChangeAvatarAsync(userId, request.Avatar);
+            if (result is null)
+            {
+                return NotFound(new { message = "Không tìm thấy người dùng hoặc bạn không có quyền thay đổi avatar này." });
+            }
+            return Ok(new { message = "Đã thay đổi avatar thành công.", Url = result });
         }
     }
 }
