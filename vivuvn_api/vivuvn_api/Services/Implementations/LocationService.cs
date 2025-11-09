@@ -11,7 +11,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IJsonService _jsonService, IImageService _imageService) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IJsonService _jsonService, IImageService _imageService, IAiClientService _aiService) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)
@@ -183,7 +183,18 @@ namespace vivuvn_api.Services.Implementations
         // CRUD Operations
         public async Task<LocationDto> CreateLocationAsync(CreateLocationRequestDto requestDto)
         {
-            var location = _mapper.Map<Location>(requestDto);
+            var existingLocation = await _unitOfWork.Locations.GetOneAsync(l =>
+                l.Name == requestDto.Name &&
+                l.ProvinceId == requestDto.ProvinceId &&
+                !l.DeleteFlag
+            );
+
+            if (existingLocation != null)
+            {
+                throw new InvalidOperationException("Địa điểm với tên và tỉnh/thành phố đã tồn tại.");
+			}
+
+			var location = _mapper.Map<Location>(requestDto);
 
             // Handle multiple image uploads
             if (requestDto.Images != null && requestDto.Images.Any())
@@ -201,8 +212,33 @@ namespace vivuvn_api.Services.Implementations
             location.NameNormalized = TextHelper.ToSearchFriendly(requestDto.Name);
             location.DeleteFlag = false;
 
-            await _unitOfWork.Locations.AddAsync(location);
+			var province = await _unitOfWork.Provinces.GetOneAsync(p => p.Id == requestDto.ProvinceId);
+
+			var placeData = string.IsNullOrEmpty(location.Address) ? await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name) : await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name, location.Address);
+
+            if(placeData is null)
+            {
+                throw new Exception("Không thể tìm thấy địa điểm bạn nhập vào. Vui lòng thử lại!");
+			}
+
+            if(location.Address is null)
+            {
+                location.Address = placeData.FormattedAddress;
+			}
+			location.GooglePlaceId = placeData.PlaceId;
+            location.Latitude = placeData.Latitude;
+            location.Longitude = placeData.Longitude;
+            location.ReviewUri = placeData.ReviewsUri;
+            location.Rating = placeData.Rating;
+            location.RatingCount = placeData.UserRatingCount;
+            location.PlaceUri = placeData.GoogleMapsUri;
+
+            PlaceUpsertRequestDto placeUpsert = _mapper.Map<PlaceUpsertRequestDto>(location);
+
+            await _aiService.InsertPlaceAsync(placeUpsert);
+			await _unitOfWork.Locations.AddAsync(location);
             await _unitOfWork.SaveChangesAsync();
+            
 
             // Fetch the created location with its relationships
             var createdLocation = await _unitOfWork.Locations.GetOneAsync(
@@ -210,7 +246,7 @@ namespace vivuvn_api.Services.Implementations
                 includeProperties: "Photos,Province"
             );
 
-            return _mapper.Map<LocationDto>(createdLocation);
+			return _mapper.Map<LocationDto>(createdLocation);
         }
 
         public async Task<LocationDto> UpdateLocationAsync(int id, UpdateLocationRequestDto requestDto)
@@ -250,7 +286,10 @@ namespace vivuvn_api.Services.Implementations
                 location.Photos = photos;
             }
 
-            _unitOfWork.Locations.Update(location);
+            PlaceUpsertRequestDto placeUpsert = _mapper.Map<PlaceUpsertRequestDto>(location);
+
+            await _aiService.UpdatePlaceAsync(placeUpsert);
+			_unitOfWork.Locations.Update(location);
             await _unitOfWork.SaveChangesAsync();
 
             // Fetch updated location with relationships
@@ -271,7 +310,9 @@ namespace vivuvn_api.Services.Implementations
                 throw new KeyNotFoundException($"Location with id {id} not found.");
             }
 
-            location.DeleteFlag = true;
+            await _aiService.DeletePlaceAsync(location.GooglePlaceId);
+
+			location.DeleteFlag = true;
             _unitOfWork.Locations.Update(location);
             await _unitOfWork.SaveChangesAsync();
         }
