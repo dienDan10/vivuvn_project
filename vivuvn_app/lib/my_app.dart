@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'common/theme/app_theme.dart';
 import 'core/routes/app_route.dart';
 import 'core/services/fcm_service.dart';
+import 'core/services/theme_service.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -27,6 +28,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(final BuildContext context) {
     final goRouter = ref.watch(goRouterProvider);
+    final themeMode = ref.watch(themeServiceProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
@@ -34,7 +36,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       // theme configuration
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
 
       // route configuration
       routerConfig: goRouter,
