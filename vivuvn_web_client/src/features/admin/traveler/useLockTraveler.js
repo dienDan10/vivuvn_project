@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
 import { lockTraveler as lockTravelerApi } from "../../../services/apiTraveler";
+import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../../utils/constant";
 
 export function useLockTraveler() {
 	const queryClient = useQueryClient();
@@ -14,7 +15,7 @@ export function useLockTraveler() {
 			queryClient.invalidateQueries({ queryKey: ["travelers"] });
 			dispatch(
 				notify({
-					type: "success",
+					type: SUCCESS_NOTIFICATION,
 					message: "Traveler locked",
 					description: "Traveler account has been locked successfully",
 				})
@@ -23,9 +24,9 @@ export function useLockTraveler() {
 		onError: (error) => {
 			dispatch(
 				notify({
-					type: "error",
+					type: ERROR_NOTIFICATION,
 					message: "Lock failed",
-					description: error.response?.data?.message || error.message,
+					description: error.response?.data?.detail,
 				})
 			);
 		},

@@ -25,7 +25,8 @@ export function useUpdateProvince() {
 			dispatch(
 				notify({
 					type: ERROR_NOTIFICATION,
-					message: `Update failed: ${error.message || "Unknown error"}`,
+					message: "Update province failed",
+					description: error.response?.data?.detail,
 				})
 			),
 	});

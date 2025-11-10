@@ -26,7 +26,8 @@ export function useCreateOperator() {
 			dispatch(
 				notify({
 					type: ERROR_NOTIFICATION,
-					message: `Creation failed: ${error.response?.data?.message || error.message || "Unknown error"}`,
+					message: "Create operator failed",
+					description: error.response?.data?.detail,
 				})
 			),
 	});

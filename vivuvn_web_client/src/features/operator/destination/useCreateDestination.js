@@ -26,7 +26,8 @@ export function useCreateDestination() {
 			dispatch(
 				notify({
 					type: ERROR_NOTIFICATION,
-					message: `Creation failed: ${error.response?.data?.message || error.message}`,
+					message: "Create destination failed",
+					description: error.response?.data?.detail,
 				})
 			);
 		},

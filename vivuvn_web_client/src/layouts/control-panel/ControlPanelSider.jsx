@@ -59,7 +59,7 @@ function ControlPanelSider({ collapsed }) {
 							},
 						],
 					},
-					isOperator && {
+					(isOperator || isAdmin) && {
 						key: "5",
 						icon: <FaMapLocationDot />,
 						label: <Link to="/manage/destinations">Destinations</Link>,

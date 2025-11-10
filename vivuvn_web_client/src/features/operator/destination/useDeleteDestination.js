@@ -26,7 +26,8 @@ export function useDeleteDestination() {
 			dispatch(
 				notify({
 					type: ERROR_NOTIFICATION,
-					message: `Delete failed: ${error.response?.data?.message || error.message}`,
+					message: "Delete destination failed",
+					description: error.response?.data?.detail,
 				})
 			);
 		},

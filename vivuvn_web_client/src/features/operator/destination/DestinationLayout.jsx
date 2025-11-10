@@ -5,6 +5,7 @@ import DestinationTable from "./DestinationTable";
 import DestinationQuery from "./DestinationQuery";
 import DestinationForm from "./DestinationForm";
 import { useGetDestinations } from "./useGetDestinations";
+import { ERROR_NOTIFICATION } from "../../../utils/constant";
 
 const { Title } = Typography;
 
@@ -53,7 +54,7 @@ function DestinationLayout() {
 					<Alert
 						message="Error Loading Destinations"
 						description={error?.message || "An error occurred"}
-						type="error"
+						type={ERROR_NOTIFICATION}
 						showIcon
 						closable
 						onClose={() => refetch()}

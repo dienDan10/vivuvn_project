@@ -5,6 +5,7 @@ import ProvinceTable from "./ProvinceTable";
 import ProvinceForm from "./ProvinceForm";
 import ProvinceQuery from "./ProvinceQuery";
 import { useGetProvinces } from "./useGetProvinces";
+import { ERROR_NOTIFICATION } from "../../../utils/constant";
 
 const { Title } = Typography;
 
@@ -53,7 +54,7 @@ function ProvinceLayout() {
 						description={`Failed to load provinces: ${
 							error.message || "Unknown error"
 						}`}
-						type="error"
+						type={ERROR_NOTIFICATION}
 						showIcon
 						action={
 							<Button size="small" type="primary" onClick={() => refetch()}>

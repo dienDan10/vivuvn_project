@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
 import { unlockOperator as unlockOperatorApi } from "../../../services/apiOperator";
+import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../../utils/constant";
 
 export function useUnlockOperator() {
 	const queryClient = useQueryClient();
@@ -13,7 +14,7 @@ export function useUnlockOperator() {
 			queryClient.invalidateQueries({ queryKey: ["operators"] });
 			dispatch(
 				notify({
-					type: "success",
+					type: SUCCESS_NOTIFICATION,
 					message: "Operator unlocked",
 					description: "Operator account has been unlocked successfully",
 				})
@@ -22,9 +23,9 @@ export function useUnlockOperator() {
 		onError: (error) => {
 			dispatch(
 				notify({
-					type: "error",
+					type: ERROR_NOTIFICATION,
 					message: "Unlock failed",
-					description: error.response?.data?.message || error.message,
+					description: error.response?.data?.detail,
 				})
 			);
 		},

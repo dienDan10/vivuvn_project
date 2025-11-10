@@ -26,7 +26,8 @@ export function useUpdateDestination() {
 			dispatch(
 				notify({
 					type: ERROR_NOTIFICATION,
-					message: `Update failed: ${error.response?.data?.message || error.message}`,
+					message: "Update destination failed",
+					description: error.response?.data?.detail,
 				})
 			);
 		},
