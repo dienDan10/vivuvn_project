@@ -170,17 +170,29 @@ class _MessageListState extends ConsumerState<MessageList> {
         final previousMessage = index < messages.length - 1
             ? messages[index + 1]
             : null;
+        final nextMessage = index > 0 ? messages[index - 1] : null;
+
         final bool showDateSeparator = _shouldShowDateSeparator(
           message,
           previousMessage,
         );
 
+        // Check if there's a date separator between current and next message
+        final bool hasDateSeparatorAfter =
+            nextMessage != null &&
+            _shouldShowDateSeparator(nextMessage, message);
+
+        // Determine sequence position considering date separators
+        // A date separator breaks the sequence
         final bool isLastInSequence =
             index == messages.length - 1 ||
-            messages[index + 1].memberId != message.memberId;
+            messages[index + 1].memberId != message.memberId ||
+            showDateSeparator;
 
         final bool isFirstInSequence =
-            index == 0 || messages[index - 1].memberId != message.memberId;
+            index == 0 ||
+            messages[index - 1].memberId != message.memberId ||
+            hasDateSeparatorAfter;
 
         final bool isAloneInSequence = isFirstInSequence && isLastInSequence;
 
@@ -203,8 +215,8 @@ class _MessageListState extends ConsumerState<MessageList> {
         if (showDateSeparator) {
           return Column(
             children: [
-              messageBubble,
               _buildDateSeparator(_formatDateSeparator(message.createdAt)),
+              messageBubble,
             ],
           );
         }
