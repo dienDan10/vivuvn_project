@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../../common/helper/image_util.dart';
 import '../data/model/message.dart';
+import 'user_info_modal.dart';
 
 class MessageBubble extends StatelessWidget {
   const MessageBubble.alone({super.key, required this.message})
@@ -66,6 +67,10 @@ class MessageBubble extends StatelessWidget {
     }
   }
 
+  void _onAvatarTap(final BuildContext context) {
+    UserInfoModal.show(context, message);
+  }
+
   @override
   Widget build(final BuildContext context) {
     final isMe = message.isOwnMessage;
@@ -85,7 +90,13 @@ class MessageBubble extends StatelessWidget {
             //the first message in a sequence
             // and the message is from another user
             if ((isAloneInSequence || isFirstInSequence) && !isMe)
-              ImageUtil.buildAvatarWidget(imageUrl: message.photo, radius: 16)
+              GestureDetector(
+                onTap: () => _onAvatarTap(context),
+                child: ImageUtil.buildAvatarWidget(
+                  imageUrl: message.photo,
+                  radius: 16,
+                ),
+              )
             else if (!isMe)
               const SizedBox(width: 32),
 
