@@ -5,6 +5,7 @@ import '../../../../core/data/remote/network/network_service.dart';
 import '../dto/google_login_request.dart';
 import '../dto/login_request.dart';
 import '../dto/login_response.dart';
+import '../dto/reset_password_request.dart';
 
 final loginApiProvider = Provider.autoDispose<LoginApi>((final ref) {
   final dio = ref.watch(networkServiceProvider);
@@ -34,5 +35,13 @@ final class LoginApi {
     );
 
     return LoginResponse.fromMap(response.data);
+  }
+
+  Future<void> forgotPassword(final String email) async {
+    await _dio.post('/api/v1/auth/forgot-password', data: {'email': email});
+  }
+
+  Future<void> resetPassword(final ResetPasswordRequest request) async {
+    await _dio.post('/api/v1/auth/reset-password', data: request.toMap());
   }
 }

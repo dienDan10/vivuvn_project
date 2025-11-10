@@ -58,13 +58,6 @@ export async function createDestination(data) {
 	if (data.description) formData.append("description", data.description);
 	if (data.address) formData.append("address", data.address);
 	if (data.websiteUri) formData.append("websiteUri", data.websiteUri);
-	if (data.latitude) formData.append("latitude", data.latitude);
-	if (data.longitude) formData.append("longitude", data.longitude);
-	if (data.googlePlaceId) formData.append("googlePlaceId", data.googlePlaceId);
-	if (data.placeUri) formData.append("placeUri", data.placeUri);
-	if (data.directionsUri) formData.append("directionsUri", data.directionsUri);
-	if (data.reviewUri) formData.append("reviewUri", data.reviewUri);
-
 	// Append multiple images
 	if (data.images && data.images.length > 0) {
 		data.images.forEach((image) => {
@@ -93,12 +86,6 @@ export async function updateDestination({ id, ...data }) {
 	if (data.description) formData.append("description", data.description);
 	if (data.address) formData.append("address", data.address);
 	if (data.websiteUri) formData.append("websiteUri", data.websiteUri);
-	if (data.latitude) formData.append("latitude", data.latitude);
-	if (data.longitude) formData.append("longitude", data.longitude);
-	if (data.googlePlaceId) formData.append("googlePlaceId", data.googlePlaceId);
-	if (data.placeUri) formData.append("placeUri", data.placeUri);
-	if (data.directionsUri) formData.append("directionsUri", data.directionsUri);
-	if (data.reviewUri) formData.append("reviewUri", data.reviewUri);
 
 	// Append multiple images if provided
 	if (data.images && data.images.length > 0) {

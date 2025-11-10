@@ -13,11 +13,11 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-	public class UserService(IUnitOfWork _unitOfWork, IMapper _mapper) : IUserService
-	{
-		public async Task<UserDto> GetProfileAsync(string email)
-		{
-			var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == email, includeProperties: "UserRoles,UserRoles.Role");
+    public class UserService(IUnitOfWork _unitOfWork, IMapper _mapper, IImageService _imageService) : IUserService
+    {
+        public async Task<UserDto> GetProfileAsync(string email)
+        {
+            var user = await _unitOfWork.Users.GetOneAsync(u => u.Email == email, includeProperties: "UserRoles,UserRoles.Role");
 
 			if (user == null)
 			{
@@ -52,14 +52,58 @@ namespace vivuvn_api.Services.Implementations
 			return _mapper.Map<UserDto>(user);
 		}
 
-		public async Task<PaginatedResponseDto<UserDto>> GetAllUsersAsync(GetAllUsersRequestDto requestDto)
-		{
-			// Build filter expression with optional role filtering
-			Expression<Func<User, bool>> filter = u =>
-				(string.IsNullOrEmpty(requestDto.Role) || u.UserRoles.Any(ur => ur.Role.Name == requestDto.Role)) &&
-				(string.IsNullOrEmpty(requestDto.Username) || u.Username.Contains(requestDto.Username)) &&
-				(string.IsNullOrEmpty(requestDto.Email) || u.Email.Contains(requestDto.Email)) &&
-				(string.IsNullOrEmpty(requestDto.PhoneNumber) || (u.PhoneNumber != null && u.PhoneNumber.Contains(requestDto.PhoneNumber)));
+        public async Task<string?> ChangeAvatarAsync(int userId, IFormFile avatar)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null)
+            {
+                return null;
+            }
+
+            var avatarUrl = await _imageService.UploadImageAsync(avatar);
+
+            // update user avatar
+            user.UserPhoto = avatarUrl;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return avatarUrl;
+        }
+
+        public async Task<string?> ChangeUsername(int userId, string name)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null)
+            {
+                return null;
+            }
+            user.Username = name;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+            return name;
+        }
+
+        public async Task<string?> ChangePhoneNumber(int userId, string phoneNumber)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null)
+            {
+                return null;
+            }
+            user.PhoneNumber = phoneNumber;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+            return phoneNumber;
+        }
+        
+        public async Task<PaginatedResponseDto<UserDto>> GetAllUsersAsync(GetAllUsersRequestDto requestDto)
+        {
+            // Build filter expression with optional role filtering
+            Expression<Func<User, bool>> filter = u =>
+                (string.IsNullOrEmpty(requestDto.Role) || u.UserRoles.Any(ur => ur.Role.Name == requestDto.Role)) &&
+                (string.IsNullOrEmpty(requestDto.Username) || u.Username.Contains(requestDto.Username)) &&
+                (string.IsNullOrEmpty(requestDto.Email) || u.Email.Contains(requestDto.Email)) &&
+                (string.IsNullOrEmpty(requestDto.PhoneNumber) || (u.PhoneNumber != null && u.PhoneNumber.Contains(requestDto.PhoneNumber)));
 
 			// Build orderBy function
 			Func<IQueryable<User>, IOrderedQueryable<User>>? orderBy = null;

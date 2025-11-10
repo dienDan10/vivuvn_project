@@ -28,7 +28,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
-        android:label="vivuvn_app"
+        android:label="VivuVn"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

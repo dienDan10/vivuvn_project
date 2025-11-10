@@ -25,9 +25,8 @@ export function useRestoreProvince() {
 			dispatch(
 				notify({
 					type: ERROR_NOTIFICATION,
-					message: `Restoration failed: ${
-						error.response?.data?.message || "Unknown error"
-					}`,
+					message: "Restore province failed",
+					description: error.response?.data?.detail,
 				})
 			),
 	});

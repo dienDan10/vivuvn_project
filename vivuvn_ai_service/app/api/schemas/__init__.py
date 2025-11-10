@@ -5,7 +5,7 @@ This package contains request and response models for all API endpoints.
 Each schema class is in its own module for better organization.
 
 Structure:
-  - place.py         - PlaceData, PlaceInsertRequest/Response, PlaceUpdateRequest/Response
+  - place.py         - PlaceUpsertRequest/Response
   - travel.py        - TravelRequest, TravelResponse
   - data.py          - DataDeleteRequest/Response, DataBatchUploadResponse
   - system.py        - HealthCheckResponse, ErrorResponse
@@ -25,25 +25,15 @@ from app.api.schemas.system import (
 
 # Place Data Management Schemas
 from app.api.schemas.place import (
-    PlaceData,
-    PlaceInsertRequest,
-    PlaceInsertResponse,
-    PlaceUpdateRequest,
-    PlaceUpdateResponse,
+    PlaceUpsertRequest,
+    PlaceUpsertResponse,
 )
 
 # Generic Data Management Schemas
 from app.api.schemas.data import (
     DataDeleteRequest,
     DataDeleteResponse,
-    DataBatchUploadResponse,
 )
-
-# Backward Compatibility Aliases (Deprecated)
-DataInsertRequest = PlaceInsertRequest
-DataInsertResponse = PlaceInsertResponse
-DataUpdateRequest = PlaceUpdateRequest
-DataUpdateResponse = PlaceUpdateResponse
 
 # Export all schemas
 __all__ = [
@@ -56,20 +46,10 @@ __all__ = [
     "ErrorResponse",
 
     # Place Data Management Schemas
-    "PlaceData",
-    "PlaceInsertRequest",
-    "PlaceInsertResponse",
-    "PlaceUpdateRequest",
-    "PlaceUpdateResponse",
+    "PlaceUpsertRequest",
+    "PlaceUpsertResponse",
 
     # Generic Data Management Schemas
     "DataDeleteRequest",
     "DataDeleteResponse",
-    "DataBatchUploadResponse",
-
-    # Backward Compatibility (Deprecated)
-    "DataInsertRequest",
-    "DataInsertResponse",
-    "DataUpdateRequest",
-    "DataUpdateResponse",
 ]

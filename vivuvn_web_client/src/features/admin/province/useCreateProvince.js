@@ -26,7 +26,8 @@ export function useCreateProvince() {
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: `Creation failed: ${error.message || "Unknown error"}`,
+          message: "Create province failed",
+          description: error.response?.data?.detail,
         })
       ),
   });

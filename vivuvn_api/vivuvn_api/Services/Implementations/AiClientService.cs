@@ -57,11 +57,10 @@ namespace vivuvn_api.Services.Implementations
 		{
 			try
 			{
-				var requestWrapper = new { place = placeData };
-				var jsonRequest = JsonSerializer.Serialize(requestWrapper, _jsonOptions);
+				var jsonRequest = JsonSerializer.Serialize(placeData, _jsonOptions);
 				var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-				var response = await _httpClient.PostAsync("/api/v1/place/insert", content);
+				var response = await _httpClient.PostAsync("/api/v1/data/place/insert", content);
 				var jsonResponse = await response.Content.ReadAsStringAsync();
 
 				if (!response.IsSuccessStatusCode)
@@ -86,11 +85,10 @@ namespace vivuvn_api.Services.Implementations
 		{
 			try
 			{
-				var requestWrapper = new { place = placeData };
-				var jsonRequest = JsonSerializer.Serialize(requestWrapper, _jsonOptions);
+				var jsonRequest = JsonSerializer.Serialize(placeData, _jsonOptions);
 				var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-				var response = await _httpClient.PutAsync("/api/v1/place/update", content);
+				var response = await _httpClient.PutAsync("/api/v1/data/place/update", content);
 				var jsonResponse = await response.Content.ReadAsStringAsync();
 
 				if (!response.IsSuccessStatusCode)
@@ -119,7 +117,7 @@ namespace vivuvn_api.Services.Implementations
 				var jsonRequest = JsonSerializer.Serialize(requestDto, _jsonOptions);
 				var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-				var response = await _httpClient.DeleteAsync("/api/v1/place/delete");
+				var response = await _httpClient.DeleteAsync("/api/v1/data/place/delete");
 				var jsonResponse = await response.Content.ReadAsStringAsync();
 
 				if (!response.IsSuccessStatusCode)

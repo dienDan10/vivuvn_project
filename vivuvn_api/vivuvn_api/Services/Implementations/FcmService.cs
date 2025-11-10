@@ -29,6 +29,8 @@ namespace vivuvn_api.Services.Implementations
                         await _deviceService.DeactivateDeviceAsync(device.FcmToken);
                     }
 
+                    // Intentionally swallow other exceptions - notifications are non-critical
+                    // and should not block the main operation flow
                 }
             }
         }
@@ -89,7 +91,7 @@ namespace vivuvn_api.Services.Implementations
                 }
                 catch (FirebaseMessagingException ex)
                 {
-
+                    // Intentionally swallow exceptions - notifications are non-critical
                 }
             }
         }

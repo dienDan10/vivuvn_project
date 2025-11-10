@@ -319,7 +319,7 @@ namespace vivuvn_api.Services.Implementations
 
 		private async Task<User?> ValidateRefreshTokenAsync(string token)
 		{
-			var user = await _unitOfWork.Users.GetOneAsync(u => u.RefreshToken == token);
+			var user = await _unitOfWork.Users.GetOneAsync(u => u.RefreshToken == token, includeProperties: "UserRoles,UserRoles.Role");
 			if (user == null || user.RefreshToken == null || user.RefreshTokenExpireDate <= DateTime.UtcNow)
 			{
 				return null;

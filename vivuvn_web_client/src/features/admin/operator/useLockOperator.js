@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
 import { lockOperator as lockOperatorApi } from "../../../services/apiOperator";
+import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../../utils/constant";
 
 export function useLockOperator() {
 	const queryClient = useQueryClient();
@@ -13,7 +14,7 @@ export function useLockOperator() {
 			queryClient.invalidateQueries({ queryKey: ["operators"] });
 			dispatch(
 				notify({
-					type: "success",
+					type: SUCCESS_NOTIFICATION,
 					message: "Operator locked",
 					description: "Operator account has been locked successfully",
 				})
@@ -22,9 +23,9 @@ export function useLockOperator() {
 		onError: (error) => {
 			dispatch(
 				notify({
-					type: "error",
+					type: ERROR_NOTIFICATION,
 					message: "Lock failed",
-					description: error.response?.data?.message || error.message,
+					description: error.response?.data?.detail,
 				})
 			);
 		},

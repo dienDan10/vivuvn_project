@@ -23,7 +23,13 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
 
   Future<void> login() async {
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(
+        isLoading: true,
+        error: null,
+        sendForgotPasswordSuccess: false,
+        forgotPasswordError: null,
+        resetPasswordError: null,
+      );
 
       final loginRequest = LoginRequest(
         email: state.loginData['email'] ?? '',
@@ -48,6 +54,8 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
       await ref.read(authControllerProvider.notifier).setAuthenticated(user);
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isLoading: false);
     }
@@ -84,5 +92,52 @@ class LoginController extends AutoDisposeNotifier<LoginState> {
 
   void updateLoginData(final String email, final String password) {
     state = state.copyWith(loginData: {'email': email, 'password': password});
+  }
+
+  Future<void> forgotPassword(final String email) async {
+    try {
+      state = state.copyWith(
+        sendingForgotPassword: true,
+        forgotPasswordError: null,
+        sendForgotPasswordSuccess: false,
+      );
+
+      await ref.read(loginServiceProvider).forgotPassword(email);
+
+      state = state.copyWith(sendForgotPasswordSuccess: true);
+    } on DioException catch (e) {
+      state = state.copyWith(
+        forgotPasswordError: DioExceptionHandler.handleException(e),
+      );
+    } catch (e) {
+      state = state.copyWith(forgotPasswordError: e.toString());
+    } finally {
+      state = state.copyWith(sendingForgotPassword: false);
+    }
+  }
+
+  Future<void> resetPassword(
+    final String email,
+    final String newPassword,
+    final String resetToken,
+  ) async {
+    try {
+      state = state.copyWith(
+        sendingResetPassword: true,
+        resetPasswordError: null,
+      );
+
+      await ref
+          .read(loginServiceProvider)
+          .resetPassword(email, newPassword, resetToken);
+    } on DioException catch (e) {
+      state = state.copyWith(
+        resetPasswordError: DioExceptionHandler.handleException(e),
+      );
+    } catch (e) {
+      state = state.copyWith(resetPasswordError: e.toString());
+    } finally {
+      state = state.copyWith(sendingResetPassword: false);
+    }
   }
 }

@@ -10,10 +10,8 @@ from fastapi import APIRouter
 from app.api.schemas.place import PlaceUpsertRequest, PlaceUpsertResponse
 from app.services.data_management_service import get_data_management_service
 from app.api.schemas import (
-    PlaceInsertRequest,
-    PlaceInsertResponse,
-    PlaceUpdateRequest,
-    PlaceUpdateResponse,
+    PlaceUpsertResponse,
+    PlaceUpsertRequest,
     DataDeleteRequest,
     DataDeleteResponse,
 )
@@ -38,15 +36,14 @@ async def insert_place(request: PlaceUpsertRequest):
     Returns:
         PlaceInsertResponse: Success status and place ID
     """
-    place_name = request.place.name
-    place_id = request.place.googlePlaceId
+    place_name = request.name
+    place_id = request.googlePlaceId
 
     logger.info(f"Inserting place", place_name=place_name, place_id=place_id)
 
     dm_service = get_data_management_service()
 
-    # Convert PlaceData to dict for service
-    place_dict = request.place.model_dump()
+    place_dict = request.model_dump()
 
     success = await dm_service.upsert_place(place_data=place_dict)
 
@@ -55,7 +52,7 @@ async def insert_place(request: PlaceUpsertRequest):
 
     logger.info(f"Successfully inserted place", place_id=place_id, place_name=place_name)
 
-    return PlaceInsertResponse(
+    return PlaceUpsertResponse(
         success=True,
         message=f"Successfully inserted place: {place_name}",
         place_id=place_id
@@ -76,15 +73,14 @@ async def update_place(request: PlaceUpsertRequest):
     Returns:
         PlaceUpdateResponse: Success status and place ID
     """
-    place_name = request.place.name
-    place_id = request.place.googlePlaceId
+    place_name = request.name
+    place_id = request.googlePlaceId
 
     logger.info(f"Updating place", place_name=place_name, place_id=place_id)
 
     dm_service = get_data_management_service()
 
-    # Convert PlaceData to dict for service
-    place_dict = request.place.model_dump()
+    place_dict = request.model_dump()
 
     # Use upsert_place which automatically handles updates via Pinecone's upsert
     success = await dm_service.upsert_place(place_data=place_dict)
@@ -94,7 +90,7 @@ async def update_place(request: PlaceUpsertRequest):
 
     logger.info(f"Successfully updated place", place_id=place_id, place_name=place_name)
 
-    return PlaceUpdateResponse(
+    return PlaceUpsertResponse(
         success=True,
         message=f"Successfully updated place: {place_name}",
         place_id=place_id

@@ -3,8 +3,8 @@
 from pydantic import BaseModel, Field, field_validator
 
 
-class PlaceData(BaseModel):
-    """Place data model with validation."""
+class PlaceUpsertRequest(BaseModel):
+    """Request schema for upserting a place."""
 
     name: str = Field(
         ...,
@@ -100,15 +100,6 @@ class PlaceData(BaseModel):
         }
 
 
-class PlaceUpsertRequest(BaseModel):
-    """Request schema for upserting a place."""
-
-    place: PlaceData = Field(
-        ...,
-        description="Place data to upsert"
-    )
-
-
 class PlaceUpsertResponse(BaseModel):
     """Response schema for place upsert operations."""
 
@@ -118,7 +109,6 @@ class PlaceUpsertResponse(BaseModel):
 
 
 __all__ = [
-    "PlaceData",
     "PlaceUpsertRequest",
     "PlaceUpsertResponse",
 ]

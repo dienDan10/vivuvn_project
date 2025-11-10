@@ -48,7 +48,7 @@ namespace vivuvn_api.Mappings
 
             // Mapping For Update Location Request
             CreateMap<UpdateLocationRequestDto, Location>()
-                .ForMember(dest => dest.Photos, opt => opt.Ignore()) // Handled in service
+				.ForMember(dest => dest.Photos, opt => opt.Ignore()) // Handled in service
                 .ForMember(dest => dest.NameNormalized, opt => opt.Ignore()); // Handled in service
 
             // Mapping For Search Place from Google

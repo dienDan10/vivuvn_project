@@ -39,6 +39,11 @@ namespace vivuvn_api.Controllers
         public async Task<IActionResult> KickMember(int itineraryId, int memberId)
         {
             var userId = GetCurrentUserId();
+            var isOwner = await _memberService.IsOwnerAsync(userId, itineraryId);
+            if (isOwner)
+            {
+                return BadRequest("Chỉ chủ lịch trình mới có thể kick thành viên.");
+            }
             await _memberService.KickMemberAsync(userId, itineraryId, memberId);
             return NoContent();
         }

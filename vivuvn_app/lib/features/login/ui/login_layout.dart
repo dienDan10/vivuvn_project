@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/routes/routes.dart';
 import '../controller/login_controller.dart';
 import 'widgets/btn_google_login.dart';
+import 'widgets/forgot_password_btn.dart';
 import 'widgets/loading_overlay.dart';
 import 'widgets/login_form.dart';
 
@@ -76,7 +77,8 @@ class LoginLayout extends ConsumerWidget {
                     // Login Form
                     const SizedBox(height: 30),
                     const LoginForm(),
-                    const SizedBox(height: 80),
+                    const ForgotPasswordBtn(),
+                    const SizedBox(height: 60),
                     Text(
                       '- Hoặc đăng nhập bằng -',
                       style: TextStyle(

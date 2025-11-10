@@ -65,7 +65,7 @@ class Message {
       username: map['username'] as String,
       photo: map['photo'] != null ? map['photo'] as String : null,
       message: map['message'] as String,
-      createdAt: DateTime.parse(map['createdAt'] as String),
+      createdAt: DateTime.parse('${map['createdAt'] as String}Z').toLocal(),
       isOwnMessage: map['isOwnMessage'] as bool,
     );
   }

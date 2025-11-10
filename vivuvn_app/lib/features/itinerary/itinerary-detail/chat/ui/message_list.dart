@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../controller/chat_controller.dart';
+import '../data/model/message.dart';
 import '../state/chat_state.dart';
 import 'message_bubble.dart';
 
@@ -15,6 +17,65 @@ class MessageList extends ConsumerStatefulWidget {
 
 class _MessageListState extends ConsumerState<MessageList> {
   final ScrollController _scrollController = ScrollController();
+
+  bool _shouldShowDateSeparator(
+    final Message currentMessage,
+    final Message? previousMessage,
+  ) {
+    if (previousMessage == null) return true;
+
+    final currentDate = DateTime(
+      currentMessage.createdAt.year,
+      currentMessage.createdAt.month,
+      currentMessage.createdAt.day,
+    );
+
+    final previousDate = DateTime(
+      previousMessage.createdAt.year,
+      previousMessage.createdAt.month,
+      previousMessage.createdAt.day,
+    );
+
+    return !currentDate.isAtSameMomentAs(previousDate);
+  }
+
+  String _formatDateSeparator(final DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final messageDate = DateTime(date.year, date.month, date.day);
+
+    if (messageDate.isAtSameMomentAs(today)) {
+      return 'Hôm nay';
+    } else if (messageDate.isAtSameMomentAs(yesterday)) {
+      return 'Hôm qua';
+    } else {
+      return DateFormat('dd MMMM, yyyy', 'vi').format(date);
+    }
+  }
+
+  Widget _buildDateSeparator(final String dateText) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        children: [
+          const Expanded(child: Divider()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              dateText,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const Expanded(child: Divider()),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -106,6 +167,14 @@ class _MessageListState extends ConsumerState<MessageList> {
         }
 
         final message = messages[index];
+        final previousMessage = index < messages.length - 1
+            ? messages[index + 1]
+            : null;
+        final bool showDateSeparator = _shouldShowDateSeparator(
+          message,
+          previousMessage,
+        );
+
         final bool isLastInSequence =
             index == messages.length - 1 ||
             messages[index + 1].memberId != message.memberId;
@@ -117,21 +186,30 @@ class _MessageListState extends ConsumerState<MessageList> {
 
         final bool isMiddleInSequence = !isFirstInSequence && !isLastInSequence;
 
-        // Build appropriate message bubble based on position in sequence
+        // Build message bubble based on position in sequence
+        Widget messageBubble;
         if (isAloneInSequence) {
-          return MessageBubble.alone(message: message);
+          messageBubble = MessageBubble.alone(message: message);
+        } else if (isFirstInSequence) {
+          messageBubble = MessageBubble.first(message: message);
+        } else if (isMiddleInSequence) {
+          messageBubble = MessageBubble.middle(message: message);
+        } else {
+          // isLastInSequence
+          messageBubble = MessageBubble.last(message: message);
         }
 
-        if (isFirstInSequence) {
-          return MessageBubble.first(message: message);
+        // Add date separator if needed
+        if (showDateSeparator) {
+          return Column(
+            children: [
+              messageBubble,
+              _buildDateSeparator(_formatDateSeparator(message.createdAt)),
+            ],
+          );
         }
 
-        if (isMiddleInSequence) {
-          return MessageBubble.middle(message: message);
-        }
-
-        // isLastInSequence
-        return MessageBubble.last(message: message);
+        return messageBubble;
       },
     );
   }

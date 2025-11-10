@@ -63,7 +63,7 @@ export function useLogin() {
 					type: ERROR_NOTIFICATION,
 					message: "Login Failed",
 					description:
-						error.response?.data?.message || "An error occurred during login.",
+						error.response?.data?.detail || "An error occurred during login.",
 				})
 			);
 		},
