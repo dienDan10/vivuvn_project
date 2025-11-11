@@ -6,7 +6,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AccessDenied from "./pages/AccessDenied";
 import RoleBaseRoute from "./components/RoleBaseRoute";
 import AdminOnlyRoute from "./components/AdminOnlyRoute";
-import OperatorOnlyRoute from "./components/OperatorOnlyRoute";
 import OperatorLayout from "./features/admin/operator/OperatorLayout";
 
 const Login = lazy(() => import("./pages/Login"));
@@ -21,6 +20,9 @@ const TravelerLayout = lazy(() =>
 );
 const DestinationLayout = lazy(() =>
   import("./features/operator/destination/DestinationLayout")
+);
+const DashboardLayout = lazy(() =>
+  import("./features/admin/dashboard/DashboardLayout")
 );
 
 export const router = createBrowserRouter([
@@ -49,6 +51,18 @@ export const router = createBrowserRouter([
     ),
     errorElement: <PageNotFound />,
     children: [
+      {
+        index: true,
+        element: <Navigate to="/manage/dashboard" replace />,
+      },
+      {
+        path: "dashboard",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <DashboardLayout />
+          </Suspense>
+        ),
+      },
       {
         path: "provinces",
         element: (
@@ -82,11 +96,9 @@ export const router = createBrowserRouter([
       {
         path: "destinations",
         element: (
-          <OperatorOnlyRoute>
             <Suspense fallback={<SpinnerLarge />}>
               <DestinationLayout />
             </Suspense>
-          </OperatorOnlyRoute>
         ),
       },
     ],

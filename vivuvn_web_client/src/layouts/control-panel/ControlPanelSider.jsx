@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { ROLE_ADMIN, ROLE_OPERATOR } from "../../utils/constant";
 import { FaLocationDot, FaMapLocationDot } from "react-icons/fa6";
-import { BiTrip } from "react-icons/bi";
 
 function ControlPanelSider({ collapsed }) {
 	const location = useLocation();
@@ -42,7 +41,7 @@ function ControlPanelSider({ collapsed }) {
 					(isAdmin || isOperator) && {
 						key: "1",
 						icon: <MdSpaceDashboard />,
-						label: <Link to="/manage">Dashboard</Link>,
+						label: <Link to="/manage/dashboard">Dashboard</Link>,
 					},
 					isAdmin && {
 						key: "2",
