@@ -61,10 +61,13 @@ const refreshToken = async () => {
 // Add a request interceptor
 customAxios.interceptors.request.use(
 	(config) => {
-		// If the access token is available, set it in the headers
-		const accessToken = tokenManager.getAccessToken();
-		if (accessToken) {
-			config.headers["Authorization"] = `Bearer ${accessToken}`;
+		// Only set the token if Authorization header is not already present
+		// This prevents overwriting the token during retry attempts
+		if (!config.headers["Authorization"]) {
+			const accessToken = tokenManager.getAccessToken();
+			if (accessToken) {
+				config.headers["Authorization"] = `Bearer ${accessToken}`;
+			}
 		}
 		return config;
 	},
@@ -81,21 +84,23 @@ customAxios.interceptors.response.use(
 	},
 	async (error) => {
 		const originalRequest = error.config;
-
-		// If the response is a 401 Unauthorized error and we haven't already tried to refresh
+		// If the response is a 401 Unauthorized or 403 Forbidden error and we haven't already tried to refresh
 		if (
 			error.response &&
-			error.response.status === 401 &&
+			(error.response.status === 401 || error.response.status === 403) &&
 			!originalRequest._retry
 		) {
 			// Check if the request was for the user profile API or refresh endpoint
-
 			if (isRefreshing) {
 				// If we're already refreshing, queue this request
 				return new Promise((resolve, reject) => {
 					failedQueue.push({ resolve, reject });
 				})
-					.then(() => {
+					.then((token) => {
+						// Update the original request with the new token from the refresh
+						originalRequest.headers["Authorization"] = `Bearer ${token}`;
+						// Delete the _retry flag to allow fresh retry
+						delete originalRequest._retry;
 						return customAxios(originalRequest);
 					})
 					.catch((err) => {
@@ -112,10 +117,21 @@ customAxios.interceptors.response.use(
 
 				// Update Redux state to reflect successful authentication
 				store.dispatch(doLoginAction());
-
+				console.log("New token obtained:", newToken);
+				
 				// Retry the original request with new token
-				originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-				return customAxios(originalRequest);
+				// Create a new config to avoid axios caching issues
+				const retryConfig = {
+					...originalRequest,
+					headers: {
+						...originalRequest.headers,
+						Authorization: `Bearer ${newToken}`,
+					},
+				};
+				// Delete the _retry flag to allow fresh retry
+				delete retryConfig._retry;
+				
+				return customAxios(retryConfig);
 			} catch (refreshError) {
 				processQueue(refreshError, null);
 

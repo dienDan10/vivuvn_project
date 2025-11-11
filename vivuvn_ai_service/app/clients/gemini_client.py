@@ -6,9 +6,9 @@ Provides retry logic, error handling, and structured logging.
 """
 
 import asyncio
+import structlog
 from typing import Optional, List
 
-import structlog
 from google import genai
 from google.genai import types
 from google.api_core import exceptions as google_exceptions

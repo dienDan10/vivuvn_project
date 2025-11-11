@@ -8,9 +8,9 @@ Handles:
 - Retry logic for transient failures
 """
 
-import structlog
 import asyncio
 import json
+import structlog
 
 from google.genai import types
 

@@ -1,4 +1,6 @@
-﻿using vivuvn_api.DTOs.ValueObjects;
+﻿using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
+using vivuvn_api.DTOs.ValueObjects;
 
 namespace vivuvn_api.Services.Interfaces
 {
@@ -10,5 +12,7 @@ namespace vivuvn_api.Services.Interfaces
         Task<string?> ChangeAvatarAsync(int userId, IFormFile avatar);
         Task<string?> ChangeUsername(int userId, string name);
         Task<string?> ChangePhoneNumber(int userId, string phoneNumber);
+        Task<PaginatedResponseDto<UserDto>> GetAllUsersAsync(GetAllUsersRequestDto requestDto);
+        Task<UserDto> CreateOperatorAsync(CreateOperatorRequestDto requestDto);
     }
 }

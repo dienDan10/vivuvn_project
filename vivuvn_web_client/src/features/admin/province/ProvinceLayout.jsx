@@ -5,6 +5,7 @@ import ProvinceTable from "./ProvinceTable";
 import ProvinceForm from "./ProvinceForm";
 import ProvinceQuery from "./ProvinceQuery";
 import { useGetProvinces } from "./useGetProvinces";
+import { ERROR_NOTIFICATION } from "../../../utils/constant";
 
 const { Title } = Typography;
 
@@ -39,10 +40,9 @@ function ProvinceLayout() {
 			<Space direction="vertical" size="large" style={{ width: "100%" }}>
 				<Space
 					direction="horizontal"
-					justify="space-between"
-					style={{ width: "100%" }}
+					style={{ width: "100%", justifyContent: "space-between" }}
 				>
-					<Title level={2}>Provinces</Title>
+					<Title level={2} style={{ margin: 0 }}>Provinces</Title>
 					<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
 						Add Province
 					</Button>
@@ -54,7 +54,7 @@ function ProvinceLayout() {
 						description={`Failed to load provinces: ${
 							error.message || "Unknown error"
 						}`}
-						type="error"
+						type={ERROR_NOTIFICATION}
 						showIcon
 						action={
 							<Button size="small" type="primary" onClick={() => refetch()}>

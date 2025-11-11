@@ -16,6 +16,11 @@ namespace vivuvn_api.Repositories.Implementations
             dbSet = _context.Set<T>();
         }
 
+        public IQueryable<T> GetQueryable()
+        {
+            return dbSet.AsQueryable();
+        }
+
         public async Task<T?> AddAsync(T entity)
         {
             await dbSet.AddAsync(entity);

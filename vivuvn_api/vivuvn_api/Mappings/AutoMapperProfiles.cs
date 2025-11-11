@@ -40,6 +40,17 @@ namespace vivuvn_api.Mappings
             // Mapping For Search Location
             CreateMap<Location, SearchLocationDto>();
 
+            // Mapping For Create Location Request
+            CreateMap<CreateLocationRequestDto, Location>()
+                .ForMember(dest => dest.Photos, opt => opt.Ignore()) // Handled in service
+                .ForMember(dest => dest.NameNormalized, opt => opt.Ignore()) // Handled in service
+                .ForMember(dest => dest.DeleteFlag, opt => opt.MapFrom(src => false));
+
+            // Mapping For Update Location Request
+            CreateMap<UpdateLocationRequestDto, Location>()
+				.ForMember(dest => dest.Photos, opt => opt.Ignore()) // Handled in service
+                .ForMember(dest => dest.NameNormalized, opt => opt.Ignore()); // Handled in service
+
             // Mapping For Search Place from Google
             CreateMap<SimplifiedPlace, SearchPlaceDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName != null ? src.DisplayName.Text : string.Empty))
@@ -148,6 +159,22 @@ namespace vivuvn_api.Mappings
             CreateMap<Notification, NotificationDto>()
                 .ForMember(dest => dest.ItineraryName,
                     opt => opt.MapFrom(src => src.Itinerary != null ? src.Itinerary.Name : null));
-        }
-    }
+
+			// Mapping for Operator creation
+            CreateMap<CreateOperatorRequestDto, User>()
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // PasswordHash will be set in service layer
+                .ForMember(dest => dest.UserPhoto, opt => opt.Ignore())
+                .ForMember(dest => dest.RefreshToken, opt => opt.Ignore())
+                .ForMember(dest => dest.RefreshTokenExpireDate, opt => opt.Ignore())
+                .ForMember(dest => dest.GoogleIdToken, opt => opt.Ignore())
+                .ForMember(dest => dest.IsEmailVerified, opt => opt.MapFrom(src => true))
+                .ForMember(dest => dest.EmailVerificationToken, opt => opt.Ignore())
+                .ForMember(dest => dest.EmailVerificationTokenExpireDate, opt => opt.Ignore())
+                .ForMember(dest => dest.LockoutEnd, opt => opt.Ignore());
+
+			// Mapping for Place Upsert Request
+            CreateMap<Location, PlaceUpsertRequestDto>()
+                .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty));
+		}
+	}
 }

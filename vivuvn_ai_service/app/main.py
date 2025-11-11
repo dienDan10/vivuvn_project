@@ -36,13 +36,11 @@ structlog.configure(
     cache_logger_on_first_use=True,
 )
 
-# Setup handler with ConsoleRenderer
 handler = logging.StreamHandler()
 handler.setFormatter(structlog.stdlib.ProcessorFormatter(
     processor=structlog.dev.ConsoleRenderer(),
 ))
 root_logger = logging.getLogger()
-# Clear any existing handlers to prevent duplication
 root_logger.handlers.clear()
 root_logger.addHandler(handler)
 root_logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper()))
@@ -58,18 +56,10 @@ async def lifespan(app: FastAPI):
     Args:
         app: FastAPI application instance
     """
-    # Startup
     logger.info("Starting ViVu Vietnam AI Service")
     
     try:
-        # Initialize AI services
         logger.info("AI service initialization completed")
-        
-        # Additional startup tasks can be added here
-        # - Load models
-        # - Setup caching
-        # - Verify Pinecone connection
-        
         logger.info("Application startup completed successfully")
         
     except Exception as e:
@@ -78,20 +68,16 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    # Shutdown
     logger.info("Shutting down ViVu Vietnam AI Service")
     
     try:
         logger.info("AI service cleanup completed")
-        
-        # Additional cleanup tasks
         logger.info("Application shutdown completed successfully")
         
     except Exception as e:
         logger.error("Application shutdown failed", error=str(e))
 
  
-# Create FastAPI application
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -102,12 +88,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Register middleware and exception handlers
 register_middleware(app)
 register_exception_handlers(app)
 
 
-# Health check endpoint
 @app.get("/health", response_model=HealthCheckResponse)
 async def health_check():
     """
@@ -117,14 +101,12 @@ async def health_check():
         HealthCheckResponse: Service health information
     """
     try:
-        # Check AI services health
         services_status = {
             "pinecone": "configured" if settings.PINECONE_API_KEY else "not_configured",
             "gemini_ai": "configured" if settings.GEMINI_API_KEY else "not_configured",
             "embedding_service": "ready"
         }
         
-        # Determine overall status
         overall_status = "healthy" if all(
             status in ["configured", "ready"] for status in services_status.values()
         ) else "degraded"
@@ -172,7 +154,6 @@ app.include_router(
 )
 
 
-# Additional endpoints for development
 if settings.DEBUG:
     
     @app.get("/debug/config")
@@ -255,8 +236,6 @@ app.openapi_tags = [
 if __name__ == "__main__":
     import uvicorn
 
-    # Run the application
-    # Note: log_config=None disables uvicorn's default logging config to prevent duplication
     uvicorn.run(
         "app.main:app",
         host=settings.HOST,

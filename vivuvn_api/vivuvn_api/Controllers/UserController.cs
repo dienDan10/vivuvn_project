@@ -27,6 +27,14 @@ namespace vivuvn_api.Controllers
             return Ok(profile);
         }
 
+        [HttpGet]
+        [Authorize(Roles = $"{Constants.Role_Admin}")]
+        public async Task<IActionResult> GetAllUsers([FromQuery] GetAllUsersRequestDto requestDto)
+        {
+            var users = await _userService.GetAllUsersAsync(requestDto);
+            return Ok(users);
+        }
+
         [HttpPut("{userId}/lock")]
         [Authorize(Roles = $"{Constants.Role_Admin}")]
         public async Task<IActionResult> LockUserAccount(int userId)
@@ -87,5 +95,12 @@ namespace vivuvn_api.Controllers
             return Ok(new { message = "Đã thay đổi số điện thoại thành công.", NewPhoneNumber = result });
         }
 
+        [HttpPost("operator")]
+        [Authorize(Roles = $"{Constants.Role_Admin}")]
+        public async Task<IActionResult> CreateOperator([FromBody] CreateOperatorRequestDto requestDto)
+        {
+            var newOperator = await _userService.CreateOperatorAsync(requestDto);
+			return Ok(newOperator);
+        }
     }
 }

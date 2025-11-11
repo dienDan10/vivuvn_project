@@ -1,4 +1,5 @@
 import axios from "../utils/axios-customize";
+import { ROLE_TRAVELER } from "../utils/constant";
 
 /**
  * Get all travelers (users with "Traveler" role)
@@ -16,7 +17,7 @@ export const getAllTravelers = async ({
 	const params = new URLSearchParams();
 
 	// Filter by Traveler role
-	params.append("role", "Traveler");
+	params.append("role", ROLE_TRAVELER);
 
 	if (username) params.append("username", username);
 	if (email) params.append("email", email);
@@ -27,7 +28,7 @@ export const getAllTravelers = async ({
 	if (pageSize !== undefined) params.append("pageSize", pageSize);
 
 	const response = await axios.get(`/v1/users?${params.toString()}`);
-	return response.data;
+	return response;
 };
 
 /**
@@ -35,7 +36,7 @@ export const getAllTravelers = async ({
  */
 export const lockTraveler = async (id) => {
 	const response = await axios.put(`/v1/users/${id}/lock`);
-	return response.data;
+	return response;
 };
 
 /**
@@ -43,5 +44,5 @@ export const lockTraveler = async (id) => {
  */
 export const unlockTraveler = async (id) => {
 	const response = await axios.put(`/v1/users/${id}/unlock`);
-	return response.data;
+	return response;
 };

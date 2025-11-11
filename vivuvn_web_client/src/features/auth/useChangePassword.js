@@ -18,12 +18,10 @@ export function useChangePassword() {
       );
     },
     onError: (err) => {
-      const errorMsg =
-        err.response?.data?.message || "Failed to change password";
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: errorMsg,
+          message: err.response?.data?.detail,
         })
       );
     },

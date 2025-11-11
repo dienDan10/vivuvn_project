@@ -60,6 +60,7 @@ namespace vivuvn_api.Extensions
             services.AddScoped<IFcmService, FcmService>();
             services.AddScoped<IUserDeviceService, UserDeviceService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IAnalyticsService, AnalyticsService>();
             return services;
         }
 

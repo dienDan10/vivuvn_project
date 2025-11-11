@@ -2,26 +2,20 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { lockTraveler } from "../../../services/apiTraveler";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
-import { delay } from "../../../mocks/travelerMockData";
+import { lockTraveler as lockTravelerApi } from "../../../services/apiTraveler";
+import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../../utils/constant";
 
 export function useLockTraveler() {
 	const queryClient = useQueryClient();
 	const dispatch = useDispatch();
 
-	return useMutation({
-		// Real API call:
-		// mutationFn: lockTraveler,
-		// Mock behavior:
-		mutationFn: async (travelerId) => {
-			await delay(300);
-			console.log("Mock: Locking traveler", travelerId);
-			return { success: true };
-		},
+	const { isPending, mutate } = useMutation({
+		mutationFn: lockTravelerApi,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["travelers"] });
 			dispatch(
 				notify({
-					type: "success",
+					type: SUCCESS_NOTIFICATION,
 					message: "Traveler locked",
 					description: "Traveler account has been locked successfully",
 				})
@@ -30,11 +24,13 @@ export function useLockTraveler() {
 		onError: (error) => {
 			dispatch(
 				notify({
-					type: "error",
+					type: ERROR_NOTIFICATION,
 					message: "Lock failed",
-					description: error.response?.data?.message || error.message,
+					description: error.response?.data?.detail,
 				})
 			);
 		},
 	});
+
+	return { isPending, mutate };
 }

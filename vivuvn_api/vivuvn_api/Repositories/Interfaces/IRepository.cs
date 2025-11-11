@@ -4,6 +4,7 @@ namespace vivuvn_api.Repositories.Interfaces
 {
     public interface IRepository<T> where T : class
     {
+        IQueryable<T> GetQueryable();
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null,
             string? includeProperties = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
