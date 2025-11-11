@@ -18,6 +18,9 @@ class Validator {
     if (value == null || value.trim().isEmpty) {
       return 'Mật khẩu không được để trống';
     }
+    if (value.length < 6) {
+      return 'Mật khẩu phải có ít nhất 6 ký tự';
+    }
     return null;
   }
 

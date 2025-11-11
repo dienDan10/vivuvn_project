@@ -50,16 +50,16 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task SendPasswordResetEmailAsync(string email, string username, string resetToken)
         {
-            var subject = "Password Reset Request";
+            var subject = "Yêu cầu đặt lại mật khẩu";
             var htmlContent = $@"
                 <html>
                 <body>
-                    <h2>Password Reset</h2>
-                    <p>Hi {username},</p>
-                    <p>You requested to reset your password. Use the following code to reset your password:</p>
+                    <h2>Đặt lại mật khẩu</h2>
+                    <p>Chào bạn {username},</p>
+                    <p>Bạn đã yêu cầu đặt lại mật khẩu. Sử dụng mã sau để đặt lại mật khẩu của bạn:</p>
                     <h1 style='color: #4CAF50; letter-spacing: 5px;'>{resetToken}</h1>
-                    <p>This code will expire in 1 hour.</p>
-                    <p>If you didn't request this, please ignore this email.</p>
+                    <p>Mã này sẽ hết hạn trong 10 phút.</p>
+                    <p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>
                 </body>
                 </html>
             ";
@@ -69,13 +69,13 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task SendPasswordResetNotAvailableEmailAsync(string email)
         {
-            var subject = "Password Reset Not Available";
+            var subject = "Không thể đặt lại mật khẩu";
             var htmlContent = $@"
                 <html>
                 <body>
-                    <h2>Password Reset Request</h2>
-                    <p>You requested to reset your password, but your account uses Google Sign-In.</p>
-                    <p>Please continue logging in with your Google account.</p>
+                    <h2>Yêu cầu đặt lại mật khẩu</h2>
+                    <p>Bạn đã yêu cầu đặt lại mật khẩu, nhưng tài khoản của bạn đăng nhập bằng Google.</p>
+                    <p>Vui lòng tiếp tục đăng nhập bằng tài khoản Google của bạn.</p>
                 </body>
                 </html>
             ";
