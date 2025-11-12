@@ -1,4 +1,5 @@
 import { Card, Typography, Empty, Skeleton } from "antd";
+import { useNavigate } from "react-router-dom";
 import {
 	BarChart,
 	Bar,
@@ -26,6 +27,14 @@ const COLORS = [
 ];
 
 function TopLocationsChart({ data, isPending }) {
+	const navigate = useNavigate();
+
+	const handleBarClick = (data) => {
+		if (data && data.locationId) {
+			navigate(`/manage/destinations/${data.locationId}`);
+		}
+	};
+
 	if (isPending) {
 		return (
 			<Card>
@@ -76,7 +85,12 @@ function TopLocationsChart({ data, isPending }) {
 							`${props.payload.locationName} (${props.payload.provinceName})`,
 						]}
 					/>
-					<Bar dataKey="visitCount" radius={[0, 8, 8, 0]}>
+					<Bar
+						dataKey="visitCount"
+						radius={[0, 8, 8, 0]}
+						onClick={handleBarClick}
+						cursor="pointer"
+					>
 						{data.map((entry, index) => (
 							<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
 						))}

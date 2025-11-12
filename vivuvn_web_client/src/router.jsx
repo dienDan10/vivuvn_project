@@ -21,6 +21,9 @@ const TravelerLayout = lazy(() =>
 const DestinationLayout = lazy(() =>
   import("./features/operator/destination/DestinationLayout")
 );
+const DestinationDetail = lazy(() =>
+  import("./features/operator/destination/DestinationDetail")
+);
 const DashboardLayout = lazy(() =>
   import("./features/admin/dashboard/DashboardLayout")
 );
@@ -95,11 +98,24 @@ export const router = createBrowserRouter([
       },
       {
         path: "destinations",
-        element: (
-            <Suspense fallback={<SpinnerLarge />}>
-              <DestinationLayout />
-            </Suspense>
-        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<SpinnerLarge />}>
+                <DestinationLayout />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":id",
+            element: (
+              <Suspense fallback={<SpinnerLarge />}>
+                <DestinationDetail />
+              </Suspense>
+            ),
+          },
+        ],
       },
     ],
   },

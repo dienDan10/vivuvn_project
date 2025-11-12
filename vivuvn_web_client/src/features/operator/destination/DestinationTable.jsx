@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGetDestinations } from "./useGetDestinations";
 import { useDeleteDestination } from "./useDeleteDestination";
 import { useRestoreDestination } from "./useRestoreDestination";
@@ -18,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPage, setPageSize, setSorting } from "../../../redux/destinationSlice";
 
 function DestinationTable({ onEditDestination }) {
+	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const { destinations, totalCount, isPending } = useGetDestinations();
 	const filters = useSelector((state) => state.destination.filters);
@@ -104,7 +106,16 @@ function DestinationTable({ onEditDestination }) {
 			sorter: true,
 			render: (text, record) => (
 				<div>
-					<div style={{ fontWeight: 500 }}>{text}</div>
+					<div
+						style={{
+							fontWeight: 500,
+							cursor: "pointer",
+							color: "#1890ff",
+						}}
+						onClick={() => navigate(`/manage/destinations/${record.id}`)}
+					>
+						{text}
+					</div>
 					{record.address && (
 						<div
 							style={{
@@ -152,10 +163,20 @@ function DestinationTable({ onEditDestination }) {
 			title: "Actions",
 			key: "actions",
 			fixed: "right",
-			width: 120,
+			width: 160,
 			render: (_, record) => (
 				<Space direction="vertical" size="small">
 					<Space size="small" wrap>
+						<Tooltip title="View Details">
+							<Button
+								type="link"
+								icon={<EyeOutlined />}
+								onClick={() => navigate(`/manage/destinations/${record.id}`)}
+							>
+								View
+							</Button>
+						</Tooltip>
+
 						<Tooltip title="Edit">
 							<Button
 								type="link"
