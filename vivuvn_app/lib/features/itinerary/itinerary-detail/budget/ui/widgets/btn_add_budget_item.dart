@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import 'add_expense_layout.dart';
 
-class ButtonAddBudgetItem extends StatelessWidget {
+class ButtonAddBudgetItem extends ConsumerWidget {
   const ButtonAddBudgetItem({super.key});
 
   void _openAddExpenseDialog(final BuildContext context) {
@@ -19,7 +21,17 @@ class ButtonAddBudgetItem extends StatelessWidget {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    if (!isOwner) {
+      return const SizedBox.shrink();
+    }
+
     return InkWell(
       onTap: () => _openAddExpenseDialog(context),
       child: Container(

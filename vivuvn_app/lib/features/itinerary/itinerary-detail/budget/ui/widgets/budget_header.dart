@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/budget_controller.dart';
 import '../../utils/budget_constants.dart';
 import 'budget_header_row.dart';
@@ -56,6 +57,12 @@ class BudgetHeader extends ConsumerWidget {
     final totalBudget = state.budget?.totalBudget ?? 0;
     final estimatedBudget = state.budget?.estimatedBudget ?? 0;
 
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(
         // vertical: BudgetConstants.verticalPadding,
@@ -76,10 +83,12 @@ class BudgetHeader extends ConsumerWidget {
           if (estimatedBudget > 0) const SizedBox(height: 10),
           EstimatedBudgetButton(
             estimatedBudget: estimatedBudget,
-            onPressed: () => _openEstimatedBudgetForm(
-              context,
-              estimatedBudget > 0 ? estimatedBudget : null,
-            ),
+            onPressed: isOwner
+                ? () => _openEstimatedBudgetForm(
+                      context,
+                      estimatedBudget > 0 ? estimatedBudget : null,
+                    )
+                : null,
           ),
           const SizedBox(height: 8),
         ],

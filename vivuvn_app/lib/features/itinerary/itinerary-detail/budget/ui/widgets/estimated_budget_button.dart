@@ -6,12 +6,12 @@ import '../../utils/budget_constants.dart';
 /// Button để thêm/chỉnh sửa ngân sách dự kiến
 class EstimatedBudgetButton extends StatelessWidget {
   final double estimatedBudget;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const EstimatedBudgetButton({
     super.key,
     required this.estimatedBudget,
-    required this.onPressed,
+    this.onPressed,
   });
 
   @override
@@ -24,6 +24,7 @@ class EstimatedBudgetButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
