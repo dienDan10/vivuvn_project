@@ -173,8 +173,9 @@ class TravelPlanningAgent:
             return response
 
         except Exception as e:
-            logger.error(f"❌ Failed: {e}")
-            raise TravelPlanningError(f"{str(e)}")
+            error_message = getattr(e, 'message', str(e))
+            logger.error(f"❌ Failed: {error_message}")
+            raise TravelPlanningError(error_message)
 
 
 # ============================================================================

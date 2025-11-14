@@ -13,9 +13,12 @@ import asyncio
 import json
 
 from google.genai import types
+from google.api_core import exceptions as google_exceptions
 
 from app.core.config import settings
-from app.core.exceptions import ItineraryGenerationError
+from app.core.exceptions import (
+    ItineraryGenerationError
+)
 from app.models.travel_models import TravelItinerary
 from app.prompts.travel_prompts import create_user_prompt, get_system_prompt_for_request
 from app.agents.state import TravelPlanningState
@@ -134,14 +137,15 @@ class ItineraryAgent:
             return state
 
         except Exception as e:
+            error_message = getattr(e, 'message', str(e))
             logger.error(
                 "[Node 4/6] Itinerary generation failed",
                 destination=travel_request.destination,
-                error=str(e),
+                error=error_message,
                 error_code="GENERATION_FAILED",
                 exc_info=True
             )
-            state["error"] = f"{str(e)}"
+            state["error"] = error_message
             return state
 
 

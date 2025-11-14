@@ -36,7 +36,7 @@ class Activity(BaseModel):
     )
     cost_estimate: float = Field(
         ...,
-        description="Estimated cost in VND (0 for free activities)",
+        description="Estimated cost in VND for entire group (0 for free activities)",
         ge=0
     )
     notes: Optional[str] = Field(
@@ -111,7 +111,7 @@ class TransportationSuggestion(BaseModel):
     )
     estimated_cost: float = Field(
         ...,
-        description="Estimated cost in VND (total for group if applicable)",
+        description="Estimated cost in VND for entire group (total for all members)",
         ge=0
     )
     date: str = Field(

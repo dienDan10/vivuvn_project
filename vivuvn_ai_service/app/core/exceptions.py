@@ -30,18 +30,12 @@ class TravelPlanningError(VivuVNBaseException):
     
     def __init__(
         self,
-        message: str,
-        destination: Optional[str] = None,
-        operation: Optional[str] = None
+        message: str
     ):
         super().__init__(
             message=message,
-            status_code=400,
+            status_code=500,
             error_type="TravelPlanningError",
-            details={
-                "destination": destination,
-                "operation": operation
-            }
         )
 
 
@@ -143,18 +137,6 @@ class RateLimitError(WeatherServiceError):
         super().__init__(message, status_code=429)
 
 
-# Error message constants
-ERROR_MESSAGES = {
-    "SERVICE_UNAVAILABLE": "Service temporarily unavailable. Please try again.",
-    "EXTERNAL_SERVICE_DOWN": "External service is temporarily unavailable. Please try again.",
-    "GEMINI_AUTH_ERROR": "Internal service configuration error",
-    "GEMINI_TIMEOUT": "Request timeout. Please try again.",
-    "CONTENT_POLICY_VIOLATION": "Your request violates content policy. Please rephrase.",
-    "NO_PLACES_FOUND": "No places found for the specified destination. Please try a different destination.",
-    "VALIDATION_FAILED": "Itinerary validation failed. Please try again.",
-}
-
-
 def get_http_status_code(exception: Exception) -> int:
     """
     Get appropriate HTTP status code for an exception.
@@ -204,7 +186,6 @@ __all__ = [
     "WeatherAPIError",
     "AuthenticationError",
     "RateLimitError",
-    "ERROR_MESSAGES",
     "get_http_status_code",
     "format_error_response",
 ]

@@ -122,15 +122,16 @@ class ResponseAgent:
             return state
 
         except Exception as e:
+            error_message = getattr(e, 'message', str(e))
             logger.error(
                 "[Node 6/6] Failed to finalize response",
-                error=str(e),
+                error=error_message,
                 error_code="FINALIZATION_FAILED",
                 exc_info=True
             )
             state["final_response"] = TravelResponse(
                 success=False,
-                message=f"Lỗi tạo phản hồi cuối cùng: {str(e)}",
+                message=f"Lỗi tạo phản hồi cuối cùng: {error_message}",
                 itinerary=None
             )
             return state
