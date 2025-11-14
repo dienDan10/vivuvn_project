@@ -18,7 +18,7 @@ namespace vivuvn_api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = $"{Constants.Role_Admin},{Constants.Role_Operator}")]
+        [Authorize(Roles = $"{Constants.Role_Admin},{Constants.Role_Operator},{Constants.Role_Traveler}")]
         public async Task<IActionResult> GetAllLocations([FromQuery] GetAllLocationsRequestDto request)
         {
             var locations = await _locationService.GetAllLocationsAsync(request);
