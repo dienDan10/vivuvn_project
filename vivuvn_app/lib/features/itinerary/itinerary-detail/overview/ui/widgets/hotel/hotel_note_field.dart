@@ -9,11 +9,13 @@ class HotelNoteField extends ConsumerStatefulWidget {
   const HotelNoteField({
     required this.hotelId,
     required this.initialNote,
+    this.isOwner = true,
     super.key,
   });
 
   final String hotelId;
   final String? initialNote;
+  final bool isOwner;
 
   @override
   ConsumerState<HotelNoteField> createState() => _HotelNoteFieldState();
@@ -80,6 +82,8 @@ class _HotelNoteFieldState extends ConsumerState<HotelNoteField> {
       controller: _controller,
       focusNode: _focusNode,
       maxLines: 3,
+      enabled: widget.isOwner,
+      readOnly: !widget.isOwner,
       decoration: InputDecoration(
         hintText: 'Ghi chú',
         filled: true,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/budget_controller.dart';
 import '../../utils/budget_constants.dart';
 import '../../utils/expense_dialogs.dart';
@@ -34,6 +35,12 @@ class ExpenseList extends ConsumerWidget {
     }
 
     // List of expenses
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
     return Container(
       color: Colors.white,
       child: ListView.builder(
@@ -46,9 +53,16 @@ class ExpenseList extends ConsumerWidget {
           final expense = expenses[index];
           return BudgetItemTile(
             item: expense,
-            onTap: () => ExpenseDialogs.showEditForm(context, expense),
-            onDelete: () =>
-                ExpenseDialogs.showDeleteConfirmation(context, ref, expense),
+            onTap: isOwner
+                ? () => ExpenseDialogs.showEditForm(context, expense)
+                : null,
+            onDelete: isOwner
+                ? () => ExpenseDialogs.showDeleteConfirmation(
+                      context,
+                      ref,
+                      expense,
+                    )
+                : null,
           );
         },
       ),

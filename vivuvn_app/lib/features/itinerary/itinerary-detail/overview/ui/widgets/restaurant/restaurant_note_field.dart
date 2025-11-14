@@ -9,11 +9,13 @@ class RestaurantNoteField extends ConsumerStatefulWidget {
   const RestaurantNoteField({
     required this.restaurantId,
     required this.initialNote,
+    this.isOwner = true,
     super.key,
   });
 
   final String restaurantId;
   final String? initialNote;
+  final bool isOwner;
 
   @override
   ConsumerState<RestaurantNoteField> createState() =>
@@ -81,6 +83,8 @@ class _RestaurantNoteFieldState extends ConsumerState<RestaurantNoteField> {
       controller: _controller,
       focusNode: _focusNode,
       maxLines: 3,
+      enabled: widget.isOwner,
+      readOnly: !widget.isOwner,
       decoration: InputDecoration(
         hintText: 'Ghi chú',
         filled: true,

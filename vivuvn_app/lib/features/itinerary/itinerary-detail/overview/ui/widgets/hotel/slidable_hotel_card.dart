@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../../../detail/controller/itinerary_detail_controller.dart';
 import '../../../controller/hotels_controller.dart';
 import '../../../data/dto/hotel_item_response.dart';
 import 'hotel_card.dart';
@@ -14,6 +15,18 @@ class SlidableHotelCard extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    final hotelCard = HotelCard(hotel: hotel, index: index);
+
+    if (!isOwner) {
+      return RepaintBoundary(child: hotelCard);
+    }
+
     return RepaintBoundary(
       child: Slidable(
         key: ValueKey(hotel.id),
@@ -30,7 +43,7 @@ class SlidableHotelCard extends ConsumerWidget {
             ),
           ],
         ),
-        child: HotelCard(hotel: hotel, index: index),
+        child: hotelCard,
       ),
     );
   }

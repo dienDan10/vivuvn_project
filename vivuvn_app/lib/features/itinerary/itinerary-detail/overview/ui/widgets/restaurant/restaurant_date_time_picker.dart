@@ -11,11 +11,13 @@ class RestaurantDateTimePicker extends ConsumerWidget {
   const RestaurantDateTimePicker({
     required this.restaurantId,
     required this.mealDate,
+    this.isOwner = true,
     super.key,
   });
 
   final String restaurantId;
   final DateTime? mealDate;
+  final bool isOwner;
 
   Future<void> _pickDate(final BuildContext context, final WidgetRef ref) async {
     final config = CalendarDatePicker2WithActionButtonsConfig(
@@ -105,7 +107,7 @@ class RestaurantDateTimePicker extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               InkWell(
-                onTap: () => _pickDate(context, ref),
+                onTap: isOwner ? () => _pickDate(context, ref) : null,
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -154,7 +156,7 @@ class RestaurantDateTimePicker extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               InkWell(
-                onTap: () => _pickTime(context, ref),
+                onTap: isOwner ? () => _pickTime(context, ref) : null,
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(

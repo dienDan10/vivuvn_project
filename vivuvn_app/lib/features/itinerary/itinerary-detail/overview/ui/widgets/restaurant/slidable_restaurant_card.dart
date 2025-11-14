@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../../../detail/controller/itinerary_detail_controller.dart';
 import '../../../controller/restaurants_controller.dart';
 import '../../../data/dto/restaurant_item_response.dart';
 import 'restaurant_card.dart';
@@ -18,6 +19,18 @@ class SlidableRestaurantCard extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    final restaurantCard = RestaurantCard(restaurant: restaurant, index: index);
+
+    if (!isOwner) {
+      return RepaintBoundary(child: restaurantCard);
+    }
+
     return RepaintBoundary(
       child: Slidable(
         key: ValueKey(restaurant.id),
@@ -34,7 +47,7 @@ class SlidableRestaurantCard extends ConsumerWidget {
             ),
           ],
         ),
-        child: RestaurantCard(restaurant: restaurant, index: index),
+        child: restaurantCard,
       ),
     );
   }
