@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../../../detail/controller/itinerary_detail_controller.dart';
 import '../../../controller/favourite_places_controller.dart';
 import 'place_card.dart';
 
@@ -23,6 +24,23 @@ class SlidablePlaceCard extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    final placeCard = PlaceCard(
+      title: title,
+      description: description,
+      imageUrl: imageUrl,
+      index: index,
+    );
+
+    if (!isOwner) {
+      return RepaintBoundary(child: placeCard);
+    }
+
     return RepaintBoundary(
       child: Slidable(
         key: ValueKey(locationId),
@@ -39,12 +57,7 @@ class SlidablePlaceCard extends ConsumerWidget {
             ),
           ],
         ),
-        child: PlaceCard(
-          title: title,
-          description: description,
-          imageUrl: imageUrl,
-          index: index,
-        ),
+        child: placeCard,
       ),
     );
   }

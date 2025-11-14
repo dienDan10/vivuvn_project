@@ -29,6 +29,8 @@ class GroupSizeCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final isOwner = itinerary.isOwner;
+
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
@@ -57,7 +59,7 @@ class GroupSizeCard extends ConsumerWidget {
                   )
                 : GroupSizeInfo(groupSize: itinerary.groupSize),
           ),
-          if (!isEditing)
+          if (!isEditing && isOwner)
             IconButton(
               icon: Icon(
                 Icons.edit_outlined,

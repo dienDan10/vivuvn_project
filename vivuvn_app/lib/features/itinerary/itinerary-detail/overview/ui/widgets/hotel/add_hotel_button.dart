@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../detail/controller/itinerary_detail_controller.dart';
 import 'add_hotel_modal.dart';
 
-class AddHotelButton extends StatelessWidget {
+class AddHotelButton extends ConsumerWidget {
   const AddHotelButton({super.key});
 
   void _showAddHotelModal(final BuildContext context) {
@@ -15,7 +17,17 @@ class AddHotelButton extends StatelessWidget {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    if (!isOwner) {
+      return const SizedBox.shrink();
+    }
+
     return GestureDetector(
       onTap: () => _showAddHotelModal(context),
       child: Container(

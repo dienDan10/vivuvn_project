@@ -10,11 +10,13 @@ class HotelCostField extends ConsumerStatefulWidget {
   const HotelCostField({
     required this.hotelId,
     required this.initialCost,
+    this.isOwner = true,
     super.key,
   });
 
   final String hotelId;
   final double? initialCost;
+  final bool isOwner;
 
   @override
   ConsumerState<HotelCostField> createState() => _HotelCostFieldState();
@@ -99,7 +101,11 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
       controller: _controller,
       focusNode: _focusNode,
       keyboardType: TextInputType.number,
-      inputFormatters: [ThousandsSeparatorInputFormatter()],
+      inputFormatters: widget.isOwner
+          ? [ThousandsSeparatorInputFormatter()]
+          : null,
+      enabled: widget.isOwner,
+      readOnly: !widget.isOwner,
       decoration: InputDecoration(
         hintText: 'Chi phí',
         prefixIcon: const Icon(Icons.attach_money),

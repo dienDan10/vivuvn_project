@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../detail/controller/itinerary_detail_controller.dart';
 import 'hotel_cost_field.dart';
 import 'hotel_date_range_picker.dart';
 import 'hotel_delete_button.dart';
 import 'hotel_note_field.dart';
 
-class HotelCardExpanded extends StatelessWidget {
+class HotelCardExpanded extends ConsumerWidget {
   const HotelCardExpanded({
     required this.hotelId,
     required this.hotelName,
@@ -24,7 +26,13 @@ class HotelCardExpanded extends StatelessWidget {
   final String? note;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final s) => s.itinerary?.isOwner ?? false,
+      ),
+    );
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).unfocus(),
@@ -42,20 +50,30 @@ class HotelCardExpanded extends StatelessWidget {
               hotelId: hotelId,
               checkInDate: checkInDate,
               checkOutDate: checkOutDate,
+              isOwner: isOwner,
             ),
             const SizedBox(height: 12),
             const Divider(),
             const SizedBox(height: 12),
-            HotelCostField(hotelId: hotelId, initialCost: cost),
-            const SizedBox(height: 12),
-            HotelNoteField(hotelId: hotelId, initialNote: note),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                HotelDeleteButton(hotelId: hotelId, hotelName: hotelName),
-              ],
+            HotelCostField(
+              hotelId: hotelId,
+              initialCost: cost,
+              isOwner: isOwner,
             ),
+            const SizedBox(height: 12),
+            HotelNoteField(
+              hotelId: hotelId,
+              initialNote: note,
+              isOwner: isOwner,
+            ),
+            const SizedBox(height: 12),
+            if (isOwner)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  HotelDeleteButton(hotelId: hotelId, hotelName: hotelName),
+                ],
+              ),
           ],
         ),
       ),

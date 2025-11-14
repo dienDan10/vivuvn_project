@@ -12,12 +12,14 @@ class HotelDateRangePicker extends ConsumerWidget {
     required this.hotelId,
     required this.checkInDate,
     required this.checkOutDate,
+    this.isOwner = true,
     super.key,
   });
 
   final String hotelId;
   final DateTime? checkInDate;
   final DateTime? checkOutDate;
+  final bool isOwner;
 
   DateTime _toDateOnly(final DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -86,7 +88,7 @@ class HotelDateRangePicker extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               InkWell(
-                onTap: () => _pickDateRange(context, ref),
+                onTap: isOwner ? () => _pickDateRange(context, ref) : null,
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -135,7 +137,7 @@ class HotelDateRangePicker extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               InkWell(
-                onTap: () => _pickDateRange(context, ref),
+                onTap: isOwner ? () => _pickDateRange(context, ref) : null,
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
