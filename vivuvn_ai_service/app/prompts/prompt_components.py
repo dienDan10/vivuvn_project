@@ -21,13 +21,13 @@ class PromptComponents:
   "name": "Tên từ danh sách", // Exact name
   "place_id": "ChIJ...",     // Google Place ID (BẮT BUỘC)
   "duration_hours": 1.5,     // 0.5-8.0
-  "cost_estimate": 50000,    // VND, 0 nếu free, ước lượng chi phí cho hoạt động
+  "cost_estimate": 50000,    // VND cho CẢ NHÓM (per person × group_size), 0 nếu free
   "notes": "..."             // 15-30 từ tiếng Việt
 }
 ```
 
 ### Transportation (CHỈ trong transportation_suggestions)
-KHÔNG thêm vào activities | Tối đa 2 suggestions | Cost = TOTAL cho nhóm
+KHÔNG thêm vào activities | Tối đa 2 suggestions | Cost = TOTAL cho nhóm (tổng chi phí cho tất cả thành viên, KHÔNG chia per person)
 
 **Xử lý transportation_mode của user:**
 - Kiểm tra: Phương tiện user chọn có hợp lý với route không?
@@ -69,8 +69,8 @@ KHÔNG thêm vào activities | Tối đa 2 suggestions | Cost = TOTAL cho nhóm
 ```json
 {
   "mode": "xe khách",
-  "estimated_cost": 500000,
-  "date": "2024-03-15", 
+  "estimated_cost": 2000000,     // VND cho CẢ NHÓM (tổng chi phí cho tất cả thành viên)
+  "date": "2024-03-15",
   "details": "Hà Nội-Đà Nẵng, 07:00-21:00 (14h)"
 }
 ```
@@ -201,13 +201,17 @@ Huế↔TPHCM | ĐN↔Huế
 - **Thoải mái** (1.5M-3M): Hoạt động phí cao OK (cáp treo, tour đặc sắc)
 - **Cao cấp** (>3M): Ưu tiên premium (zipline, helicopter, cruise)
 
-**Cost estimates (VND per person):**
+**Cost reference (VND per person - PHẢI NHÂN với group_size khi tính cost_estimate):**
 Đền/Chùa: 0-20k | Bảo tàng: 40-80k | Di tích: 50-120k | Phiêu lưu: 200-500k | Biển: 0-50k
 
-**Formula:**
-total_cost = sum(activity.cost_estimate for all activities) × group_size + sum(transport.estimated_cost for all transports)
+**Calculation example (4 người):**
+- Bảo tàng: 50k/người × 4 người = 200,000 VND → cost_estimate = 200000
+- Chùa free: 0 × 4 người = 0 VND → cost_estimate = 0
 
-Note: activity cost_estimate is PER PERSON, transportation estimated_cost is TOTAL for entire group
+**Formula:**
+total_cost = sum(activity.cost_estimate) + sum(transport.estimated_cost)
+
+Note: Both activity cost_estimate and transportation estimated_cost are TOTAL for entire group
 
 **Nếu vượt ngân sách:** schedule_unavailable=true, giải thích + đề xuất"""
 

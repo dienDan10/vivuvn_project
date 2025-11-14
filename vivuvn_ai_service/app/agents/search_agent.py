@@ -132,14 +132,14 @@ class SearchAgent:
 
             logger.info(f"[Node 1/6] Built filters: {filters}")
 
-            # Store filters in state
             state["search_filters"] = filters
 
             return state
 
         except Exception as e:
-            logger.error(f"[Node 1/6] Filter building failed: {e}")
-            state["error"] = f"Filter building failed: {str(e)}"
+            error_message = getattr(e, 'message', str(e))
+            logger.error(f"[Node 1/6] Filter building failed: {error_message}")
+            state["error"] = f"Filter building failed: {error_message}"
             state["search_filters"] = {}
             return state
 
@@ -212,14 +212,15 @@ class SearchAgent:
             return state
 
         except Exception as e:
+            error_message = getattr(e, 'message', str(e))
             logger.error(
                 "[Node 2/6] Search failed",
                 destination=travel_request.destination,
-                error=str(e),
+                error=error_message,
                 error_code="SEARCH_FAILED",
                 exc_info=True
             )
-            state["error"] = f"Search failed: {str(e)}"
+            state["error"] = f"Search failed: {error_message}"
             state["relevant_places"] = []
             return state
 

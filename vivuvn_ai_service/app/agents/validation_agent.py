@@ -112,25 +112,27 @@ class ValidationAgent:
             return state
 
         except Exception as e:
+            error_message = getattr(e, 'message', str(e))
             logger.error(
                 "[Node 5/6] Validation failed",
-                error=str(e),
+                error=error_message,
                 error_code="VALIDATION_FAILED",
                 exc_info=True
             )
             state["validation_passed"] = False
-            state["error"] = f"Validation failed: {str(e)}"
+            state["error"] = f"Validation failed: {error_message}"
             return state
 
     def _calculate_total_cost(self, itinerary: dict, group_size: int) -> float:
         """Calculate total cost using correct formula.
 
-        Formula: total_cost = (Σ activity.cost_estimate) × group_size + (Σ transportation.estimated_cost)
+        Formula: total_cost = (Σ activity.cost_estimate) + (Σ transportation.estimated_cost)
 
-        Note: activity cost_estimate is per person, transportation estimated_cost is total for group
+        Note: Both activity cost_estimate and transportation estimated_cost are TOTAL for entire group.
+        group_size parameter kept for backwards compatibility but not used in calculation.
         """
         try:
-            # Sum all activity costs (per person)
+            # Sum all activity costs (already total for group)
             activity_costs = 0.0
             days = itinerary.get('days', [])
             for day in days:
@@ -139,9 +141,6 @@ class ValidationAgent:
                     if isinstance(cost, (int, float)):
                         activity_costs += float(cost)
 
-            # Apply group size multiplier to activity costs
-            total_activity_cost = activity_costs * group_size
-
             # Sum all transportation costs (already total for group)
             transportation_costs = 0.0
             for transport in itinerary.get('transportation_suggestions', []):
@@ -149,8 +148,8 @@ class ValidationAgent:
                 if isinstance(cost, (int, float)):
                     transportation_costs += float(cost)
 
-            # Calculate total
-            total_cost = total_activity_cost + transportation_costs
+            # Calculate total (both already for group, no multiplication needed)
+            total_cost = activity_costs + transportation_costs
             return total_cost
 
         except Exception as e:
