@@ -31,7 +31,6 @@ from app.api.schemas.place import (
 
 # Generic Data Management Schemas
 from app.api.schemas.data import (
-    DataDeleteRequest,
     DataDeleteResponse,
 )
 

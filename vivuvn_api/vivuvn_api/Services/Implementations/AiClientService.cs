@@ -41,15 +41,15 @@ namespace vivuvn_api.Services.Implementations
 				// Deserialize the response to the requested type
 				var result = JsonSerializer.Deserialize<T>(jsonResponse, _jsonOptions);
 
-				return result ?? throw new InvalidOperationException("Kh�ng th? gi?i tu?n t? h�a ph?n h?i t? d?ch v? AI");
+				return result ?? throw new InvalidOperationException("Không thể giải tuần tự hóa phản hồi từ dịch vụ AI");
 			}
 			catch (HttpRequestException ex)
 			{
-				throw new HttpRequestException($"Kh�ng th? giao ti?p v?i d?ch v? AI: {ex.Message}", ex);
+				throw new HttpRequestException($"Không thể giao tiếp với dịch vụ AI: {ex.Message}", ex);
 			}
 			catch (JsonException ex)
 			{
-				throw new InvalidOperationException($"Kh�ng th? x? l� ph?n h?i t? d?ch v? AI: {ex.Message}", ex);
+				throw new InvalidOperationException($"Không thể xử lý phản hồi từ dịch vụ AI: {ex.Message}", ex);
 			}
 		}
 
@@ -113,11 +113,7 @@ namespace vivuvn_api.Services.Implementations
 		{
 			try
 			{
-				var requestDto = new PlaceDeleteRequestDto { ItemId = itemId };
-				var jsonRequest = JsonSerializer.Serialize(requestDto, _jsonOptions);
-				var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-				var response = await _httpClient.DeleteAsync("/api/v1/data/place/delete");
+				var response = await _httpClient.DeleteAsync($"/api/v1/data/place/{itemId}");
 				var jsonResponse = await response.Content.ReadAsStringAsync();
 
 				if (!response.IsSuccessStatusCode)
@@ -193,11 +189,11 @@ namespace vivuvn_api.Services.Implementations
 
 					throw statusCode switch
 					{
-						400 => new ArgumentException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
-						404 => new KeyNotFoundException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
-						401 or 403 => new UnauthorizedAccessException($"L?i d?ch v? AI ({errorType}): {errorMessage}"),
-						502 or 503 => new InvalidOperationException($"D?ch v? AI t?m th?i kh�ng kh? d?ng ({errorType}): {errorMessage}"),
-						_ => new InvalidOperationException($"L?i d?ch v? AI ({errorType}): {errorMessage}")
+						400 => new ArgumentException($"Lỗi dịch vụ AI ({errorType}): {errorMessage}"),
+						404 => new KeyNotFoundException($"Lỗi dịch vụ AI ({errorType}): {errorMessage}"),
+						401 or 403 => new UnauthorizedAccessException($"Lỗi dịch vụ AI ({errorType}): {errorMessage}"),
+						502 or 503 => new InvalidOperationException($"Dịch vụ AI tạm thời không khả dụng ({errorType}): {errorMessage}"),
+						_ => new InvalidOperationException($"Lỗi dịch vụ AI ({errorType}): {errorMessage}")
 					};
 				}
 			}
@@ -207,7 +203,7 @@ namespace vivuvn_api.Services.Implementations
 			}
 
 			// Fallback: throw generic error with status code
-			throw new InvalidOperationException($"D?ch v? AI tr? v? l?i: {response.StatusCode} - {response.ReasonPhrase}");
+			throw new InvalidOperationException($"Dịch vụ AI trả về lỗi: {response.StatusCode} - {response.ReasonPhrase}");
 		}
 	}
 }

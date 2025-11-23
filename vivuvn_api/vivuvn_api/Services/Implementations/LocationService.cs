@@ -291,7 +291,7 @@ namespace vivuvn_api.Services.Implementations
 
 			var province = await _unitOfWork.Provinces.GetOneAsync(p => p.Id == requestDto.ProvinceId);
 
-			var placeData = string.IsNullOrEmpty(location.Address) ? await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name) : await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name, location.Address);
+			var placeData = await _placeService.FetchPlaceDetailsByIdAsync(googlePlaceId: location.GooglePlaceId);
 
 			var addressSplited = placeData.FormattedAddress.Split(',');
 
@@ -305,10 +305,10 @@ namespace vivuvn_api.Services.Implementations
 				location.Address = placeData.FormattedAddress;
 			}
 			location.Province = province;
-			location.GooglePlaceId = placeData.PlaceId;
-			location.Latitude = placeData.Latitude;
-			location.Longitude = placeData.Longitude;
-			location.ReviewUri = placeData.ReviewsUri;
+			location.GooglePlaceId = placeData.Id;
+			location.Latitude = placeData.Location.Latitude;
+			location.Longitude = placeData.Location.Longitude;
+			location.ReviewUri = placeData.GoogleMapsLinks.ReviewsUri;
 			location.Rating = placeData.Rating;
 			location.RatingCount = placeData.UserRatingCount;
 			location.PlaceUri = placeData.GoogleMapsUri;
@@ -334,7 +334,7 @@ namespace vivuvn_api.Services.Implementations
 
 			if (location == null)
 			{
-				throw new KeyNotFoundException($"Location with id {id} not found.");
+				throw new KeyNotFoundException($"Không tìm thấy địa điểm với Id = {id}");
 			}
 
 			await _aiService.DeletePlaceAsync(location.GooglePlaceId);
@@ -353,7 +353,7 @@ namespace vivuvn_api.Services.Implementations
 
 			if (location == null)
 			{
-				throw new KeyNotFoundException($"Location with id {id} not found.");
+				throw new KeyNotFoundException($"Không tìm thấy địa điểm với Id = {id}");
 			}
 
 			location.DeleteFlag = false;

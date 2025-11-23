@@ -12,7 +12,6 @@ from app.services.data_management_service import get_data_management_service
 from app.api.schemas import (
     PlaceUpsertResponse,
     PlaceUpsertRequest,
-    DataDeleteRequest,
     DataDeleteResponse,
 )
 
@@ -97,29 +96,29 @@ async def update_place(request: PlaceUpsertRequest):
     )
 
 
-@router.delete("/place/delete", response_model=DataDeleteResponse)
-async def delete_data_item(request: DataDeleteRequest):
+@router.delete("/place/{item_id}", response_model=DataDeleteResponse)
+async def delete_data_item(item_id: str):
     """
     Delete a data item from Pinecone by ID.
 
     Args:
-        request: Item ID to delete
+        item_id: Item ID to delete (path parameter)
 
     Returns:
         DataDeleteResponse: Success status
     """
-    logger.info(f"Deleting item {request.item_id}", item_id=request.item_id)
+    logger.info(f"Deleting item {item_id}", item_id=item_id)
 
     dm_service = get_data_management_service()
-    success = await dm_service.delete_place(request.item_id)
+    success = await dm_service.delete_place(item_id)
 
     if not success:
-        raise ValueError(f"Item {request.item_id} not found or could not be deleted")
+        raise ValueError(f"Item {item_id} not found or could not be deleted")
 
-    logger.info(f"Successfully deleted item {request.item_id}", item_id=request.item_id)
+    logger.info(f"Successfully deleted item {item_id}", item_id=item_id)
 
     return DataDeleteResponse(
         success=True,
-        message=f"Successfully deleted item {request.item_id}",
-        item_id=request.item_id
+        message=f"Successfully deleted item {item_id}",
+        item_id=item_id
     )
