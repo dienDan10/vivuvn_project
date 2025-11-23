@@ -43,8 +43,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     # Convert validation errors to JSON-serializable format
     errors = []
     for error in exc.errors():
+        loc = error.get("loc", [])
+        # Handle cases where loc has fewer than 2 elements (e.g., body-level errors)
+        key = loc[1] if len(loc) > 1 else (loc[0] if loc else "unknown")
         errors.append({
-            "key": error.get("loc", [])[1],
+            "key": key,
             "msg": str(error.get("msg", ""))
         })
     
