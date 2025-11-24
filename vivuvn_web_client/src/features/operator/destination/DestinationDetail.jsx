@@ -157,13 +157,15 @@ function DestinationDetail() {
           </Space>
 
           <Space>
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={handleEdit}
-            >
-              Edit
-            </Button>
+            {!destination.deleteFlag && (
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={handleEdit}
+              >
+                Edit
+              </Button>
+            )}
 
             {!destination.deleteFlag ? (
               <Popconfirm

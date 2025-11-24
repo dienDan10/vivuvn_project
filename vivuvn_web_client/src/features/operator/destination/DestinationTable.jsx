@@ -167,25 +167,29 @@ function DestinationTable({ onEditDestination }) {
 			render: (_, record) => (
 				<Space direction="vertical" size="small">
 					<Space size="small" wrap>
-						<Tooltip title="View Details">
-							<Button
-								type="link"
-								icon={<EyeOutlined />}
-								onClick={() => navigate(`/manage/destinations/${record.id}`)}
-							>
-								View
-							</Button>
-						</Tooltip>
+						{!record.deleteFlag && (
+							<>
+								<Tooltip title="View Details">
+									<Button
+										type="link"
+										icon={<EyeOutlined />}
+										onClick={() => navigate(`/manage/destinations/${record.id}`)}
+									>
+										View
+									</Button>
+								</Tooltip>
 
-						<Tooltip title="Edit">
-							<Button
-								type="link"
-								icon={<EditOutlined />}
-								onClick={() => onEditDestination(record)}
-							>
-								Edit
-							</Button>
-						</Tooltip>
+								<Tooltip title="Edit">
+									<Button
+										type="link"
+										icon={<EditOutlined />}
+										onClick={() => onEditDestination(record)}
+									>
+										Edit
+									</Button>
+								</Tooltip>
+							</>
+						)}
 
 						{!record.deleteFlag ? (
 							<Popconfirm
