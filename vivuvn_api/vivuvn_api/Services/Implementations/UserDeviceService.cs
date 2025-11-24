@@ -9,11 +9,12 @@ namespace vivuvn_api.Services.Implementations
     {
         public async Task RegisterDeviceAsync(int userId, RegisterDeviceRequestDto request)
         {
-            var existingDevice = await _unitOfWork.UserDevices.GetOneAsync(d => d.UserId == userId && d.FcmToken == request.FcmToken);
+            var existingDevice = await _unitOfWork.UserDevices.GetOneAsync(d => d.UserId == userId && d.DeviceType == request.DeviceType, tracked: true);
 
             if (existingDevice != null)
             {
                 // update the time stamp and return
+                existingDevice.FcmToken = request.FcmToken;
                 existingDevice.LastUsedAt = DateTime.UtcNow;
                 existingDevice.IsActive = true;
                 existingDevice.DeviceName = request.DeviceName;

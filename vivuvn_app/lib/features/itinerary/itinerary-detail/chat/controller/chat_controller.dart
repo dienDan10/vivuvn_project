@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../data/dtos/chat_update.dart';
 import '../data/model/message.dart';
 import '../service/chat_service.dart';
 import '../service/i_chat_service.dart';
@@ -17,7 +18,7 @@ final chatControllerProvider =
 class ChatController extends AutoDisposeFamilyNotifier<ChatState, int> {
   late int itineraryId;
   late final IChatService _chatService;
-  StreamSubscription<List<Message>>? _messageSubscription;
+  StreamSubscription<ChatUpdate>? _updateSubscription;
 
   @override
   ChatState build(final int arg) {
@@ -33,7 +34,7 @@ class ChatController extends AutoDisposeFamilyNotifier<ChatState, int> {
     Future.microtask(() => loadMessages());
 
     // listen to new messages stream
-    _listenToNewMessages();
+    _listenToChatUpdate();
 
     return ChatState();
   }
@@ -88,12 +89,26 @@ class ChatController extends AutoDisposeFamilyNotifier<ChatState, int> {
     }
   }
 
-  void _listenToNewMessages() {
-    _messageSubscription = _chatService.newMessagesStream.listen(
-      (final newMessages) {
-        if (newMessages.isEmpty) return;
+  void _listenToChatUpdate() {
+    _updateSubscription = _chatService.chatUpdateStream.listen(
+      (final chatUpdate) {
+        if (chatUpdate.newMessages.isEmpty &&
+            chatUpdate.deletedMessageIds.isEmpty) {
+          return;
+        }
 
-        final updatedMessages = [...newMessages, ...state.messages];
+        final updatedMessages = List<Message>.from(state.messages);
+
+        // remove deleted messages
+        if (chatUpdate.deletedMessageIds.isNotEmpty) {
+          updatedMessages.removeWhere(
+            (final message) =>
+                chatUpdate.deletedMessageIds.contains(message.id),
+          );
+        }
+
+        // add new messages
+        updatedMessages.insertAll(0, chatUpdate.newMessages);
 
         // remove duplicated messages (just for safety)
         final uniqueMessages = _removeDuplicateMessages(updatedMessages);
@@ -260,8 +275,8 @@ class ChatController extends AutoDisposeFamilyNotifier<ChatState, int> {
   /// Dispose resources
   void _dispose() {
     // Cancel stream subscription
-    _messageSubscription?.cancel();
-    _messageSubscription = null;
+    _updateSubscription?.cancel();
+    _updateSubscription = null;
 
     // Stop polling and dispose the service
     _chatService.dispose();

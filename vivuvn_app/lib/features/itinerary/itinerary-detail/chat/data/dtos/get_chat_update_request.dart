@@ -1,9 +1,11 @@
-class GetNewMessagesRequest {
+class GetChatUpdateRequest {
   final int itineraryId;
   final int lastMessageId;
+  final DateTime? lastPolledAt;
 
-  GetNewMessagesRequest({
+  GetChatUpdateRequest({
     required this.itineraryId,
     required this.lastMessageId,
+    this.lastPolledAt,
   });
 }

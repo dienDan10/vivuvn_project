@@ -300,6 +300,7 @@ namespace vivuvn_api.Data
 
                 // Indexes for better query performance
                 entity.HasIndex(d => d.FcmToken)
+                      .IsUnique()
                       .HasDatabaseName("IX_UserDevices_FcmToken");
 
                 entity.HasIndex(d => new { d.UserId, d.IsActive })

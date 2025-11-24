@@ -20,6 +20,7 @@ namespace vivuvn_api.Models
 
         [Required]
         public DateTime CreatedAt { get; set; }
-
+        public bool DeleteFlag { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
     }
 }

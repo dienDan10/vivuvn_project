@@ -18,10 +18,11 @@ namespace vivuvn_api.Services.Interfaces
         /// <summary>
         /// Get new messages after a specific message ID (for polling)
         /// </summary>
-        Task<List<ItineraryMessageDto>> GetNewMessagesAsync(
+        Task<ChatUpdateDto> GetChatUpdatesAsync(
             int itineraryId,
             int userId,
-            int lastMessageId);
+            int lastMessageId,
+            DateTime? lastPolledAt);
 
         /// <summary>
         /// Send a new message
@@ -34,6 +35,6 @@ namespace vivuvn_api.Services.Interfaces
         /// <summary>
         /// Delete a message (soft delete)
         /// </summary>
-        Task DeleteMessageAsync(int messageId, int userId);
+        Task DeleteMessageAsync(int itineraryId, int messageId, int userId);
     }
 }

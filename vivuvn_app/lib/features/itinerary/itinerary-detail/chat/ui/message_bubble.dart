@@ -1,40 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../common/helper/image_util.dart';
+import '../../detail/controller/itinerary_detail_controller.dart';
 import '../data/model/message.dart';
+import 'delete_message_modal.dart';
 import 'user_info_modal.dart';
 
-class MessageBubble extends StatelessWidget {
-  const MessageBubble.alone({super.key, required this.message})
-    : isAloneInSequence = true,
-      isFirstInSequence = false,
-      isMiddleInSequence = false,
-      isLastInSequence = false;
+class MessageBubble extends ConsumerWidget {
+  const MessageBubble.alone({
+    super.key,
+    required this.message,
+    required this.itineraryId,
+  }) : isAloneInSequence = true,
+       isFirstInSequence = false,
+       isMiddleInSequence = false,
+       isLastInSequence = false;
 
-  const MessageBubble.first({super.key, required this.message})
-    : isFirstInSequence = true,
-      isAloneInSequence = false,
-      isMiddleInSequence = false,
-      isLastInSequence = false;
+  const MessageBubble.first({
+    super.key,
+    required this.message,
+    required this.itineraryId,
+  }) : isFirstInSequence = true,
+       isAloneInSequence = false,
+       isMiddleInSequence = false,
+       isLastInSequence = false;
 
-  const MessageBubble.middle({super.key, required this.message})
-    : isFirstInSequence = false,
-      isAloneInSequence = false,
-      isMiddleInSequence = true,
-      isLastInSequence = false;
+  const MessageBubble.middle({
+    super.key,
+    required this.message,
+    required this.itineraryId,
+  }) : isFirstInSequence = false,
+       isAloneInSequence = false,
+       isMiddleInSequence = true,
+       isLastInSequence = false;
 
-  const MessageBubble.last({super.key, required this.message})
-    : isFirstInSequence = false,
-      isAloneInSequence = false,
-      isMiddleInSequence = false,
-      isLastInSequence = true;
+  const MessageBubble.last({
+    super.key,
+    required this.message,
+    required this.itineraryId,
+  }) : isFirstInSequence = false,
+       isAloneInSequence = false,
+       isMiddleInSequence = false,
+       isLastInSequence = true;
 
   final bool isAloneInSequence;
   final bool isFirstInSequence;
   final bool isMiddleInSequence;
   final bool isLastInSequence;
   final Message message;
+  final int itineraryId;
 
   BorderRadius _getBorderRadius() {
     final isMe = message.isOwnMessage;
@@ -71,8 +87,24 @@ class MessageBubble extends StatelessWidget {
     UserInfoModal.show(context, message);
   }
 
+  void _onMessageLongPress(final BuildContext context, final WidgetRef ref) {
+    final isOwner =
+        ref.read(itineraryDetailControllerProvider).itinerary?.isOwner ?? false;
+    final canDelete = message.isOwnMessage || isOwner;
+
+    if (!canDelete) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (final BuildContext context) {
+        return DeleteMessageModal(itineraryId: itineraryId, message: message);
+      },
+    );
+  }
+
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final isMe = message.isOwnMessage;
 
     return Column(
@@ -100,43 +132,49 @@ class MessageBubble extends StatelessWidget {
             else if (!isMe)
               const SizedBox(width: 32),
 
-            Container(
-              decoration: BoxDecoration(
-                color: !isMe
-                    ? Theme.of(context).colorScheme.surfaceContainerHighest
-                    : Theme.of(context).colorScheme.primary,
-                borderRadius: _getBorderRadius(),
-              ),
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7,
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.message,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isMe
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                  if (isAloneInSequence || isFirstInSequence)
+            GestureDetector(
+              onLongPress: () => _onMessageLongPress(context, ref),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !isMe
+                      ? Theme.of(context).colorScheme.surfaceContainerHighest
+                      : Theme.of(context).colorScheme.primary,
+                  borderRadius: _getBorderRadius(),
+                ),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.7,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      DateFormat('HH:mm').format(message.createdAt),
+                      message.message,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 16,
                         color: isMe
-                            ? Theme.of(
-                                context,
-                              ).colorScheme.onPrimary.withValues(alpha: 0.7)
-                            : Theme.of(context).colorScheme.onPrimaryContainer
-                                  .withValues(alpha: 0.7),
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onPrimaryContainer,
                       ),
                     ),
-                ],
+                    if (isAloneInSequence || isFirstInSequence)
+                      Text(
+                        DateFormat('HH:mm').format(message.createdAt),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isMe
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary.withValues(alpha: 0.7)
+                              : Theme.of(context).colorScheme.onPrimaryContainer
+                                    .withValues(alpha: 0.7),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ],

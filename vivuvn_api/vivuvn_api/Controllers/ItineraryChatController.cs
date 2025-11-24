@@ -29,7 +29,7 @@ namespace vivuvn_api.Controllers
         // Get new message after a message (for polling)
         [HttpGet("new")]
         [Authorize]
-        public async Task<IActionResult> GetNewMessages(int itineraryId, [FromQuery] int lastMessageId)
+        public async Task<IActionResult> GetChatUpdates(int itineraryId, [FromQuery] int lastMessageId, [FromQuery] DateTime? lastPolledAt)
         {
             // check for if user is member of itinerary
             int userId = GetCurrentUserId();
@@ -38,8 +38,8 @@ namespace vivuvn_api.Controllers
             {
                 return BadRequest("Bạn không phải là thành viên của lịch trình này.");
             }
-            var newMessages = await _messageService.GetNewMessagesAsync(itineraryId, userId, lastMessageId);
-            return Ok(newMessages);
+            var updates = await _messageService.GetChatUpdatesAsync(itineraryId, userId, lastMessageId, lastPolledAt);
+            return Ok(updates);
         }
 
         // Send message
@@ -65,12 +65,7 @@ namespace vivuvn_api.Controllers
         {
             // check for if user is member of itinerary
             int userId = GetCurrentUserId();
-            bool isMember = await _memberService.IsMemberAsync(itineraryId, userId);
-            if (!isMember)
-            {
-                return BadRequest("Bạn không phải là thành viên của lịch trình này.");
-            }
-            await _messageService.DeleteMessageAsync(messageId, userId);
+            await _messageService.DeleteMessageAsync(itineraryId, messageId, userId);
             return NoContent();
         }
 

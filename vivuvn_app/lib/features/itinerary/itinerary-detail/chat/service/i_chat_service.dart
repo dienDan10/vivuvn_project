@@ -1,9 +1,10 @@
+import '../data/dtos/chat_update.dart';
 import '../data/dtos/get_messages_response.dart';
 import '../data/model/message.dart';
 
 abstract interface class IChatService {
   // Stream of new messages from polling
-  Stream<List<Message>> get newMessagesStream;
+  Stream<ChatUpdate> get chatUpdateStream;
 
   // Get paginated messages
   Future<GetMessagesResponse> getMessages({
@@ -12,10 +13,11 @@ abstract interface class IChatService {
     final int pageSize = 50,
   });
 
-  // Get new messages for polling
-  Future<List<Message>> getNewMessages({
+  // Get message update for polling
+  Future<ChatUpdate> getChatUpdates({
     required final int itineraryId,
     required final int lastMessageId,
+    final DateTime? lastPolledAt,
   });
 
   // Send a message

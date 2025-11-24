@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/chat_api.dart';
+import '../data/dtos/chat_update.dart';
 import '../data/dtos/delete_message_request.dart';
+import '../data/dtos/get_chat_update_request.dart';
 import '../data/dtos/get_messages_request.dart';
 import '../data/dtos/get_messages_response.dart';
-import '../data/dtos/get_new_messages_request.dart';
 import '../data/dtos/send_message_request.dart';
 import '../data/model/message.dart';
 import 'i_chat_service.dart';
@@ -31,16 +32,15 @@ class ChatService implements IChatService {
   Timer? _pollingTimer;
   int? _currentItineraryId;
   int _lastMessageId = 0;
+  DateTime? _lastPolledAt;
   bool _isPolling = false;
 
   // Message stream controller
-  final StreamController<List<Message>> _messageStreamController =
-      StreamController<List<Message>>.broadcast();
-
+  final StreamController<ChatUpdate> _updateStreamController =
+      StreamController<ChatUpdate>.broadcast();
   // Expose the stream for listeners
   @override
-  Stream<List<Message>> get newMessagesStream =>
-      _messageStreamController.stream;
+  Stream<ChatUpdate> get chatUpdateStream => _updateStreamController.stream;
 
   @override
   Future<GetMessagesResponse> getMessages({
@@ -58,15 +58,17 @@ class ChatService implements IChatService {
   }
 
   @override
-  Future<List<Message>> getNewMessages({
+  Future<ChatUpdate> getChatUpdates({
     required final int itineraryId,
     required final int lastMessageId,
+    final DateTime? lastPolledAt,
   }) async {
-    final request = GetNewMessagesRequest(
+    final request = GetChatUpdateRequest(
       itineraryId: itineraryId,
       lastMessageId: lastMessageId,
+      lastPolledAt: lastPolledAt,
     );
-    return await _chatApi.getNewMessages(request);
+    return await _chatApi.getChatUpdates(request);
   }
 
   @override
@@ -116,32 +118,38 @@ class ChatService implements IChatService {
     _currentItineraryId = itineraryId;
     _lastMessageId = lastMessageId;
     _isPolling = true;
+    _lastPolledAt = DateTime.now();
 
     // start the timer
     _pollingTimer = Timer.periodic(interval, (_) {
-      _checkForNewMessages();
+      _checkForUpdates();
     });
   }
 
-  Future<void> _checkForNewMessages() async {
+  Future<void> _checkForUpdates() async {
     if (!_isPolling || _currentItineraryId == null) {
       // if not polling or itinerary ID not set, do nothing
       return;
     }
 
-    final request = GetNewMessagesRequest(
+    final request = GetChatUpdateRequest(
       itineraryId: _currentItineraryId!,
       lastMessageId: _lastMessageId,
+      lastPolledAt: _lastPolledAt,
     );
 
     try {
-      final newMessages = await _chatApi.getNewMessages(request);
-      if (newMessages.isNotEmpty) {
-        // update last message ID
-        _lastMessageId = newMessages.first.id;
-
-        // add new messages to stream
-        _messageStreamController.add(newMessages);
+      final updates = await _chatApi.getChatUpdates(request);
+      if (updates.hasUpdates) {
+        if (updates.newMessages.isNotEmpty) {
+          final newMessages = updates.newMessages;
+          // update last message ID
+          _lastMessageId = newMessages.first.id;
+        }
+        // update last polled time
+        _lastPolledAt = DateTime.now();
+        // add updates to stream
+        _updateStreamController.add(updates);
       }
     } catch (e) {
       // Handle error (e.g., log it)
@@ -153,7 +161,7 @@ class ChatService implements IChatService {
   @override
   void dispose() {
     stopPolling();
-    _messageStreamController.close();
+    _updateStreamController.close();
   }
 
   @override

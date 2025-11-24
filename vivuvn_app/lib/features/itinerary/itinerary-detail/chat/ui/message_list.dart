@@ -201,14 +201,26 @@ class _MessageListState extends ConsumerState<MessageList> {
         // Build message bubble based on position in sequence
         Widget messageBubble;
         if (isAloneInSequence) {
-          messageBubble = MessageBubble.alone(message: message);
+          messageBubble = MessageBubble.alone(
+            message: message,
+            itineraryId: widget.itineraryId,
+          );
         } else if (isFirstInSequence) {
-          messageBubble = MessageBubble.first(message: message);
+          messageBubble = MessageBubble.first(
+            message: message,
+            itineraryId: widget.itineraryId,
+          );
         } else if (isMiddleInSequence) {
-          messageBubble = MessageBubble.middle(message: message);
+          messageBubble = MessageBubble.middle(
+            message: message,
+            itineraryId: widget.itineraryId,
+          );
         } else {
           // isLastInSequence
-          messageBubble = MessageBubble.last(message: message);
+          messageBubble = MessageBubble.last(
+            message: message,
+            itineraryId: widget.itineraryId,
+          );
         }
 
         // Add date separator if needed

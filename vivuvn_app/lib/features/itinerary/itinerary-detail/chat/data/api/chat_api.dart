@@ -2,10 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
+import '../dtos/chat_update.dart';
 import '../dtos/delete_message_request.dart';
+import '../dtos/get_chat_update_request.dart';
 import '../dtos/get_messages_request.dart';
 import '../dtos/get_messages_response.dart';
-import '../dtos/get_new_messages_request.dart';
 import '../dtos/send_message_request.dart';
 import '../model/message.dart';
 
@@ -25,18 +26,23 @@ class ChatApi {
     return GetMessagesResponse.fromMap(data);
   }
 
-  Future<List<Message>> getNewMessages(
-    final GetNewMessagesRequest request,
-  ) async {
+  Future<ChatUpdate> getChatUpdates(final GetChatUpdateRequest request) async {
+    final queryParams = <String, dynamic>{
+      'lastMessageId': request.lastMessageId,
+    };
+
+    if (request.lastPolledAt != null) {
+      queryParams['lastPolledAt'] = request.lastPolledAt!
+          .toUtc()
+          .toIso8601String();
+    }
     final response = await _dio.get(
       '/api/v1/itineraries/${request.itineraryId}/chat/new',
-      queryParameters: {'lastMessageId': request.lastMessageId},
+      queryParameters: queryParams,
     );
 
-    final data = response.data as List<dynamic>;
-    return data
-        .map((final e) => Message.fromMap(e as Map<String, dynamic>))
-        .toList();
+    final data = response.data as Map<String, dynamic>;
+    return ChatUpdate.fromMap(data);
   }
 
   Future<Message> sendMessage(final SendMessageRequest request) async {

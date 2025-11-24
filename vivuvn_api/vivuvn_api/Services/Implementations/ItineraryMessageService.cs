@@ -2,6 +2,7 @@
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
+using vivuvn_api.Helpers;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
 using vivuvn_api.Services.Interfaces;
@@ -14,7 +15,7 @@ namespace vivuvn_api.Services.Implementations
         public async Task<MessagePageResponseDto> GetMessagesAsync(int itineraryId, int userId, int page = 1, int pageSize = 50)
         {
             var (items, totalCount) = await _unitOfWork.ItineraryMessages.GetPagedAsync(
-               filter: m => m.ItineraryId == itineraryId,
+               filter: m => m.ItineraryId == itineraryId && !m.DeleteFlag,
                includeProperties: "ItineraryMember,ItineraryMember.User",
                orderBy: q => q.OrderByDescending(m => m.CreatedAt),
                pageNumber: page,
@@ -39,11 +40,11 @@ namespace vivuvn_api.Services.Implementations
             };
         }
 
-        public async Task<List<ItineraryMessageDto>> GetNewMessagesAsync(int itineraryId, int userId, int lastMessageId)
+        public async Task<ChatUpdateDto> GetChatUpdatesAsync(int itineraryId, int userId, int lastMessageId, DateTime? lastPolledAt)
         {
 
             var messages = await _unitOfWork.ItineraryMessages.GetAllAsync(
-                filter: m => m.ItineraryId == itineraryId && m.Id > lastMessageId,
+                filter: m => m.ItineraryId == itineraryId && m.Id > lastMessageId && !m.DeleteFlag,
                 includeProperties: "ItineraryMember,ItineraryMember.User",
                 orderBy: q => q.OrderByDescending(m => m.CreatedAt));
 
@@ -53,7 +54,21 @@ namespace vivuvn_api.Services.Implementations
                 var member = messages.ElementAt(i).ItineraryMember;
                 messageDtos[i].IsOwnMessage = member?.UserId == userId;
             }
-            return messageDtos;
+
+            var chatUpdate = new ChatUpdateDto
+            {
+                NewMessages = messageDtos
+            };
+
+            if (lastPolledAt.HasValue)
+            {
+                var deletedMessages = await _unitOfWork.ItineraryMessages
+                    .GetAllAsync(filter: m => m.ItineraryId == itineraryId && m.DeleteFlag && m.DeletedAt > lastPolledAt.Value);
+                var deletedMessageIds = deletedMessages.Select(m => m.Id).ToList();
+                chatUpdate.DeletedMessageIds = deletedMessageIds;
+            }
+
+            return chatUpdate;
         }
 
         public async Task<ItineraryMessageDto> SendMessageAsync(int itineraryId, int userId, SendMessageRequestDto request)
@@ -79,14 +94,30 @@ namespace vivuvn_api.Services.Implementations
 
             return messageDto;
         }
-        public async Task DeleteMessageAsync(int messageId, int userId)
+        public async Task DeleteMessageAsync(int itineraryId, int messageId, int userId)
         {
             var message = await _unitOfWork.ItineraryMessages.GetOneAsync(
-                m => m.Id == messageId && m.ItineraryMember.UserId == userId)
+                m => m.Id == messageId && m.ItineraryId == itineraryId && !m.DeleteFlag)
                 ?? throw new BadHttpRequestException("Không tìm thấy tin nhắn");
 
-            _unitOfWork.ItineraryMessages.Remove(message);
-            await _unitOfWork.SaveChangesAsync();
+            // only sender and itinerary creator can delete message
+            var member = await _unitOfWork.ItineraryMembers.GetOneAsync(m => m.ItineraryId == itineraryId && m.UserId == userId);
+            if (member == null)
+            {
+                throw new BadHttpRequestException("Bạn không có quyền xóa tin nhắn này.");
+            }
+
+            if (message.ItineraryMemberId == member.Id || member.Role == Constants.ItineraryRole_Owner)
+            {
+                message.DeleteFlag = true;
+                message.DeletedAt = DateTime.UtcNow;
+                _unitOfWork.ItineraryMessages.Update(message);
+                await _unitOfWork.SaveChangesAsync();
+                return;
+            }
+
+            throw new BadHttpRequestException("Bạn không có quyền xóa tin nhắn này.");
+
         }
     }
 }
