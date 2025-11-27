@@ -15872,6 +15872,29 @@
                 "reviewUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x36ca66577fcf12f1:0xe3de2f5f3cd28e8b!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA"
             },
             {
+<<<<<<< HEAD
+                "name": "Khu di tích Chủ tịch Hồ Chí Minh với chiến dịch biên giới 1950",
+                "description": "Khu di tích được đưa vào sử dụng ngày 19/05/2004, thể hiện đạo lý cao cả ”Uống nước nhớ nguồn “ đối với vị lãnh tụ thiên tài, vị cha già kính yêu của dân tộc.\n\nKhu gồm có: Nhà tưởng niệm được thiết kế với kiến trúc nhà sàn hiện đại, trưng bày những hình ảnh, hiện vật liên quan tới hoạt động của Bác trong chiến dịch và Cụm tượng đài Bác Hồ ngồi quan sát trận đánh trên núi Báo Đông.\n\nTượng đài Bác Hồ được mô phỏng theo bức ảnh của nghệ sỹ Vũ Năng An chụp, làm bằng vật liệu compozit giả đồng, cao 2,8 m, nặng 418 kg, cột bê tông cốt thép, toàn bộ bức tượng đặt trên bệ đá ốp gạch lát hoa. Đi qua 845 bậc đá, được chia thành 79 cung bậc, tượng trưng cho 79 mùa xuân của Bác là đến tượng đài.\n\nTại đây du khách được ngắm nhìn tư thế ung dung, lạc quan của vị Chủ tịch trực tiếp ra mặt trận chỉ huy trận đánh đồn Đông Khê thắng lợi vẻ vang trên đường số 4 Cao Bằng – Lạng Sơn, ngày 16/09/1950, mở màn cho chiến thắng Chiến dịch Biên giới năm 1950, tạo tiền đề cho cuộc kháng chiến vĩ đại của dân tộc.\n\nTại đài quan sát, Bác đã làm một bài thơ nổi tiếng về khí thế và niềm tin tất thắng của dân tộc:\n\nChống gậy lên non xem trận địa\n\nVạn trùng núi đỡ vạn trùng mây\n\nQuân ta khí mạnh nuốt ngưu đẩu\n\nThề diệt xâm lăng lũ sói cầy\n\nTại khu di tích còn có đôi rồng bằng đá quý (dài 3,93m, cao 1,15m, đường kính 0,393m, nặng gần 9 tấn) đặt trên bệ đá cao 1,20m do những đôi bàn tay nghệ nhân từ vùng đất cố đô Hoa Lư (Ninh Bình) thực hiện. Đôi rồng mang sinh khí từ đất thiêng Nghĩa Lĩnh, cội nguồn của dân tộc - biểu tượng cho sức mạnh đoàn kết, gắn bó không ngừng lớn mạnh của con cháu Rồng Tiên; thể hiện tình cảm thành kính của nhân dân tỉnh Phú Thọ đối với Bác Hồ.\n\n",
+                "pictures": [
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/DtctHochiminh/Tuongniembac01.jpg",
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/DtctHochiminh/Tuongniembac02.jpg",
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/DtctHochiminh/Tuongniembac03.jpg",
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/DtctHochiminh/Tuongniembac04.jpg"
+                ],
+                "latitude": 22.430229399999998,
+                "longitude": 106.43318079999999,
+                "address": "CCJM+37V, TT. Đông Khê, Thạch An, Cao Bằng, Việt Nam",
+                "rating": 4.5,
+                "userRatingCount": 285,
+                "googlePlaceId": "ChIJqRqoOAKEyjYRTrUQ_XSdz80",
+                "websiteUri": "",
+                "placeUri": "https://maps.google.com/?cid=14830245223741830478&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "directionsUri": "https://www.google.com/maps/dir//''/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x36ca840238a81aa9:0xcdcf9d74fd10b54e!3e0?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "reviewUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x36ca840238a81aa9:0xcdcf9d74fd10b54e!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA"
+            },
+            {
+=======
+>>>>>>> 9e38b14cd1c9534610a2c779ae69709ea4af6b28
                 "name": "Lễ hội Mời Mẹ Trăng",
                 "description": "Lễ hội Mời Mẹ Trăng hay còn gọi là lễ hội Nàng Hai là lễ hội lớn của người Tày tại huyện Phục Hòa, Cao Bằng. Được tổ chức trong khoảng thời gian từ 30 tháng Giêng đến hội chính vào ngày 22/3 âm lịch. Mặc dù tiến hành riêng theo từng bản nhưng khách đi du lịch thác bản Giốc vẫn có thể hòa mình vào không gian lễ hội đặc sắc này.\n\nVới ý nghĩa rước Mẹ Trăng về ban phước lành cho bản làng để ngày mùa mới mùa màng bội thu. Vì vậy, hàng năm dân làng sẽ cử một người phụ nữ trung niên, có cuộc sống hạnh phúc và được mọi người yêu quý làm Mẹ Trăng. Đồng thời tuyển chọn khoảng 20 cô gái xinh đẹp trong bản hóa thân thành nàng tiên. Ngoài ra, còn chọn hai thanh niên trai tráng nhất mở đường cho Mẹ Trăng và các nàng tiên về trời.\n\nTrong quá trình làm lễ Mẹ Trăng mặc quần áo chàm, buộc vải đỏ vắt chéo khăn trên đầu. Đi trên đường sẽ cầm ngọn mía có treo túi trầu nhỏ, một chiếc khăn mùi xoa, một bát nước có một lá bưởi. Bát nước và ngọn mía này mang ý nghĩa tẩy uế theo phong tục của người dân tộc Tày.\n\nLễ hội Mời Mẹ Trăng xuất phát từ tín ngưỡng dân gian của người Tày Cao Bằng. Trước đây điều kiện sản xuất nông nghiệp khó khăn, lạc hậu nên người dân chỉ biết cầu trời ban phước cho thời tiết, khí hậu thuận lợi. Bây giờ dù kĩ thuật đã phát triển nhưng lễ hội cầu mùa này vẫn được giữ gìn và trở thành tín ngưỡng văn hóa đặc sắc vùng miền.\n\nTrước khi diễn ra người Tày Cao Bằng đã phải chuẩn bị hết sức công phu để lễ hội suôn sẻ. Sử dụng các thẻ cắm ở 4 góc sân nơi diễn ra lễ cầu để tránh tà ma xâm nhập. Đồng thời mâm lễ vật dâng lên Thổ địa và các nàng Trăng cũng phải chuẩn bị chu đáo, trang trí đẹp mắt. Điều này thể hiện sự tôn kính của người dân đến thần linh - người cho họ bình an, cuộc sống sung túc.\n\nKhi tham gia vào lễ hội Mời Mẹ Trăng trong hành trình tour Thác bản Giốc, bạn sẽ tận mắt thấy những con thuyền được đẽo bằng gỗ do chính tay người dân địa phương làm ra. Với ý nghĩa chứa đựng của cải dâng lên Mẹ Trăng và 12 bó hoa tượng trưng cho 12 đêm làm lễ, biểu trưng sự kính trọng của dân làng dành cho người.\n\nDu khách tour Thác Bản Giốc từ Hà Nội đi đúng ngày lễ hội còn có cơ hội chiêm ngưỡng điệu múa dân tộc ấn tượng trong ngày lễ tiễn Mẹ Trăng và các nàng Tiên về trời. Lời hát được cất lên từ chính những người nông dân nhưng nghe rất hay, thiết tha với hy vọng mùa tới bội thu hơn để tổ chức lễ lớn hơn đón các nàng về. Đây chắc chắn là kỷ niệm bạn sẽ ghi nhớ mãi trong kỳ nghỉ này.\n\nNgoài tham gia lễ hội, chiêm ngưỡng cảnh đẹp của núi rừng thì du khách đừng quên dừng chân để thưởng thức các món Đặc sản Cao Bằng. Nơi đây còn được biết đến với biệt hiệu ‘cái nôi ẩm thực Tây Bắc’. Cùng điểm lại các món ăn nức tiếng của nơi đây nhé.\n\nĐi du lịch Thác bản Giốc Cao Bằng vào thời điểm diễn ra lễ hội truyền thống Mời Mẹ Trăng sẽ giúp bạn có thêm nhiều hiểu biết về nền văn hóa đa dạng của các dân tộc Việt Nam. Đặc biệt, bạn cũng lưu giữ lại cho mình miền ký ức đẹp về núi rừng Tây Bắc, những con người chân chất, thật thà, mến khách, chan chứa nhiều tình cảm. Và đừng quên thưởng thức các món ăn đặc sắc để cảm nhận nền ẩm thực cực kỳ ấn tượng của mảnh đất Cao Bằng nhé.\n\n",
                 "pictures": [
@@ -16012,6 +16035,29 @@
                 "reviewUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x36b58dba53c3d2e9:0xa0afb46e57889bdc!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA"
             },
             {
+<<<<<<< HEAD
+                "name": "Lễ hội Đền Kỳ Sầm",
+                "description": "Ngày 25/2 (mùng 10 tháng Giêng âm lịch), đông đảo nhân dân và khách thập phương đến trẩy hội Đền Kỳ Sầm, xã Vĩnh Quang, Thành phố Cao Bằng.\n\nĐền Kỳ Sầm nằm ở Bản Ngần, xã Vĩnh Quang, cách trung tâm Thành phố Cao Bằng khoảng 5 km. Đền Kỳ Sầm thờ Khâu Sầm Đại Vương Nùng Trí Cao (1025 - 1055), người dân tộc Tày, một nhân vật có liên quan đến sự nghiệp giữ nước thời Lý (vua Lý Thái Tông thế kỷ XI). Nùng Trí Cao là con của thủ lĩnh Nùng Tồn Phúc và bà A Nùng. Vốn thông minh, lại được về kinh đô Thăng Long theo học, Nùng Trí Cao trở thành người có tài thao lược. Ông đã có một thời oanh liệt, đánh tan giặc Tống xâm lược, được vua phong Thái Bảo, được lưu danh trong lịch sử, là niềm tự hào của người dân Cao Bằng. Sau khi ông mất, vua lại sắc phong Khâu Sầm Đại Vương và cho lập đền thờ.\n\nĐền Kỳ Sầm được công nhận Di tích lịch sử văn hóa cấp Quốc gia từ năm 1993. Trải qua nhiều thế hệ, truyền thuyết về Khâu Sầm Đại Vương Nùng Trí Cao đã đi sâu vào tâm linh và để lại dấu ấn sâu đậm trong đời sống văn hóa và tinh thần của nhân dân các dân tộc trong tỉnh.\n\nLễ hội Đền Kỳ Sầm là một trong các lễ hội lớn của tỉnh, thu hút đông đảo du khách trong và ngoài tỉnh đến trẩy hội, vui xuân. Lễ hội được tổ chức với phần lễ và phần hội. Phần lễ được thực hiện từ tối mùng 9 âm lịch với các nghi lễ truyền thống được khôi phục lại gần giống thời xa xưa. Ngày hội mùng 10 âm lịch hằng năm là dịp để du khách đến dự hội, cầu lộc, cầu tài. Đến lễ hội, du khách được tham gia nhiều trò chơi dân gian: cờ tướng, tung còn, đu tre, đi cà kheo, bịt mắt đập bóng...\n\nNhiều năm gần đây, lễ hội còn có thêm các không gian hát then, chế tác đàn tính, thư pháp, sản vật địa phương… phục vụ du khách thập phương. Để lễ hội diễn ra vui tươi, an toàn, Ban Tổ chức Lễ hội phân công trách nhiệm cho các tổ và các thành viên phụ trách. Chỉ đạo, bố trí lực lượng dân quân, công an xã phối hợp với Đoàn thanh niên, Công an Thành phố chuẩn bị cho hoạt động của Lễ hội diễn ra tốt đẹp, lành mạnh, đúng với thuần phong mỹ tục.\n\n",
+                "pictures": [
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/Lhdenkysam/Lhdenkysam01.jpg",
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/Lhdenkysam/Lhdenkysam02.jpg",
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/Lhdenkysam/Lhdenkysam03.jpg",
+                    "https://csdl.vietnamtourism.gov.vn/uploads/images/01_3/CSDLDIEMDL2021/CAOBANG/Lhdenkysam/Lhdenkysam04.jpg"
+                ],
+                "latitude": 22.693650299999998,
+                "longitude": 106.2356701,
+                "address": "M6VP+F77 Xã, Vĩnh Quang, Cao Bằng, Việt Nam",
+                "rating": 4.7,
+                "userRatingCount": 91,
+                "googlePlaceId": "ChIJR2cQFkxmyjYRE8-U81mR6xI",
+                "websiteUri": "",
+                "placeUri": "https://maps.google.com/?cid=1363343127734439699&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "directionsUri": "https://www.google.com/maps/dir//''/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x36ca664c16106747:0x12eb9159f394cf13!3e0?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "reviewUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x36ca664c16106747:0x12eb9159f394cf13!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA"
+            },
+            {
+=======
+>>>>>>> 9e38b14cd1c9534610a2c779ae69709ea4af6b28
                 "name": "Hồ Thang Hen",
                 "description": "Cách thành phố Cao Bằng khoảng 30 km theo Tỉnh lộ 205, địa danh hồ Thang Hen thuộc xã Quốc Toản (Trà Lĩnh) được nhắc đến như một trong những địa chỉ du lịch sinh thái nổi bật, hấp dẫn, với phong cảnh thơ mộng, hữu tình gắn liền với những truyền thuyết, sự tích kỳ bí.\n\nHuyền thoại về hồ Thang Hen là một sự khám phá thú vị đối với du khách. Theo truyền thuyết dân gian, ngày xưa ở Cao Bằng có một chàng trai tên là Sung thông minh, tuấn tú. Chàng thi đỗ làm quan và được vua ban thưởng bảy ngày vinh quy bái tổ. Về quê, chàng kết hôn cùng nàng Boóc xinh đẹp. Mải quyến luyến bên người vợ mới cưới, chàng quên mất ngày trở về kinh. Đến đêm thứ Bảy chàng mới sực nhớ, vội chia tay vợ và bố mẹ chạy về kinh. Giữa đêm tối trong rừng hoang, chàng chạy được 36 bước chân thì ngã đầu đập vào núi rồi chết. 36 bước chân của chàng ngày nay là 36 cái hồ lớn nhỏ với những tên gọi khác nhau của tiếng địa phương thuộc huyện Trà Lĩnh. Tương truyền rằng nơi chàng nằm xuống chính là hồ Thang Hen ngày nay.\n\nHiện nay, quần thể hồ Thang Hen có 36 hồ tự nhiên, mỗi hồ cách xa nhau vài chục hoặc vài trăm mét. Các hồ đều có bờ ngăn riêng, tuy nhiên, tất cả đều thông nhau bởi các hang động ngầm dưới lòng đất. 36 hồ nước ngọt tự nhiên này nằm trong một thung lũng rộng lớn tiếp giáp giữa xã Quốc Toản (Trà Lĩnh) và xã Ngũ Lão (Hòa An). Những tên hồ được đặt theo tiếng địa phương như: Thang Vạt, Nà Ma, Thang Loỏng, Thang Hoi… có từ hàng trăm năm nay. Trong đó, Thang Hen là hồ lớn nhất trong quần thể 36 hồ. Hồ Thang Hen có chiều dài gần 2.000 m, rộng 500 m, được bao quanh bởi những tán rừng già xen lẫn những mỏm đá tai mèo và có độ sâu tới 40 m. Tên của hồ Thang Hen theo tiếng địa phương có nghĩa là “đuôi ong”, bởi từ trên cao phóng tầm mắt nhìn xuống, du khách sẽ liên tưởng hình dáng của hồ có hình tựa như đuôi con ong. Các hồ tự nhiên này có nhiều đặc sản do thiên nhiên ban tặng với hơn 100 loại cá lớn, nhỏ khác nhau, như tôm, tép, cá chép vây đỏ, cá nheo…\n\nThang Hen có phong cảnh sơn thủy hữu tình với những hàng cây xanh vươn mình trên vách đá cheo leo, soi bóng xuống mặt nước xanh ngát, uốn vòng theo lòng thung lũng mấp mô những mỏm đá ngầm. Vào buổi sáng, từ đỉnh núi phóng tầm mắt xuống lòng hồ có thể thấy những đám mây lướt qua hệt như những dải lụa trắng tung bay trong gió. Phía đầu nguồn của hồ có một cái hang rộng gọi là hang Thang Hen. Miệng hang sâu 200 m, rộng khoảng 5 - 6 m, cao chừng 5 m thông thẳng lên đỉnh núi. Nước từ trong hang chảy ra quanh năm không dứt. Mỗi ngày hồ Thang Hen đều có 2 đợt thủy triều lên và xuống. Đặc biệt vào khoảng tháng 9 - 10, thời kỳ lập thu, trong một đêm, nước hồ Thang Hen bị rút cạn chỉ trong vài ba giờ đồng hồ. Không kể mùa lũ hoặc mùa khô, nước trong hồ Thang Hen quanh năm xanh ngắt. Khu vực hồ Thang Hen có bờ vực đá dựng đứng sâu từ 5 m - 30 m, trên núi đá có những loại cây gỗ quý hiếm như nghiến cổ thụ có tuổi thọ hằng trăm năm và nhiều giống hoa lan rừng, các loại thực vật đa dạng phong phú cùng với nhiều loại thú hoang dã như khỉ vàng, gà gô, chim gáy rừng…\n\nChỉ mất một giờ đi xe máy hoặc ôtô, du khách có thể đến Thang Hen để được tận hưởng không khí mát lành, ngắm cảnh sông nước, núi rừng hùng vĩ, thơ mộng, chèo thuyền từ hồ này sang hồ khác, thưởng thức các món ăn đậm đà bản sắc dân tộc từ sản phẩm của hồ và được nếm hương vị rượu thơm ngon nồng ấm chưng cất từ ngô và men lá theo phương pháp cổ truyền của dân tộc Tày.\n\n",
                 "pictures": [
@@ -16549,6 +16595,21 @@
                 "reviewUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x314af66707d8a429:0x655fe64af6d7c604!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA"
             },
             {
+<<<<<<< HEAD
+                "name": "Chợ Rừng",
+                "description": "",
+                "pictures": [],
+                "latitude": 20.9388816,
+                "longitude": 106.7990147,
+                "address": "110 Lê Lợi, TT. Quảng Yên, Quảng Yên, Quảng Ninh, Việt Nam",
+                "rating": 4.4,
+                "userRatingCount": 195,
+                "googlePlaceId": "ChIJPUxa2s1jSjER36ou-BOdGyo",
+                "websiteUri": "",
+                "placeUri": "https://maps.google.com/?cid=3034191483057908447&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "directionsUri": "https://www.google.com/maps/dir//''/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x314a63cdda5a4c3d:0x2a1b9d13f82eaadf!3e0?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "reviewUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x314a63cdda5a4c3d:0x2a1b9d13f82eaadf!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA"
+=======
                 "name": "Chùa Yên Mỹ",
                 "description": "",
                 "pictures": [],
@@ -16577,6 +16638,22 @@
                 "placeUri": "https://maps.google.com/?cid=16567444513508202636&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
                 "directionsUri": "https://www.google.com/maps/dir//''/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x314a8a70367da935:0xe5eb6301c7a6988c!3e0?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
                 "reviewUri": ""
+            },
+            {
+                "name": "Làng nghề truyền thống Hưng Học",
+                "description": "",
+                "pictures": [],
+                "latitude": 20.8657432,
+                "longitude": 106.1943913,
+                "address": "Hoạch Trạch, Bình Giang, Hải Dương, Việt Nam",
+                "rating": 5,
+                "userRatingCount": 1,
+                "googlePlaceId": "ChIJcbgKE5qXNTERzQeuZFx9ewA",
+                "websiteUri": "",
+                "placeUri": "https://maps.google.com/?cid=34759257915000781&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "directionsUri": "https://www.google.com/maps/dir//''/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x3135979a130ab871:0x7b7d5c64ae07cd!3e0?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+                "reviewUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x3135979a130ab871:0x7b7d5c64ae07cd!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA"
+>>>>>>> 9e38b14cd1c9534610a2c779ae69709ea4af6b28
             },
             {
                 "name": "Đền An Sinh",
