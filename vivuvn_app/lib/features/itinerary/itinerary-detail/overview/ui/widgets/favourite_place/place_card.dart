@@ -9,6 +9,9 @@ class PlaceCard extends StatelessWidget {
     required this.description,
     this.imageUrl,
     this.index,
+    this.placeUri,
+    this.directionsUri,
+    this.locationQuery,
     super.key,
   });
 
@@ -16,6 +19,9 @@ class PlaceCard extends StatelessWidget {
   final String description;
   final String? imageUrl;
   final int? index;
+  final String? placeUri;
+  final String? directionsUri;
+  final String? locationQuery;
 
   @override
   Widget build(final BuildContext context) {
@@ -28,6 +34,9 @@ class PlaceCard extends StatelessWidget {
               title: title,
               description: description,
               index: index,
+              placeUri: placeUri,
+              directionsUri: directionsUri,
+              locationQuery: locationQuery,
             ),
           ),
           const SizedBox(width: 12),

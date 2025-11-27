@@ -28,6 +28,8 @@ class RestaurantCard extends ConsumerWidget {
             address: restaurant.address,
             mealDate: restaurant.mealDate,
             imageUrl: restaurant.imageUrl,
+            placeUri: restaurant.placeUri,
+            directionsUri: restaurant.directionsUri,
             onTap: () {
               ref
                   .read(restaurantCardExpandControllerProvider.notifier)
