@@ -135,13 +135,15 @@ function ProvinceTable({ onEditProvince }) {
 			key: "actions",
 			render: (_, record) => (
 				<Space>
-					<Button
-						icon={<EditOutlined />}
-						type="link"
-						onClick={() => handleEdit(record)}
-					>
-						Edit
-					</Button>
+					{!record.deleteFlag && (
+						<Button
+							icon={<EditOutlined />}
+							type="link"
+							onClick={() => handleEdit(record)}
+						>
+							Edit
+						</Button>
+					)}
 					{!record.deleteFlag ? (
 						<Popconfirm
 							title="Delete Province"
