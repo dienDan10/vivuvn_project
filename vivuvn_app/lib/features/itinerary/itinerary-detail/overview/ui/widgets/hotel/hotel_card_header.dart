@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../favourite_place/place_card_image.dart';
+import '../shared/location_action_buttons.dart';
 
 class HotelCardHeader extends StatelessWidget {
   const HotelCardHeader({
@@ -12,6 +13,8 @@ class HotelCardHeader extends StatelessWidget {
     required this.checkOutDate,
     required this.imageUrl,
     required this.onTap,
+    this.placeUri,
+    this.directionsUri,
     super.key,
   });
 
@@ -22,6 +25,8 @@ class HotelCardHeader extends StatelessWidget {
   final DateTime? checkOutDate;
   final String? imageUrl;
   final VoidCallback onTap;
+  final String? placeUri;
+  final String? directionsUri;
 
   @override
   Widget build(final BuildContext context) {
@@ -64,6 +69,11 @@ class HotelCardHeader extends StatelessWidget {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  LocationActionButtons(
+                    placeUri: placeUri,
+                    directionsUri: directionsUri,
+                    fallbackQuery: '$name, $address',
                   ),
                 ],
               ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../overview/ui/widgets/favourite_place/place_card_image.dart';
+
 class SuggestedPlaceItem extends StatelessWidget {
   final String title;
   final String? imageUrl;
@@ -14,41 +16,6 @@ class SuggestedPlaceItem extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    Widget buildImage() {
-      if (imageUrl != null && imageUrl!.isNotEmpty) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            imageUrl!,
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-            errorBuilder: (final context, final error, final stackTrace) {
-              return Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.lightBlue[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.image, size: 28, color: Colors.white),
-              );
-            },
-          ),
-        );
-      }
-
-      return Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: Colors.lightBlue[200],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(Icons.image, size: 28, color: Colors.white),
-      );
-    }
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -60,7 +27,7 @@ class SuggestedPlaceItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            buildImage(),
+            PlaceCardImage(imageUrl: imageUrl, size: 60),
 
             const SizedBox(width: 8),
 

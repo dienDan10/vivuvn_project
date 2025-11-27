@@ -6,6 +6,8 @@ class RestaurantItemResponse {
   final DateTime? mealDate;
   final String? note;
   final double? cost;
+  final String? placeUri;
+  final String? directionsUri;
 
   RestaurantItemResponse({
     required this.id,
@@ -15,6 +17,8 @@ class RestaurantItemResponse {
     this.mealDate,
     this.note,
     this.cost,
+    this.placeUri,
+    this.directionsUri,
   });
 
   factory RestaurantItemResponse.fromJson(final Map<String, dynamic> json) {
@@ -70,6 +74,9 @@ class RestaurantItemResponse {
       mealDate: mealDate,
       note: (json['notes'] as String?) ?? (nested['notes'] as String?),
       cost: ((json['cost'] as num?) ?? (nested['cost'] as num?))?.toDouble(),
+      placeUri: (nested['placeUri'] ?? json['placeUri'])?.toString(),
+      directionsUri:
+          (nested['directionsUri'] ?? json['directionsUri'])?.toString(),
     );
   }
 }

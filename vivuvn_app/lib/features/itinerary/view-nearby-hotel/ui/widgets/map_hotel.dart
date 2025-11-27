@@ -32,7 +32,7 @@ class _MapHotelState extends ConsumerState<MapHotel> {
 
     // Fetch nearby restaurants after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((final _) {
-      ref.read(hotelControllerProvider.notifier).fetchNearbyHotels(40);
+      ref.read(hotelControllerProvider.notifier).fetchNearbyHotels(widget.location.id);
     });
 
     // Load custom markers

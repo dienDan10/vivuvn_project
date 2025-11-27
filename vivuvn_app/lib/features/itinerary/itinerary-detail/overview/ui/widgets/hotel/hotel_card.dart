@@ -29,6 +29,8 @@ class HotelCard extends ConsumerWidget {
             checkInDate: hotel.checkInDate,
             checkOutDate: hotel.checkOutDate,
             imageUrl: hotel.imageUrl,
+            placeUri: hotel.placeUri,
+            directionsUri: hotel.directionsUri,
             onTap: () {
               ref
                   .read(hotelCardExpandControllerProvider.notifier)

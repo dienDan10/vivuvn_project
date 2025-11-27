@@ -5,7 +5,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 class PlaceActionButtonDirection extends StatelessWidget {
   final String url;
-  const PlaceActionButtonDirection({super.key, required this.url});
+  final bool compact;
+  const PlaceActionButtonDirection({
+    super.key,
+    required this.url,
+    this.compact = false,
+  });
 
   Future<void> _openDirections(final BuildContext context) async {
     if (url.isEmpty) {
@@ -35,10 +40,17 @@ class PlaceActionButtonDirection extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final horizontalPadding = compact ? 10.0 : 12.0;
+    final verticalPadding = compact ? 6.0 : 8.0;
+    final iconSize = compact ? 16.0 : 20.0;
+    final fontSize = compact ? 12.0 : 14.0;
     return GestureDetector(
       onTap: () => _openDirections(context),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(40),
@@ -47,14 +59,14 @@ class PlaceActionButtonDirection extends StatelessWidget {
           children: [
             Icon(
               Icons.directions_outlined,
-              size: 20,
+              size: iconSize,
               color: colorScheme.primary,
             ),
             const SizedBox(width: 4),
             Text(
               'Đường đi',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w500,
                 color: colorScheme.primary,
               ),

@@ -5,6 +5,8 @@ class FavouritePlacesResponse {
   final String description;
   final String imageUrl;
   final String provinceName;
+  final String? placeUri;
+  final String? directionsUri;
 
   FavouritePlacesResponse({
     required this.idInWishlist,
@@ -13,6 +15,8 @@ class FavouritePlacesResponse {
     required this.description,
     required this.imageUrl,
     required this.provinceName,
+    this.placeUri,
+    this.directionsUri,
   });
 
   factory FavouritePlacesResponse.fromJson(final Map<String, dynamic> json) {
@@ -32,6 +36,8 @@ class FavouritePlacesResponse {
       description: location?['description'] as String? ?? '',
       imageUrl: imageUrl,
       provinceName: location?['provinceName'] as String? ?? '',
+      placeUri: location?['placeUri']?.toString(),
+      directionsUri: location?['directionsUri']?.toString(),
     );
   }
 }

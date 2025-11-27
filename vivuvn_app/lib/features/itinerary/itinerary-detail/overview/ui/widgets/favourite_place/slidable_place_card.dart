@@ -13,6 +13,9 @@ class SlidablePlaceCard extends ConsumerWidget {
     required this.locationId,
     this.imageUrl,
     this.index,
+    this.placeUri,
+    this.directionsUri,
+    this.locationQuery,
     super.key,
   });
 
@@ -21,6 +24,9 @@ class SlidablePlaceCard extends ConsumerWidget {
   final int locationId;
   final String? imageUrl;
   final int? index;
+  final String? placeUri;
+  final String? directionsUri;
+  final String? locationQuery;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -35,6 +41,9 @@ class SlidablePlaceCard extends ConsumerWidget {
       description: description,
       imageUrl: imageUrl,
       index: index,
+      placeUri: placeUri,
+      directionsUri: directionsUri,
+      locationQuery: locationQuery,
     );
 
     if (!isOwner) {

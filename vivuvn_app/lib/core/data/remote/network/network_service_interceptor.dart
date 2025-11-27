@@ -29,10 +29,27 @@ class NetworkServiceInterceptor extends Interceptor {
     final RequestOptions options,
     final RequestInterceptorHandler handler,
   ) async {
-    options.headers['Content-Type'] = 'application/json';
+    if (options.data is FormData) {
+      // Let Dio set the proper multipart boundary header automatically
+      options.headers.remove('Content-Type');
+    } else {
+      options.headers['Content-Type'] = 'application/json';
+    }
     options.headers['Accept'] = 'application/json';
-    options.headers['Authorization'] =
-        'Bearer ${await _tokenService.getAccessToken()}';
+
+    final hasExplicitAuthHeader = options.headers.containsKey('Authorization');
+    if (hasExplicitAuthHeader) {
+      final authHeader = options.headers['Authorization'];
+      if (authHeader == null) {
+        // Respect explicit opt-out from auth header (e.g., refresh token request)
+        options.headers.remove('Authorization');
+      }
+    } else {
+      final accessToken = await _tokenService.getAccessToken();
+      if (accessToken.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $accessToken';
+      }
+    }
 
     handler.next(options);
   }
@@ -72,9 +89,10 @@ class NetworkServiceInterceptor extends Interceptor {
       );
 
       // Retry the original request
-      final requestOptions = err.requestOptions;
-      requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-      final newResponse = await _dio.fetch(requestOptions);
+      final newResponse = await _retryFailedRequest(
+        err.requestOptions,
+        overrideAccessToken: newAccessToken,
+      );
 
       // Token refresh successful, process queued requests
       _isRefreshing = false;
@@ -116,14 +134,39 @@ class NetworkServiceInterceptor extends Interceptor {
 
     // After refresh is complete, retry the request with new token
     try {
-      final requestOptions = err.requestOptions;
       final newAccessToken = await _tokenService.getAccessToken();
-      requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-      final response = await _dio.fetch(requestOptions);
+      final response = await _retryFailedRequest(
+        err.requestOptions,
+        overrideAccessToken: newAccessToken,
+      );
       handler.resolve(response);
     } catch (e) {
       handler.next(err);
     }
+  }
+
+  Future<Response<dynamic>> _retryFailedRequest(
+    final RequestOptions requestOptions, {
+    final String? overrideAccessToken,
+  }) async {
+    final headers = Map<String, dynamic>.from(requestOptions.headers);
+    if (overrideAccessToken != null) {
+      headers['Authorization'] = 'Bearer $overrideAccessToken';
+    }
+
+    final clonedOptions = requestOptions.copyWith(
+      headers: headers,
+      data: _cloneRequestData(requestOptions.data),
+    );
+
+    return _dio.fetch(clonedOptions);
+  }
+
+  dynamic _cloneRequestData(final dynamic data) {
+    if (data is FormData) {
+      return data.clone();
+    }
+    return data;
   }
 
   /// Process all queued requests (currently not needed as we handle in _addRequestToQueue)
