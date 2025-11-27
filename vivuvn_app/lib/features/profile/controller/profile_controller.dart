@@ -1,8 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/auth/controller/auth_controller.dart';
 import '../../../common/validator/validation_exception.dart';
 import '../../../common/validator/validator.dart';
+import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../itinerary/view-itinerary-list/models/user.dart';
 import '../service/profile_service.dart';
 import '../state/profile_state.dart';
@@ -45,9 +47,11 @@ class ProfileController extends AutoDisposeNotifier<ProfileState> {
       throw Exception('Người dùng không tồn tại');
     }
 
-    try {
-      state = state.copyWith(isLoading: true, error: null);
+    String message = '';
 
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
       final profileService = ref.read(profileServiceProvider);
       final avatarUrl = await profileService.uploadAvatar(
         userId: currentUser.id,
@@ -56,19 +60,28 @@ class ProfileController extends AutoDisposeNotifier<ProfileState> {
 
       // Cập nhật user với avatar URL mới
       final updatedUser = currentUser.copyWith(userPhoto: avatarUrl);
-      state = state.copyWith(user: updatedUser, isLoading: false);
+      state = state.copyWith(user: updatedUser);
 
       // Cập nhật AuthState để đồng bộ
       ref.read(authControllerProvider.notifier).setAuthenticated(updatedUser);
 
-      return 'Đã thay đổi avatar thành công.';
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-      rethrow;
+      message = 'Đã thay đổi avatar thành công.';
+    } on DioException catch (e) {
+      final errMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(error: errMsg);
+      message = errMsg;
+    } on ValidationException catch (e) {
+      state = state.copyWith(error: e.message);
+      message = e.message;
+    } on Exception catch (e) {
+      final errMsg = e.toString();
+      state = state.copyWith(error: errMsg);
+      message = errMsg;
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
+
+    return message;
   }
 
   void setEditingUsername(final bool isEditing, {final String? text}) {
