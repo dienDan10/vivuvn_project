@@ -276,10 +276,10 @@ namespace vivuvn_api.Services.Implementations
                 throw new InvalidOperationException("Không thể tạo lịch trình từ dịch vụ AI.");
             }
 
-            if (aiResponse.Itinerary.ScheduleUnavailable)
-            {
-                throw new ArgumentException(aiResponse.Itinerary.UnavailableReason);
-            }
+            //if (aiResponse.Itinerary.ScheduleUnavailable)
+            //{
+            //    throw new ArgumentException(aiResponse.Itinerary.UnavailableReason);
+            //}
 
             // Save the generated itinerary to database
             var savedItinerary = await SaveTravelItineraryToDatabaseAsync(itineraryId, aiResponse.Itinerary, request.GroupSize);
