@@ -28,6 +28,8 @@ class SuggestedPlacesList extends ConsumerWidget {
           final firstPhoto = _firstPhoto(location);
 
           return SuggestedPlaceItem(
+            key: ValueKey(location.id),
+            locationId: location.id,
             title: location.name,
             imageUrl: firstPhoto,
             onTap: () async {

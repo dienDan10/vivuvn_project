@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../location-detail/ui/location_detail_screen.dart';
+import '../../../../../../core/routes/routes.dart';
 import '../../model/location.dart';
 
 class PlaceActionButtonInfo extends StatelessWidget {
@@ -12,12 +13,7 @@ class PlaceActionButtonInfo extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => LocationDetailScreen(locationId: location.id),
-          ),
-        );
+        context.push(createLocationDetailRoute(location.id));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
