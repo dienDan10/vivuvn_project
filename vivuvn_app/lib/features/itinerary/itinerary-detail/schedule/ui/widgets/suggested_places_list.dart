@@ -17,12 +17,12 @@ class SuggestedPlacesList extends ConsumerWidget {
     );
 
     return SizedBox(
-      height: 120,
+      height: 200,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: suggestions.length,
-        separatorBuilder: (_, final __) => const SizedBox(width: 12),
+        separatorBuilder: (_, final __) => const SizedBox(width: 16),
         itemBuilder: (final context, final index) {
           final location = suggestions[index];
           final firstPhoto = _firstPhoto(location);
@@ -31,8 +31,9 @@ class SuggestedPlacesList extends ConsumerWidget {
             title: location.name,
             imageUrl: firstPhoto,
             onTap: () async {
-              final controller =
-                  ref.read(itineraryScheduleControllerProvider.notifier);
+              final controller = ref.read(
+                itineraryScheduleControllerProvider.notifier,
+              );
 
               final result = await controller.addLocationToSelectedDay(
                 locationId: location.id,
@@ -40,9 +41,9 @@ class SuggestedPlacesList extends ConsumerWidget {
               );
 
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(result.message)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(result.message)));
             },
           );
         },
@@ -53,4 +54,3 @@ class SuggestedPlacesList extends ConsumerWidget {
   String? _firstPhoto(final Location location) =>
       location.photos.isNotEmpty ? location.photos.first : null;
 }
-
