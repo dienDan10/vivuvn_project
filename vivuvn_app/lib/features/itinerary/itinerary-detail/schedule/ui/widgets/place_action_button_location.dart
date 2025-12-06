@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../../../core/routes/routes.dart';
 
 class PlaceActionButtonLocation extends StatelessWidget {
   final String url;
@@ -25,7 +28,7 @@ class PlaceActionButtonLocation extends StatelessWidget {
     final iconSize = compact ? 16.0 : 20.0;
     final fontSize = compact ? 12.0 : 14.0;
     return GestureDetector(
-      onTap: () => _openMap(),
+      onTap: () => context.push(mapLocationRoute),
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: horizontalPadding,

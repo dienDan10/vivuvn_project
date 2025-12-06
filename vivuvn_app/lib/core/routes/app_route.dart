@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/controller/auth_controller.dart';
 import '../../common/auth/state/auth_state.dart';
+import '../../features/itinerary/itinerary-detail/location-map/ui/map_location_screen.dart';
 import '../../features/itinerary/itinerary-detail/schedule/model/location.dart';
 import '../../features/itinerary/location-detail/ui/location_detail_screen.dart';
 import '../../screens/bottom_navigation_screen.dart';
@@ -79,6 +80,11 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
           final itineraryId = state.pathParameters['id']!;
           return ItineraryDetailScreen(itineraryId: int.parse(itineraryId));
         },
+      ),
+
+      GoRoute(
+        path: mapLocationRoute,
+        builder: (final context, final state) => const MapLocationScreen(),
       ),
 
       GoRoute(
