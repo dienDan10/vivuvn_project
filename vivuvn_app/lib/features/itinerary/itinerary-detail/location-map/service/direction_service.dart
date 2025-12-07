@@ -19,6 +19,7 @@ class DirectionService implements IDirectionService {
   Future<Directions?> getDirections({
     required final LatLng origin,
     required final LatLng destination,
+    final List<LatLng>? intermediates,
   }) async {
     final PolylinePoints polylinePoints = PolylinePoints(apiKey: _apiKey);
 
@@ -26,9 +27,15 @@ class DirectionService implements IDirectionService {
     final RoutesApiRequest request = RoutesApiRequest(
       origin: PointLatLng(origin.latitude, origin.longitude),
       destination: PointLatLng(destination.latitude, destination.longitude),
-      //travelMode: TravelMode.driving,
       languageCode: 'vi',
       routingPreference: RoutingPreference.trafficAware,
+      intermediates: intermediates
+          ?.map(
+            (final location) => PolylineWayPoint(
+              location: '${location.latitude},${location.longitude}',
+            ),
+          )
+          .toList(),
     );
 
     // Get the route using Routes Api
@@ -43,24 +50,21 @@ class DirectionService implements IDirectionService {
   }
 
   @override
-  Future<List<Directions>> getMultipleDirections({
+  Future<Directions?> getRouteWithMultipleStops({
     required final List<LatLng> locations,
   }) async {
-    if (locations.length < 2) return [];
+    if (locations.length < 2) return null;
 
-    final List<Directions> directions = [];
+    final origin = locations.first;
+    final destination = locations.last;
+    final intermediates = locations.length > 2
+        ? locations.sublist(1, locations.length - 1)
+        : null;
 
-    for (int i = 0; i < locations.length - 1; i++) {
-      final direction = await getDirections(
-        origin: locations[i],
-        destination: locations[i + 1],
-      );
-
-      if (direction != null) {
-        directions.add(direction);
-      }
-    }
-
-    return directions;
+    return await getDirections(
+      origin: origin,
+      destination: destination,
+      intermediates: intermediates,
+    );
   }
 }

@@ -23,6 +23,10 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
     await setLocationMarkersForSelectedDay();
   }
 
+  Future<void> setCurrentItemIndex(final int index) async {
+    state = state.copyWith(currentItemIndex: index);
+  }
+
   void nextDay() {
     if (state.selectedDayIndex >= state.days.length - 1) return;
 
@@ -51,7 +55,7 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
     final markers = <Marker>{};
     final locationIcon = await ref
         .read(iconServiceProvider)
-        .createCustomMarkerBitmap('assets/icons/location-marker.png', size: 30);
+        .createCustomMarkerBitmap('assets/icons/location-marker.png', size: 40);
 
     for (final item in selectedDay.items) {
       final marker = Marker(
@@ -59,6 +63,10 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
         icon: locationIcon,
         position: LatLng(item.location.latitude!, item.location.longitude!),
         infoWindow: InfoWindow(title: item.location.name),
+        onTap: () {
+          final index = selectedDay.items.indexOf(item);
+          setCurrentItemIndex(index);
+        },
       );
       markers.add(marker);
     }
@@ -78,12 +86,14 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
         )
         .toList();
 
-    // Get directions through all locations
-    final directions = await ref
+    // Get single route through all locations
+    final direction = await ref
         .read(directionServiceProvider)
-        .getMultipleDirections(locations: locations);
+        .getRouteWithMultipleStops(locations: locations);
 
-    state = state.copyWith(directions: directions);
+    if (direction != null) {
+      state = state.copyWith(directions: [direction]);
+    }
   }
 
   Future<void> animateCameraToFitBounds(

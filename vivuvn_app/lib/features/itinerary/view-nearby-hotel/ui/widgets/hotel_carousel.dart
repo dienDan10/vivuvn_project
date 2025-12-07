@@ -19,7 +19,9 @@ class _HotelCarouselState extends ConsumerState<HotelCarousel> {
     final int index,
     final CarouselPageChangedReason reason,
   ) {
-    ref.read(hotelControllerProvider.notifier).setCurrentHotelIndex(index);
+    if (reason == CarouselPageChangedReason.manual) {
+      ref.read(hotelControllerProvider.notifier).setCurrentHotelIndex(index);
+    }
   }
 
   @override

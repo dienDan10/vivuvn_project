@@ -9,12 +9,14 @@ class MapLocationState {
   final List<ItineraryDay> days;
   final List<Marker> locationMarkers;
   final List<Directions> directions;
+  final int currentItemIndex;
 
   MapLocationState({
     required this.selectedDayIndex,
     required this.days,
     this.locationMarkers = const [],
     this.directions = const [],
+    this.currentItemIndex = 0,
   });
 
   MapLocationState copyWith({
@@ -22,12 +24,14 @@ class MapLocationState {
     final List<ItineraryDay>? days,
     final List<Marker>? locationMarkers,
     final List<Directions>? directions,
+    final int? currentItemIndex,
   }) {
     return MapLocationState(
       selectedDayIndex: selectedDayIndex ?? this.selectedDayIndex,
       days: days ?? this.days,
       locationMarkers: locationMarkers ?? this.locationMarkers,
       directions: directions ?? this.directions,
+      currentItemIndex: currentItemIndex ?? this.currentItemIndex,
     );
   }
 }

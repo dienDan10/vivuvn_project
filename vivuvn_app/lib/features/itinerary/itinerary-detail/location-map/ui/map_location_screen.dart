@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../schedule/controller/itinerary_schedule_controller.dart';
 import '../controller/map_location_controller.dart';
+import 'location_carousel.dart';
 import 'map_location.dart';
 
 class MapLocationScreen extends ConsumerStatefulWidget {
@@ -45,6 +46,17 @@ class _MapLocationScreenState extends ConsumerState<MapLocationScreen> {
       );
     }
 
-    return const Scaffold(body: SafeArea(child: MapLocation()));
+    return const Scaffold(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            MapLocation(),
+
+            // location carousel
+            LocationCarousel(),
+          ],
+        ),
+      ),
+    );
   }
 }

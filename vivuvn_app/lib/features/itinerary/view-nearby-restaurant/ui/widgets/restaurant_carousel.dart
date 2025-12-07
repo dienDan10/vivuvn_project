@@ -19,9 +19,11 @@ class _RestaurantCarouselState extends ConsumerState<RestaurantCarousel> {
     final int index,
     final CarouselPageChangedReason reason,
   ) {
-    ref
-        .read(restaurantControllerProvider.notifier)
-        .setCurrentRestaurantIndex(index);
+    if (reason == CarouselPageChangedReason.manual) {
+      ref
+          .read(restaurantControllerProvider.notifier)
+          .setCurrentRestaurantIndex(index);
+    }
   }
 
   @override

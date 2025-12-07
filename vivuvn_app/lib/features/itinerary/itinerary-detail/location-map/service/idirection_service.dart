@@ -6,9 +6,10 @@ abstract interface class IDirectionService {
   Future<Directions?> getDirections({
     required final LatLng origin,
     required final LatLng destination,
+    final List<LatLng>? intermediates,
   });
 
-  Future<List<Directions>> getMultipleDirections({
+  Future<Directions?> getRouteWithMultipleStops({
     required final List<LatLng> locations,
   });
 }
