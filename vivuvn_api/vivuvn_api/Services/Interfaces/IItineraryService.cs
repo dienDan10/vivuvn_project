@@ -18,6 +18,6 @@ namespace vivuvn_api.Services.Interfaces
         Task<bool> SetItineraryToPrivateAsync(int itineraryId);
         Task<bool> UpdateItineraryTransportationAsync(int itineraryId, TransportationMode transportation);
 
-        Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request);
+        Task<AutoGenerateItineraryResponseDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request);
     }
 }

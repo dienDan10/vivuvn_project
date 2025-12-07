@@ -10,7 +10,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient) : IItineraryService
+    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient, IGoogleMapRouteService _routeService) : IItineraryService
     {
         #region Itinerary Service Methods
 
@@ -238,16 +238,14 @@ namespace vivuvn_api.Services.Implementations
 
         #endregion
 
-        public async Task<ItineraryDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
+        public async Task<AutoGenerateItineraryResponseDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
         {
             // Retrieve and return the complete itinerary with all details
-            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId,
-                includeProperties: "StartProvince,DestinationProvince");
-
-            if (itinerary == null)
-            {
-                throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {itineraryId}.");
-            }
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(
+                    i => i.Id == itineraryId,
+                    includeProperties: "StartProvince,DestinationProvince,Days,Days.Items,Budget,Budget.Items,Budget.Items.ItineraryHotel,Budget.Items.ItineraryRestaurant",
+                    tracked: true)
+                ?? throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {itineraryId}.");
 
             var daysCount = (itinerary.EndDate - itinerary.StartDate).Days + 1;
             if (daysCount > 10 || daysCount < 1)
@@ -276,36 +274,25 @@ namespace vivuvn_api.Services.Implementations
                 throw new InvalidOperationException("Không thể tạo lịch trình từ dịch vụ AI.");
             }
 
-            //if (aiResponse.Itinerary.ScheduleUnavailable)
-            //{
-            //    throw new ArgumentException(aiResponse.Itinerary.UnavailableReason);
-            //}
-
             // Save the generated itinerary to database
-            var savedItinerary = await SaveTravelItineraryToDatabaseAsync(itineraryId, aiResponse.Itinerary, request.GroupSize);
+            var savedItinerary = await SaveTravelItineraryToDatabaseAsync(itinerary, aiResponse.Itinerary, request.GroupSize, request.Budget!.Value);
 
-            // Map the saved entity directly to DTO (avoiding redundant query)
-            var itineraryDto = _mapper.Map<ItineraryDto>(savedItinerary);
-
-            return itineraryDto;
+            return new AutoGenerateItineraryResponseDto
+            {
+                Status = aiResponse.Itinerary.ScheduleUnavailable
+                    ? Constants.ResponseStatus_Warning
+                    : Constants.ResponseStatus_Success,
+                ItineraryId = savedItinerary.Id,
+                Warning = aiResponse.Itinerary.UnavailableReason,
+                Message = "Lịch trình đã được tạo thành công."
+            };
         }
 
-        private async Task<Itinerary> SaveTravelItineraryToDatabaseAsync(int itineraryId, TravelItinerary travelItinerary, int groupSize)
+        private async Task<Itinerary> SaveTravelItineraryToDatabaseAsync(Itinerary itinerary, TravelItinerary travelItinerary, int groupSize, long estimatedBudget)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
-
-                // Get the existing itinerary with its days and budget
-                var itinerary = await _unitOfWork.Itineraries.GetOneAsync(
-                    i => i.Id == itineraryId,
-                    includeProperties: "Days,Days.Items,Budget,Budget.Items,Budget.Items.ItineraryHotel,Budget.Items.ItineraryRestaurant",
-                    tracked: true);
-
-                if (itinerary == null)
-                {
-                    throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {itineraryId}.");
-                }
 
                 // Update itinerary group size
                 itinerary.GroupSize = groupSize;
@@ -314,58 +301,22 @@ namespace vivuvn_api.Services.Implementations
                 itinerary.TransportationVehicle = travelItinerary.TransportationSuggestions
                     .FirstOrDefault()?.Mode ?? null;
 
-                // Use the budget from the navigation property
-                var budget = itinerary.Budget;
+                // Update estimated budget
+                itinerary.Budget!.EstimatedBudget = estimatedBudget;
 
-                // Clear existing itinerary items from all days
-                foreach (var day in itinerary.Days)
-                {
-                    if (day.Items != null && day.Items.Any())
-                    {
-                        foreach (var item in day.Items.ToList())
-                        {
-                            _unitOfWork.ItineraryItems.Remove(item);
-                        }
-                    }
-                }
+                // UPDATE ITINERARY DAYS AND ITEMS
+                await ProcessItineraryDaysAsync(travelItinerary.Days, itinerary.Days, travelItinerary);
 
-                if (budget?.Items != null)
-                {
-                    // Clear all items that do not have ItineraryRestaurant and ItineraryHotel from the collection
-                    budget.Items = budget.Items
-                        .Where(bi => bi.ItineraryHotel != null || bi.ItineraryRestaurant != null)
-                        .ToList();
-                    budget.TotalBudget = budget.Items.Sum(bi => bi.Cost);
-                }
+                // UPDATE BUDGET ITEMS
+                await ProcessItineraryBudgetAsync(itinerary, travelItinerary);
 
-                // Batch load all locations
-                var allPlaceIds = travelItinerary.Days
-                    .SelectMany(d => d.Activities)
-                    .Select(a => a.PlaceId)
-                    .Where(placeId => !string.IsNullOrEmpty(placeId))
-                    .Distinct()
-                    .ToList();
-
-                var locations = await _unitOfWork.Locations.GetAllAsync(
-                    l => !string.IsNullOrEmpty(l.GooglePlaceId) && allPlaceIds.Contains(l.GooglePlaceId) && !l.DeleteFlag);
-                var locationDict = locations
-                    .Where(l => !string.IsNullOrEmpty(l.GooglePlaceId))
-                    .ToDictionary(l => l.GooglePlaceId!, l => l);
-
-                // Get all budget types
-                var allBudgetTypes = await _unitOfWork.Budgets.GetAllBudgetTypesAsync();
-                var budgetTypeDict = allBudgetTypes.ToDictionary(bt => bt.Name, bt => bt.BudgetTypeId);
-
-                // Process each day from the AI-generated itinerary
-                await ProcessItineraryDaysAsync(itineraryId, travelItinerary.Days, budget, budgetTypeDict, itinerary.Days, locationDict);
-
-                // Process transportation suggestions (no SaveChanges)
-                await ProcessTransportationSuggestionsAsync(travelItinerary.TransportationSuggestions, budget, budgetTypeDict);
+                // UPDATE TRANSPORTATION SUGGESTIONS AND BUDGET ITEMS
+                await ProcessTransportationSuggestionsAsync(travelItinerary.TransportationSuggestions, itinerary.Budget);
 
                 // Update budget total if TotalCost is provided
-                if (travelItinerary.TotalCost > 0 && budget != null)
+                if (travelItinerary.TotalCost > 0)
                 {
-                    budget.TotalBudget += travelItinerary.TotalCost;
+                    itinerary.Budget.TotalBudget += travelItinerary.TotalCost;
                 }
 
                 // Single SaveChanges at the end for all changes
@@ -377,21 +328,42 @@ namespace vivuvn_api.Services.Implementations
             catch (Exception)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                throw;
+                throw new BadHttpRequestException("Đã có lỗi xảy ra khi tạo lịch trình");
             }
         }
 
-        /// <summary>
-        /// Processes all itinerary days and their activities
-        /// </summary>
         private async Task ProcessItineraryDaysAsync(
-            int itineraryId,
             List<AIDayItineraryDto> aiDays,
-            Budget? budget,
-            Dictionary<string, int> budgetTypeDict,
-            ICollection<ItineraryDay> existingDays,
-            Dictionary<string, Location> locationDict)
+            ICollection<ItineraryDay> existingDays
+            , TravelItinerary travelItinerary)
         {
+            // Clear existing itinerary items from all days
+            foreach (var day in existingDays)
+            {
+                if (day.Items != null && day.Items.Any())
+                {
+                    foreach (var item in day.Items.ToList())
+                    {
+                        _unitOfWork.ItineraryItems.Remove(item);
+                    }
+                }
+            }
+
+            // get all locations corresponding to PlaceIds in the itinerary
+            var allPlaceIds = travelItinerary.Days
+                    .SelectMany(d => d.Activities)
+                    .Select(a => a.PlaceId)
+                    .Where(placeId => !string.IsNullOrEmpty(placeId))
+                    .Distinct()
+                    .ToList();
+
+            var locations = await _unitOfWork.Locations.GetAllAsync(
+                l => !string.IsNullOrEmpty(l.GooglePlaceId) && allPlaceIds.Contains(l.GooglePlaceId) && !l.DeleteFlag);
+            var locationDict = locations
+                .Where(l => !string.IsNullOrEmpty(l.GooglePlaceId))
+                .ToDictionary(l => l.GooglePlaceId!, l => l);
+
+            // add activities to each day
             foreach (var aiDay in aiDays)
             {
                 // Find or create the itinerary day
@@ -399,6 +371,7 @@ namespace vivuvn_api.Services.Implementations
 
                 // Process activities for this day
                 int orderIndex = 1;
+                var items = new List<ItineraryItem>();
 
                 foreach (var activity in aiDay.Activities)
                 {
@@ -416,58 +389,118 @@ namespace vivuvn_api.Services.Implementations
                     itineraryItem.TransportationVehicle = Constants.TravelMode_Driving;
                     itineraryItem.TransportationDuration = 500;
                     itineraryItem.TransportationDistance = 278;
+                    itineraryItem.StartTime = activity.Time;
+                    itineraryItem.EndTime = activity.Time.AddHours(activity.DurationHours);
 
-                    await _unitOfWork.ItineraryItems.AddAsync(itineraryItem);
+                    items.Add(itineraryItem);
+                }
 
-                    // Create budget item if activity has cost
-                    if (activity.CostEstimate > 0 && budget != null)
+                for (int i = 1; i < items.Count; i++)
+                {
+                    try
                     {
-                        var activityBudgetTypeId = budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Activities);
+                        await UpdateTransportationDetailsAsync(items[i - 1], items[i]);
+                    }
+                    catch
+                    {
+                        // ignore errors
+                    }
+                }
 
-                        if (activityBudgetTypeId > 0)
+                // add items to the existing day
+                await _unitOfWork.ItineraryItems.AddRangeAsync(items);
+                await _unitOfWork.SaveChangesAsync();
+            }
+        }
+
+        private async Task UpdateTransportationDetailsAsync(ItineraryItem prevItem, ItineraryItem curItem, string? travelMode = Constants.TravelMode_Driving)
+        {
+            var prevItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == prevItem.LocationId);
+
+            var curItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == curItem.LocationId);
+
+            var request = new ComputeRouteRequestDto
+            {
+                Origin = new OriginDestination
+                {
+                    PlaceId = prevItemLocation?.GooglePlaceId
+                },
+                Destination = new OriginDestination
+                {
+                    PlaceId = curItemLocation?.GooglePlaceId
+                },
+                TravelMode = travelMode ?? Constants.TravelMode_Driving,
+            };
+
+            var response = await _routeService.GetRouteInformationAsync(request);
+
+            if (response is null || response.Routes is null || !response.Routes.Any()) throw new BadHttpRequestException("Không thể lấy thông tin tuyến đường.");
+
+            curItem.TransportationDistance = response.Routes?.FirstOrDefault()?.DistanceMeters ?? 500;
+            curItem.TransportationVehicle = travelMode ?? Constants.TravelMode_Driving;
+
+            _ = double.TryParse(response.Routes?.FirstOrDefault()?.Duration.Replace("s", ""), out double durationInSeconds);
+
+            curItem.TransportationDuration = durationInSeconds;
+        }
+
+        private async Task ProcessItineraryBudgetAsync(Itinerary itinerary, TravelItinerary travelItinerary)
+        {
+            var budget = itinerary.Budget;
+
+            if (budget?.Items != null)
+            {
+                // Clear all items that do not have ItineraryRestaurant and ItineraryHotel from the collection
+                budget.Items = budget.Items
+                    .Where(bi => bi.ItineraryHotel != null || bi.ItineraryRestaurant != null)
+                    .ToList();
+                budget.TotalBudget = budget.Items.Sum(bi => bi.Cost);
+            }
+
+            var activityBudgetType = await _unitOfWork.BudgetTypes
+                .GetOneAsync(bt => bt.Name == Constants.BudgetType_Activities);
+            foreach (var aiDay in travelItinerary.Days)
+            {
+                foreach (var activity in aiDay.Activities)
+                {
+                    if (activity.CostEstimate > 0)
+                    {
+                        var budgetItem = new BudgetItem
                         {
-                            var budgetItem = new BudgetItem
-                            {
-                                BudgetId = budget.BudgetId,
-                                Name = activity.Name,
-                                Cost = activity.CostEstimate,
-                                Date = aiDay.Date,
-                                BudgetTypeId = activityBudgetTypeId
-                            };
-                            budget.Items.Add(budgetItem);
-                        }
+                            BudgetId = budget.BudgetId,
+                            Name = activity.Name,
+                            Cost = activity.CostEstimate,
+                            Date = aiDay.Date,
+                            BudgetTypeId = activityBudgetType!.BudgetTypeId
+                        };
+                        budget.Items.Add(budgetItem);
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// Processes transportation suggestions and creates budget items
-        /// </summary>
         private async Task ProcessTransportationSuggestionsAsync(
             List<AITransportationSuggestionDto> transportations,
-            Budget? budget,
-            Dictionary<string, int> budgetTypeDict)
+            Budget budget)
         {
-            if (budget == null) return;
 
             foreach (var transportation in transportations)
             {
                 if (transportation.EstimatedCost > 0)
                 {
-                    var transportationBudgetTypeId = transportation.Mode switch
+                    var budgetType = transportation.Mode switch
                     {
                         var m when m.Equals(Constants.TransportationMode_Airplane, StringComparison.OrdinalIgnoreCase)
-                            => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Flights),
+                            => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Flights),
                         var m when m.Equals(Constants.TransportationMode_Bus, StringComparison.OrdinalIgnoreCase)
                             || m.Equals(Constants.TransportationMode_Train, StringComparison.OrdinalIgnoreCase)
-                            => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit),
+                            => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Transit),
                         var m when m.Equals(Constants.TransportationMode_PrivateCar, StringComparison.OrdinalIgnoreCase)
-                            => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Gas),
-                        _ => budgetTypeDict.GetValueOrDefault(Constants.BudgetType_Transit)
+                            => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Gas),
+                        _ => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Transit),
                     };
 
-                    if (transportationBudgetTypeId > 0)
+                    if (budgetType is not null)
                     {
                         var budgetItem = new BudgetItem
                         {
@@ -475,7 +508,7 @@ namespace vivuvn_api.Services.Implementations
                             Name = transportation.Mode,
                             Cost = transportation.EstimatedCost,
                             Date = transportation.Date,
-                            BudgetTypeId = transportationBudgetTypeId,
+                            BudgetTypeId = budgetType.BudgetTypeId,
                             Details = transportation.Details
                         };
                         budget.Items.Add(budgetItem);
