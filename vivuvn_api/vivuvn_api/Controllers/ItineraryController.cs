@@ -13,7 +13,7 @@ namespace vivuvn_api.Controllers
         // Get all itineraries of the user (include joined itineraries)
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAllItineraries()
+        public async Task<IActionResult> GetAllItinerariesOfUser()
         {
             // get user id from token
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

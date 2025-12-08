@@ -98,6 +98,37 @@ namespace vivuvn_api.Services.Implementations
                 $"{user?.Username ?? "Có thành viên mới"} đã tham gia vào lịch trình {itinerary.Name} của bạn.", fcmData);
         }
 
+        public async Task JoinPublicItineraryAsync(int userId, int itineraryId)
+        {
+            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && i.IsPublic)
+                ?? throw new ArgumentException("Không tìm thấy lịch trình công khai");
+
+            // check if user is already a member
+            var isMember = await _unitOfWork.ItineraryMembers.IsMemberAsync(itinerary.Id, userId);
+            if (isMember)
+            {
+                throw new BadHttpRequestException("Người dùng đã là thành viên của lịch trình này");
+            }
+
+            // count the number of member and check for full
+            var membersCount = await _unitOfWork.ItineraryMembers.CountAsync(itinerary.Id);
+            if (membersCount >= itinerary.GroupSize)
+            {
+                throw new BadHttpRequestException("Lịch trình này đã đủ thành viên. Không thể tham gia.");
+            }
+
+            // add new member
+            var newMember = new ItineraryMember
+            {
+                UserId = userId,
+                ItineraryId = itinerary.Id,
+                JoinedAt = DateTime.UtcNow,
+                DeleteFlag = false
+            };
+            await _unitOfWork.ItineraryMembers.AddAsync(newMember);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<ItineraryMemberDto>> GetMembersAsync(int itineraryId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId)
