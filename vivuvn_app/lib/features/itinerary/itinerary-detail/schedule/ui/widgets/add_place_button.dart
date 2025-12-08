@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import 'add_place_bottom_sheet.dart';
 
@@ -46,6 +47,16 @@ class AddPlaceButton extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    if (!isOwner) {
+      return const SizedBox.shrink();
+    }
+
     return GestureDetector(
       onTap: onPressed ?? () => _openAddPlaceBottomSheet(context, ref),
       child: Container(

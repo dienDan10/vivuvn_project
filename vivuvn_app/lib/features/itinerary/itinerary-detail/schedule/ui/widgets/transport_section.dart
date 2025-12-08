@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../common/helper/time_util.dart';
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../model/itinerary_item.dart';
 import 'select_transport_modal.dart';
 
-class TransportSection extends StatelessWidget {
+class TransportSection extends ConsumerWidget {
   final ItineraryItem item;
 
   const TransportSection({super.key, required this.item});
@@ -22,8 +24,13 @@ class TransportSection extends StatelessWidget {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
 
     // Chọn icon theo vehicle
     final vehicleData = _getVehicleData(
@@ -46,7 +53,7 @@ class TransportSection extends StatelessWidget {
     return Row(
       children: [
         InkWell(
-          onTap: () => _showTransportOptions(context),
+          onTap: isOwner ? () => _showTransportOptions(context) : null,
           child: Row(
             children: [
               Icon(vehicleIcon, color: iconColor, size: 20),

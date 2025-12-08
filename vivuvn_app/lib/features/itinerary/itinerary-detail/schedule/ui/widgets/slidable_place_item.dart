@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import '../../model/itinerary_item.dart';
 import 'schedule_place_card.dart';
@@ -30,6 +31,12 @@ class _SlidablePlaceItemState extends ConsumerState<SlidablePlaceItem> {
 
   @override
   Widget build(final BuildContext context) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
+
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(
@@ -40,19 +47,22 @@ class _SlidablePlaceItemState extends ConsumerState<SlidablePlaceItem> {
               child: TransportSection(item: widget.item),
             ),
           Slidable(
-            endActionPane: ActionPane(
-              motion: const DrawerMotion(),
-              extentRatio: 0.18,
-              children: [
-                SlidableAction(
-                  onPressed: (final _) => _deleteItineraryItem(),
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  icon: Icons.delete,
-                  label: 'Xóa',
-                ),
-              ],
-            ),
+            enabled: isOwner,
+            endActionPane: isOwner
+                ? ActionPane(
+                    motion: const DrawerMotion(),
+                    extentRatio: 0.18,
+                    children: [
+                      SlidableAction(
+                        onPressed: (final _) => _deleteItineraryItem(),
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Xóa',
+                      ),
+                    ],
+                  )
+                : null,
             child: SchedulePlaceCard(item: widget.item),
           ),
         ],
