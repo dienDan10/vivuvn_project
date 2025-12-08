@@ -5,6 +5,7 @@ import '../../schedule/controller/itinerary_schedule_controller.dart';
 import '../controller/map_location_controller.dart';
 import 'location_carousel.dart';
 import 'map_location.dart';
+import 'map_location_header.dart';
 
 class MapLocationScreen extends ConsumerStatefulWidget {
   const MapLocationScreen({super.key});
@@ -47,15 +48,16 @@ class _MapLocationScreenState extends ConsumerState<MapLocationScreen> {
     }
 
     return const Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            MapLocation(),
+      body: Stack(
+        children: [
+          MapLocation(),
 
-            // location carousel
-            LocationCarousel(),
-          ],
-        ),
+          // header with day navigation
+          MapLocationHeader(),
+
+          // location carousel
+          LocationCarousel(),
+        ],
       ),
     );
   }

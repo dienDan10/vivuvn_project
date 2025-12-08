@@ -24,30 +24,38 @@ class _MapLocationState extends ConsumerState<MapLocation> {
     super.initState();
     // load route
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(mapLocationControllerProvider.notifier).loadRoutes();
-
-      // Fit bounds after routes are loaded
-      final controller = await _controller.future;
-      await ref
-          .read(mapLocationControllerProvider.notifier)
-          .animateCameraToFitBounds(controller);
-
-      // show info window for the first location
-      final day = ref.read(
-        mapLocationControllerProvider.select(
-          (final state) =>
-              state.days.isNotEmpty ? state.days[state.selectedDayIndex] : null,
-        ),
-      );
-
-      final firstLocation = day?.items.isNotEmpty == true
-          ? day!.items.first.location
-          : null;
-
-      if (firstLocation != null) {
-        controller.showMarkerInfoWindow(MarkerId(firstLocation.id.toString()));
-      }
+      await _initializeMap();
     });
+  }
+
+  Future<void> _initializeMap() async {
+    await ref.read(mapLocationControllerProvider.notifier).loadRoutes();
+
+    final controller = await _controller.future;
+
+    final day = ref.read(
+      mapLocationControllerProvider.select(
+        (final state) =>
+            state.days.isNotEmpty ? state.days[state.selectedDayIndex] : null,
+      ),
+    );
+
+    // If no items, don't do anything
+    if (day == null || day.items.isEmpty) {
+      return;
+    }
+
+    // Fit bounds after routes are loaded
+    await ref
+        .read(mapLocationControllerProvider.notifier)
+        .animateCameraToFitBounds(controller);
+
+    final firstLocation = day.items.first.location;
+    // show info window for the first location
+
+    // Wait a bit for markers to be fully rendered on the map
+    await Future.delayed(const Duration(milliseconds: 100));
+    controller.showMarkerInfoWindow(MarkerId('location-${firstLocation.id}'));
   }
 
   Future<void> _moveCameraToLocation(
@@ -67,7 +75,7 @@ class _MapLocationState extends ConsumerState<MapLocation> {
     );
 
     // Show info window
-    controller.showMarkerInfoWindow(MarkerId(location.id.toString()));
+    controller.showMarkerInfoWindow(MarkerId('location-${location.id}'));
   }
 
   @override
@@ -93,6 +101,17 @@ class _MapLocationState extends ConsumerState<MapLocation> {
       );
       polylines.add(polyline);
     }
+
+    ref.listen(
+      mapLocationControllerProvider.select(
+        (final state) => state.selectedDayIndex,
+      ),
+      (final prev, final next) {
+        if (prev != next) {
+          _initializeMap();
+        }
+      },
+    );
 
     ref.listen(
       mapLocationControllerProvider.select(

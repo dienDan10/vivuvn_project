@@ -19,7 +19,11 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
   Future<void> setSelectedIndex(final int index) async {
     if (index < 0 || index >= state.days.length) return;
 
-    state = state.copyWith(selectedDayIndex: index);
+    state = state.copyWith(
+      selectedDayIndex: index,
+      currentItemIndex: 0,
+      directions: [],
+    );
     await setLocationMarkersForSelectedDay();
   }
 
@@ -27,16 +31,8 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
     state = state.copyWith(currentItemIndex: index);
   }
 
-  void nextDay() {
-    if (state.selectedDayIndex >= state.days.length - 1) return;
-
-    state = state.copyWith(selectedDayIndex: state.selectedDayIndex + 1);
-  }
-
-  void previousDay() {
-    if (state.selectedDayIndex <= 0) return;
-
-    state = state.copyWith(selectedDayIndex: state.selectedDayIndex - 1);
+  List<DateTime> getDayDates() {
+    return state.days.map((final day) => day.date ?? DateTime.now()).toList();
   }
 
   CameraPosition getInitialCameraPosition() {
@@ -59,7 +55,7 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
 
     for (final item in selectedDay.items) {
       final marker = Marker(
-        markerId: MarkerId(item.location.id.toString()),
+        markerId: MarkerId('location-${item.location.id}'),
         icon: locationIcon,
         position: LatLng(item.location.latitude!, item.location.longitude!),
         infoWindow: InfoWindow(title: item.location.name),
@@ -76,7 +72,9 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
 
   Future<void> loadRoutes() async {
     final selectedDay = state.days[state.selectedDayIndex];
-    if (selectedDay.items.length < 2) return;
+    if (selectedDay.items.length < 2) {
+      return;
+    }
 
     // Extract locations from items
     final locations = selectedDay.items
@@ -99,7 +97,23 @@ class MapLocationController extends AutoDisposeNotifier<MapLocationState> {
   Future<void> animateCameraToFitBounds(
     final GoogleMapController controller,
   ) async {
-    if (state.directions.isEmpty) return;
+    final selectedDay = state.days[state.selectedDayIndex];
+    // Handle single location or no directions
+    if (state.directions.isEmpty) {
+      if (selectedDay.items.isNotEmpty) {
+        // Zoom to the single location
+        final location = selectedDay.items.first.location;
+        await controller.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(location.latitude!, location.longitude!),
+              zoom: 15,
+            ),
+          ),
+        );
+      }
+      return;
+    }
 
     // Collect all bounds from all directions
     double south = double.infinity;
