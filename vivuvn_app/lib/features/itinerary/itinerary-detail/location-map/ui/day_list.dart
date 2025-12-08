@@ -28,7 +28,7 @@ class DayList extends ConsumerWidget {
             );
 
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6.0),
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
               child: GestureDetector(
                 onTap: () {
                   ref

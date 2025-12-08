@@ -18,7 +18,6 @@ Future<void> _firebaseMessagingBackgroundHandler(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // Initialize localization
   await initializeDateFormatting('vi_VN', null);
   // Load environment variables
