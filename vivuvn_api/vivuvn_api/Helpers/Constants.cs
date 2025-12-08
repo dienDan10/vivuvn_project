@@ -79,5 +79,13 @@
         // Notification Types 
         public const string NotificationType_OwnerAnnouncement = "OwnerAnnouncement";
 
+        // Response Status
+        public const string ResponseStatus_Success = "Success";
+        public const string ResponseStatus_Warning = "Warning";
+        public const string ResponseStatus_Error = "Error";
+
+        // Default Top Locations Limit
+        public const int DefaultTopLocationsLimit = 5;
+
     }
 }

@@ -38,6 +38,13 @@ namespace vivuvn_api.Controllers
             return Ok(locations);
         }
 
+        [HttpGet("top-travel-locations")]
+        public async Task<IActionResult> GetTopTravelLocations([FromQuery] int? limit)
+        {
+            var locations = await _locationService.GetTopTravelLocationsAsync(limit ?? Constants.DefaultTopLocationsLimit);
+            return Ok(locations);
+        }
+
         [HttpGet("{id}/restaurants")]
         public async Task<IActionResult> GetRestaurantsByLocationId(int id)
         {
