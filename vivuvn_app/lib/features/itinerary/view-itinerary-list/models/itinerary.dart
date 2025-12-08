@@ -103,9 +103,49 @@ class Itinerary {
   }
 
   factory Itinerary.fromMap(final Map<String, dynamic> map) {
+    // Ưu tiên lấy ownerId từ top level nếu có
+    final ownerIdFromTop = map['ownerId']?.toString();
+    
+    // Parse owner object
+    User owner;
+    if (map['owner'] != null && map['owner'] is Map) {
+      final ownerMap = map['owner'] as Map<String, dynamic>;
+      // Nếu có ownerId từ top level, ưu tiên dùng nó
+      if (ownerIdFromTop != null) {
+        owner = User(
+          id: ownerIdFromTop,
+          username: ownerMap['username']?.toString() ?? '',
+          email: ownerMap['email']?.toString() ?? '',
+          phoneNumber: ownerMap['phoneNumber']?.toString(),
+          userPhoto: ownerMap['userPhoto']?.toString(),
+          googleIdToken: ownerMap['googleIdToken']?.toString(),
+          isLocked: ownerMap['isLocked'] as bool? ?? false,
+          roles: ownerMap['roles'] != null
+              ? List<String>.from(ownerMap['roles'].map((final e) => e.toString()))
+              : null,
+        );
+      } else {
+        owner = User.fromMap(ownerMap);
+      }
+    } else {
+      // Fallback nếu không có owner object
+      owner = User(
+        id: ownerIdFromTop ?? '',
+        username: map['ownerUsername']?.toString() ?? '',
+        email: map['ownerEmail']?.toString() ?? '',
+        phoneNumber: map['ownerPhoneNumber']?.toString(),
+        userPhoto: map['ownerUserPhoto']?.toString(),
+        googleIdToken: map['ownerGoogleIdToken']?.toString(),
+        isLocked: map['ownerIsLocked'] as bool? ?? false,
+        roles: map['ownerRoles'] != null
+            ? List<String>.from(map['ownerRoles'].map((final e) => e.toString()))
+            : null,
+      );
+    }
+    
     return Itinerary(
       id: map['id'] as int,
-      owner: User.fromMap(map['owner'] as Map<String, dynamic>),
+      owner: owner,
       isOwner: map['isOwner'] as bool? ?? false,
       name: map['name'].toString(),
       startProvinceId: map['startProvinceId'] as int,

@@ -1,16 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../common/auth/controller/auth_controller.dart';
 import '../../../../../core/routes/routes.dart';
+import '../../../itinerary/itinerary-detail/detail/service/itinerary_detail_service.dart';
 import '../../data/dto/itinerary_dto.dart';
 
-class ItineraryCard extends StatelessWidget {
+class ItineraryCard extends ConsumerWidget {
   final ItineraryDto itinerary;
 
   const ItineraryCard({required this.itinerary, super.key});
 
+  Future<void> _handleTap(final BuildContext context, final WidgetRef ref) async {
+    final authState = ref.read(authControllerProvider);
+    final currentUserId = authState.user?.id;
+    
+    final itineraryId = int.tryParse(itinerary.id);
+    
+    if (itineraryId == null) {
+      debugPrint('ItineraryCard tap - Cannot parse id, using public route');
+      context.push(createPublicItineraryViewRoute(itinerary.id));
+      return;
+    }
+    
+    // Gọi API getItineraryById để lấy ownerId
+    try {
+      final itineraryDetailService = ref.read(itineraryDetailServiceProvider);
+      final itineraryDetail = await itineraryDetailService.getItineraryDetail(itineraryId);
+      
+      // Lấy ownerId từ response (owner.id đã được parse thành string trong User model)
+      final ownerId = itineraryDetail.owner.id.trim();
+      
+      // So sánh ownerId với currentUserId để kiểm tra xem user có phải owner không
+      // Đảm bảo cả hai đều là string và so sánh đúng
+      final isOwner = currentUserId != null && 
+                      ownerId.isNotEmpty && 
+                      currentUserId.trim() == ownerId;
+      
+      // Kiểm tra xem user có phải member không (từ API response)
+      final isMember = itineraryDetail.isOwner == false && 
+                       // Có thể cần kiểm tra thêm từ members list nếu có
+                       false; // Tạm thời để false, có thể cần gọi API members để kiểm tra
+      
+      // Debug: In ra để kiểm tra (có thể xóa sau)
+      debugPrint('ItineraryCard tap - itineraryId: $itineraryId');
+      debugPrint('ItineraryCard tap - currentUserId: $currentUserId');
+      debugPrint('ItineraryCard tap - ownerId from API: $ownerId');
+      debugPrint('ItineraryCard tap - isOwner: $isOwner');
+      debugPrint('ItineraryCard tap - isMember: $isMember');
+      
+      // Nếu là owner hoặc member, chuyển đến itinerary detail
+      if (isOwner || isMember) {
+        debugPrint('ItineraryCard tap - Navigating to detail: $itineraryId');
+        if (context.mounted) {
+          context.push(createItineraryDetailRoute(itineraryId));
+        }
+      } else {
+        // Chuyển đến public view nếu không phải owner hoặc member
+        debugPrint('ItineraryCard tap - Not owner/member, using public route');
+        if (context.mounted) {
+          context.push(createPublicItineraryViewRoute(itinerary.id));
+        }
+      }
+    } catch (e) {
+      debugPrint('ItineraryCard tap - Error getting itinerary detail: $e');
+      // Fallback: chuyển đến public view nếu có lỗi
+      if (context.mounted) {
+        context.push(createPublicItineraryViewRoute(itinerary.id));
+      }
+    }
+  }
+
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -20,9 +83,7 @@ class ItineraryCard extends StatelessWidget {
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: InkWell(
-          onTap: () {
-            context.push(createPublicItineraryViewRoute(itinerary.id));
-          },
+          onTap: () => _handleTap(context, ref),
           borderRadius: BorderRadius.circular(12),
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

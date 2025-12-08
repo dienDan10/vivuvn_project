@@ -9,6 +9,8 @@ class ItineraryDto {
   final int durationDays;
   final bool isPublic;
   final OwnerDto owner;
+  final bool isOwner;
+  final bool isMember;
 
   const ItineraryDto({
     required this.id,
@@ -21,6 +23,8 @@ class ItineraryDto {
     required this.durationDays,
     required this.isPublic,
     required this.owner,
+    this.isOwner = false,
+    this.isMember = false,
   });
 
   factory ItineraryDto.fromJson(final Map<String, dynamic> json) {
@@ -58,20 +62,71 @@ class ItineraryDto {
                         json['destinationName']?.toString() ?? 
                         json['startProvinceName']?.toString() ?? '';
     
-    // Handle owner - may be nested or flat, or may not exist
+    // Handle owner - ưu tiên lấy ownerId từ top level, sau đó mới lấy từ nested owner object
     OwnerDto? owner;
+    
+    // Ưu tiên: lấy ownerId từ top level nếu có
+    final ownerIdFromTop = json['ownerId']?.toString();
+    
+    // Debug: In ra để kiểm tra (có thể xóa sau)
+    // ignore: avoid_print
+    print('ItineraryDto.fromJson - ownerIdFromTop: $ownerIdFromTop');
+    // ignore: avoid_print
+    print('ItineraryDto.fromJson - owner object: ${json['owner']}');
+    
     if (json['owner'] != null && json['owner'] is Map) {
-      owner = OwnerDto.fromJson(json['owner'] as Map<String, dynamic>);
-    } else if (json['ownerId'] != null || json['ownerName'] != null) {
+      final ownerMap = json['owner'] as Map<String, dynamic>;
+      // Nếu có ownerId từ top level, ưu tiên dùng nó
+      // Xử lý cả trường hợp id là int hoặc string
+      String? ownerIdFromMap;
+      if (ownerMap['id'] != null) {
+        ownerIdFromMap = ownerMap['id'].toString();
+      } else if (ownerMap['userId'] != null) {
+        ownerIdFromMap = ownerMap['userId'].toString();
+      }
+      
+      final finalOwnerId = ownerIdFromTop ?? ownerIdFromMap ?? '';
+      
+      // Debug
+      // ignore: avoid_print
+      print('ItineraryDto.fromJson - ownerIdFromTop: $ownerIdFromTop');
+      // ignore: avoid_print
+      print('ItineraryDto.fromJson - ownerMap[id]: ${ownerMap['id']}');
+      // ignore: avoid_print
+      print('ItineraryDto.fromJson - ownerMap[userId]: ${ownerMap['userId']}');
+      // ignore: avoid_print
+      print('ItineraryDto.fromJson - finalOwnerId: $finalOwnerId');
+      
       owner = OwnerDto(
-        id: json['ownerId']?.toString() ?? '',
-        name: json['ownerName']?.toString() ?? json['ownerUsername']?.toString() ?? '',
-        avatarUrl: json['ownerAvatarUrl']?.toString(),
+        id: finalOwnerId,
+        name: ownerMap['name']?.toString() ?? 
+              ownerMap['username']?.toString() ?? 
+              ownerMap['fullName']?.toString() ?? 
+              json['ownerName']?.toString() ?? 
+              json['ownerUsername']?.toString() ?? '',
+        avatarUrl: ownerMap['avatarUrl']?.toString() ?? 
+                   ownerMap['avatar']?.toString() ?? 
+                   ownerMap['userPhoto']?.toString() ??
+                   json['ownerAvatarUrl']?.toString(),
+      );
+    } else if (ownerIdFromTop != null || json['ownerName'] != null || json['ownerUsername'] != null) {
+      owner = OwnerDto(
+        id: ownerIdFromTop ?? '',
+        name: json['ownerName']?.toString() ?? 
+              json['ownerUsername']?.toString() ?? 
+              json['ownerFullName']?.toString() ?? '',
+        avatarUrl: json['ownerAvatarUrl']?.toString() ?? 
+                   json['ownerAvatar']?.toString() ??
+                   json['ownerUserPhoto']?.toString(),
       );
     } else {
       // Default owner if not provided
       owner = const OwnerDto(id: '', name: 'Unknown');
     }
+    
+    // Debug: In ra owner cuối cùng
+    // ignore: avoid_print
+    print('ItineraryDto.fromJson - final owner.id: ${owner.id}');
     
     return ItineraryDto(
       id: id,
@@ -88,6 +143,8 @@ class ItineraryDto {
       durationDays: durationDays,
       isPublic: json['isPublic'] as bool? ?? json['public'] as bool? ?? true, // Default to true for public itineraries
       owner: owner,
+      isOwner: json['isOwner'] as bool? ?? false,
+      isMember: json['isMember'] as bool? ?? false,
     );
   }
 
@@ -103,6 +160,8 @@ class ItineraryDto {
       'durationDays': durationDays,
       'isPublic': isPublic,
       'owner': owner.toJson(),
+      'isOwner': isOwner,
+      'isMember': isMember,
     };
   }
 

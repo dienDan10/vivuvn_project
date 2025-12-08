@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 import '../../itinerary/itinerary-detail/overview/data/dto/hotel_item_response.dart';
 // ignore: unused_import
 import '../../itinerary/itinerary-detail/overview/data/dto/restaurant_item_response.dart';
+import '../../itinerary/itinerary-detail/overview/ui/widgets/favourite_place/place_card_image.dart';
+import '../../itinerary/itinerary-detail/overview/ui/widgets/shared/location_action_buttons.dart';
+import '../../itinerary/itinerary-detail/schedule/model/transportation_mode.dart';
 import '../../itinerary/itinerary-detail/schedule/ui/widgets/schedule_place_card.dart';
 import '../controller/public_itinerary_controller.dart';
 
@@ -25,6 +28,8 @@ class PublicItineraryViewScreen extends ConsumerStatefulWidget {
 class _PublicItineraryViewScreenState
     extends ConsumerState<PublicItineraryViewScreen> {
   final Set<int> _expandedDays = {};
+  bool _restaurantsExpanded = true;
+  bool _hotelsExpanded = true;
 
   @override
   void initState() {
@@ -45,6 +50,7 @@ class _PublicItineraryViewScreenState
       }
     });
   }
+
 
   @override
   Widget build(final BuildContext context) {
@@ -337,14 +343,17 @@ class _PublicItineraryViewScreenState
                                       ],
                                     ),
                                     const Spacer(),
+                                    const SizedBox(height: 8),
                                     // Transportation
                                     Row(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Padding(
-                                          padding: EdgeInsets.only(top: 2),
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 2),
                                           child: Icon(
-                                            Icons.directions_car,
+                                            itinerary.transportationVehicle.isNotEmpty
+                                                ? TransportationMode.getIcon(itinerary.transportationVehicle)
+                                                : Icons.directions,
                                             size: 18,
                                             color: Colors.white,
                                           ),
@@ -425,10 +434,10 @@ class _PublicItineraryViewScreenState
 
                     // Vertical expandable day list
                     ...state.days.map((final day) {
-                      final date = day.date;
+                            final date = day.date;
                       final dayLabel = date != null
                           ? DateFormat('EEE, dd/MM/yyyy', 'vi').format(date)
-                          : 'Ngày ${day.dayNumber}';
+                                : 'Ngày ${day.dayNumber}';
                       final isExpanded = _expandedDays.contains(day.id);
 
                       return Card(
@@ -481,85 +490,121 @@ class _PublicItineraryViewScreenState
                               ),
                             const SizedBox(height: 8),
                           ],
-                        ),
-                      );
-                    }),
+                              ),
+                            );
+                          }),
                   ],
 
                   // Nhà hàng
                   if (state.restaurants.isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                      child: Text(
-                        'Nhà hàng',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    ...state.restaurants.map((final restaurant) {
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          leading: restaurant.imageUrl != null && restaurant.imageUrl!.isNotEmpty
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    restaurant.imageUrl!,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (final context, final error, final stackTrace) => const Icon(Icons.restaurant, size: 40),
-                                  ),
-                                )
-                              : const Icon(Icons.restaurant, size: 40),
-                          title: Text(
-                            restaurant.name,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Nhà hàng',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          subtitle: Column(
+                          IconButton(
+                            icon: Icon(
+                              _restaurantsExpanded ? Icons.expand_less : Icons.expand_more,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _restaurantsExpanded = !_restaurantsExpanded;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_restaurantsExpanded)
+                      ...state.restaurants.map((final restaurant) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (restaurant.address.isNotEmpty)
-                                Text(
-                                  restaurant.address,
-                                  style: theme.textTheme.bodySmall,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              if (restaurant.mealDate != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.calendar_today, size: 14),
-                                      const SizedBox(width: 4),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      restaurant.name,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    if (restaurant.address.isNotEmpty)
                                       Text(
-                                        DateFormat('dd/MM/yyyy HH:mm', 'vi').format(restaurant.mealDate!),
-                                        style: theme.textTheme.bodySmall,
+                                        restaurant.address,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: Colors.grey[600],
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    if (restaurant.mealDate != null) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'Thời gian: ${DateFormat('dd/MM/yyyy HH:mm', 'vi').format(restaurant.mealDate!)}',
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: Colors.grey[600],
+                                        ),
                                       ),
                                     ],
-                                  ),
-                                ),
-                              if (restaurant.cost != null && restaurant.cost! > 0)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.attach_money, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${NumberFormat('#,###').format(restaurant.cost)} VNĐ',
-                                        style: theme.textTheme.bodySmall,
+                                    if (restaurant.cost != null && restaurant.cost! > 0) ...[
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.attach_money, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${NumberFormat('#,###').format(restaurant.cost)} VNĐ',
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
-                                  ),
+                                    if (restaurant.note != null && restaurant.note!.isNotEmpty) ...[
+                                      const SizedBox(height: 6),
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          restaurant.note!,
+                                          style: theme.textTheme.bodySmall,
+                                        ),
+                                      ),
+                                    ],
+                                    const SizedBox(height: 8),
+                                    LocationActionButtons(
+                                      placeUri: restaurant.placeUri,
+                                      directionsUri: restaurant.directionsUri,
+                                      fallbackQuery: '${restaurant.name}, ${restaurant.address}',
+                                    ),
+                                  ],
                                 ),
+                              ),
+                              const SizedBox(width: 12),
+                              PlaceCardImage(
+                                imageUrl: restaurant.imageUrl,
+                                size: 120,
+                              ),
                             ],
                           ),
-                          isThreeLine: true,
                         ),
                       );
                     }),
@@ -569,76 +614,112 @@ class _PublicItineraryViewScreenState
                   if (state.hotels.isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                      child: Text(
-                        'Khách sạn',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    ...state.hotels.map((final hotel) {
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          leading: hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    hotel.imageUrl!,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (final context, final error, final stackTrace) => const Icon(Icons.hotel, size: 40),
-                                  ),
-                                )
-                              : const Icon(Icons.hotel, size: 40),
-                          title: Text(
-                            hotel.name,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Khách sạn',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          subtitle: Column(
+                          IconButton(
+                            icon: Icon(
+                              _hotelsExpanded ? Icons.expand_less : Icons.expand_more,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _hotelsExpanded = !_hotelsExpanded;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_hotelsExpanded)
+                      ...state.hotels.map((final hotel) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (hotel.address.isNotEmpty)
-                                Text(
-                                  hotel.address,
-                                  style: theme.textTheme.bodySmall,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              if (hotel.checkInDate != null && hotel.checkOutDate != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.calendar_today, size: 14),
-                                      const SizedBox(width: 4),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      hotel.name,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    if (hotel.address.isNotEmpty)
                                       Text(
-                                        '${DateFormat('dd/MM/yyyy', 'vi').format(hotel.checkInDate!)} - ${DateFormat('dd/MM/yyyy', 'vi').format(hotel.checkOutDate!)}',
-                                        style: theme.textTheme.bodySmall,
+                                        hotel.address,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: Colors.grey[600],
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Nhận phòng: ${hotel.checkInDate != null ? DateFormat('dd/MM/yyyy', 'vi').format(hotel.checkInDate!) : '--/--'} - Trả phòng: ${hotel.checkOutDate != null ? DateFormat('dd/MM/yyyy', 'vi').format(hotel.checkOutDate!) : '--/--'}',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: Colors.grey[600],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (hotel.cost != null && hotel.cost! > 0) ...[
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.attach_money, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${NumberFormat('#,###').format(hotel.cost)} VNĐ',
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
-                                  ),
-                                ),
-                              if (hotel.cost != null && hotel.cost! > 0)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.attach_money, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${NumberFormat('#,###').format(hotel.cost)} VNĐ',
-                                        style: theme.textTheme.bodySmall,
+                                    if (hotel.note != null && hotel.note!.isNotEmpty) ...[
+                                      const SizedBox(height: 6),
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          hotel.note!,
+                                          style: theme.textTheme.bodySmall,
+                                        ),
                                       ),
                                     ],
-                                  ),
+                                    const SizedBox(height: 8),
+                                    LocationActionButtons(
+                                      placeUri: hotel.placeUri,
+                                      directionsUri: hotel.directionsUri,
+                                      fallbackQuery: '${hotel.name}, ${hotel.address}',
+                                    ),
+                                  ],
                                 ),
+                              ),
+                              const SizedBox(width: 12),
+                              PlaceCardImage(
+                                imageUrl: hotel.imageUrl,
+                                size: 120,
+                              ),
                             ],
                           ),
-                          isThreeLine: true,
                         ),
                       );
                     }),
