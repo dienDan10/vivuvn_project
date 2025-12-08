@@ -29,6 +29,14 @@ namespace vivuvn_api.Controllers
             return Ok(itineraries);
         }
 
+        [HttpGet("public")]
+        [Authorize]
+        public async Task<IActionResult> GetAllPublicItineraries([FromQuery] GetAllPublicItinerariesRequestDto request)
+        {
+            var response = await _itineraryService.GetAllPublicItinerariesAsync(request);
+            return Ok(response);
+        }
+
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> GetItineraryById(int id)
