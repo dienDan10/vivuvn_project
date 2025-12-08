@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../schedule/model/location.dart';
+import 'location_detail_modal.dart';
 
 class LocationCarouselItem extends StatelessWidget {
   final Location location;
@@ -10,6 +12,27 @@ class LocationCarouselItem extends StatelessWidget {
     required this.location,
     required this.index,
   });
+
+  Future<void> _openDirections(final String uri) async {
+    if (uri.isEmpty) return;
+
+    final Uri url = Uri.parse(uri);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _showDetailsModel(final BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (final context) => LocationDetailModal(location: location),
+    );
+  }
 
   @override
   Widget build(final BuildContext context) {
@@ -189,9 +212,7 @@ class LocationCarouselItem extends StatelessWidget {
                 // Directions Button
                 if (location.directionsUri != null)
                   OutlinedButton.icon(
-                    onPressed: () {
-                      // Open directions in maps
-                    },
+                    onPressed: () => _openDirections(location.directionsUri!),
                     icon: Icon(
                       Icons.directions,
                       size: 18,
@@ -219,9 +240,7 @@ class LocationCarouselItem extends StatelessWidget {
 
                 // Details Button
                 FilledButton.icon(
-                  onPressed: () {
-                    // Show location details
-                  },
+                  onPressed: () => _showDetailsModel(context),
                   icon: const Icon(Icons.info_outline, size: 18),
                   label: const Text('Chi tiết', style: TextStyle(fontSize: 13)),
                   style: FilledButton.styleFrom(
