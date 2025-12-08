@@ -26,6 +26,12 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl))
                 .ForMember(dest => dest.FavoritePlaces, opt => opt.MapFrom(src => src.FavoritePlaces.Select(fp => fp.Location).ToList()));
 
+            // Mapping For Search Itinerary
+            CreateMap<Itinerary, SearchItineraryDto>()
+                .ForMember(dest => dest.StartProvinceName, opt => opt.MapFrom(src => src.StartProvince.Name))
+                .ForMember(dest => dest.DestinationProvinceName, opt => opt.MapFrom(src => src.DestinationProvince.Name))
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl));
+
             // Mapping For Itinerary Day
             CreateMap<ItineraryDay, ItineraryDayDto>();
 
@@ -48,7 +54,7 @@ namespace vivuvn_api.Mappings
 
             // Mapping For Update Location Request
             CreateMap<UpdateLocationRequestDto, Location>()
-				.ForMember(dest => dest.Photos, opt => opt.Ignore()) // Handled in service
+                .ForMember(dest => dest.Photos, opt => opt.Ignore()) // Handled in service
                 .ForMember(dest => dest.NameNormalized, opt => opt.Ignore()); // Handled in service
 
             // Mapping For Search Place from Google
@@ -160,7 +166,7 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.ItineraryName,
                     opt => opt.MapFrom(src => src.Itinerary != null ? src.Itinerary.Name : null));
 
-			// Mapping for Operator creation
+            // Mapping for Operator creation
             CreateMap<CreateOperatorRequestDto, User>()
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // PasswordHash will be set in service layer
                 .ForMember(dest => dest.UserPhoto, opt => opt.Ignore())
@@ -172,9 +178,9 @@ namespace vivuvn_api.Mappings
                 .ForMember(dest => dest.EmailVerificationTokenExpireDate, opt => opt.Ignore())
                 .ForMember(dest => dest.LockoutEnd, opt => opt.Ignore());
 
-			// Mapping for Place Upsert Request
+            // Mapping for Place Upsert Request
             CreateMap<Location, PlaceUpsertRequestDto>()
                 .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty));
-		}
-	}
+        }
+    }
 }
