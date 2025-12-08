@@ -81,12 +81,40 @@ class ResponseAgent:
                     )
                     transport_objects.append(transport)
 
+                # Gộp warnings từ LLM và backend
+                llm_warnings = structured_itinerary.get("warnings", [])
+                backend_warnings = state.get("warnings", [])
+                
+                # Nếu schedule_unavailable và backend có lý do chặn, ưu tiên nó
+                all_warnings = []
+                is_unavailable = structured_itinerary.get('schedule_unavailable', False)
+
+                if is_unavailable and backend_warnings:
+                    # Lý do chặn từ backend đi trước
+                    all_warnings.extend(backend_warnings)
+                    # Sau đó là warnings từ LLM (nếu có)
+                    all_warnings.extend([w for w in llm_warnings if w not in backend_warnings])
+                else:
+                    # Trường hợp bình thường: gộp và loại trùng
+                    seen = set()
+                    for warning in llm_warnings + backend_warnings:
+                        if warning and warning not in seen:
+                            all_warnings.append(warning)
+                            seen.add(warning)
+
                 travel_itinerary = TravelItinerary(
                     days=day_itineraries,
                     transportation_suggestions=transport_objects,
                     total_cost=structured_itinerary.get("total_cost", 0.0),
                     schedule_unavailable=structured_itinerary.get("schedule_unavailable", False),
-                    unavailable_reason=structured_itinerary.get("unavailable_reason", "")
+                    warnings=all_warnings
+                )
+
+                logger.info(
+                    "[Node 6/6] Đã gộp warnings",
+                    llm_warnings_count=len(llm_warnings),
+                    backend_warnings_count=len(backend_warnings),
+                    total_warnings=len(all_warnings)
                 )
 
             except Exception as conversion_error:

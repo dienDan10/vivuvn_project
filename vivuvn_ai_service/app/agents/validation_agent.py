@@ -11,6 +11,7 @@ import structlog
 from typing import Optional, Tuple
 
 from app.agents.state import TravelPlanningState
+from app.utils.warning_messages import WarningMessages
 
 logger = structlog.get_logger(__name__)
 
@@ -167,21 +168,24 @@ class ValidationAgent:
         budget: Optional[int],
         calculated_cost: float
     ) -> Tuple[bool, str]:
-        """Validate if itinerary respects budget constraints.
+        """Kiểm tra ràng buộc ngân sách.
 
         Returns:
-            Tuple of (should_be_unavailable: bool, unavailable_reason: str)
+            Tuple của (should_be_unavailable: bool, blocking_reason: str)
         """
-        # If no budget specified, no constraint
+        # Nếu không có ngân sách, không ràng buộc
         if budget is None:
             return False, ""
 
-        # Check if cost exceeds budget
+        # Kiểm tra chi phí có vượt ngân sách không
         should_be_unavailable = calculated_cost > budget
 
         if should_be_unavailable:
-            reason = f"Tổng chi phí {calculated_cost:,.0f} VND vượt ngân sách {budget:,.0f} VND"
-            return True, reason
+            blocking_reason = WarningMessages.budget_exceeded_blocking_reason(
+                calculated_cost,
+                budget
+            )
+            return True, blocking_reason
 
         return False, ""
 
@@ -220,7 +224,7 @@ class ValidationAgent:
             structured_itinerary['total_cost'] = calculated_cost
 
             # Validate budget constraints
-            should_be_unavailable, unavailable_reason = self._validate_budget_constraints(
+            should_be_unavailable, blocking_reason = self._validate_budget_constraints(
                 structured_itinerary,
                 budget,
                 calculated_cost
@@ -231,14 +235,24 @@ class ValidationAgent:
             # Check if AI's decision matches correct decision
             if should_be_unavailable != ai_schedule_unavailable:
                 logger.warning(
-                    "[Node 5/6] Schedule availability mismatch - correcting",
+                    "[Node 5/6] Phát hiện không khớp về schedule availability - đang điều chỉnh",
                     ai_decision=ai_schedule_unavailable,
                     corrected_decision=should_be_unavailable,
                     calculated_cost=calculated_cost,
                     budget=budget
                 )
                 structured_itinerary['schedule_unavailable'] = should_be_unavailable
-                structured_itinerary['unavailable_reason'] = unavailable_reason
+                
+                # Thêm lý do chặn vào warnings[0] nếu unavailable
+                if should_be_unavailable and blocking_reason:
+                    # Khởi tạo warnings nếu chưa có
+                    if 'warnings' not in structured_itinerary:
+                        structured_itinerary['warnings'] = []
+                    
+                    # Chèn lý do chặn vào đầu (ưu tiên cao nhất)
+                    if blocking_reason not in structured_itinerary['warnings']:
+                        structured_itinerary['warnings'].insert(0, blocking_reason)
+                        logger.info(f"[Node 5/6] Đã thêm lý do chặn vào warnings[0]")
 
         except Exception as e:
             logger.error(
