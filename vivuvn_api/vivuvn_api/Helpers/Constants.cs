@@ -84,5 +84,8 @@
         public const string ResponseStatus_Warning = "Warning";
         public const string ResponseStatus_Error = "Error";
 
+        // Default Top Locations Limit
+        public const int DefaultTopLocationsLimit = 5;
+
     }
 }
