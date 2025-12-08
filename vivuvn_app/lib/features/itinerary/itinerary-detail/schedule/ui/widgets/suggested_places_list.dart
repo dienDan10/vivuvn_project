@@ -28,13 +28,15 @@ class SuggestedPlacesList extends ConsumerWidget {
       ),
     );
 
+    final cardHeight = MediaQuery.of(context).size.height * 0.25;
+
     return SizedBox(
-      height: 120,
+      height: cardHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: suggestions.length,
-        separatorBuilder: (_, final __) => const SizedBox(width: 12),
+        separatorBuilder: (_, final __) => const SizedBox(width: 16),
         itemBuilder: (final context, final index) {
           final location = suggestions[index];
           final firstPhoto = _firstPhoto(location);

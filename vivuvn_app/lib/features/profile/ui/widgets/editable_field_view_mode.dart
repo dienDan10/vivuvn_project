@@ -28,10 +28,7 @@ class EditableFieldViewMode extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: colorScheme.primary,
-            ),
+            Icon(icon, color: colorScheme.primary),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -41,8 +38,9 @@ class EditableFieldViewMode extends ConsumerWidget {
                     label,
                     style: TextStyle(
                       fontSize: 12,
-                      color: (isDark ? Colors.white : Colors.black)
-                          .withOpacity(0.6),
+                      color: (isDark ? Colors.white : Colors.black).withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -60,7 +58,9 @@ class EditableFieldViewMode extends ConsumerWidget {
             Icon(
               Icons.edit_outlined,
               size: 20,
-              color: (isDark ? Colors.white : Colors.black).withOpacity(0.5),
+              color: (isDark ? Colors.white : Colors.black).withValues(
+                alpha: 0.5,
+              ),
             ),
           ],
         ),
@@ -68,4 +68,3 @@ class EditableFieldViewMode extends ConsumerWidget {
     );
   }
 }
-
