@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../itinerary/itinerary-detail/overview/controller/search_location_controller.dart';
 import '../../../../itinerary/itinerary-detail/overview/models/location.dart';
@@ -70,7 +71,9 @@ class SearchPlacesModal extends ConsumerWidget {
             );
           },
           onSelected: (final suggestion) {
-            Navigator.pop(context, suggestion);
+            // Navigate to location detail screen
+            Navigator.pop(context); // Close search modal first
+            context.push('/location/${suggestion.id}');
           },
           decorationBuilder: (final context, final child) {
             return Material(

@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/home_api.dart';
 import '../data/dto/destination_dto.dart';
 import '../data/dto/itinerary_dto.dart';
 import 'home_service.dart';
 
+final homeServiceProvider = Provider<HomeService>((final ref) {
+  final api = ref.watch(homeApiProvider);
+  return HomeServiceImpl(api: api);
+});
+
 class HomeServiceImpl implements HomeService {
-  // ignore: unused_field
   final HomeApi _api;
 
-  HomeServiceImpl({final HomeApi? api}) : _api = api ?? HomeApi();
+  HomeServiceImpl({required final HomeApi api}) : _api = api;
 
   @override
   Future<List<DestinationDto>> getPopularDestinations() async {
     try {
-      // TODO: Replace with actual API call when available
-      // return await _api.getPopularDestinations(limit: 10);
-
-      // Mock data for now
-      await Future.delayed(const Duration(milliseconds: 500));
-      return _generateMockDestinations();
+      return await _api.getPopularDestinations(limit: 5);
     } catch (e) {
       debugPrint('Error fetching destinations: $e');
       rethrow;
@@ -41,21 +41,6 @@ class HomeServiceImpl implements HomeService {
     }
   }
 
-  // Mock data generators
-  List<DestinationDto> _generateMockDestinations() {
-    return List.generate(
-      5,
-      (final index) => DestinationDto(
-        id: 'dest_$index',
-        name: 'Địa điểm ${index + 1}',
-        location: 'Vị trí ${index + 1}',
-        imageUrl:
-            'https://images.unsplash.com/photo-1528127269322-539801943592?w=800&h=600&fit=crop',
-        rating: 4.5 + (index * 0.1),
-        description: 'Mô tả địa điểm ${index + 1}',
-      ),
-    );
-  }
 
   List<ItineraryDto> _generateMockItineraries() {
     return List.generate(

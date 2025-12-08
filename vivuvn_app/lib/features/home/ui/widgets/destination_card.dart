@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../data/dto/destination_dto.dart';
 
@@ -13,24 +14,32 @@ class DestinationCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Container(
-      width: screenWidth * 0.85,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
+    return GestureDetector(
+      onTap: () {
+        // Convert destination.id (String) to int for navigation
+        final locationId = int.tryParse(destination.id);
+        if (locationId != null) {
+          context.push('/location/$locationId');
+        }
+      },
+      child: Container(
+        width: screenWidth * 0.85,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
             Image.network(
               destination.imageUrl,
               fit: BoxFit.cover,
@@ -114,7 +123,8 @@ class DestinationCard extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

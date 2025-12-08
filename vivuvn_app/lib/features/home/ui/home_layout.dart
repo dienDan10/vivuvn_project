@@ -22,10 +22,22 @@ class HomeLayout extends ConsumerWidget {
       });
     }
 
+    // Ensure auto-scroll controller is initialized
+    ref.watch(autoScrollControllerProvider);
+    
     // Start auto-scroll when data is loaded
     ref.listen<HomeState>(homeControllerProvider, (final previous, final next) {
-      if (next.isLoaded && !ref.read(autoScrollControllerProvider)) {
-        ref.read(autoScrollControllerProvider.notifier).start();
+      // Only start when transitioning to loaded state with itineraries
+      if (next.isLoaded && 
+          next.itineraries.isNotEmpty &&
+          (previous == null || previous.status != HomeStatus.loaded)) {
+        // Ensure PageView is ready before starting auto-scroll
+        Future.delayed(const Duration(milliseconds: 800), () {
+          final isAutoScrolling = ref.read(autoScrollControllerProvider);
+          if (!isAutoScrolling) {
+            ref.read(autoScrollControllerProvider.notifier).start();
+          }
+        });
       }
     });
 

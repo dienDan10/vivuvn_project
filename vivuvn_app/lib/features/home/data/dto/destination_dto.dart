@@ -16,13 +16,32 @@ class DestinationDto {
   });
 
   factory DestinationDto.fromJson(final Map<String, dynamic> json) {
+    // Map from API response format
+    final id = json['id']?.toString() ?? '';
+    final name = json['name']?.toString() ?? '';
+    final location = json['provinceName']?.toString() ?? 
+                     json['address']?.toString() ?? 
+                     json['location']?.toString() ?? '';
+    
+    // Use first photo if available, otherwise use imageUrl
+    final photos = json['photos'] as List<dynamic>?;
+    final imageUrl = (photos != null && photos.isNotEmpty)
+        ? photos.first.toString()
+        : json['imageUrl']?.toString() ?? '';
+    
+    final rating = (json['rating'] != null)
+        ? (json['rating'] as num).toDouble()
+        : 0.0;
+    
+    final description = json['description']?.toString();
+
     return DestinationDto(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      location: json['location'] as String,
-      imageUrl: json['imageUrl'] as String,
-      rating: (json['rating'] as num).toDouble(),
-      description: json['description'] as String?,
+      id: id,
+      name: name,
+      location: location,
+      imageUrl: imageUrl,
+      rating: rating,
+      description: description,
     );
   }
 

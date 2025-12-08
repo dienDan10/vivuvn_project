@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../common/auth/controller/auth_controller.dart';
 import 'search/search_itineraries_modal.dart';
 import 'search/search_places_modal.dart';
 import 'search/search_type_modal.dart';
 
-class HomeAppBar extends StatelessWidget {
+class HomeAppBar extends ConsumerWidget {
   const HomeAppBar({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final authState = ref.watch(authControllerProvider);
+    final userName = authState.user?.username;
 
     return SliverAppBar(
       expandedHeight: MediaQuery.of(context).size.height * 0.35,
@@ -69,7 +73,7 @@ class HomeAppBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Xin chào! 👋',
+                    userName != null ? 'Xin chào, $userName! 👋' : 'Xin chào! 👋',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

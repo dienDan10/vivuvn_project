@@ -1,21 +1,36 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../../core/data/remote/network/network_service.dart';
 import '../dto/destination_dto.dart';
 import '../dto/itinerary_dto.dart';
 
+final homeApiProvider = Provider.autoDispose<HomeApi>((final ref) {
+  final dio = ref.watch(networkServiceProvider);
+  return HomeApi(dio);
+});
+
 class HomeApi {
-  // TODO: Replace with actual API endpoints
-  static const String _baseUrl = 'https://api.vivuvietnam.com';
-  static const String _destinationsEndpoint = '$_baseUrl/destinations';
-  static const String _itinerariesEndpoint = '$_baseUrl/itineraries/public';
+  final Dio _dio;
+
+  HomeApi(this._dio);
 
   /// Fetch popular destinations
-  /// GET /destinations?limit=10
+  /// GET /api/v1/locations/top-travel-locations?limit=5
   Future<List<DestinationDto>> getPopularDestinations({
-    final int limit = 10,
+    final int limit = 5,
   }) async {
-    // TODO: Implement actual API call
-    throw UnimplementedError(
-      'API endpoint not yet implemented: $_destinationsEndpoint?limit=$limit',
+    final response = await _dio.get(
+      '/api/v1/locations/top-travel-locations',
+      queryParameters: {'limit': limit},
     );
+
+    if (response.data == null) return [];
+
+    final List<dynamic> jsonList = response.data as List<dynamic>;
+    return jsonList
+        .map((final json) => DestinationDto.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Fetch public itineraries
@@ -24,9 +39,9 @@ class HomeApi {
     final int limit = 10,
     final String sort = 'recent',
   }) async {
-    // TODO: Implement actual API call
+    // TODO: Implement actual API call when available
     throw UnimplementedError(
-      'API endpoint not yet implemented: $_itinerariesEndpoint?limit=$limit&sort=$sort',
+      'API endpoint not yet implemented: /api/v1/itineraries/public?limit=$limit&sort=$sort',
     );
   }
 }

@@ -7,11 +7,6 @@ import '../service/home_service.dart';
 import '../service/home_service_impl.dart';
 import '../state/home_state.dart';
 
-// Service provider
-final homeServiceProvider = Provider<HomeService>((final ref) {
-  return HomeServiceImpl();
-});
-
 // State notifier for home data
 class HomeController extends StateNotifier<HomeState> {
   final HomeService _service;
