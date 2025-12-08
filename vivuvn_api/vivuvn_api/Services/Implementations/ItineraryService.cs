@@ -342,10 +342,7 @@ namespace vivuvn_api.Services.Implementations
             {
                 if (day.Items != null && day.Items.Any())
                 {
-                    foreach (var item in day.Items.ToList())
-                    {
-                        _unitOfWork.ItineraryItems.Remove(item);
-                    }
+                    day.Items.Clear();
                 }
             }
 
@@ -361,7 +358,9 @@ namespace vivuvn_api.Services.Implementations
                 l => !string.IsNullOrEmpty(l.GooglePlaceId) && allPlaceIds.Contains(l.GooglePlaceId) && !l.DeleteFlag);
             var locationDict = locations
                 .Where(l => !string.IsNullOrEmpty(l.GooglePlaceId))
-                .ToDictionary(l => l.GooglePlaceId!, l => l);
+                .GroupBy(l => l.GooglePlaceId!)
+                .ToDictionary(g => g.Key, g => g.First());
+
 
             // add activities to each day
             foreach (var aiDay in aiDays)
@@ -408,9 +407,13 @@ namespace vivuvn_api.Services.Implementations
                 }
 
                 // add items to the existing day
-                await _unitOfWork.ItineraryItems.AddRangeAsync(items);
-                await _unitOfWork.SaveChangesAsync();
+                foreach (var item in items)
+                {
+                    existingDay.Items.Add(item);
+                }
+                //await _unitOfWork.SaveChangesAsync();
             }
+
         }
 
         private async Task UpdateTransportationDetailsAsync(ItineraryItem prevItem, ItineraryItem curItem, string? travelMode = Constants.TravelMode_Driving)
