@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -29,6 +30,50 @@ namespace vivuvn_api.Services.Implementations
             }
 
             return itineraryDtos;
+        }
+
+        public async Task<PaginatedResponseDto<SearchItineraryDto>> GetAllPublicItinerariesAsync(GetAllPublicItinerariesRequestDto request)
+        {
+            // build filter expression
+            Expression<Func<Itinerary, bool>>? filter = i => i.IsPublic
+                && !i.DeleteFlag
+                && i.StartDate > DateTime.UtcNow;
+            if (request.ProvinceId is not null)
+            {
+                filter = i => i.IsPublic && !i.DeleteFlag
+                    && i.StartDate > DateTime.UtcNow &&
+                    (i.StartProvinceId == request.ProvinceId
+                    || i.DestinationProvinceId == request.ProvinceId);
+            }
+
+            // build orderBy function
+            Func<IQueryable<Itinerary>, IOrderedQueryable<Itinerary>>? orderBy = (request.SortByDate ?? true)
+                ? (request.IsDescending ?? false
+                    ? q => q.OrderByDescending(i => i.StartDate)
+                    : q => q.OrderBy(i => i.StartDate))
+                : null;
+
+            var (items, totalCount) = await _unitOfWork.Itineraries
+                .GetPagedAsync(filter: filter,
+                orderBy: orderBy,
+                includeProperties: "StartProvince,DestinationProvince",
+                pageNumber: request.Page ?? 1,
+                pageSize: request.PageSize ?? Constants.DefaultPageSize);
+
+            var itineraryDtos = _mapper.Map<IEnumerable<SearchItineraryDto>>(items);
+
+            var paginatedResponse = new PaginatedResponseDto<SearchItineraryDto>
+            {
+                Data = itineraryDtos,
+                PageNumber = request.Page ?? 1,
+                PageSize = request.PageSize ?? Constants.DefaultPageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)(request.PageSize ?? Constants.DefaultPageSize)),
+                HasPreviousPage = (request.Page ?? 1) > 1,
+                HasNextPage = (request.Page ?? 1) < (int)Math.Ceiling(totalCount / (double)(request.PageSize ?? Constants.DefaultPageSize))
+            };
+
+            return paginatedResponse;
         }
 
         public async Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId)
@@ -237,6 +282,8 @@ namespace vivuvn_api.Services.Implementations
         }
 
         #endregion
+
+        #region Itinerary Auto-Generation Methods
 
         public async Task<AutoGenerateItineraryResponseDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
         {
@@ -519,6 +566,7 @@ namespace vivuvn_api.Services.Implementations
                 }
             }
         }
+        #endregion
     }
 
 }

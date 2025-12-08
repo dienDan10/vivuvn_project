@@ -33,5 +33,14 @@ namespace vivuvn_api.Controllers
             await _memberService.JoinItineraryByInviteCodeAsync(userId, request.InviteCode);
             return Ok(new { message = "Tham gia lịch trình thành công." });
         }
+
+        [HttpPost("{itineraryId}/public/join")]
+        [Authorize]
+        public async Task<IActionResult> JoinPublicItinerary(int itineraryId)
+        {
+            var userId = GetCurrentUserId();
+            await _memberService.JoinPublicItineraryAsync(userId, itineraryId);
+            return Ok(new { message = "Tham gia lịch trình công khai thành công." });
+        }
     }
 }
