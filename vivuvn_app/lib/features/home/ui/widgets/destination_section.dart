@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/dto/destination_dto.dart';
 import 'destination_carousel.dart';
+import 'empty_state_widget.dart';
 
 class DestinationSection extends StatelessWidget {
   final List<DestinationDto> destinations;
@@ -24,7 +25,12 @@ class DestinationSection extends StatelessWidget {
             ),
           ),
         ),
-        DestinationCarousel(destinations: destinations),
+        destinations.isEmpty
+            ? const EmptyStateWidget(
+                icon: Icons.location_on_outlined,
+                message: 'Không có địa điểm phổ biến',
+              )
+            : DestinationCarousel(destinations: destinations),
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import '../../model/itinerary_item.dart';
 
@@ -55,6 +56,26 @@ class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
 
   @override
   Widget build(final BuildContext context) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    if (!isOwner) {
+      // Nếu không phải owner, chỉ hiển thị ghi chú (nếu có) mà không cho sửa
+      return widget.item.note == null
+          ? const SizedBox.shrink()
+          : Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(widget.item.note ?? ''),
+            );
+    }
+
     return widget.item.note == null
         ? TextButton.icon(
             onPressed: _editNote,

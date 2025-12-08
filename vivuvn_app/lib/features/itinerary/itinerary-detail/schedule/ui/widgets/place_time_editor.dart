@@ -110,18 +110,20 @@ class PlaceTimeEditor extends ConsumerWidget {
               );
             },
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.blue.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(
-          Icons.mode_edit_outline_rounded,
-          size: 16,
-          color: Colors.blue,
-        ),
-      ),
+      child: isOwner
+          ? Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.mode_edit_outline_rounded,
+                size: 16,
+                color: Colors.blue,
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 

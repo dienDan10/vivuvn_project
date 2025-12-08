@@ -25,17 +25,19 @@ class HomeLayout extends ConsumerWidget {
     // Ensure auto-scroll controller is initialized
     ref.watch(autoScrollControllerProvider);
     
-    // Start auto-scroll when data is loaded
+    // Start auto-scroll when data is loaded (only if more than 1 card)
     ref.listen<HomeState>(homeControllerProvider, (final previous, final next) {
-      // Only start when transitioning to loaded state with itineraries
+      // Only start when transitioning to loaded state with more than 1 itinerary
       if (next.isLoaded && 
-          next.itineraries.isNotEmpty &&
+          next.itineraries.length > 1 &&
           (previous == null || previous.status != HomeStatus.loaded)) {
         // Ensure PageView is ready before starting auto-scroll
         Future.delayed(const Duration(milliseconds: 800), () {
           final isAutoScrolling = ref.read(autoScrollControllerProvider);
           if (!isAutoScrolling) {
-            ref.read(autoScrollControllerProvider.notifier).start();
+            ref.read(autoScrollControllerProvider.notifier).start(
+              totalCount: next.itineraries.length,
+            );
           }
         });
       }

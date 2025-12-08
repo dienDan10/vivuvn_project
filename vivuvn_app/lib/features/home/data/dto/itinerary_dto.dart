@@ -24,17 +24,70 @@ class ItineraryDto {
   });
 
   factory ItineraryDto.fromJson(final Map<String, dynamic> json) {
+    // Handle id as int or String
+    final id = json['id']?.toString() ?? '';
+    
+    // Handle date parsing with fallback
+    DateTime? parseDate(final dynamic dateValue) {
+      if (dateValue == null) return null;
+      if (dateValue is DateTime) return dateValue;
+      if (dateValue is String) {
+        try {
+          return DateTime.parse(dateValue);
+        } catch (_) {
+          return null;
+        }
+      }
+      return null;
+    }
+    
+    final startDate = parseDate(json['startDate']) ?? DateTime.now();
+    final endDate = parseDate(json['endDate']) ?? DateTime.now();
+    
+    // Calculate durationDays if not provided
+    final durationDays = json['durationDays'] as int? ?? 
+                         endDate.difference(startDate).inDays + 1;
+    
+    // Map title - use 'name' field from API response
+    final title = json['name']?.toString() ?? 
+                  json['title']?.toString() ?? '';
+    
+    // Map destination - use destinationProvinceName or startProvinceName
+    final destination = json['destinationProvinceName']?.toString() ?? 
+                        json['destination']?.toString() ?? 
+                        json['destinationName']?.toString() ?? 
+                        json['startProvinceName']?.toString() ?? '';
+    
+    // Handle owner - may be nested or flat, or may not exist
+    OwnerDto? owner;
+    if (json['owner'] != null && json['owner'] is Map) {
+      owner = OwnerDto.fromJson(json['owner'] as Map<String, dynamic>);
+    } else if (json['ownerId'] != null || json['ownerName'] != null) {
+      owner = OwnerDto(
+        id: json['ownerId']?.toString() ?? '',
+        name: json['ownerName']?.toString() ?? json['ownerUsername']?.toString() ?? '',
+        avatarUrl: json['ownerAvatarUrl']?.toString(),
+      );
+    } else {
+      // Default owner if not provided
+      owner = const OwnerDto(id: '', name: 'Unknown');
+    }
+    
     return ItineraryDto(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      destination: json['destination'] as String,
-      imageUrl: json['imageUrl'] as String,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
-      participantCount: json['participantCount'] as int,
-      durationDays: json['durationDays'] as int,
-      isPublic: json['isPublic'] as bool,
-      owner: OwnerDto.fromJson(json['owner'] as Map<String, dynamic>),
+      id: id,
+      title: title,
+      destination: destination,
+      imageUrl: json['imageUrl']?.toString() ?? 
+                json['coverImageUrl']?.toString() ?? 
+                json['image']?.toString() ?? '',
+      startDate: startDate,
+      endDate: endDate,
+      participantCount: json['participantCount'] as int? ?? 
+                        json['memberCount'] as int? ?? 
+                        json['participants'] as int? ?? 0,
+      durationDays: durationDays,
+      isPublic: json['isPublic'] as bool? ?? json['public'] as bool? ?? true, // Default to true for public itineraries
+      owner: owner,
     );
   }
 
@@ -70,9 +123,13 @@ class OwnerDto {
 
   factory OwnerDto.fromJson(final Map<String, dynamic> json) {
     return OwnerDto(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      avatarUrl: json['avatarUrl'] as String?,
+      id: json['id']?.toString() ?? json['userId']?.toString() ?? '',
+      name: json['name']?.toString() ?? 
+            json['username']?.toString() ?? 
+            json['fullName']?.toString() ?? '',
+      avatarUrl: json['avatarUrl']?.toString() ?? 
+                 json['avatar']?.toString() ?? 
+                 json['userPhoto']?.toString(),
     );
   }
 

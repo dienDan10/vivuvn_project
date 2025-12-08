@@ -25,9 +25,9 @@ class ItineraryCarousel extends ConsumerWidget {
       height: MediaQuery.of(context).size.height * 0.26,
       child: PageView.builder(
         controller: pageController,
+        itemCount: itineraries.length,
         itemBuilder: (final context, final index) {
-          final actualIndex = index % itineraries.length;
-          return ItineraryCard(itinerary: itineraries[actualIndex]);
+          return ItineraryCard(itinerary: itineraries[index]);
         },
       ),
     );

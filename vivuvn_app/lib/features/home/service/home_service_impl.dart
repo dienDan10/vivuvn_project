@@ -29,39 +29,15 @@ class HomeServiceImpl implements HomeService {
   @override
   Future<List<ItineraryDto>> getPublicItineraries() async {
     try {
-      // TODO: Replace with actual API call when available
-      // return await _api.getPublicItineraries(limit: 10, sort: 'recent');
-
-      // Mock data for now
-      await Future.delayed(const Duration(milliseconds: 500));
-      return _generateMockItineraries();
+      return await _api.getPublicItineraries(
+        page: 1,
+        pageSize: 5,
+        sortByDate: true,
+        isDescending: false,
+      );
     } catch (e) {
       debugPrint('Error fetching itineraries: $e');
       rethrow;
     }
-  }
-
-
-  List<ItineraryDto> _generateMockItineraries() {
-    return List.generate(
-      3,
-      (final index) => ItineraryDto(
-        id: 'itinerary_$index',
-        title: 'Lịch trình ${index + 1}',
-        destination: 'Điểm đến ${index + 1}',
-        imageUrl:
-            'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&h=400&fit=crop',
-        startDate: DateTime.now().add(Duration(days: index * 7)),
-        endDate: DateTime.now().add(Duration(days: (index * 7) + 3)),
-        participantCount: 5 + (index * 2),
-        durationDays: 3,
-        isPublic: true,
-        owner: OwnerDto(
-          id: 'user_$index',
-          name: 'Người dùng ${index + 1}',
-          avatarUrl: null,
-        ),
-      ),
-    );
   }
 }

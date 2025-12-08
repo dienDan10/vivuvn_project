@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/dto/itinerary_dto.dart';
+import 'empty_state_widget.dart';
 import 'itinerary_carousel.dart';
 
 class ItinerarySection extends StatelessWidget {
@@ -18,13 +19,18 @@ class ItinerarySection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
           child: Text(
-            'Lịch trình công khai gần đây',
+            'Lịch trình gần đây',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        ItineraryCarousel(itineraries: itineraries),
+        itineraries.isEmpty
+            ? const EmptyStateWidget(
+                icon: Icons.calendar_today_outlined,
+                message: 'Không có lịch trình gần đây',
+              )
+            : ItineraryCarousel(itineraries: itineraries),
       ],
     );
   }

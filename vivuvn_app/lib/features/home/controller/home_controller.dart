@@ -54,7 +54,7 @@ final homeControllerProvider = StateNotifierProvider<HomeController, HomeState>(
 final itineraryPageControllerProvider = Provider.autoDispose<PageController>((
   final ref,
 ) {
-  final controller = PageController(viewportFraction: 0.9, initialPage: 1000);
+  final controller = PageController(viewportFraction: 0.9, initialPage: 0);
 
   ref.onDispose(() {
     controller.dispose();
@@ -67,18 +67,23 @@ final itineraryPageControllerProvider = Provider.autoDispose<PageController>((
 class AutoScrollController extends StateNotifier<bool> {
   Timer? _timer;
   final PageController _pageController;
+  int _totalCount = 0;
 
   AutoScrollController(this._pageController) : super(false);
 
-  void start() {
+  void start({final int totalCount = 0}) {
     if (state) return; // Already started
 
+    _totalCount = totalCount;
     state = true;
     _timer = Timer.periodic(const Duration(seconds: 4), (final timer) {
       if (_pageController.hasClients) {
         final currentPage = _pageController.page?.toInt() ?? 0;
+        final nextPage = _totalCount > 0 && currentPage >= _totalCount - 1
+            ? 0
+            : currentPage + 1;
         _pageController.animateToPage(
-          currentPage + 1,
+          nextPage,
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeInOut,
         );
