@@ -9,5 +9,8 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string? ImageUrl { get; set; }
+        public UserDto Owner { get; set; } = new UserDto();
+        public int GroupSize { get; set; }
+        public int CurrentMemberCount { get; set; }
     }
 }
