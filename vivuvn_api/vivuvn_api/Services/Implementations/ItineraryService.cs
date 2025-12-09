@@ -56,11 +56,12 @@ namespace vivuvn_api.Services.Implementations
             var (items, totalCount) = await _unitOfWork.Itineraries
                 .GetPagedAsync(filter: filter,
                 orderBy: orderBy,
-                includeProperties: "StartProvince,DestinationProvince",
+                includeProperties: "StartProvince,DestinationProvince,User,Members",
                 pageNumber: request.Page ?? 1,
                 pageSize: request.PageSize ?? Constants.DefaultPageSize);
 
             var itineraryDtos = _mapper.Map<IEnumerable<SearchItineraryDto>>(items);
+
 
             var paginatedResponse = new PaginatedResponseDto<SearchItineraryDto>
             {
