@@ -85,7 +85,7 @@ namespace vivuvn_api.Services.Implementations
             if (itinerary == null) throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {id}.");
             var dto = _mapper.Map<ItineraryDto>(itinerary);
             dto.IsOwner = itinerary.UserId == userId;
-            dto.IsMember = itinerary.Members.Any(m => m.UserId == userId);
+            dto.IsMember = itinerary.Members.Any(m => m.UserId == userId && !m.DeleteFlag);
             return dto;
         }
 
