@@ -18,6 +18,15 @@ final itineraryDetailControllerProvider =
       ItineraryDetailState
     >(() => ItineraryDetailController());
 
+/// Provider to check if current user is the owner of the itinerary
+final isItineraryOwnerProvider = Provider.autoDispose<bool>((final ref) {
+  return ref.watch(
+    itineraryDetailControllerProvider.select(
+      (final state) => state.itinerary?.isOwner ?? false,
+    ),
+  );
+});
+
 class ItineraryDetailController
     extends AutoDisposeNotifier<ItineraryDetailState> {
   @override
@@ -188,7 +197,7 @@ class ItineraryDetailController
     final ok = isPublic
         ? await updater.setPublic(shouldFetch: false)
         : await updater.setPrivate(shouldFetch: false);
-    
+
     // Fetch list in background to sync data for list screen
     if (ok) {
       ref.read(itineraryControllerProvider.notifier).fetchItineraries();
@@ -198,7 +207,8 @@ class ItineraryDetailController
       // Revert UI if request failed
       setPublicStatus(oldIsPublic);
       if (context.mounted) {
-        final errorMsg = ref.read(updateItineraryControllerProvider).error ??
+        final errorMsg =
+            ref.read(updateItineraryControllerProvider).error ??
             'Cập nhật trạng thái thất bại';
         GlobalToast.showErrorToast(context, message: errorMsg);
       }
@@ -312,10 +322,7 @@ class ItineraryDetailController
     final itineraryId = state.itineraryId;
     if (itineraryId == null) return;
 
-    state = state.copyWith(
-      isInviteCodeLoading: true,
-      inviteCodeError: null,
-    );
+    state = state.copyWith(isInviteCodeLoading: true, inviteCodeError: null);
 
     try {
       final inviteCode = await ref
@@ -360,10 +367,7 @@ class ItineraryDetailController
 
     try {
       final qrCodeSaveService = ref.read(qrCodeSaveServiceProvider);
-      await qrCodeSaveService.saveQrCodeToGallery(
-        context,
-        repaintBoundaryKey,
-      );
+      await qrCodeSaveService.saveQrCodeToGallery(context, repaintBoundaryKey);
     } catch (e) {
       // Error handling đã được xử lý trong service
       // Chỉ cần log nếu cần thiết
@@ -379,12 +383,15 @@ class ItineraryDetailController
 
     // Get the detail screen context before closing modal
     // The context in modal builder is from detail screen (parent)
-    final detailScreenContext = Navigator.of(context, rootNavigator: false).context;
+    final detailScreenContext = Navigator.of(
+      context,
+      rootNavigator: false,
+    ).context;
     if (!detailScreenContext.mounted) return;
 
     // Close settings modal first
     Navigator.of(context).pop();
-    
+
     // Wait a bit for modal to close, then show confirmation dialog
     await Future.delayed(const Duration(milliseconds: 100));
 
@@ -419,8 +426,10 @@ class ItineraryDetailController
     if (confirmed == true && detailScreenContext.mounted) {
       // Delete itinerary using itinerary controller
       try {
-        await ref.read(itineraryControllerProvider.notifier).deleteItinerary(itineraryId);
-        
+        await ref
+            .read(itineraryControllerProvider.notifier)
+            .deleteItinerary(itineraryId);
+
         // Navigate back to itinerary list after successful deletion
         if (detailScreenContext.mounted) {
           Navigator.of(detailScreenContext).pop();
@@ -431,7 +440,10 @@ class ItineraryDetailController
         if (detailScreenContext.mounted) {
           final errorState = ref.read(itineraryControllerProvider).error;
           if (errorState != null) {
-            GlobalToast.showErrorToast(detailScreenContext, message: errorState);
+            GlobalToast.showErrorToast(
+              detailScreenContext,
+              message: errorState,
+            );
           }
         }
       }

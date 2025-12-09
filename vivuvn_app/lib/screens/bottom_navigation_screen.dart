@@ -8,7 +8,19 @@ class BottomNavigationScreen extends StatelessWidget {
 
   const BottomNavigationScreen({super.key, required this.navigationShell});
 
-  void _onItemTapped(final int index) {
+  void _onItemTapped(final BuildContext context, final int index) {
+    // Pop all modals/dialogs in current tab before switching
+    if (index != navigationShell.currentIndex) {
+      // Get the navigator key of the current branch
+      final navigatorKey = navigationShell.shellRouteContext.navigatorKey;
+      final currentContext = navigatorKey.currentContext;
+
+      // Pop all routes except the first one in the current tab
+      if (currentContext != null) {
+        Navigator.of(currentContext).popUntil((final route) => route.isFirst);
+      }
+    }
+
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
@@ -21,7 +33,7 @@ class BottomNavigationScreen extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: navigationShell.currentIndex,
-        onTap: _onItemTapped,
+        onTap: (final index) => _onItemTapped(context, index),
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(

@@ -77,7 +77,6 @@ class NotificationService implements INotificationService {
 
   @override
   Future<void> refresh() {
-    // TODO: implement refresh
     throw UnimplementedError();
   }
 }

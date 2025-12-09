@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../../../common/toast/global_toast.dart';
+import '../../../itinerary-detail/detail/controller/itinerary_detail_controller.dart';
 import '../../controller/restaurant_controller.dart';
 import '../../data/model/restaurant.dart';
 
@@ -17,6 +18,15 @@ class ButtonAddToItinerary extends ConsumerStatefulWidget {
 
 class _ButtonAddToItineraryState extends ConsumerState<ButtonAddToItinerary> {
   Future<void> _handleAddToItinerary() async {
+    final isOwner = ref.read(itineraryDetailControllerProvider).itinerary?.isOwner ?? false;
+    if (!isOwner) {
+      GlobalToast.showErrorToast(
+        context,
+        message: 'Chỉ chủ sở hữu lịch trình mới có thể thêm địa điểm',
+      );
+      return;
+    }
+
     await ref
         .read(restaurantControllerProvider.notifier)
         .addRestaurantToItinerary(widget.restaurant.id, context);
@@ -41,12 +51,22 @@ class _ButtonAddToItineraryState extends ConsumerState<ButtonAddToItinerary> {
       ),
     );
 
+    final itinerary = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary,
+      ),
+    );
+    final isOwner = itinerary?.isOwner ?? false;
+
+    // Disable button if not owner or if itinerary is not available
+    final isDisabled = isAdding || !isOwner || itinerary == null;
+
     return InkWell(
-      onTap: isAdding ? null : _handleAddToItinerary,
+      onTap: isDisabled ? null : _handleAddToItinerary,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isAdding
+          color: isDisabled
               ? Theme.of(
                   context,
                 ).colorScheme.tertiaryFixed.withValues(alpha: 0.5)

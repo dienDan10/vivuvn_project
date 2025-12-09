@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import '../../model/location.dart';
 import 'suggested_place_item.dart';
@@ -10,19 +11,32 @@ class SuggestedPlacesList extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    // Ẩn phần gợi ý nếu không phải owner
+    if (!isOwner) {
+      return const SizedBox.shrink();
+    }
+
     final suggestions = ref.watch(
       itineraryScheduleControllerProvider.select(
         (final state) => state.suggestedLocations,
       ),
     );
 
+    final cardHeight = MediaQuery.of(context).size.height * 0.25;
+
     return SizedBox(
-      height: 120,
+      height: cardHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: suggestions.length,
-        separatorBuilder: (_, final __) => const SizedBox(width: 12),
+        separatorBuilder: (_, final __) => const SizedBox(width: 16),
         itemBuilder: (final context, final index) {
           final location = suggestions[index];
           final firstPhoto = _firstPhoto(location);
@@ -31,8 +45,9 @@ class SuggestedPlacesList extends ConsumerWidget {
             title: location.name,
             imageUrl: firstPhoto,
             onTap: () async {
-              final controller =
-                  ref.read(itineraryScheduleControllerProvider.notifier);
+              final controller = ref.read(
+                itineraryScheduleControllerProvider.notifier,
+              );
 
               final result = await controller.addLocationToSelectedDay(
                 locationId: location.id,
@@ -40,9 +55,9 @@ class SuggestedPlacesList extends ConsumerWidget {
               );
 
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(result.message)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(result.message)));
             },
           );
         },
@@ -53,4 +68,3 @@ class SuggestedPlacesList extends ConsumerWidget {
   String? _firstPhoto(final Location location) =>
       location.photos.isNotEmpty ? location.photos.first : null;
 }
-
