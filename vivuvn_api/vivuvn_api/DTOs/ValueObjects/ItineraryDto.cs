@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public UserDto Owner { get; set; } = null!;
         public bool IsOwner { get; set; } = false;
+        public bool IsMember { get; set; } = false;
         public string Name { get; set; } = string.Empty;
         public int StartProvinceId { get; set; }
         public string StartProvinceName { get; set; } = string.Empty;
