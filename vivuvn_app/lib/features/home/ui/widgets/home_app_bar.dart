@@ -26,7 +26,7 @@ class HomeAppBar extends ConsumerWidget {
           Image.asset('assets/images/app-logo.png', height: 32, width: 32),
           const SizedBox(width: 8),
           Text(
-            'Vivu Viet Nam',
+            'Vivu Việt Nam',
             style: theme.textTheme.titleLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,

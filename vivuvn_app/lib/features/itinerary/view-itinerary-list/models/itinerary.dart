@@ -7,6 +7,7 @@ class Itinerary {
   final int id;
   final User owner;
   final bool isOwner;
+  final bool isMember;
   final String name;
   final int startProvinceId;
   final String startProvinceName;
@@ -25,6 +26,7 @@ class Itinerary {
     required this.id,
     required this.owner,
     required this.isOwner,
+    required this.isMember,
     required this.name,
     required this.startProvinceId,
     required this.startProvinceName,
@@ -44,6 +46,7 @@ class Itinerary {
     final int? id,
     final User? owner,
     final bool? isOwner,
+    final bool? isMember,
     final String? name,
     final int? startProvinceId,
     final String? startProvinceName,
@@ -62,6 +65,7 @@ class Itinerary {
       id: id ?? this.id,
       owner: owner ?? this.owner,
       isOwner: isOwner ?? this.isOwner,
+      isMember: isMember ?? this.isMember,
       name: name ?? this.name,
       startProvinceId: startProvinceId ?? this.startProvinceId,
       startProvinceName: startProvinceName ?? this.startProvinceName,
@@ -86,6 +90,7 @@ class Itinerary {
       'id': id,
       'owner': owner.toMap(),
       'isOwner': isOwner,
+      'isMember': isMember,
       'name': name,
       'startProvinceId': startProvinceId,
       'startProvinceName': startProvinceName,
@@ -147,6 +152,7 @@ class Itinerary {
       id: map['id'] as int,
       owner: owner,
       isOwner: map['isOwner'] as bool? ?? false,
+      isMember: map['isMember'] as bool? ?? false,
       name: map['name'].toString(),
       startProvinceId: map['startProvinceId'] as int,
       startProvinceName: map['startProvinceName'].toString(),

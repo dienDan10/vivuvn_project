@@ -70,14 +70,19 @@ class PublicItineraryController extends StateNotifier<PublicItineraryState> {
 
   Future<void> joinItinerary() async {
     if (_itineraryId == null) return;
+    state = state.copyWith(isJoining: true, error: null);
     try {
       final service = _ref.read(publicItineraryServiceProvider);
       await service.joinPublicItinerary(_itineraryId!);
     } on DioException catch (e) {
       final message = DioExceptionHandler.handleException(e);
+      state = state.copyWith(isJoining: false, error: message);
       throw Exception(message);
     } on Exception catch (e) {
+      state = state.copyWith(isJoining: false, error: e.toString());
       throw Exception(e.toString());
+    } finally {
+      state = state.copyWith(isJoining: false);
     }
   }
 }

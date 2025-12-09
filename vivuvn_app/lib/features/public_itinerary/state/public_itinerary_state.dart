@@ -11,6 +11,7 @@ class PublicItineraryState {
   final List<RestaurantItemResponse> restaurants;
   final List<HotelItemResponse> hotels;
   final bool isLoading;
+  final bool isJoining;
   final String? error;
   final int selectedDayIndex;
 
@@ -21,6 +22,7 @@ class PublicItineraryState {
     this.restaurants = const [],
     this.hotels = const [],
     this.isLoading = false,
+    this.isJoining = false,
     this.error,
     this.selectedDayIndex = 0,
   });
@@ -32,6 +34,7 @@ class PublicItineraryState {
     final List<RestaurantItemResponse>? restaurants,
     final List<HotelItemResponse>? hotels,
     final bool? isLoading,
+    final bool? isJoining,
     final String? error,
     final int? selectedDayIndex,
   }) {
@@ -42,6 +45,7 @@ class PublicItineraryState {
       restaurants: restaurants ?? this.restaurants,
       hotels: hotels ?? this.hotels,
       isLoading: isLoading ?? this.isLoading,
+      isJoining: isJoining ?? this.isJoining,
       error: error,
       selectedDayIndex: selectedDayIndex ?? this.selectedDayIndex,
     );

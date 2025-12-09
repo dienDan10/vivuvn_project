@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../common/toast/global_toast.dart';
+import '../../../../home/controller/home_controller.dart';
 import '../../controller/itinerary_controller.dart';
 
 class LeaveConfirmDialog extends ConsumerStatefulWidget {
@@ -19,6 +20,8 @@ class _LeaveConfirmDialogState extends ConsumerState<LeaveConfirmDialog> {
     await ref
         .read(itineraryControllerProvider.notifier)
         .leaveItinerary(widget.itineraryId);
+    // Refresh home public itineraries so isMember/isOwner flags update
+    await ref.read(homeControllerProvider.notifier).refreshHomeData();
     if (mounted) {
       GlobalToast.showSuccessToast(
         context,

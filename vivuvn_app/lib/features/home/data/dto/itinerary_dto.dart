@@ -8,6 +8,8 @@ class ItineraryDto {
   final DateTime startDate;
   final DateTime endDate;
   final int participantCount;
+  final int currentMemberCount;
+  final int groupSize;
   final int durationDays;
   final bool isPublic;
   final OwnerDto owner;
@@ -24,6 +26,8 @@ class ItineraryDto {
     required this.startDate,
     required this.endDate,
     required this.participantCount,
+    required this.currentMemberCount,
+    required this.groupSize,
     required this.durationDays,
     required this.isPublic,
     required this.owner,
@@ -35,6 +39,21 @@ class ItineraryDto {
     // Handle id as int or String
     final id = json['id']?.toString() ?? '';
     
+    bool? parseBool(final dynamic value) {
+      if (value == null) return null;
+      if (value is bool) return value;
+      if (value is String) {
+        final lower = value.toLowerCase();
+        if (lower == 'true' || lower == '1') return true;
+        if (lower == 'false' || lower == '0') return false;
+      }
+      if (value is num) {
+        if (value == 1) return true;
+        if (value == 0) return false;
+      }
+      return null;
+    }
+
     // Handle date parsing with fallback
     DateTime? parseDate(final dynamic dateValue) {
       if (dateValue == null) return null;
@@ -135,6 +154,22 @@ class ItineraryDto {
     // ignore: avoid_print
     print('ItineraryDto.fromJson - final owner.id: ${owner.id}');
     
+    final currentMemberCount = json['currentMemberCount'] as int? ??
+        json['participantCount'] as int? ??
+        json['memberCount'] as int? ??
+        json['participants'] as int? ??
+        0;
+
+    final groupSize = json['groupSize'] as int? ??
+        json['maxGroupSize'] as int? ??
+        json['capacity'] as int? ??
+        currentMemberCount;
+
+    final participantCount = json['participantCount'] as int? ??
+        json['memberCount'] as int? ??
+        json['participants'] as int? ??
+        currentMemberCount;
+
     return ItineraryDto(
       id: id,
       title: title,
@@ -146,14 +181,14 @@ class ItineraryDto {
                 json['image']?.toString() ?? '',
       startDate: startDate,
       endDate: endDate,
-      participantCount: json['participantCount'] as int? ?? 
-                        json['memberCount'] as int? ?? 
-                        json['participants'] as int? ?? 0,
+      participantCount: participantCount,
+      currentMemberCount: currentMemberCount,
+      groupSize: groupSize,
       durationDays: durationDays,
       isPublic: json['isPublic'] as bool? ?? json['public'] as bool? ?? true, // Default to true for public itineraries
       owner: owner,
-      isOwner: json['isOwner'] as bool? ?? false,
-      isMember: json['isMember'] as bool? ?? false,
+      isOwner: parseBool(json['isOwner']) ?? false,
+      isMember: parseBool(json['isMember']) ?? false,
     );
   }
 
@@ -168,6 +203,8 @@ class ItineraryDto {
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
       'participantCount': participantCount,
+      'currentMemberCount': currentMemberCount,
+      'groupSize': groupSize,
       'durationDays': durationDays,
       'isPublic': isPublic,
       'owner': owner.toJson(),
