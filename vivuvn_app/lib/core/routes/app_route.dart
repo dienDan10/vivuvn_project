@@ -17,6 +17,7 @@ import '../../screens/nearby_hotel_screen.dart';
 import '../../screens/nearby_restaurant_screen.dart';
 import '../../screens/notification_screen.dart';
 import '../../screens/profile_screen.dart';
+import '../../screens/public_itinerary_view_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
 import '../../screens/splash_screen.dart';
@@ -92,6 +93,14 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
         builder: (final context, final state) {
           final id = int.parse(state.pathParameters['id']!);
           return LocationDetailScreen(locationId: id);
+        },
+      ),
+
+      GoRoute(
+        path: publicItineraryViewRoute,
+        builder: (final context, final state) {
+          final itineraryId = state.pathParameters['id']!;
+          return PublicItineraryViewScreen(itineraryId: itineraryId);
         },
       ),
 

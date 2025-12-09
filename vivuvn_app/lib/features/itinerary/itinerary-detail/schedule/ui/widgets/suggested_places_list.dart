@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import '../../model/location.dart';
 import 'suggested_place_item.dart';
@@ -10,6 +11,17 @@ class SuggestedPlacesList extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    // Ẩn phần gợi ý nếu không phải owner
+    if (!isOwner) {
+      return const SizedBox.shrink();
+    }
+
     final suggestions = ref.watch(
       itineraryScheduleControllerProvider.select(
         (final state) => state.suggestedLocations,

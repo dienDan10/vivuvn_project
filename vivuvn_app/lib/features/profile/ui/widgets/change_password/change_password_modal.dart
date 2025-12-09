@@ -56,7 +56,7 @@ class _ChangePasswordModalState extends ConsumerState<ChangePasswordModal> {
 
     return PopScope(
       canPop: true,
-      onPopInvoked: (final didPop) {
+      onPopInvokedWithResult: (final didPop, final result) {
         if (didPop) {
           // Reset state when modal is closed
           try {
@@ -78,10 +78,7 @@ class _ChangePasswordModalState extends ConsumerState<ChangePasswordModal> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Header
-              ChangePasswordHeader(
-                onClose: _handleClose,
-                onSave: _handleSave,
-              ),
+              ChangePasswordHeader(onClose: _handleClose, onSave: _handleSave),
               // Form
               const ChangePasswordForm(),
             ],
@@ -91,4 +88,3 @@ class _ChangePasswordModalState extends ConsumerState<ChangePasswordModal> {
     );
   }
 }
-

@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../schedule/ui/widgets/AI-generate/gen_ai_modal.dart';
+import '../controller/itinerary_detail_controller.dart';
 
-class ButtonGenerateItinerary extends StatefulWidget {
+class ButtonGenerateItinerary extends ConsumerStatefulWidget {
   const ButtonGenerateItinerary({super.key});
 
   @override
-  State<ButtonGenerateItinerary> createState() =>
+  ConsumerState<ButtonGenerateItinerary> createState() =>
       _ButtonGenerateItineraryState();
 }
 
-class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
+class _ButtonGenerateItineraryState
+    extends ConsumerState<ButtonGenerateItinerary> {
   final _fabKey = GlobalKey<ExpandableFabState>();
   void _showCreateItineraryBottomSheet(final BuildContext context) {
     showModalBottomSheet(
@@ -28,60 +31,70 @@ class _ButtonGenerateItineraryState extends State<ButtonGenerateItinerary> {
 
   @override
   Widget build(final BuildContext context) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    if (!isOwner) {
+      return const SizedBox.shrink();
+    }
+
     return HeroMode(
       enabled: false,
       child: ExpandableFab(
-      key: _fabKey,
-      overlayStyle: ExpandableFabOverlayStyle(
-        color: Colors.black.withValues(alpha: 0.7),
-      ),
-      distance: 70,
-      childrenAnimation: ExpandableFabAnimation.none,
-      openButtonBuilder: RotateFloatingActionButtonBuilder(
-        child: const Icon(Icons.add, size: 26),
-        fabSize: ExpandableFabSize.regular,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        shape: const CircleBorder(),
-      ),
-      closeButtonBuilder: RotateFloatingActionButtonBuilder(
-        child: const Icon(Icons.close, size: 26),
-        fabSize: ExpandableFabSize.regular,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        shape: const CircleBorder(),
-      ),
-      children: [
-        Row(
-          children: [
-            const Text(
-              'Tạo lịch trình thông minh',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(width: 20),
-            FloatingActionButton(
-              heroTag: 'detail_fab_ai',
-              backgroundColor: Theme.of(context).colorScheme.onPrimary,
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-              onPressed: () {
-                // Close the expandable FAB
-                final state = _fabKey.currentState;
-                state?.toggle();
-                // Show the bottom sheet
-                _showCreateItineraryBottomSheet(context);
-              },
-              child: const Icon(Icons.add),
-            ),
-          ],
+        key: _fabKey,
+        overlayStyle: ExpandableFabOverlayStyle(
+          color: Colors.black.withValues(alpha: 0.7),
         ),
-      ],
+        distance: 70,
+        childrenAnimation: ExpandableFabAnimation.none,
+        openButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: const Icon(Icons.add, size: 26),
+          fabSize: ExpandableFabSize.regular,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          shape: const CircleBorder(),
+        ),
+        closeButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: const Icon(Icons.close, size: 26),
+          fabSize: ExpandableFabSize.regular,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          shape: const CircleBorder(),
+        ),
+        children: [
+          Row(
+            children: [
+              const Text(
+                'Tạo lịch trình thông minh',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 20),
+              FloatingActionButton(
+                heroTag: 'detail_fab_ai',
+                backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                onPressed: () {
+                  // Close the expandable FAB
+                  final state = _fabKey.currentState;
+                  state?.toggle();
+                  // Show the bottom sheet
+                  _showCreateItineraryBottomSheet(context);
+                },
+                child: const Icon(Icons.add),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

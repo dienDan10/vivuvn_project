@@ -9,7 +9,8 @@ class SuggestedPlacesTile extends ConsumerStatefulWidget {
   const SuggestedPlacesTile({super.key});
 
   @override
-  ConsumerState<SuggestedPlacesTile> createState() => _SuggestedPlacesTileState();
+  ConsumerState<SuggestedPlacesTile> createState() =>
+      _SuggestedPlacesTileState();
 }
 
 class _SuggestedPlacesTileState extends ConsumerState<SuggestedPlacesTile> {
@@ -59,11 +60,20 @@ class _SuggestedPlacesTileState extends ConsumerState<SuggestedPlacesTile> {
 
   @override
   Widget build(final BuildContext context) {
+    final isOwner = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.itinerary?.isOwner ?? false,
+      ),
+    );
+
+    // Ẩn toàn bộ phần địa điểm gợi ý nếu không phải owner
+    if (!isOwner) {
+      return const SizedBox.shrink();
+    }
+
     return const ExpansionTile(
       title: Text('Địa điểm gợi ý'),
-      children: [
-        SuggestedPlacesContent(),
-      ],
+      children: [SuggestedPlacesContent()],
     );
   }
 }
