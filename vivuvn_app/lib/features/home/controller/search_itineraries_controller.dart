@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../itinerary/create-itinerary/models/province.dart';
 import '../service/home_service_impl.dart';
 import '../state/search_itineraries_state.dart';
@@ -75,6 +77,12 @@ class SearchItinerariesController
         isLoading: false,
         hasSearched: true,
       );
+    } on DioException catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: DioExceptionHandler.handleException(e),
+        hasSearched: true,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -105,6 +113,11 @@ class SearchItinerariesController
         hasMore: itineraries.length >= _pageSize,
         page: nextPage,
         isLoadingMore: false,
+      );
+    } on DioException catch (e) {
+      state = state.copyWith(
+        isLoadingMore: false,
+        errorMessage: DioExceptionHandler.handleException(e),
       );
     } catch (e) {
       state = state.copyWith(

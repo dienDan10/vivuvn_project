@@ -58,24 +58,24 @@ class HomeLayout extends ConsumerWidget {
       onRefresh: () async {
         await ref.read(homeControllerProvider.notifier).refreshHomeData();
       },
-      child: CustomScrollView(
+      child: const CustomScrollView(
         slivers: [
-          const HomeAppBar(),
+          HomeAppBar(),
 
           // Destinations section
           SliverToBoxAdapter(
-            child: DestinationSection(destinations: state.destinations),
+            child: DestinationSection(),
           ),
 
           // Itineraries section
           SliverToBoxAdapter(
-            child: ItinerarySection(itineraries: state.itineraries),
+            child: ItinerarySection(),
           ),
 
           // Travel tips section
-          const SliverToBoxAdapter(child: TravelTipsHardcodedSection()),
+          SliverToBoxAdapter(child: TravelTipsHardcodedSection()),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
     );

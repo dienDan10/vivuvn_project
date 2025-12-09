@@ -92,5 +92,11 @@ class PublicItineraryApi {
       return [];
     }
   }
+
+  /// POST: Join a public itinerary
+  /// Endpoint: /api/v1/itineraries/:itineraryId/public/join
+  Future<void> joinPublicItinerary(final String itineraryId) async {
+    await _dio.post('/api/v1/itineraries/$itineraryId/public/join');
+  }
 }
 

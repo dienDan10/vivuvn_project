@@ -45,5 +45,9 @@ class PublicItineraryService {
   Future<List<HotelItemResponse>> getHotels(final String itineraryId) async {
     return await _api.getHotels(itineraryId);
   }
+
+  Future<void> joinPublicItinerary(final String itineraryId) async {
+    await _api.joinPublicItinerary(itineraryId);
+  }
 }
 

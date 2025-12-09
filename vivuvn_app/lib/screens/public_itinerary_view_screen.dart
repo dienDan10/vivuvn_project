@@ -55,12 +55,7 @@ class _PublicItineraryViewScreenState
       );
     }
 
-    return PublicItineraryLayout(
-      state: state,
-      onRetry: () =>
-          ref.read(publicItineraryControllerProvider.notifier).loadItineraryDetail(),
-      onBack: () => Navigator.of(context).pop(),
-    );
+    return const PublicItineraryLayout();
   }
 }
 

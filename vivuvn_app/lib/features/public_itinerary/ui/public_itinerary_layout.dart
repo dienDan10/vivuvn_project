@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../state/public_itinerary_state.dart';
+import '../../../common/toast/global_toast.dart';
+import '../controller/public_itinerary_controller.dart';
 import 'widgets/public_itinerary_header.dart';
 import 'widgets/sections/hotel_section.dart';
 import 'widgets/sections/itinerary_day_list.dart';
 import 'widgets/sections/restaurant_section.dart';
 
-class PublicItineraryLayout extends StatelessWidget {
-  final PublicItineraryState state;
-  final VoidCallback onBack;
-  final VoidCallback onRetry;
-
-  const PublicItineraryLayout({
-    required this.state,
-    required this.onBack,
-    required this.onRetry,
-    super.key,
-  });
+class PublicItineraryLayout extends ConsumerWidget {
+  const PublicItineraryLayout({super.key});
 
   @override
-  Widget build(final BuildContext context) {
-    final itinerary = state.itinerary!;
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final state = ref.watch(publicItineraryControllerProvider);
+    final itinerary = state.itinerary;
+
+    if (itinerary == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Lịch trình')),
+        body: const Center(child: Text('Không tìm thấy lịch trình')),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -29,18 +30,14 @@ class PublicItineraryLayout extends StatelessWidget {
         title: const Text('Lịch trình'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: onBack,
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (final String value) {
               if (value == 'join') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tính năng tham gia lịch trình đang được phát triển'),
-                  ),
-                );
+                _joinItinerary(context, ref);
               }
             },
             itemBuilder: (final BuildContext context) => const <PopupMenuEntry<String>>[
@@ -60,22 +57,20 @@ class PublicItineraryLayout extends StatelessWidget {
       ),
       body: Column(
         children: [
-          PublicItineraryHeader(itinerary: itinerary, members: state.members),
+          const PublicItineraryHeader(),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () async => onRetry(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
+              onRefresh: () async =>
+                  ref.read(publicItineraryControllerProvider.notifier).loadItineraryDetail(),
+              child: const SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (state.days.isNotEmpty)
-                      ItineraryDayList(days: state.days),
-                    if (state.restaurants.isNotEmpty)
-                      RestaurantSection(restaurants: state.restaurants),
-                    if (state.hotels.isNotEmpty)
-                      HotelSection(hotels: state.hotels),
-                    const SizedBox(height: 24),
+                    ItineraryDayList(),
+                    RestaurantSection(),
+                    HotelSection(),
+                    SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -84,6 +79,26 @@ class PublicItineraryLayout extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+Future<void> _joinItinerary(final BuildContext context, final WidgetRef ref) async {
+  final controller = ref.read(publicItineraryControllerProvider.notifier);
+  try {
+    await controller.joinItinerary();
+    if (context.mounted) {
+      GlobalToast.showSuccessToast(
+        context,
+        message: 'Đã gửi yêu cầu tham gia lịch trình',
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
+      GlobalToast.showErrorToast(
+        context,
+        message: e.toString(),
+      );
+    }
   }
 }
 

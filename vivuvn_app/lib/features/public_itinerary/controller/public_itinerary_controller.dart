@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../service/public_itinerary_service.dart';
 import '../state/public_itinerary_state.dart';
 
@@ -63,6 +65,19 @@ class PublicItineraryController extends StateNotifier<PublicItineraryState> {
   void selectDay(final int index) {
     if (index >= 0 && index < state.days.length) {
       state = state.copyWith(selectedDayIndex: index);
+    }
+  }
+
+  Future<void> joinItinerary() async {
+    if (_itineraryId == null) return;
+    try {
+      final service = _ref.read(publicItineraryServiceProvider);
+      await service.joinPublicItinerary(_itineraryId!);
+    } on DioException catch (e) {
+      final message = DioExceptionHandler.handleException(e);
+      throw Exception(message);
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

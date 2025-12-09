@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/dto/destination_dto.dart';
+import '../../controller/home_controller.dart';
 import 'destination_carousel.dart';
 import 'empty_state_widget.dart';
 
-class DestinationSection extends StatelessWidget {
-  final List<DestinationDto> destinations;
-
-  const DestinationSection({required this.destinations, super.key});
+class DestinationSection extends ConsumerWidget {
+  const DestinationSection({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final theme = Theme.of(context);
+    final destinations = ref.watch(
+      homeControllerProvider.select((final s) => s.destinations),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

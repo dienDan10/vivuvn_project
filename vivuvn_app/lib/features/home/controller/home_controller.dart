@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../service/home_service.dart';
 import '../service/home_service_impl.dart';
 import '../state/home_state.dart';
@@ -27,6 +29,13 @@ class HomeController extends StateNotifier<HomeState> {
         destinations: destinations,
         itineraries: itineraries,
       );
+    } on DioException catch (e) {
+      final message = DioExceptionHandler.handleException(e);
+      state = state.copyWith(
+        status: HomeStatus.error,
+        errorMessage: message,
+      );
+      debugPrint('Error loading home data: $message');
     } catch (e) {
       state = state.copyWith(
         status: HomeStatus.error,
