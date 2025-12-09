@@ -47,7 +47,7 @@ namespace vivuvn_api.Services.Implementations
             }
 
             // check if user is already a member
-            var existingMember = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itinerary.Id && im.UserId == userId, includeProperties: "User");
+            var existingMember = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itinerary.Id && im.UserId == userId);
 
             if (existingMember is not null && !existingMember.DeleteFlag) // active member exists
             {
@@ -103,13 +103,6 @@ namespace vivuvn_api.Services.Implementations
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == itineraryId && i.IsPublic)
                 ?? throw new ArgumentException("Không tìm thấy lịch trình công khai");
 
-            // check if user is already a member
-            var isMember = await _unitOfWork.ItineraryMembers.IsMemberAsync(itinerary.Id, userId);
-            if (isMember)
-            {
-                throw new BadHttpRequestException("Người dùng đã là thành viên của lịch trình này");
-            }
-
             // count the number of member and check for full
             var membersCount = await _unitOfWork.ItineraryMembers.CountAsync(itinerary.Id);
             if (membersCount >= itinerary.GroupSize)
@@ -117,16 +110,56 @@ namespace vivuvn_api.Services.Implementations
                 throw new BadHttpRequestException("Lịch trình này đã đủ thành viên. Không thể tham gia.");
             }
 
-            // add new member
-            var newMember = new ItineraryMember
+            // check if user is already a member
+            var existingMember = await _unitOfWork.ItineraryMembers.GetOneAsync(im => im.ItineraryId == itinerary.Id && im.UserId == userId, includeProperties: "User");
+
+            if (existingMember is not null && !existingMember.DeleteFlag) // active member exists
             {
-                UserId = userId,
+                throw new BadHttpRequestException("Người dùng đã là thành viên của lịch trình này");
+            }
+
+            if (existingMember is not null && existingMember.DeleteFlag) // inactive member exists
+            {
+                existingMember.DeleteFlag = false;
+                _unitOfWork.ItineraryMembers.Update(existingMember);
+            }
+            else
+            {
+                // add new member
+                var newMember = new ItineraryMember
+                {
+                    UserId = userId,
+                    ItineraryId = itinerary.Id,
+                    JoinedAt = DateTime.UtcNow,
+                    DeleteFlag = false
+                };
+                await _unitOfWork.ItineraryMembers.AddAsync(newMember);
+            }
+
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            // create notification for owner
+            var notification = new Notification
+            {
+                UserId = itinerary.UserId,
                 ItineraryId = itinerary.Id,
-                JoinedAt = DateTime.UtcNow,
-                DeleteFlag = false
+                Type = Constants.NotificationType_MemberJoined,
+                Title = "Có thành viên mới tham gia",
+                Message = $"{user?.Username ?? "Có thành viên mới"} đã tham gia vào lịch trình {itinerary.Name} của bạn.",
+                CreatedAt = DateTime.UtcNow,
             };
-            await _unitOfWork.ItineraryMembers.AddAsync(newMember);
+            await _unitOfWork.Notifications.AddAsync(notification);
             await _unitOfWork.SaveChangesAsync();
+
+            // send notification to owner
+            var fcmData = new Dictionary<string, string>
+            {
+                {"itineraryId", itinerary.Id.ToString() },
+                {"type", Constants.NotificationType_MemberJoined },
+            };
+
+            await _fcmService.SendNotificationToUserAsync(itinerary.UserId,
+                "Có thành viên mới tham gia",
+                $"{user?.Username ?? "Có thành viên mới"} đã tham gia vào lịch trình {itinerary.Name} của bạn.", fcmData);
         }
 
         public async Task<IEnumerable<ItineraryMemberDto>> GetMembersAsync(int itineraryId)
