@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../itinerary/itinerary-detail/schedule/model/itinerary_day.dart';
 import '../service/public_itinerary_service.dart';
 import '../state/public_itinerary_state.dart';
 
@@ -33,16 +32,16 @@ class PublicItineraryController extends StateNotifier<PublicItineraryState> {
       final hotels = await service.getHotels(_itineraryId!);
 
       // Load items for each day
-      final daysWithItems = <ItineraryDay>[];
-      for (final day in days) {
-        try {
-          final items = await service.getItemsByDay(_itineraryId!, day.id);
-          daysWithItems.add(day.copyWith(items: items));
-        } catch (e) {
-          // If error loading items for a day, use empty list
-          daysWithItems.add(day.copyWith(items: []));
-        }
-      }
+      final daysWithItems = await Future.wait(
+        days.map((final day) async {
+          try {
+            final items = await service.getItemsByDay(_itineraryId!, day.id);
+            return day.copyWith(items: items);
+          } catch (_) {
+            return day.copyWith(items: []);
+          }
+        }),
+      );
 
       state = state.copyWith(
         itinerary: itinerary,

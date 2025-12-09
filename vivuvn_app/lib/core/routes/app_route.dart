@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../common/auth/controller/auth_controller.dart';
 import '../../common/auth/state/auth_state.dart';
-import '../../features/home/ui/public_itinerary_view_screen.dart';
 import '../../features/itinerary/itinerary-detail/schedule/model/location.dart';
 import '../../features/itinerary/location-detail/ui/location_detail_screen.dart';
 import '../../screens/bottom_navigation_screen.dart';
@@ -17,6 +16,7 @@ import '../../screens/nearby_hotel_screen.dart';
 import '../../screens/nearby_restaurant_screen.dart';
 import '../../screens/notification_screen.dart';
 import '../../screens/profile_screen.dart';
+import '../../screens/public_itinerary_view_screen.dart';
 import '../../screens/register_screen.dart';
 import '../../screens/route_error_screen.dart';
 import '../../screens/splash_screen.dart';

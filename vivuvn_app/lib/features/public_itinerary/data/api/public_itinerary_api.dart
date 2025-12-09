@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/data/remote/network/network_service.dart';
+import '../../../../core/data/remote/network/network_service.dart';
 import '../../../itinerary/itinerary-detail/member/data/model/member.dart';
 import '../../../itinerary/itinerary-detail/overview/data/dto/hotel_item_response.dart';
 import '../../../itinerary/itinerary-detail/overview/data/dto/restaurant_item_response.dart';
@@ -71,7 +71,7 @@ class PublicItineraryApi {
                 RestaurantItemResponse.fromJson(json as Map<String, dynamic>),
           )
           .toList();
-    } catch (e) {
+    } catch (_) {
       return [];
     }
   }
@@ -88,7 +88,7 @@ class PublicItineraryApi {
                 HotelItemResponse.fromJson(json as Map<String, dynamic>),
           )
           .toList();
-    } catch (e) {
+    } catch (_) {
       return [];
     }
   }

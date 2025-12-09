@@ -5,7 +5,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import '../../../../itinerary/create-itinerary/controller/create_itinerary_controller.dart';
 import '../../../../itinerary/create-itinerary/models/province.dart';
 import '../../../controller/search_itineraries_controller.dart';
-import '../../../data/dto/itinerary_dto.dart';
+import 'widgets/search_itinerary_result_list.dart';
 
 class SearchItinerariesModal extends ConsumerStatefulWidget {
   const SearchItinerariesModal({super.key});
@@ -56,126 +56,6 @@ class _SearchItinerariesModalState
     if (position.pixels >= position.maxScrollExtent - 200) {
       controller.loadMore();
     }
-  }
-
-  Widget _buildItineraryTile(final ItineraryDto itinerary) {
-    final theme = Theme.of(context);
-    final dateRange = itinerary.formattedDateRange;
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: SizedBox(
-        // Allow a bit more vertical room to avoid text overflow in tighter layouts
-        height: 140,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(12),
-              ),
-              child: SizedBox(
-                width: 130,
-                height: 140,
-                child: Image.network(
-                  itinerary.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (final context, final error, final stackTrace) =>
-                          Image.asset(
-                    'assets/images/images-placeholder.jpeg',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      itinerary.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (itinerary.startProvinceName.isNotEmpty)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.flight_takeoff,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              itinerary.startProvinceName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    if (itinerary.startProvinceName.isNotEmpty &&
-                        itinerary.destinationProvinceName.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 2),
-                        child: Icon(
-                          Icons.arrow_downward,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    if (itinerary.destinationProvinceName.isNotEmpty)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.flight_land,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              itinerary.destinationProvinceName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    const Spacer(),
-                    Text(
-                      dateRange,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -298,60 +178,9 @@ class _SearchItinerariesModalState
 
             const SizedBox(height: 16),
 
-            // Results list with pagination
             Expanded(
-              child: Builder(
-                builder: (final context) {
-                  if (state.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (state.itineraries.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.map_outlined,
-                              size: 64, color: Colors.grey[400]),
-                          const SizedBox(height: 16),
-                          Text(
-                            !state.hasSearched
-                                ? 'Chọn tỉnh/thành để tìm kiếm lịch trình'
-                                : 'Chưa có lịch trình nào cho tỉnh/thành này',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await controller.searchByProvince();
-                    },
-                    child: ListView.separated(
-                      controller: _scrollController,
-                      itemCount: state.itineraries.length +
-                          (state.isLoadingMore ? 1 : 0),
-                      separatorBuilder: (final context, final index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (final context, final index) {
-                        if (index >= state.itineraries.length) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        final itinerary = state.itineraries[index];
-                        return _buildItineraryTile(itinerary);
-                      },
-                    ),
-                  );
-                },
+              child: SearchItineraryResultList(
+                scrollController: _scrollController,
               ),
             ),
           ],
