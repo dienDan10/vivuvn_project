@@ -34,12 +34,13 @@ class HomeApi {
   }
 
   /// Fetch public itineraries
-  /// GET /api/v1/itineraries/public?page=1&pageSize=5&sortByDate=true&isDescending=false
+  /// GET /api/v1/itineraries/public?page=1&pageSize=5&sortByDate=true&isDescending=false&provinceId=xx
   Future<List<ItineraryDto>> getPublicItineraries({
     final int page = 1,
     final int pageSize = 5,
     final bool sortByDate = true,
     final bool isDescending = false,
+    final int? provinceId,
   }) async {
     final response = await _dio.get(
       '/api/v1/itineraries/public',
@@ -48,6 +49,7 @@ class HomeApi {
         'pageSize': pageSize,
         'sortByDate': sortByDate,
         'isDescending': isDescending,
+        if (provinceId != null) 'provinceId': provinceId,
       },
     );
 

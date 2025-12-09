@@ -27,13 +27,20 @@ class HomeServiceImpl implements HomeService {
   }
 
   @override
-  Future<List<ItineraryDto>> getPublicItineraries() async {
+  Future<List<ItineraryDto>> getPublicItineraries({
+    final int page = 1,
+    final int pageSize = 5,
+    final bool sortByDate = true,
+    final bool isDescending = false,
+    final int? provinceId,
+  }) async {
     try {
       return await _api.getPublicItineraries(
-        page: 1,
-        pageSize: 5,
-        sortByDate: true,
-        isDescending: false,
+        page: page,
+        pageSize: pageSize,
+        sortByDate: sortByDate,
+        isDescending: isDescending,
+        provinceId: provinceId,
       );
     } catch (e) {
       debugPrint('Error fetching itineraries: $e');

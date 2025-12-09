@@ -6,5 +6,11 @@ abstract class HomeService {
   Future<List<DestinationDto>> getPopularDestinations();
 
   /// Fetch public itineraries
-  Future<List<ItineraryDto>> getPublicItineraries();
+  Future<List<ItineraryDto>> getPublicItineraries({
+    final int page,
+    final int pageSize,
+    final bool sortByDate,
+    final bool isDescending,
+    final int? provinceId,
+  });
 }

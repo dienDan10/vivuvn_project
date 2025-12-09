@@ -2,6 +2,8 @@ class ItineraryDto {
   final String id;
   final String title;
   final String destination;
+  final String startProvinceName;
+  final String destinationProvinceName;
   final String imageUrl;
   final DateTime startDate;
   final DateTime endDate;
@@ -16,6 +18,8 @@ class ItineraryDto {
     required this.id,
     required this.title,
     required this.destination,
+    required this.startProvinceName,
+    required this.destinationProvinceName,
     required this.imageUrl,
     required this.startDate,
     required this.endDate,
@@ -61,6 +65,9 @@ class ItineraryDto {
                         json['destination']?.toString() ?? 
                         json['destinationName']?.toString() ?? 
                         json['startProvinceName']?.toString() ?? '';
+    final startProvinceName = json['startProvinceName']?.toString() ?? '';
+    final destinationProvinceName =
+        json['destinationProvinceName']?.toString() ?? destination;
     
     // Handle owner - ưu tiên lấy ownerId từ top level, sau đó mới lấy từ nested owner object
     OwnerDto? owner;
@@ -132,6 +139,8 @@ class ItineraryDto {
       id: id,
       title: title,
       destination: destination,
+      startProvinceName: startProvinceName,
+      destinationProvinceName: destinationProvinceName,
       imageUrl: json['imageUrl']?.toString() ?? 
                 json['coverImageUrl']?.toString() ?? 
                 json['image']?.toString() ?? '',
@@ -153,6 +162,8 @@ class ItineraryDto {
       'id': id,
       'title': title,
       'destination': destination,
+      'startProvinceName': startProvinceName,
+      'destinationProvinceName': destinationProvinceName,
       'imageUrl': imageUrl,
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
