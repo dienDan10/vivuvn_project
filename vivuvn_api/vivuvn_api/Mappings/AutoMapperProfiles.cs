@@ -30,7 +30,9 @@ namespace vivuvn_api.Mappings
             CreateMap<Itinerary, SearchItineraryDto>()
                 .ForMember(dest => dest.StartProvinceName, opt => opt.MapFrom(src => src.StartProvince.Name))
                 .ForMember(dest => dest.DestinationProvinceName, opt => opt.MapFrom(src => src.DestinationProvince.Name))
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl));
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.DestinationProvince.ImageUrl))
+                .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.User))
+                .ForMember(dest => dest.CurrentMemberCount, opt => opt.MapFrom(src => src.Members.Count));
 
             // Mapping For Itinerary Day
             CreateMap<ItineraryDay, ItineraryDayDto>();

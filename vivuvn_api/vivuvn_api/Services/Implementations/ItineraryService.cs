@@ -56,11 +56,12 @@ namespace vivuvn_api.Services.Implementations
             var (items, totalCount) = await _unitOfWork.Itineraries
                 .GetPagedAsync(filter: filter,
                 orderBy: orderBy,
-                includeProperties: "StartProvince,DestinationProvince",
+                includeProperties: "StartProvince,DestinationProvince,User,Members",
                 pageNumber: request.Page ?? 1,
                 pageSize: request.PageSize ?? Constants.DefaultPageSize);
 
             var itineraryDtos = _mapper.Map<IEnumerable<SearchItineraryDto>>(items);
+
 
             var paginatedResponse = new PaginatedResponseDto<SearchItineraryDto>
             {
@@ -79,11 +80,12 @@ namespace vivuvn_api.Services.Implementations
         public async Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId)
         {
             var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id && !i.DeleteFlag,
-                includeProperties: "StartProvince,DestinationProvince,User");
+                includeProperties: "StartProvince,DestinationProvince,User,Members");
 
             if (itinerary == null) throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {id}.");
             var dto = _mapper.Map<ItineraryDto>(itinerary);
             dto.IsOwner = itinerary.UserId == userId;
+            dto.IsMember = itinerary.Members.Any(m => m.UserId == userId);
             return dto;
         }
 
