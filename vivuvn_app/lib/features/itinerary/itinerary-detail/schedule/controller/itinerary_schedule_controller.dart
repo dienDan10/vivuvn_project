@@ -196,7 +196,7 @@ class ItineraryScheduleController
 
   Future<void> updateDates(final DateTime start, final DateTime end) async {
     if (itineraryId == null) return;
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
 
     try {
       await ref
@@ -210,8 +210,13 @@ class ItineraryScheduleController
       // load lại days
       await fetchDays();
       
+      // Refresh itinerary detail to update dates in detail screen
+      ref.read(itineraryDetailControllerProvider.notifier).fetchItineraryDetail();
+      
       // Refresh home data to update "recent itineraries" section
       ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
+      
+      state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
     }

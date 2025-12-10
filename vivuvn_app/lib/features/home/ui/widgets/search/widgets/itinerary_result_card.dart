@@ -46,6 +46,15 @@ class ItineraryResultCard extends ConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     final theme = Theme.of(context);
     final dateRange = itinerary.formattedDateRange;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 700;
+    
+    // Responsive dimensions
+    final cardHeight = isSmallScreen ? 110.0 : 140.0;
+    final imageWidth = isSmallScreen ? screenWidth * 0.28 : 130.0;
+    final horizontalPadding = isSmallScreen ? 8.0 : 12.0;
+    final verticalPadding = isSmallScreen ? 8.0 : 12.0;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -54,7 +63,7 @@ class ItineraryResultCard extends ConsumerWidget {
         onTap: () => _handleTap(context, ref),
         borderRadius: BorderRadius.circular(12),
         child: SizedBox(
-        height: 140,
+        height: cardHeight,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -63,8 +72,8 @@ class ItineraryResultCard extends ConsumerWidget {
                 left: Radius.circular(12),
               ),
               child: SizedBox(
-                width: 130,
-                height: 140,
+                width: imageWidth,
+                height: cardHeight,
                 child: Image.network(
                   itinerary.imageUrl,
                   fit: BoxFit.cover,
@@ -77,10 +86,10 @@ class ItineraryResultCard extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: horizontalPadding),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: verticalPadding),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,22 +100,24 @@ class ItineraryResultCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
+                        fontSize: isSmallScreen ? 14 : null,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: isSmallScreen ? 2 : 4),
                     if (itinerary.startProvinceName.isNotEmpty)
                       _buildProvinceRow(
                         context,
                         icon: Icons.flight_takeoff,
                         label: itinerary.startProvinceName,
+                        isSmallScreen: isSmallScreen,
                       ),
                     if (itinerary.startProvinceName.isNotEmpty &&
                         itinerary.destinationProvinceName.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 2),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 1 : 2),
                         child: Icon(
                           Icons.arrow_downward,
-                          size: 14,
+                          size: isSmallScreen ? 12 : 14,
                           color: Colors.grey,
                         ),
                       ),
@@ -115,19 +126,21 @@ class ItineraryResultCard extends ConsumerWidget {
                         context,
                         icon: Icons.flight_land,
                         label: itinerary.destinationProvinceName,
+                        isSmallScreen: isSmallScreen,
                       ),
                     const Spacer(),
                     Text(
                       dateRange,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline,
+                        fontSize: isSmallScreen ? 11 : null,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: horizontalPadding),
           ],
         ),
       ),
@@ -139,16 +152,17 @@ class ItineraryResultCard extends ConsumerWidget {
     final BuildContext context, {
     required final IconData icon,
     required final String label,
+    required final bool isSmallScreen,
   }) {
     final theme = Theme.of(context);
     return Row(
       children: [
         Icon(
           icon,
-          size: 16,
+          size: isSmallScreen ? 14 : 16,
           color: theme.colorScheme.primary,
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: isSmallScreen ? 4 : 6),
         Expanded(
           child: Text(
             label,
@@ -157,6 +171,7 @@ class ItineraryResultCard extends ConsumerWidget {
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w500,
+              fontSize: isSmallScreen ? 12 : null,
             ),
           ),
         ),

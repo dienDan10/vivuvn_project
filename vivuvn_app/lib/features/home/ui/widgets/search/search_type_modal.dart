@@ -20,70 +20,88 @@ class SearchTypeModal extends StatelessWidget {
   Widget build(final BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenSize = MediaQuery.of(context).size;
+    final screenHeight = screenSize.height;
+    final screenWidth = screenSize.width;
+    final isSmallScreen = screenHeight < 700 || screenWidth < 360;
 
     return Container(
-      height: screenHeight * 0.38,
+      constraints: BoxConstraints(
+        maxHeight: screenHeight * 0.5,
+        minHeight: isSmallScreen ? 200 : 250,
+      ),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Title
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'Bạn muốn tìm kiếm gì?',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: isSmallScreen ? 8 : 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-          ),
 
-          const SizedBox(height: 20),
+            SizedBox(height: isSmallScreen ? 12 : 20),
 
-          // Option 1: Search Places
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _SearchOptionCard(
-              icon: Icons.place,
-              title: 'Địa điểm du lịch',
-              description: 'Tìm kiếm các địa điểm du lịch hấp dẫn',
-              color: colorScheme.primary,
-              onTap: () => Navigator.of(context).pop('places'),
+            // Title
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isSmallScreen ? 16 : 24,
+              ),
+              child: Text(
+                'Bạn muốn tìm kiếm gì?',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: isSmallScreen ? 18 : null,
+                ),
+              ),
             ),
-          ),
 
-          const SizedBox(height: 16),
+            SizedBox(height: isSmallScreen ? 12 : 20),
 
-          // Option 2: Search Itineraries
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _SearchOptionCard(
-              icon: Icons.map,
-              title: 'Lịch trình du lịch',
-              description: 'Khám phá các lịch trình từ cộng đồng',
-              color: colorScheme.secondary,
-              onTap: () => Navigator.of(context).pop('itineraries'),
+            // Option 1: Search Places
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isSmallScreen ? 16 : 24,
+              ),
+              child: _SearchOptionCard(
+                icon: Icons.place,
+                title: 'Địa điểm du lịch',
+                description: 'Tìm kiếm các địa điểm du lịch hấp dẫn',
+                color: colorScheme.primary,
+                onTap: () => Navigator.of(context).pop('places'),
+                isSmallScreen: isSmallScreen,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 20),
-        ],
+            SizedBox(height: isSmallScreen ? 12 : 16),
+
+            // Option 2: Search Itineraries
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isSmallScreen ? 16 : 24,
+              ),
+              child: _SearchOptionCard(
+                icon: Icons.map,
+                title: 'Lịch trình du lịch',
+                description: 'Khám phá các lịch trình từ cộng đồng',
+                color: colorScheme.secondary,
+                onTap: () => Navigator.of(context).pop('itineraries'),
+                isSmallScreen: isSmallScreen,
+              ),
+            ),
+
+            SizedBox(height: isSmallScreen ? 12 : 20),
+          ],
+        ),
       ),
     );
   }
@@ -95,6 +113,7 @@ class _SearchOptionCard extends StatelessWidget {
   final String description;
   final Color color;
   final VoidCallback onTap;
+  final bool isSmallScreen;
 
   const _SearchOptionCard({
     required this.icon,
@@ -102,18 +121,23 @@ class _SearchOptionCard extends StatelessWidget {
     required this.description,
     required this.color,
     required this.onTap,
+    required this.isSmallScreen,
   });
 
   @override
   Widget build(final BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final iconSize = isSmallScreen ? 40.0 : 56.0;
+    final iconInnerSize = isSmallScreen ? 20.0 : 28.0;
+    final padding = isSmallScreen ? 12.0 : 20.0;
+    final spacing = isSmallScreen ? 12.0 : 16.0;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(padding),
         decoration: BoxDecoration(
           color: isDark ? Colors.grey[850] : Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -130,34 +154,41 @@ class _SearchOptionCard extends StatelessWidget {
           children: [
             // Icon
             Container(
-              width: 56,
-              height: 56,
+              width: iconSize,
+              height: iconSize,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 28),
+              child: Icon(icon, color: color, size: iconInnerSize),
             ),
 
-            const SizedBox(width: 16),
+            SizedBox(width: spacing),
 
             // Text content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: isSmallScreen ? 14 : null,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: isSmallScreen ? 2 : 4),
                   Text(
                     description,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.grey,
+                      fontSize: isSmallScreen ? 11 : null,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -166,7 +197,7 @@ class _SearchOptionCard extends StatelessWidget {
             // Arrow icon
             Icon(
               Icons.arrow_forward_ios,
-              size: 16,
+              size: isSmallScreen ? 14 : 16,
               color: Colors.grey.withValues(alpha: 0.5),
             ),
           ],
