@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../../core/routes/routes.dart';
 import '../../../../../itinerary/itinerary-detail/detail/service/itinerary_detail_service.dart';
+import '../../../../controller/search_itineraries_controller.dart';
 import '../../../../data/dto/itinerary_dto.dart';
 
 class ItineraryResultCard extends ConsumerWidget {
@@ -17,7 +18,17 @@ class ItineraryResultCard extends ConsumerWidget {
     final isAllowedToViewDetail = itinerary.isMember || itinerary.isOwner;
 
     if (isAllowedToViewDetail && itineraryId != null) {
-      context.push(createItineraryDetailRoute(itineraryId));
+      // Clear search data
+      ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
+      
+      // Close modal if we're in a modal context
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      
+      if (context.mounted) {
+        context.push(createItineraryDetailRoute(itineraryId));
+      }
       return;
     }
 
@@ -29,6 +40,14 @@ class ItineraryResultCard extends ConsumerWidget {
         final allowFromDetail = detail.isMember || detail.isOwner;
 
         if (allowFromDetail) {
+          // Clear search data
+          ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
+          
+          // Close modal if we're in a modal context
+          if (context.mounted && Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
+          
           if (context.mounted) {
             context.push(createItineraryDetailRoute(itineraryId));
           }
@@ -39,7 +58,17 @@ class ItineraryResultCard extends ConsumerWidget {
       }
     }
 
-    context.push(createPublicItineraryViewRoute(itinerary.id));
+    // Clear search data
+    ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
+    
+    // Close modal if we're in a modal context
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+    
+    if (context.mounted) {
+      context.push(createPublicItineraryViewRoute(itinerary.id));
+    }
   }
 
   @override
@@ -135,6 +164,8 @@ class ItineraryResultCard extends ConsumerWidget {
                         color: theme.colorScheme.outline,
                         fontSize: isSmallScreen ? 11 : null,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

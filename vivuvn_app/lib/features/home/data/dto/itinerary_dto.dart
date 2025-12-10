@@ -194,10 +194,11 @@ class ItineraryDto {
   }
 
   String get formattedDateRange {
-    final start = startDate.day.toString().padLeft(2, '0');
+    final start =
+        '${startDate.day.toString().padLeft(2, '0')}/${startDate.month.toString().padLeft(2, '0')}/${startDate.year}';
     final end =
         '${endDate.day.toString().padLeft(2, '0')}/${endDate.month.toString().padLeft(2, '0')}/${endDate.year}';
-    return '$start-$end';
+    return '$start - $end';
   }
 }
 
