@@ -107,7 +107,7 @@ class ItineraryResultCard extends ConsumerWidget {
                     if (itinerary.startProvinceName.isNotEmpty)
                       _buildProvinceRow(
                         context,
-                        icon: Icons.flight_takeoff,
+                        icon: Icons.place,
                         label: itinerary.startProvinceName,
                         isSmallScreen: isSmallScreen,
                       ),
@@ -124,7 +124,7 @@ class ItineraryResultCard extends ConsumerWidget {
                     if (itinerary.destinationProvinceName.isNotEmpty)
                       _buildProvinceRow(
                         context,
-                        icon: Icons.flight_land,
+                        icon: Icons.place,
                         label: itinerary.destinationProvinceName,
                         isSmallScreen: isSmallScreen,
                       ),

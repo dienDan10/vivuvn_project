@@ -5,6 +5,7 @@ import 'widgets/itinerary_appbar_buttons.dart';
 import 'widgets/itinerary_background_image.dart';
 import 'widgets/itinerary_date_range.dart';
 import 'widgets/itinerary_name_editor.dart';
+import 'widgets/itinerary_provinces.dart';
 
 class ExpandedAppbarBackground extends StatelessWidget {
   const ExpandedAppbarBackground({super.key});
@@ -20,14 +21,15 @@ class ExpandedAppbarBackground extends StatelessWidget {
           top: appbarExpandedHeight * 0.4,
           left: 20,
           right: 20,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ItineraryNameEditor(),
-              SizedBox(height: 8),
-              ItineraryDateRange(),
-            ],
-          ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ItineraryNameEditor(),
+                SizedBox(height: 8),
+                ItineraryDateRange(),
+                ItineraryProvinces(),
+              ],
+            ),
         ),
       ],
     );
