@@ -1,21 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../../core/routes/routes.dart';
+import '../../../../../itinerary/itinerary-detail/detail/service/itinerary_detail_service.dart';
 import '../../../../data/dto/itinerary_dto.dart';
 
-class ItineraryResultCard extends StatelessWidget {
+class ItineraryResultCard extends ConsumerWidget {
   final ItineraryDto itinerary;
 
   const ItineraryResultCard({required this.itinerary, super.key});
 
+  Future<void> _handleTap(final BuildContext context, final WidgetRef ref) async {
+    final itineraryId = int.tryParse(itinerary.id);
+
+    final isAllowedToViewDetail = itinerary.isMember || itinerary.isOwner;
+
+    debugPrint(
+      'ItineraryResultCard tap - id: ${itinerary.id}, parsedId: $itineraryId, '
+      'isOwner: ${itinerary.isOwner}, isMember: ${itinerary.isMember}, '
+      'route: ${isAllowedToViewDetail && itineraryId != null ? 'detail' : 'public'}',
+    );
+
+    if (isAllowedToViewDetail && itineraryId != null) {
+      context.push(createItineraryDetailRoute(itineraryId));
+      return;
+    }
+
+    // Fallback: nếu list item không có isMember/isOwner đúng, gọi detail để kiểm tra lại
+    if (itineraryId != null) {
+      try {
+        final detailService = ref.read(itineraryDetailServiceProvider);
+        final detail = await detailService.getItineraryDetail(itineraryId);
+        final allowFromDetail = detail.isMember || detail.isOwner;
+
+        debugPrint(
+          'ItineraryResultCard tap - fallback detail check id: $itineraryId, '
+          'detail.isOwner: ${detail.isOwner}, detail.isMember: ${detail.isMember}, '
+          'route: ${allowFromDetail ? 'detail' : 'public'}',
+        );
+
+        if (allowFromDetail) {
+          if (context.mounted) {
+            context.push(createItineraryDetailRoute(itineraryId));
+          }
+          return;
+        }
+      } catch (e) {
+        debugPrint('ItineraryResultCard tap - fallback detail error: $e');
+      }
+    }
+
+    context.push(createPublicItineraryViewRoute(itinerary.id));
+  }
+
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final theme = Theme.of(context);
     final dateRange = itinerary.formattedDateRange;
 
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: SizedBox(
+      child: InkWell(
+        onTap: () => _handleTap(context, ref),
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
         height: 140,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,6 +142,7 @@ class ItineraryResultCard extends StatelessWidget {
             const SizedBox(width: 12),
           ],
         ),
+      ),
       ),
     );
   }
