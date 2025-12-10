@@ -9,14 +9,28 @@ import 'invite_button.dart';
 import 'privacy_button.dart';
 
 class SettingsModal extends ConsumerWidget {
-  const SettingsModal({super.key});
+  final int? itineraryId;
+  final BuildContext? parentContext;
+  
+  const SettingsModal({
+    super.key, 
+    this.itineraryId,
+    this.parentContext,
+  });
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final isOwner =
         ref.watch(itineraryDetailControllerProvider).itinerary?.isOwner ?? false;
-    final itineraryId =
+    
+    // Sử dụng itineraryId được truyền vào, fallback về controller nếu không có
+    final finalItineraryId = itineraryId ?? 
         ref.watch(itineraryDetailControllerProvider).itineraryId;
+    
+    // Sử dụng parentContext nếu có (từ nơi gọi showModalBottomSheet), 
+    // nếu không thì dùng context hiện tại
+    final detailScreenContext = parentContext ?? context;
+    
     return Stack(
       children: [
         // Background tap area
@@ -91,15 +105,55 @@ class SettingsModal extends ConsumerWidget {
                               ),
                               title: const Text('Rời khỏi chuyến đi này'),
                               onTap: () {
+                                final itineraryIdToLeave = finalItineraryId;
+                                
+                                // Đóng settings modal trước (dùng context từ builder)
                                 Navigator.of(context).pop();
-                                if (itineraryId != null) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (final _) => LeaveConfirmDialog(
-                                      itineraryId: itineraryId,
-                                      popToList: true,
-                                    ),
-                                  );
+                                
+                                if (itineraryIdToLeave != null) {
+                                  // Đợi một chút để modal đóng hoàn toàn trước khi show dialog
+                                  // Sử dụng detailScreenContext từ outer build method
+                                  Future.delayed(const Duration(milliseconds: 300), () {
+                                    // Kiểm tra mounted và show dialog với context đúng
+                                    try {
+                                      if (detailScreenContext.mounted) {
+                                        showDialog(
+                                          context: detailScreenContext,
+                                          barrierDismissible: false,
+                                          builder: (final dialogContext) => LeaveConfirmDialog(
+                                            itineraryId: itineraryIdToLeave,
+                                            popToList: true,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      // Nếu có lỗi, thử với root navigator
+                                      try {
+                                        showDialog(
+                                          context: detailScreenContext,
+                                          useRootNavigator: true,
+                                          barrierDismissible: false,
+                                          builder: (final dialogContext) => LeaveConfirmDialog(
+                                            itineraryId: itineraryIdToLeave,
+                                            popToList: true,
+                                          ),
+                                        );
+                                      } catch (_) {
+                                        // Ignore nếu vẫn lỗi
+                                      }
+                                    }
+                                  });
+                                } else {
+                                  // Nếu itineraryId null, hiển thị lỗi
+                                  Future.delayed(const Duration(milliseconds: 300), () {
+                                    if (detailScreenContext.mounted) {
+                                      ScaffoldMessenger.of(detailScreenContext).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Không thể xác định lịch trình'),
+                                        ),
+                                      );
+                                    }
+                                  });
                                 }
                               },
                             ),

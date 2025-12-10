@@ -16,12 +16,6 @@ class ItineraryResultCard extends ConsumerWidget {
 
     final isAllowedToViewDetail = itinerary.isMember || itinerary.isOwner;
 
-    debugPrint(
-      'ItineraryResultCard tap - id: ${itinerary.id}, parsedId: $itineraryId, '
-      'isOwner: ${itinerary.isOwner}, isMember: ${itinerary.isMember}, '
-      'route: ${isAllowedToViewDetail && itineraryId != null ? 'detail' : 'public'}',
-    );
-
     if (isAllowedToViewDetail && itineraryId != null) {
       context.push(createItineraryDetailRoute(itineraryId));
       return;
@@ -34,12 +28,6 @@ class ItineraryResultCard extends ConsumerWidget {
         final detail = await detailService.getItineraryDetail(itineraryId);
         final allowFromDetail = detail.isMember || detail.isOwner;
 
-        debugPrint(
-          'ItineraryResultCard tap - fallback detail check id: $itineraryId, '
-          'detail.isOwner: ${detail.isOwner}, detail.isMember: ${detail.isMember}, '
-          'route: ${allowFromDetail ? 'detail' : 'public'}',
-        );
-
         if (allowFromDetail) {
           if (context.mounted) {
             context.push(createItineraryDetailRoute(itineraryId));
@@ -47,7 +35,7 @@ class ItineraryResultCard extends ConsumerWidget {
           return;
         }
       } catch (e) {
-        debugPrint('ItineraryResultCard tap - fallback detail error: $e');
+        // Error handled silently
       }
     }
 

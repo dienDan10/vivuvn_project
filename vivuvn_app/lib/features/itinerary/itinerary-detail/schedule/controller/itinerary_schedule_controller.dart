@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../../home/controller/home_controller.dart';
 import '../../detail/controller/itinerary_detail_controller.dart';
 import '../model/add_location_result.dart';
 import '../model/itinerary_day.dart';
@@ -208,6 +209,9 @@ class ItineraryScheduleController
 
       // load lại days
       await fetchDays();
+      
+      // Refresh home data to update "recent itineraries" section
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
     }

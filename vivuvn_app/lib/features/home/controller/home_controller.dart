@@ -35,19 +35,56 @@ class HomeController extends StateNotifier<HomeState> {
         status: HomeStatus.error,
         errorMessage: message,
       );
-      debugPrint('Error loading home data: $message');
     } catch (e) {
       state = state.copyWith(
         status: HomeStatus.error,
         errorMessage: e.toString(),
       );
-      debugPrint('Error loading home data: $e');
     }
   }
 
   Future<void> refreshHomeData() async {
     state = const HomeState();
     await loadHomeData();
+  }
+
+  /// Refresh data silently without showing loading indicator
+  /// Used when returning to home screen
+  Future<void> refreshHomeDataSilently() async {
+    // Don't refresh if already loading
+    if (state.isLoading) return;
+    
+    // Keep current data and status, just refresh in background
+    try {
+      final destinations = await _service.getPopularDestinations();
+      final itineraries = await _service.getPublicItineraries();
+
+      state = state.copyWith(
+        status: HomeStatus.loaded,
+        destinations: destinations,
+        itineraries: itineraries,
+        errorMessage: null, // Clear any previous errors
+      );
+    } on DioException catch (e) {
+      final message = DioExceptionHandler.handleException(e);
+      // Only update error if we have data, otherwise keep showing data
+      if (state.isEmpty) {
+        state = state.copyWith(
+          status: HomeStatus.error,
+          errorMessage: message,
+        );
+      }
+      // If we have data, keep showing it even if refresh fails
+    } catch (e) {
+      // Only update error if we have data, otherwise keep showing data
+      if (state.isEmpty) {
+        state = state.copyWith(
+          status: HomeStatus.error,
+          errorMessage: e.toString(),
+        );
+      }
+      // If we have data, keep showing it even if refresh fails
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'settings/settings_modal.dart';
 
@@ -7,6 +8,19 @@ class ButtonSettings extends StatelessWidget {
   const ButtonSettings({super.key, this.onAppbar = false});
 
   void _showSettingsModal(final BuildContext context) {
+    // Lấy itineraryId từ route parameter trước khi show modal
+    // Context này nằm trong cây GoRouter nên có thể lấy được route parameter
+    int? itineraryId;
+    try {
+      final route = GoRouterState.of(context);
+      final itineraryIdParam = route.pathParameters['id'];
+      itineraryId = itineraryIdParam != null ? int.tryParse(itineraryIdParam) : null;
+    } catch (e) {
+      // Nếu không lấy được từ route, itineraryId sẽ là null
+      // SettingsModal sẽ fallback về controller
+      itineraryId = null;
+    }
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -17,7 +31,10 @@ class ButtonSettings extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (final context) => const SettingsModal(),
+      builder: (final modalContext) => SettingsModal(
+        itineraryId: itineraryId,
+        parentContext: context, // Truyền context của detail screen
+      ),
     );
   }
 

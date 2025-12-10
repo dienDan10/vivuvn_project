@@ -94,12 +94,6 @@ class ItineraryDto {
     // Ưu tiên: lấy ownerId từ top level nếu có
     final ownerIdFromTop = json['ownerId']?.toString();
     
-    // Debug: In ra để kiểm tra (có thể xóa sau)
-    // ignore: avoid_print
-    print('ItineraryDto.fromJson - ownerIdFromTop: $ownerIdFromTop');
-    // ignore: avoid_print
-    print('ItineraryDto.fromJson - owner object: ${json['owner']}');
-    
     if (json['owner'] != null && json['owner'] is Map) {
       final ownerMap = json['owner'] as Map<String, dynamic>;
       // Nếu có ownerId từ top level, ưu tiên dùng nó
@@ -112,16 +106,6 @@ class ItineraryDto {
       }
       
       final finalOwnerId = ownerIdFromTop ?? ownerIdFromMap ?? '';
-      
-      // Debug
-      // ignore: avoid_print
-      print('ItineraryDto.fromJson - ownerIdFromTop: $ownerIdFromTop');
-      // ignore: avoid_print
-      print('ItineraryDto.fromJson - ownerMap[id]: ${ownerMap['id']}');
-      // ignore: avoid_print
-      print('ItineraryDto.fromJson - ownerMap[userId]: ${ownerMap['userId']}');
-      // ignore: avoid_print
-      print('ItineraryDto.fromJson - finalOwnerId: $finalOwnerId');
       
       owner = OwnerDto(
         id: finalOwnerId,
@@ -149,10 +133,6 @@ class ItineraryDto {
       // Default owner if not provided
       owner = const OwnerDto(id: '', name: 'Unknown');
     }
-    
-    // Debug: In ra owner cuối cùng
-    // ignore: avoid_print
-    print('ItineraryDto.fromJson - final owner.id: ${owner.id}');
     
     final currentMemberCount = json['currentMemberCount'] as int? ??
         json['participantCount'] as int? ??
