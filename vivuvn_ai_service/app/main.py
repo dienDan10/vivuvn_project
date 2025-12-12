@@ -22,11 +22,12 @@ from app.api.schemas import HealthCheckResponse
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
-        structlog.stdlib.filter_by_level,  # Filter by log level
+        structlog.stdlib.filter_by_level,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,  # Format exception info đẹp hơn
         structlog.processors.UnicodeDecoder(),
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
     ],
@@ -36,14 +37,24 @@ structlog.configure(
     cache_logger_on_first_use=True,
 )
 
+# Console renderer với colors và formatting đẹp
 handler = logging.StreamHandler()
 handler.setFormatter(structlog.stdlib.ProcessorFormatter(
-    processor=structlog.dev.ConsoleRenderer(),
+    processor=structlog.dev.ConsoleRenderer(
+        colors=True,  # Bật màu sắc
+        exception_formatter=structlog.dev.plain_traceback,  # Format traceback rõ ràng
+    ),
 ))
+
 root_logger = logging.getLogger()
 root_logger.handlers.clear()
 root_logger.addHandler(handler)
 root_logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper()))
+
+# Giảm noise từ các thư viện bên ngoài
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 logger = structlog.get_logger(__name__)
 

@@ -157,11 +157,19 @@ class TravelItinerary(BaseModel):
     )
     schedule_unavailable: bool = Field(
         ...,
-        description="True if itinerary could not be fully scheduled due to constraints"
+        description=(
+            "True nếu không thể tạo lịch trình do các ràng buộc cứng "
+            "(vượt ngân sách, thiếu địa điểm, thời gian di chuyển quá dài). "
+            "Khi True, xem warnings[0] để biết lý do."
+        )
     )
-    unavailable_reason: str = Field(
-        ...,
-        description="Reason why itinerary could not be fully scheduled, if applicable"
+    warnings: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Thông báo thân thiện bằng tiếng Việt (text thuần, không icon). "
+            "- Nếu schedule_unavailable=True: warnings[0] chứa lý do chặn (vd: vượt ngân sách). "
+            "- Nếu schedule_unavailable=False: cảnh báo không chặn (vd: đổi phương tiện)."
+        )
     )
 
 

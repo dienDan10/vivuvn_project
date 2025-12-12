@@ -65,16 +65,50 @@ KHÔNG thêm vào activities | Tối đa 2 suggestions | Cost = TOTAL cho nhóm 
 }
 ```
 
-**Đi lại giữa các thành phố (Transportation - max 2):**
+**Transportation (max 2):**
 ```json
 {
   "mode": "xe khách",
-  "estimated_cost": 2000000,     // VND cho CẢ NHÓM (tổng chi phí cho tất cả thành viên)
+  "estimated_cost": 2000000,
   "date": "2024-03-15",
-  "details": "Hà Nội-Đà Nẵng, 07:00-21:00 (14h)"
+  "details": "Hà Nội → Đà Nẵng, 07:00-21:00 (14h)"
 }
 ```
-*Format: Từ-Đến, giờ bắt đầu-giờ kết thúc (tổng thời gian) (lý do thay đổi transportation_mode nếu có). Không lặp lại route.*
+
+**Example: Transportation warning (LLM tự tạo, không có icon)**
+User chọn "máy bay", route HN → Hà Giang
+```json
+{
+  "transportation_suggestions": [{
+    "mode": "xe khách",
+    "estimated_cost": 400000,
+    "date": "2024-03-15",
+    "details": "Hà Nội → Hà Giang, 06:00-12:00 (6h)"
+  }],
+  "warnings": [
+    "Phương tiện di chuyển: Hà Giang không có sân bay, nên chúng tôi đề xuất xe khách thay vì máy bay để bạn có thể di chuyển thuận tiện hơn."
+  ]
+}
+```
+
+**Example: Cost warning (Backend tạo, không có icon)**
+Budget: 10,000,000 VND, Total cost: 10,500,000 VND
+```json
+{
+  "total_cost": 10500000,
+  "schedule_unavailable": true,
+  "unavailable_reason": "Tổng chi phí 10,500,000 VND vượt ngân sách 10,000,000 VND",
+  "warnings": [
+    "Chi phí vượt ngân sách: 10,500,000 VND (vượt 500,000 VND so với ngân sách 10,000,000 VND). Bạn có thể cần điều chỉnh lịch trình hoặc tăng ngân sách."
+  ]
+}
+```
+
+**Lưu ý:**
+- KHÔNG CÓ field unavailable_reason nữa
+- Khi schedule_unavailable=true: warnings[0] chứa lý do chặn
+- Khi schedule_unavailable=false: warnings chứa cảnh báo không chặn
+- Text thuần bằng tiếng Việt, không icon
 """
 
     NOTES_GUIDE = """## VIẾT NOTES (BẮT BUỘC)
@@ -187,11 +221,21 @@ Huế↔TPHCM | ĐN↔Huế
 
 **Nếu phương tiện user chọn KHÔNG pass validation:**
 - Suggest: phương tiện tối ưu cho chuyến đi
-- Reason: Đưa ra lý do phương tiện người dùng chọn không pass validation (VD: "Không có sân bay", "Rẻ hơn", "Thoải mái hơn")
-- Ví dụ: User "máy bay" HN→Hà Giang (không có sân bay) → Suggest + reason
-**Nếu tổng thời gian di chuyển từ điểm xuất phát đến điểm đến và ngược lại lớn hơn travel duration (end date - start date):** schedule_unavailable=true, giải thích + đề xuất
-**Ngày khởi hành phụ thuộc vào thời gian di chuyển của phương tiện**: Điều chỉnh ngày khởi hành sao cho phù hợp với thời gian di chuyển của phương tiện đã chọn.
-- Ví dụ: Nếu phương tiện di chuyển mất 2 ngày và ngày trở về là ngày 10, thì ngày khởi hành phải là ngày 8 hoặc trước đó."""
+- ADD TO warnings: Tạo message thân thiện BẰNG TIẾNG VIỆT giải thích tại sao thay đổi
+  * KHÔNG dùng icon, chỉ text thuần
+  * Giải thích rõ ràng lý do (không có sân bay/ga, quãng đường xa, thời gian chuyến đi, etc.)
+  * Giọng điệu thân thiện, lịch sự, chuyên nghiệp
+  * Đề xuất phương tiện phù hợp hơn
+  * Ví dụ: "Phương tiện di chuyển: Hà Giang không có sân bay, nên chúng tôi đề xuất xe khách thay vì máy bay để bạn có thể di chuyển thuận tiện hơn."
+- details CHỈ ghi: "Route, giờ xuất phát-giờ đến (tổng thời gian)"
+  * Ví dụ: "Hà Nội → Hà Giang, 06:00-12:00 (6h)"
+  * KHÔNG ghi lý do trong details
+
+**Nếu tổng thời gian di chuyển lớn hơn travel duration:** 
+- schedule_unavailable=true
+- unavailable_reason: giải thích + đề xuất
+
+**Ngày khởi hành:** Điều chỉnh ngày khởi hành sao cho phù hợp với thời gian di chuyển của phương tiện đã chọn."""
 
     BUDGET_STRATEGY = """## CHIẾN LƯỢC NGÂN SÁCH
 
@@ -231,16 +275,33 @@ Note: Both activity cost_estimate and transportation estimated_cost are TOTAL fo
 
     VALIDATION_AND_FALLBACK = """## VALIDATION & FALLBACK
 
-**Validation rules:**
-- Min 3 activities/day
+**Quy tắc validation:**
+- Tối thiểu 3 hoạt động/ngày (khuyến nghị, có thể giảm nếu thiếu dữ liệu)
 - place_id hợp lệ từ danh sách
-- total_cost ≤ budget × 1.1 (10% buffer OK)
+- total_cost ≤ budget (ràng buộc cứng)
 
-**Fallback strategies:**
-1. **Thiếu địa điểm:** Giảm số ngày, note "Chỉ đủ cho X ngày chất lượng"
-2. **Zero preference match:** Dùng rating cao nhất + notes giải thích
-3. **Budget impossible:** schedule_unavailable + "Tối thiểu cần Xk VND"
-4. **Không đủ hoạt động/ngày:** Tăng duration_hours cho activities hiện có
+**Lỗi nghiêm trọng (schedule_unavailable=true):**
+1. **Vượt ngân sách:** 
+   - Đặt schedule_unavailable=true
+   - Thêm vào warnings[0]: "Chi phí vượt ngân sách: X VND vượt quá ngân sách Y VND. Bạn có thể cần điều chỉnh lịch trình hoặc tăng ngân sách."
+
+2. **Thiếu địa điểm (<2 địa điểm/ngày):**
+   - Đặt schedule_unavailable=true
+   - Thêm vào warnings[0]: "Không đủ địa điểm: Chỉ có X địa điểm cho Y ngày. Đề xuất giảm số ngày hoặc mở rộng vùng tìm kiếm."
+
+3. **Thời gian di chuyển > thời gian chuyến đi:**
+   - Đặt schedule_unavailable=true
+   - Thêm vào warnings[0]: "Thời gian di chuyển quá dài: X giờ vượt quá thời gian chuyến đi Y ngày. Đề xuất tăng số ngày hoặc chọn điểm đến gần hơn."
+
+**Vấn đề không chặn (schedule_unavailable=false, thêm vào warnings):**
+1. **Đổi phương tiện di chuyển:** Giải thích lý do bằng tiếng Việt, text thuần
+2. **Khớp sở thích thấp:** (tùy chọn) Ghi chú trong warnings
+3. **Không có dữ liệu thời tiết:** (tùy chọn) Ghi chú trong warnings
+
+**Quan trọng:** 
+- KHÔNG CÒN field unavailable_reason
+- Khi schedule_unavailable=true: Đặt lý do chặn vào warnings[0]
+- Khi schedule_unavailable=false: Đặt cảnh báo không chặn vào warnings
 
 **Output:** JSON theo schema TravelItinerary | MỌI text tiếng Việt"""
 
