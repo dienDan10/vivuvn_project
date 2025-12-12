@@ -16,14 +16,13 @@ class ItineraryDetailScreen extends ConsumerStatefulWidget {
 class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
   @override
   void initState() {
-    // Set the itinerary ID in the controller
+    super.initState();
+    // Set the itinerary ID trong addPostFrameCallback để tránh modify provider trong build phase
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
           .read(itineraryDetailControllerProvider.notifier)
           .setItineraryId(widget.itineraryId);
     });
-
-    super.initState();
   }
 
   @override

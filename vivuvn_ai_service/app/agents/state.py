@@ -23,6 +23,7 @@ class TravelPlanningState(TypedDict):
     final_response: Optional[TravelResponse]
     error: Optional[str]
     validation_passed: bool  # Anti-hallucination check
+    warnings: List[str]  # Warnings from both LLM and backend
 
 
 __all__ = ["TravelPlanningState"]

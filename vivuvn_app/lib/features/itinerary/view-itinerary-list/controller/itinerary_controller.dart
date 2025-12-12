@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../home/controller/home_controller.dart';
 import '../service/itinerary_service.dart';
 import '../state/itinerary_state.dart';
 
@@ -35,6 +36,10 @@ class ItineraryController extends Notifier<ItineraryState> {
       await ref.read(itineraryServiceProvider).deleteItinerary(itineraryId);
       final refreshed = await ref.read(itineraryServiceProvider).getItineraries();
       state = state.copyWith(itineraries: refreshed, isLoading: false);
+      
+      // Refresh home data to update "recent itineraries" section
+      // Use silent refresh to avoid showing loading indicator
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
       state = state.copyWith(error: errorMsg, isLoading: false);
@@ -51,6 +56,10 @@ class ItineraryController extends Notifier<ItineraryState> {
       await ref.read(itineraryServiceProvider).leaveItinerary(itineraryId);
       final refreshed = await ref.read(itineraryServiceProvider).getItineraries();
       state = state.copyWith(itineraries: refreshed, isLoading: false);
+      
+      // Refresh home data to update "recent itineraries" section
+      // Use silent refresh to avoid showing loading indicator
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
       state = state.copyWith(error: errorMsg, isLoading: false);

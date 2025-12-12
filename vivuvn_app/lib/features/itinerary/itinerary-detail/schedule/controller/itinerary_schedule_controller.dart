@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../../home/controller/home_controller.dart';
 import '../../detail/controller/itinerary_detail_controller.dart';
 import '../model/add_location_result.dart';
 import '../model/itinerary_day.dart';
@@ -195,7 +196,7 @@ class ItineraryScheduleController
 
   Future<void> updateDates(final DateTime start, final DateTime end) async {
     if (itineraryId == null) return;
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
 
     try {
       await ref
@@ -208,6 +209,14 @@ class ItineraryScheduleController
 
       // load lại days
       await fetchDays();
+      
+      // Refresh itinerary detail to update dates in detail screen
+      ref.read(itineraryDetailControllerProvider.notifier).fetchItineraryDetail();
+      
+      // Refresh home data to update "recent itineraries" section
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
+      
+      state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
     }

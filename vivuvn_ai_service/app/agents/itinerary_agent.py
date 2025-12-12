@@ -111,18 +111,20 @@ class ItineraryAgent:
                 "transportation_suggestions": [t.model_dump() for t in structured_itinerary.transportation_suggestions],
                 "total_cost": structured_itinerary.total_cost,
                 "schedule_unavailable": structured_itinerary.schedule_unavailable,
-                "unavailable_reason": structured_itinerary.unavailable_reason
+                "warnings": structured_itinerary.warnings
             }
 
             # Log budget validation status with structured fields
             if structured_data.get('schedule_unavailable'):
+                warnings = structured_data.get('warnings', [])
+                blocking_reason = warnings[0] if warnings else 'Không có lý do cụ thể'
                 logger.warning(
-                    "[Node 4/6] Budget exceeded",
+                    "[Node 4/6] Lịch trình không khả dụng",
                     destination=travel_request.destination,
                     total_cost=structured_data.get('total_cost', 0),
                     budget=travel_request.budget,
-                    reason=structured_data.get('unavailable_reason', 'No reason provided'),
-                    error_code="BUDGET_EXCEEDED"
+                    reason=blocking_reason,
+                    error_code="SCHEDULE_UNAVAILABLE"
                 )
             else:
                 logger.info(

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../common/toast/global_toast.dart';
 import '../../../../../../common/validator/validator.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../../home/controller/home_controller.dart';
 import '../../../update-itinerary/controller/update_itinerary_controller.dart';
 import '../../../view-itinerary-list/controller/itinerary_controller.dart';
 import '../../schedule/model/transportation_mode.dart';
@@ -306,6 +307,8 @@ class ItineraryDetailController
         isGroupSizeSaving: false,
         groupSizeDraft: null,
       );
+      // Refresh home data to update "recent itineraries" section
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
       return true;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);

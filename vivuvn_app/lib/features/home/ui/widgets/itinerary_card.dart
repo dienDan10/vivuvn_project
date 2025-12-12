@@ -16,12 +16,6 @@ class ItineraryCard extends ConsumerWidget {
 
     final isAllowedToViewDetail = itinerary.isMember || itinerary.isOwner;
 
-    debugPrint(
-      'ItineraryCard tap - id: ${itinerary.id}, parsedId: $itineraryId, '
-      'isOwner: ${itinerary.isOwner}, isMember: ${itinerary.isMember}, '
-      'route: ${isAllowedToViewDetail && itineraryId != null ? 'detail' : 'public'}',
-    );
-
     if (isAllowedToViewDetail && itineraryId != null) {
       context.push(createItineraryDetailRoute(itineraryId));
       return;
@@ -34,12 +28,6 @@ class ItineraryCard extends ConsumerWidget {
         final detail = await detailService.getItineraryDetail(itineraryId);
         final allowFromDetail = detail.isMember || detail.isOwner;
 
-        debugPrint(
-          'ItineraryCard tap - fallback detail check id: $itineraryId, '
-          'detail.isOwner: ${detail.isOwner}, detail.isMember: ${detail.isMember}, '
-          'route: ${allowFromDetail ? 'detail' : 'public'}',
-        );
-
         if (allowFromDetail) {
           if (context.mounted) {
             context.push(createItineraryDetailRoute(itineraryId));
@@ -47,7 +35,7 @@ class ItineraryCard extends ConsumerWidget {
           return;
         }
       } catch (e) {
-        debugPrint('ItineraryCard tap - fallback detail error: $e');
+        // Error handled silently
       }
     }
 
@@ -172,11 +160,15 @@ class ItineraryCard extends ConsumerWidget {
                                   color: Colors.white,
                                 ),
                                 const SizedBox(width: 4),
-                                Text(
-                                  itinerary.formattedDateRange,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
+                                Expanded(
+                                  child: Text(
+                                    itinerary.formattedDateRange,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],

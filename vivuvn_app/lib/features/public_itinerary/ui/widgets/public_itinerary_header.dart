@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../itinerary/itinerary-detail/schedule/model/transportation_mode.dart';
 import '../../controller/public_itinerary_controller.dart';
 import 'header/info_column.dart';
+import 'header/location_info_column.dart';
 
 class PublicItineraryHeader extends ConsumerWidget {
   const PublicItineraryHeader({super.key});
@@ -91,9 +92,9 @@ class PublicItineraryHeader extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: InfoColumn(
-                          icon: Icons.location_on,
-                          label: itinerary.destinationProvinceName,
+                        child: LocationInfoColumn(
+                          startProvinceName: itinerary.startProvinceName,
+                          destinationProvinceName: itinerary.destinationProvinceName,
                           secondaryIcon: Icons.calendar_today,
                           secondaryLabel:
                               '${DateFormat('dd/MM/yyyy').format(itinerary.startDate)} - ${DateFormat('dd/MM/yyyy').format(itinerary.endDate)}',

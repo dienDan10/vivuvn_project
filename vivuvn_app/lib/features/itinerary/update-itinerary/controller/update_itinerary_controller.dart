@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../common/toast/global_toast.dart';
 import '../../../../common/validator/validator.dart';
 import '../../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../home/controller/home_controller.dart';
 import '../../view-itinerary-list/controller/itinerary_controller.dart';
 import '../service/update_itinerary_service.dart';
 import '../state/update_itinerary_state.dart';
@@ -51,6 +52,8 @@ class UpdateItineraryController
           .read(updateItineraryServiceProvider)
           .updateName(itineraryId: itineraryId, name: name);
       await ref.read(itineraryControllerProvider.notifier).fetchItineraries();
+      // Refresh home data to update "recent itineraries" section
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
       state = state.copyWith(isLoading: false, lastUpdatedName: name);
       return true;
     } on DioException catch (e) {
@@ -94,6 +97,8 @@ class UpdateItineraryController
       if (shouldFetch) {
         await ref.read(itineraryControllerProvider.notifier).fetchItineraries();
       }
+      // Refresh home data to update "recent itineraries" section
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
       state = state.copyWith(isLoading: false, isPublic: true);
       return true;
     } on DioException catch (e) {
@@ -117,6 +122,8 @@ class UpdateItineraryController
       if (shouldFetch) {
         await ref.read(itineraryControllerProvider.notifier).fetchItineraries();
       }
+      // Refresh home data to update "recent itineraries" section
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
       state = state.copyWith(isLoading: false, isPublic: false);
       return true;
     } on DioException catch (e) {
@@ -176,6 +183,8 @@ class UpdateItineraryController
       // Optimistic state will be cleared when itinerary.isPublic matches the optimistic value
       // This is handled in the UI by checking if values match
       ref.read(itineraryControllerProvider.notifier).fetchItineraries();
+      // Refresh home data to update "recent itineraries" section
+      ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
     }
   }
 

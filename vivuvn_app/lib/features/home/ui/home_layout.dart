@@ -8,17 +8,62 @@ import 'widgets/home_app_bar.dart';
 import 'widgets/itinerary_section.dart';
 import 'widgets/travel_tips_hardcoded_section.dart';
 
-class HomeLayout extends ConsumerWidget {
+class HomeLayout extends ConsumerStatefulWidget {
   const HomeLayout({super.key});
 
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
+  ConsumerState<HomeLayout> createState() => _HomeLayoutState();
+}
+
+class _HomeLayoutState extends ConsumerState<HomeLayout> {
+  bool _hasLoadedInitial = false;
+  DateTime? _lastRefreshTime;
+
+  void _refreshSilently() {
+    final homeState = ref.read(homeControllerProvider);
+    // Only refresh if we have data (not initial or error state)
+    if (homeState.isLoaded || (!homeState.isEmpty && homeState.status != HomeStatus.initial)) {
+      // Throttle: chỉ refresh nếu đã qua ít nhất 1 giây kể từ lần refresh cuối
+      final now = DateTime.now();
+      if (_lastRefreshTime == null || 
+          now.difference(_lastRefreshTime!).inSeconds >= 1) {
+        _lastRefreshTime = now;
+        Future.microtask(() {
+          ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
+        });
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh silently when returning to this screen (after first load)
+    if (_hasLoadedInitial) {
+      _refreshSilently();
+    }
+  }
+
+  @override
+  Widget build(final BuildContext context) {
     final homeState = ref.watch(homeControllerProvider);
 
     // Load data on first build if initial
-    if (homeState.status == HomeStatus.initial) {
+    if (homeState.status == HomeStatus.initial && !_hasLoadedInitial) {
+      _hasLoadedInitial = true;
       Future.microtask(() {
         ref.read(homeControllerProvider.notifier).loadHomeData();
+      });
+    }
+
+    // Refresh silently every time widget is rebuilt (after initial load)
+    // This ensures data is refreshed when returning to home tab
+    // Throttle is handled in _refreshSilently() to avoid too many refreshes
+    if (_hasLoadedInitial) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _refreshSilently();
+        }
       });
     }
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controller/itinerary_detail_controller.dart';
 import 'btn_back.dart';
 import 'btn_settings.dart';
+import 'widgets/collapsed_name_input.dart';
 
 class CollapsedAppbar extends ConsumerWidget {
   const CollapsedAppbar({super.key});
@@ -13,6 +14,11 @@ class CollapsedAppbar extends ConsumerWidget {
     final itinerary = ref.watch(
       itineraryDetailControllerProvider.select(
         (final state) => state.itinerary!,
+      ),
+    );
+    final isEditing = ref.watch(
+      itineraryDetailControllerProvider.select(
+        (final state) => state.isNameEditing,
       ),
     );
 
@@ -28,17 +34,19 @@ class CollapsedAppbar extends ConsumerWidget {
         children: [
           const ButtonBack(onAppbar: true),
           Expanded(
-            child: Text(
-              itinerary.name,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: isEditing
+                ? const CollapsedNameInput()
+                : Text(
+                    itinerary.name,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
           ),
           const ButtonSettings(onAppbar: true),
         ],

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api/home_api.dart';
@@ -21,7 +20,6 @@ class HomeServiceImpl implements HomeService {
     try {
       return await _api.getPopularDestinations(limit: 5);
     } catch (e) {
-      debugPrint('Error fetching destinations: $e');
       rethrow;
     }
   }
@@ -43,7 +41,6 @@ class HomeServiceImpl implements HomeService {
         provinceId: provinceId,
       );
     } catch (e) {
-      debugPrint('Error fetching itineraries: $e');
       rethrow;
     }
   }

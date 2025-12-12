@@ -17,20 +17,28 @@ class LeaveConfirmDialog extends ConsumerStatefulWidget {
 
 class _LeaveConfirmDialogState extends ConsumerState<LeaveConfirmDialog> {
   Future<void> _leaveItinerary() async {
-    await ref
-        .read(itineraryControllerProvider.notifier)
-        .leaveItinerary(widget.itineraryId);
-    // Refresh home public itineraries so isMember/isOwner flags update
-    await ref.read(homeControllerProvider.notifier).refreshHomeData();
-    if (mounted) {
-      GlobalToast.showSuccessToast(
-        context,
-        message: 'Đã rời khỏi chuyến đi',
-      );
-      final navigator = Navigator.of(context);
-      navigator.pop(); // close dialog
-      if (widget.popToList && navigator.canPop()) {
-        navigator.pop(); // leave detail to list
+    try {
+      await ref
+          .read(itineraryControllerProvider.notifier)
+          .leaveItinerary(widget.itineraryId);
+      // Refresh home public itineraries so isMember/isOwner flags update
+      await ref.read(homeControllerProvider.notifier).refreshHomeData();
+      if (mounted) {
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Đã rời khỏi chuyến đi',
+        );
+        final navigator = Navigator.of(context);
+        navigator.pop(); // close dialog
+        if (widget.popToList && navigator.canPop()) {
+          navigator.pop(); // leave detail to list
+        }
+      }
+    } catch (e) {
+      // Error đã được xử lý trong controller và hiển thị qua listener
+      // Nhưng đảm bảo dialog không đóng nếu có lỗi
+      if (mounted) {
+        // Dialog sẽ tự động hiển thị lỗi qua listener
       }
     }
   }
