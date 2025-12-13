@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
@@ -290,10 +291,22 @@ namespace vivuvn_api.Services.Implementations
         public async Task<AutoGenerateItineraryResponseDto> AutoGenerateItineraryAsync(int itineraryId, AutoGenerateItineraryRequest request)
         {
             // Retrieve and return the complete itinerary with all details
-            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(
-                    i => i.Id == itineraryId,
-                    includeProperties: "StartProvince,DestinationProvince,Days,Days.Items,Budget,Budget.Items,Budget.Items.ItineraryHotel,Budget.Items.ItineraryRestaurant",
-                    tracked: true)
+            var itinerary = await _unitOfWork.Itineraries
+                .GetQueryable()
+                .Where(i => i.Id == itineraryId)
+                .Include(i => i.StartProvince)
+                .Include(i => i.DestinationProvince)
+                .Include(i => i.Days.OrderBy(d => d.DayNumber))
+                    .ThenInclude(d => d.Items)
+                .Include(i => i.Budget)
+                    .ThenInclude(b => b.Items)
+                        .ThenInclude(bi => bi.ItineraryHotel)
+                .Include(i => i.Budget)
+                    .ThenInclude(b => b.Items)
+                        .ThenInclude(bi => bi.ItineraryRestaurant)
+                .AsSplitQuery()
+                .AsTracking()
+                .FirstOrDefaultAsync()
                 ?? throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {itineraryId}.");
 
             var daysCount = (itinerary.EndDate - itinerary.StartDate).Days + 1;
@@ -405,11 +418,13 @@ namespace vivuvn_api.Services.Implementations
 
             var locations = await _unitOfWork.Locations.GetAllAsync(
                 l => !string.IsNullOrEmpty(l.GooglePlaceId) && allPlaceIds.Contains(l.GooglePlaceId) && !l.DeleteFlag);
+
             var locationDict = locations
                 .Where(l => !string.IsNullOrEmpty(l.GooglePlaceId))
                 .GroupBy(l => l.GooglePlaceId!)
                 .ToDictionary(g => g.Key, g => g.First());
 
+            var locationByIdDict = locations.ToDictionary(l => l.Id);
 
             // add activities to each day
             foreach (var aiDay in aiDays)
@@ -447,7 +462,7 @@ namespace vivuvn_api.Services.Implementations
                 {
                     try
                     {
-                        await UpdateTransportationDetailsAsync(items[i - 1], items[i]);
+                        await UpdateTransportationDetailsAsync(items[i - 1], items[i], locationByIdDict);
                     }
                     catch
                     {
@@ -465,11 +480,20 @@ namespace vivuvn_api.Services.Implementations
 
         }
 
-        private async Task UpdateTransportationDetailsAsync(ItineraryItem prevItem, ItineraryItem curItem, string? travelMode = Constants.TravelMode_Driving)
+        private async Task UpdateTransportationDetailsAsync(ItineraryItem prevItem,
+            ItineraryItem curItem,
+            Dictionary<int, Location> locationDict,
+            string? travelMode = Constants.TravelMode_Driving)
         {
-            var prevItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == prevItem.LocationId);
+            if (!locationDict.TryGetValue(prevItem.LocationId ?? 0, out var prevItemLocation))
+            {
+                throw new KeyNotFoundException($"Location {prevItem.LocationId} not found");
+            }
 
-            var curItemLocation = await _unitOfWork.Locations.GetOneAsync(l => l.Id == curItem.LocationId);
+            if (!locationDict.TryGetValue(curItem.LocationId ?? 0, out var curItemLocation))
+            {
+                throw new KeyNotFoundException($"Location {curItem.LocationId} not found");
+            }
 
             var request = new ComputeRouteRequestDto
             {
@@ -535,24 +559,37 @@ namespace vivuvn_api.Services.Implementations
             List<AITransportationSuggestionDto> transportations,
             Budget budget)
         {
+            if (!transportations.Any()) return;
+
+            var budgetTypeNames = new[]
+            {
+                Constants.BudgetType_Flights,
+                Constants.BudgetType_Transit,
+                Constants.BudgetType_Gas
+            };
+
+            var budgetTypes = await _unitOfWork.BudgetTypes
+                .GetAllAsync(bt => budgetTypeNames.Contains(bt.Name));
+
+            var budgetTypeDict = budgetTypes.ToDictionary(bt => bt.Name, bt => bt);
 
             foreach (var transportation in transportations)
             {
                 if (transportation.EstimatedCost > 0)
                 {
-                    var budgetType = transportation.Mode switch
+                    var budgetTypeName = transportation.Mode switch
                     {
                         var m when m.Equals(Constants.TransportationMode_Airplane, StringComparison.OrdinalIgnoreCase)
-                            => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Flights),
+                            => Constants.BudgetType_Flights,
                         var m when m.Equals(Constants.TransportationMode_Bus, StringComparison.OrdinalIgnoreCase)
                             || m.Equals(Constants.TransportationMode_Train, StringComparison.OrdinalIgnoreCase)
-                            => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Transit),
+                            => Constants.BudgetType_Transit,
                         var m when m.Equals(Constants.TransportationMode_PrivateCar, StringComparison.OrdinalIgnoreCase)
-                            => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Gas),
-                        _ => await _unitOfWork.BudgetTypes.GetOneAsync(bt => bt.Name == Constants.BudgetType_Transit),
+                            => Constants.BudgetType_Gas,
+                        _ => Constants.BudgetType_Transit,
                     };
 
-                    if (budgetType is not null)
+                    if (budgetTypeDict.TryGetValue(budgetTypeName, out var budgetType))
                     {
                         var budgetItem = new BudgetItem
                         {
