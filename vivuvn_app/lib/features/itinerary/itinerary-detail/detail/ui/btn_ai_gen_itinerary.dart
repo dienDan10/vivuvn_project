@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/routes/routes.dart';
 import '../../schedule/ui/widgets/AI-generate/gen_ai_modal.dart';
 import '../controller/itinerary_detail_controller.dart';
 
-class ButtonGenerateItinerary extends ConsumerStatefulWidget {
-  const ButtonGenerateItinerary({super.key});
+class ButtonScheduleOptions extends ConsumerStatefulWidget {
+  const ButtonScheduleOptions({super.key});
 
   @override
-  ConsumerState<ButtonGenerateItinerary> createState() =>
-      _ButtonGenerateItineraryState();
+  ConsumerState<ButtonScheduleOptions> createState() =>
+      ButtonScheduleOptionsState();
 }
 
-class _ButtonGenerateItineraryState
-    extends ConsumerState<ButtonGenerateItinerary> {
+class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
   final _fabKey = GlobalKey<ExpandableFabState>();
   void _showCreateItineraryBottomSheet(final BuildContext context) {
     showModalBottomSheet(
@@ -51,7 +52,7 @@ class _ButtonGenerateItineraryState
         distance: 70,
         childrenAnimation: ExpandableFabAnimation.none,
         openButtonBuilder: RotateFloatingActionButtonBuilder(
-          child: const Icon(Icons.add, size: 26),
+          child: const Icon(Icons.menu, size: 26),
           fabSize: ExpandableFabSize.regular,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           backgroundColor: Theme.of(context).colorScheme.primary,
@@ -65,6 +66,36 @@ class _ButtonGenerateItineraryState
           shape: const CircleBorder(),
         ),
         children: [
+          // View on Map option
+          Row(
+            children: [
+              const Text(
+                'Xem lịch trình trên Map',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 20),
+              FloatingActionButton(
+                heroTag: 'detail_fab_map',
+                backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                onPressed: () {
+                  // Close the expandable FAB
+                  final state = _fabKey.currentState;
+                  state?.toggle();
+                  context.push(mapLocationRoute);
+                },
+                child: const Icon(Icons.map),
+              ),
+            ],
+          ),
+          // AI Generate option
           Row(
             children: [
               const Text(
@@ -90,7 +121,7 @@ class _ButtonGenerateItineraryState
                   // Show the bottom sheet
                   _showCreateItineraryBottomSheet(context);
                 },
-                child: const Icon(Icons.add),
+                child: const Icon(Icons.auto_awesome),
               ),
             ],
           ),
