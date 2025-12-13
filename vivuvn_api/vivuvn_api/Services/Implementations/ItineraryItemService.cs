@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Helpers;
@@ -51,11 +52,45 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<IEnumerable<ItineraryItemDto>> GetItemsByDayIdAsync(int dayId)
         {
-            var items = await _unitOfWork.ItineraryItems.GetAllAsync(i => i.ItineraryDayId == dayId,
-                includeProperties: "Location,Location.Photos,Location.Province",
-                orderBy: q => q.OrderBy(i => i.OrderIndex));
-
-            return _mapper.Map<IEnumerable<ItineraryItemDto>>(items);
+            return await _unitOfWork.ItineraryItems
+                .GetQueryable()
+                .Where(i => i.ItineraryDayId == dayId)
+                .OrderBy(i => i.OrderIndex)
+                .Select(i => new ItineraryItemDto
+                {
+                    ItineraryItemId = i.ItineraryItemId,
+                    OrderIndex = i.OrderIndex,
+                    Note = i.Note,
+                    EstimateDuration = i.EstimateDuration,
+                    StartTime = i.StartTime,
+                    EndTime = i.EndTime,
+                    TransportationVehicle = i.TransportationVehicle,
+                    TransportationDuration = i.TransportationDuration,
+                    TransportationDistance = i.TransportationDistance,
+                    Location = new LocationDto
+                    {
+                        Id = i.Location.Id,
+                        Name = i.Location.Name,
+                        ProvinceName = i.Location.Province.Name,
+                        Description = i.Location.Description,
+                        Latitude = i.Location.Latitude,
+                        Longitude = i.Location.Longitude,
+                        Address = i.Location.Address,
+                        Rating = i.Location.Rating,
+                        RatingCount = i.Location.RatingCount,
+                        GooglePlaceId = i.Location.GooglePlaceId,
+                        PlaceUri = i.Location.PlaceUri,
+                        DirectionsUri = i.Location.DirectionsUri,
+                        ReviewUri = i.Location.ReviewUri,
+                        WebsiteUri = i.Location.WebsiteUri,
+                        DeleteFlag = i.Location.DeleteFlag,
+                        Photos = i.Location.Photos
+                            .Select(p => p.PhotoUrl)
+                            .ToList()
+                    }
+                })
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task RemoveItemFromDayAsync(int dayId, int itemId)
