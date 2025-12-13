@@ -332,7 +332,7 @@ namespace vivuvn_api.Services.Implementations
                     ? Constants.ResponseStatus_Warning
                     : Constants.ResponseStatus_Success,
                 ItineraryId = savedItinerary.Id,
-                Warning = aiResponse.Itinerary.UnavailableReason,
+                Warnings = aiResponse.Itinerary.Warnings,
                 Message = "Lịch trình đã được tạo thành công."
             };
         }
