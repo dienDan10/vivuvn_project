@@ -19,18 +19,22 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId)
         {
             var itineraries = await _unitOfWork.Itineraries
-                .GetAllAsync(i => (i.UserId == userId
-                || i.Members.Any(m => m.UserId == userId && !m.DeleteFlag))
-                && !i.DeleteFlag, includeProperties: "StartProvince,DestinationProvince,User");
+                .GetQueryable()
+                .Where(i => (i.UserId == userId
+                            || i.Members.Any(m => m.UserId == userId && !m.DeleteFlag))
+                            && !i.DeleteFlag)
+                .Include(i => i.StartProvince)
+                .Include(i => i.DestinationProvince)
+                .Include(i => i.User)
+                .AsNoTracking()
+                .ToListAsync();
 
-            var itineraryDtos = _mapper.Map<IEnumerable<ItineraryDto>>(itineraries);
-            foreach (var dto in itineraryDtos)
+            return itineraries.Select(i =>
             {
-                var itinerary = itineraries.First(i => i.Id == dto.Id);
-                dto.IsOwner = itinerary.UserId == userId;
-            }
-
-            return itineraryDtos;
+                var dto = _mapper.Map<ItineraryDto>(i);
+                dto.IsOwner = i.UserId == userId;
+                return dto;
+            });
         }
 
         public async Task<PaginatedResponseDto<SearchItineraryDto>> GetAllPublicItinerariesAsync(GetAllPublicItinerariesRequestDto request)
@@ -80,13 +84,27 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId)
         {
-            var itinerary = await _unitOfWork.Itineraries.GetOneAsync(i => i.Id == id && !i.DeleteFlag,
-                includeProperties: "StartProvince,DestinationProvince,User,Members");
+            var result = await _unitOfWork.Itineraries
+                .GetQueryable()
+                .Where(i => i.Id == id && !i.DeleteFlag)
+                .Include(i => i.StartProvince)
+                .Include(i => i.DestinationProvince)
+                .Include(i => i.User)
+                .Select(i => new
+                {
+                    Itinerary = i,
+                    IsOwner = i.UserId == userId,
+                    IsMember = i.Members.Any(m => m.UserId == userId && !m.DeleteFlag)
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
 
-            if (itinerary == null) throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {id}.");
-            var dto = _mapper.Map<ItineraryDto>(itinerary);
-            dto.IsOwner = itinerary.UserId == userId;
-            dto.IsMember = itinerary.Members.Any(m => m.UserId == userId && !m.DeleteFlag);
+            if (result == null)
+                throw new KeyNotFoundException($"Không tìm thấy lịch trình có ID {id}.");
+
+            var dto = _mapper.Map<ItineraryDto>(result.Itinerary);
+            dto.IsOwner = result.IsOwner;
+            dto.IsMember = result.IsMember;
             return dto;
         }
 

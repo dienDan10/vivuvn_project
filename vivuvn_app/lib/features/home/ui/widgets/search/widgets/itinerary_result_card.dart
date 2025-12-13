@@ -12,7 +12,10 @@ class ItineraryResultCard extends ConsumerWidget {
 
   const ItineraryResultCard({required this.itinerary, super.key});
 
-  Future<void> _handleTap(final BuildContext context, final WidgetRef ref) async {
+  Future<void> _handleTap(
+    final BuildContext context,
+    final WidgetRef ref,
+  ) async {
     final itineraryId = int.tryParse(itinerary.id);
 
     final isAllowedToViewDetail = itinerary.isMember || itinerary.isOwner;
@@ -20,12 +23,12 @@ class ItineraryResultCard extends ConsumerWidget {
     if (isAllowedToViewDetail && itineraryId != null) {
       // Clear search data
       ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
-      
+
       // Close modal if we're in a modal context
       if (Navigator.canPop(context)) {
         Navigator.pop(context);
       }
-      
+
       if (context.mounted) {
         context.push(createItineraryDetailRoute(itineraryId));
       }
@@ -42,12 +45,12 @@ class ItineraryResultCard extends ConsumerWidget {
         if (allowFromDetail) {
           // Clear search data
           ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
-          
+
           // Close modal if we're in a modal context
           if (context.mounted && Navigator.canPop(context)) {
             Navigator.pop(context);
           }
-          
+
           if (context.mounted) {
             context.push(createItineraryDetailRoute(itineraryId));
           }
@@ -60,12 +63,12 @@ class ItineraryResultCard extends ConsumerWidget {
 
     // Clear search data
     ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
-    
+
     // Close modal if we're in a modal context
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
     }
-    
+
     if (context.mounted) {
       context.push(createPublicItineraryViewRoute(itinerary.id));
     }
@@ -78,7 +81,7 @@ class ItineraryResultCard extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = screenWidth < 360 || screenHeight < 700;
-    
+
     // Responsive dimensions
     final cardHeight = isSmallScreen ? 110.0 : 140.0;
     final imageWidth = isSmallScreen ? screenWidth * 0.28 : 130.0;
@@ -92,89 +95,91 @@ class ItineraryResultCard extends ConsumerWidget {
         onTap: () => _handleTap(context, ref),
         borderRadius: BorderRadius.circular(12),
         child: SizedBox(
-        height: cardHeight,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(12),
-              ),
-              child: SizedBox(
-                width: imageWidth,
-                height: cardHeight,
-                child: Image.network(
-                  itinerary.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (final context, final error, final stackTrace) =>
-                          Image.asset(
-                    'assets/images/images-placeholder.jpeg',
+          height: cardHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(12),
+                ),
+                child: SizedBox(
+                  width: imageWidth,
+                  height: cardHeight,
+                  child: Image.network(
+                    itinerary.imageUrl,
                     fit: BoxFit.cover,
+                    errorBuilder:
+                        (final context, final error, final stackTrace) =>
+                            Image.asset(
+                              'assets/images/image-placeholder.jpeg',
+                              fit: BoxFit.cover,
+                            ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(width: horizontalPadding),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: verticalPadding),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      itinerary.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: isSmallScreen ? 14 : null,
-                      ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 2 : 4),
-                    if (itinerary.startProvinceName.isNotEmpty)
-                      _buildProvinceRow(
-                        context,
-                        icon: Icons.place,
-                        label: itinerary.startProvinceName,
-                        isSmallScreen: isSmallScreen,
-                      ),
-                    if (itinerary.startProvinceName.isNotEmpty &&
-                        itinerary.destinationProvinceName.isNotEmpty)
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 1 : 2),
-                        child: Icon(
-                          Icons.arrow_downward,
-                          size: isSmallScreen ? 12 : 14,
-                          color: Colors.grey,
+              SizedBox(width: horizontalPadding),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: verticalPadding),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        itinerary.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: isSmallScreen ? 14 : null,
                         ),
                       ),
-                    if (itinerary.destinationProvinceName.isNotEmpty)
-                      _buildProvinceRow(
-                        context,
-                        icon: Icons.place,
-                        label: itinerary.destinationProvinceName,
-                        isSmallScreen: isSmallScreen,
+                      SizedBox(height: isSmallScreen ? 2 : 4),
+                      if (itinerary.startProvinceName.isNotEmpty)
+                        _buildProvinceRow(
+                          context,
+                          icon: Icons.place,
+                          label: itinerary.startProvinceName,
+                          isSmallScreen: isSmallScreen,
+                        ),
+                      if (itinerary.startProvinceName.isNotEmpty &&
+                          itinerary.destinationProvinceName.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: isSmallScreen ? 1 : 2,
+                          ),
+                          child: Icon(
+                            Icons.arrow_downward,
+                            size: isSmallScreen ? 12 : 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      if (itinerary.destinationProvinceName.isNotEmpty)
+                        _buildProvinceRow(
+                          context,
+                          icon: Icons.place,
+                          label: itinerary.destinationProvinceName,
+                          isSmallScreen: isSmallScreen,
+                        ),
+                      const Spacer(),
+                      Text(
+                        dateRange,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                          fontSize: isSmallScreen ? 11 : null,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    const Spacer(),
-                    Text(
-                      dateRange,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                        fontSize: isSmallScreen ? 11 : null,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: horizontalPadding),
-          ],
+              SizedBox(width: horizontalPadding),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -210,4 +215,3 @@ class ItineraryResultCard extends ConsumerWidget {
     );
   }
 }
-

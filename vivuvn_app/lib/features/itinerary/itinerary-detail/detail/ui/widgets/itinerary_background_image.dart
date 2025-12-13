@@ -31,11 +31,10 @@ class ItineraryBackgroundImage extends ConsumerWidget {
         fit: BoxFit.cover,
         errorBuilder: (final context, final error, final stackTrace) =>
             Image.asset(
-          'assets/images/images-placeholder.jpeg',
-          fit: BoxFit.cover,
-        ),
+              'assets/images/image-placeholder.jpeg',
+              fit: BoxFit.cover,
+            ),
       ),
     );
   }
 }
-

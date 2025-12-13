@@ -49,7 +49,7 @@ class HomeAppBar extends ConsumerWidget {
               fit: BoxFit.cover,
               errorBuilder: (final context, final error, final stackTrace) =>
                   Image.asset(
-                    'assets/images/images-placeholder.jpeg',
+                    'assets/images/image-placeholder.jpeg',
                     fit: BoxFit.cover,
                   ),
             ),
@@ -73,7 +73,9 @@ class HomeAppBar extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    userName != null ? 'Xin chào, $userName! 👋' : 'Xin chào! 👋',
+                    userName != null
+                        ? 'Xin chào, $userName! 👋'
+                        : 'Xin chào! 👋',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

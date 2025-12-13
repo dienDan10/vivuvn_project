@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
@@ -37,7 +38,15 @@ namespace vivuvn_api.Services.Implementations
         public async Task<IEnumerable<FavoritePlaceDto>> GetFavoritePlacesByItineraryIdAsync(int itineraryId)
         {
             var favoritePlaces = await _unitOfWork.FavoritePlaces
-                .GetAllAsync(fp => fp.ItineraryId == itineraryId, includeProperties: "Location,Location.Photos,Location.Province");
+                .GetQueryable()
+                .Where(fp => fp.ItineraryId == itineraryId)
+                .Include(fp => fp.Location)
+                    .ThenInclude(l => l.Photos)
+                .Include(fp => fp.Location)
+                    .ThenInclude(l => l.Province)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .ToListAsync();
             return _mapper.Map<IEnumerable<FavoritePlaceDto>>(favoritePlaces);
         }
     }
