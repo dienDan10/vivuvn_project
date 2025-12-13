@@ -37,6 +37,16 @@ namespace vivuvn_api.Controllers
             return Ok(response);
         }
 
+        [HttpPost("public/copy")]
+        [Authorize]
+        public async Task<IActionResult> CopyPublicItinerary([FromBody] CopyPublicItineraryRequestDto request)
+        {
+            var userId = GetCurrentUserId();
+
+            int itineraryId = await _itineraryService.CopyPublicItineraryAsync(userId, request);
+            return Ok(new { itineraryId });
+        }
+
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> GetItineraryById(int id)

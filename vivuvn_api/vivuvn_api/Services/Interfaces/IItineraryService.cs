@@ -8,6 +8,7 @@ namespace vivuvn_api.Services.Interfaces
     {
         Task<IEnumerable<ItineraryDto>> GetAllItinerariesByUserIdAsync(int userId);
         Task<PaginatedResponseDto<SearchItineraryDto>> GetAllPublicItinerariesAsync(GetAllPublicItinerariesRequestDto request);
+        Task<int> CopyPublicItineraryAsync(int userId, CopyPublicItineraryRequestDto request);
         Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId);
         Task<CreateItineraryResponseDto> CreateItineraryAsync(int userId, CreateItineraryRequestDto request);
         Task<bool> DeleteItineraryByIdAsync(int id);

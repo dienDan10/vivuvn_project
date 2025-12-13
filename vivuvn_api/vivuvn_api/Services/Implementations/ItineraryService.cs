@@ -12,7 +12,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient, IGoogleMapRouteService _routeService) : IItineraryService
+    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient, IGoogleMapRouteService _routeService, IItineraryMemberService _memberService) : IItineraryService
     {
         #region Itinerary Service Methods
 
@@ -82,6 +82,117 @@ namespace vivuvn_api.Services.Implementations
             return paginatedResponse;
         }
 
+        public async Task<int> CopyPublicItineraryAsync(int userId, CopyPublicItineraryRequestDto request)
+        {
+            // member cannot copy itinerary
+            var isMember = await _memberService.IsMemberAsync(request.ItineraryId, userId);
+            if (isMember) throw new BadHttpRequestException("Bạn không thể sao chép lịch trình nếu bạn là thành viên");
+
+            var publicItinerary = await _unitOfWork.Itineraries
+                .GetQueryable()
+                .Where(i => i.Id == request.ItineraryId && i.IsPublic && !i.DeleteFlag)
+                .Include(i => i.Days)
+                    .ThenInclude(d => d.Items)
+                .Include(i => i.FavoritePlaces)
+                .Include(i => i.Restaurants)
+                .Include(i => i.Hotels)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (publicItinerary == null)
+            {
+                throw new KeyNotFoundException($"Không tìm thấy lịch trình công khai có ID {request.ItineraryId}.");
+            }
+
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                // Create new itinerary
+                var newItinerary = new Itinerary
+                {
+                    UserId = userId,
+                    StartProvinceId = publicItinerary.StartProvinceId,
+                    DestinationProvinceId = publicItinerary.DestinationProvinceId,
+                    Name = publicItinerary.Name,
+                    StartDate = publicItinerary.StartDate,
+                    EndDate = publicItinerary.EndDate,
+                    DaysCount = (publicItinerary.EndDate - publicItinerary.StartDate).Days + 1,
+                    TransportationVehicle = publicItinerary.TransportationVehicle,
+                    GroupSize = 1,
+                    IsPublic = false,
+                    DeleteFlag = false,
+                    Days = publicItinerary.Days
+                        .OrderBy(d => d.DayNumber)
+                        .Select(day => new ItineraryDay
+                        {
+                            DayNumber = day.DayNumber,
+                            Date = publicItinerary.StartDate.AddDays(day.DayNumber - 1),
+                            Items = day.Items.Select(item => new ItineraryItem
+                            {
+                                LocationId = item.LocationId,
+                                OrderIndex = item.OrderIndex,
+                                Note = item.Note,
+                                EstimateDuration = item.EstimateDuration,
+                                StartTime = item.StartTime,
+                                EndTime = item.EndTime,
+                                TransportationVehicle = item.TransportationVehicle,
+                                TransportationDuration = item.TransportationDuration,
+                                TransportationDistance = item.TransportationDistance
+                            }).ToList()
+                        }).ToList(),
+                    FavoritePlaces = publicItinerary.FavoritePlaces
+                        .Select(fp => new FavoritePlace
+                        {
+                            LocationId = fp.LocationId
+                        }).ToList(),
+                    Hotels = publicItinerary.Hotels
+                        .Select(h => new ItineraryHotel
+                        {
+                            HotelId = h.HotelId,
+                            CheckIn = h.CheckIn,
+                            CheckOut = h.CheckOut,
+                            Notes = h.Notes,
+                        }).ToList(),
+                    Restaurants = publicItinerary.Restaurants
+                        .Select(r => new ItineraryRestaurant
+                        {
+                            RestaurantId = r.RestaurantId,
+                            Date = r.Date,
+                            Time = r.Time,
+                            Notes = r.Notes,
+                        }).ToList(),
+                    Budget = new Budget
+                    {
+                        EstimatedBudget = 0,
+                        TotalBudget = 0
+                    },
+                    Members = new List<ItineraryMember>
+                    {
+                        new ItineraryMember
+                        {
+                            UserId = userId,
+                            JoinedAt = DateTime.UtcNow,
+                            Role = Constants.ItineraryRole_Owner
+                        }
+                    }
+                };
+
+                await _unitOfWork.Itineraries.AddAsync(newItinerary);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                await _unitOfWork.CommitTransactionAsync();
+
+                return newItinerary.Id;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+        }
         public async Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId)
         {
             var result = await _unitOfWork.Itineraries
