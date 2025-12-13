@@ -10,5 +10,6 @@
         public int? BudgetTypeId { get; set; }
         public int? MemberId { get; set; }
         public string? Details { get; set; }
+        public string? BillPhotoUrl { get; set; }
     }
 }

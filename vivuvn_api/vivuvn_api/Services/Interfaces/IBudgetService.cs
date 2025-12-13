@@ -1,4 +1,5 @@
 ﻿using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
 
 namespace vivuvn_api.Services.Interfaces
@@ -12,6 +13,7 @@ namespace vivuvn_api.Services.Interfaces
         Task<BudgetDto?> UpdateBudgetAsync(int itineraryId, UpdateBudgetRequestDto request);
         Task<BudgetItemDto?> UpdateBudgetItemAsync(int itemId, UpdateBudgetItemRequestDto request);
         Task<BudgetItemDto?> DeleteBudgetItemAsync(int itemId);
+        Task<UploadBudgetItemBillImageResponse> UploadBudgetItemImageAsync(IFormFile image);
 
     }
 }

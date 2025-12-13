@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.Request;
+using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Models;
 using vivuvn_api.Repositories.Interfaces;
@@ -7,11 +9,21 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class BudgetService(IUnitOfWork _unitOfWork, IMapper _mapper) : IBudgetService
+    public class BudgetService(IUnitOfWork _unitOfWork, IMapper _mapper, IImageService _imageService) : IBudgetService
     {
         public async Task<BudgetDto?> GetBudgetByItineraryIdAsync(int itineraryId)
         {
-            var budget = await _unitOfWork.Budgets.GetOneAsync(b => b.ItineraryId == itineraryId, includeProperties: "Items,Items.BudgetType,Items.PaidByMember,Items.PaidByMember.User");
+            var budget = await _unitOfWork.Budgets
+                .GetQueryable()
+                .Where(b => b.ItineraryId == itineraryId)
+                .Include(b => b.Items)
+                    .ThenInclude(i => i.BudgetType)
+                .Include(b => b.Items)
+                    .ThenInclude(i => i.PaidByMember)
+                        .ThenInclude(m => m.User)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
 
             if (budget == null)
             {
@@ -111,6 +123,8 @@ namespace vivuvn_api.Services.Implementations
 
             if (request.Details is not null) item.Details = request.Details;
 
+            if (request.BillPhotoUrl is not null) item.BillPhotoUrl = request.BillPhotoUrl;
+
             var updatedItem = await _unitOfWork.Budgets.UpdateBudgetItemAsync(item);
 
             await _unitOfWork.SaveChangesAsync();
@@ -123,6 +137,15 @@ namespace vivuvn_api.Services.Implementations
             var deletedItem = await _unitOfWork.Budgets.DeleteBudgetItemAsync(itemId);
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<BudgetItemDto>(deletedItem);
+        }
+
+        public async Task<UploadBudgetItemBillImageResponse> UploadBudgetItemImageAsync(IFormFile image)
+        {
+            var imageUrl = await _imageService.UploadImageAsync(image);
+            return new UploadBudgetItemBillImageResponse
+            {
+                ImageUrl = imageUrl
+            };
         }
     }
 }

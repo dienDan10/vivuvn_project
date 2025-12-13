@@ -54,6 +54,8 @@ namespace vivuvn_api.Repositories.Implementations
                 .Include(i => i.BudgetType)
                 .Include(i => i.PaidByMember)
                 .ThenInclude(p => p.User)
+                .AsNoTracking()
+                .AsSplitQuery()
                 .ToListAsync();
         }
 

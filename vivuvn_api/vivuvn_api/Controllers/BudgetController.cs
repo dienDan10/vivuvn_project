@@ -84,6 +84,14 @@ namespace vivuvn_api.Controllers
             return Ok(budgetItem);
         }
 
+        [HttpPost("items/photo")]
+        [Authorize]
+        public async Task<IActionResult> UploadBudgetItemImage([FromForm] UploadBudgetItemBillImageRequestDto request)
+        {
+            var response = await _budgetService.UploadBudgetItemImageAsync(request.BillPhoto);
+            return Ok(response);
+        }
+
         private async Task<bool> IsOwner(int itineraryId)
         {
             var userId = GetCurrentUserId();
