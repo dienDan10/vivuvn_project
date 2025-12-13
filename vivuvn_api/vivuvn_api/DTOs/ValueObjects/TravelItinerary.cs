@@ -16,7 +16,7 @@ namespace vivuvn_api.DTOs.ValueObjects
         [JsonPropertyName("schedule_unavailable")]
         public bool ScheduleUnavailable { get; set; }
 
-        [JsonPropertyName("unavailable_reason")]
+        [JsonPropertyName("warnings")]
         public string UnavailableReason { get; set; } = string.Empty;
     }
 
