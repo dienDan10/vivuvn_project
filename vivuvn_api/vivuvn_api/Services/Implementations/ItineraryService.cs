@@ -406,11 +406,55 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<IEnumerable<ItineraryDayDto>> GetItineraryScheduleAsync(int itineraryId)
         {
-            var days = await _unitOfWork.ItineraryDays.GetAllAsync(d => d.ItineraryId == itineraryId,
-                includeProperties: "Items,Items.Location,Items.Location.Photos,Items.Location.Province");
 
-            if (days is null) return [];
-            return _mapper.Map<IEnumerable<ItineraryDayDto>>(days);
+            return await _unitOfWork.ItineraryDays
+                .GetQueryable()
+                .Where(d => d.ItineraryId == itineraryId)
+                .OrderBy(d => d.DayNumber)
+                .Select(d => new ItineraryDayDto
+                {
+                    Id = d.Id,
+                    DayNumber = d.DayNumber,
+                    Date = d.Date,
+                    Items = d.Items
+                        .OrderBy(i => i.OrderIndex)
+                        .Select(i => new ItineraryItemDto
+                        {
+                            ItineraryItemId = i.ItineraryItemId,
+                            OrderIndex = i.OrderIndex,
+                            Note = i.Note,
+                            EstimateDuration = i.EstimateDuration,
+                            StartTime = i.StartTime,
+                            EndTime = i.EndTime,
+                            TransportationVehicle = i.TransportationVehicle,
+                            TransportationDuration = i.TransportationDuration,
+                            TransportationDistance = i.TransportationDistance,
+                            Location = new LocationDto
+                            {
+                                Id = i.Location.Id,
+                                Name = i.Location.Name,
+                                ProvinceName = i.Location.Province.Name,
+                                Description = i.Location.Description,
+                                Latitude = i.Location.Latitude,
+                                Longitude = i.Location.Longitude,
+                                Address = i.Location.Address,
+                                Rating = i.Location.Rating,
+                                RatingCount = i.Location.RatingCount,
+                                GooglePlaceId = i.Location.GooglePlaceId,
+                                PlaceUri = i.Location.PlaceUri,
+                                DirectionsUri = i.Location.DirectionsUri,
+                                ReviewUri = i.Location.ReviewUri,
+                                WebsiteUri = i.Location.WebsiteUri,
+                                DeleteFlag = i.Location.DeleteFlag,
+                                Photos = i.Location.Photos
+                                    .Select(p => p.PhotoUrl)
+                                    .ToList()
+                            }
+                        })
+                        .ToList()
+                })
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         #endregion

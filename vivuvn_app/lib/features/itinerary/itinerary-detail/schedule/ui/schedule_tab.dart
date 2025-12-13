@@ -70,7 +70,7 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
               SizedBox(height: 80), // Space for FAB
             ],
           ),
-          const Positioned(child: ButtonGenerateItinerary()),
+          const Positioned(child: ButtonScheduleOptions()),
         ],
       ),
     );
