@@ -14,5 +14,6 @@ namespace vivuvn_api.DTOs.Request
         public DateTime Date { get; set; }
         public int? MemberId { get; set; }
         public string? Details { get; set; }
+        public string? BillPhotoUrl { get; set; }
     }
 }

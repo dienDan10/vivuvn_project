@@ -58,7 +58,8 @@ namespace vivuvn_api.Services.Implementations
                 Date = request.Date,
                 BudgetTypeId = request.BudgetTypeId,
                 PaidByMemberId = request.MemberId,
-                Details = request.Details
+                Details = request.Details,
+                BillPhotoUrl = request.BillPhotoUrl
             };
 
             await _unitOfWork.Budgets.AddBudgetItemAsync(budgetItem);

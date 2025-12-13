@@ -19,6 +19,8 @@ namespace vivuvn_api.Models
 
         public string? Details { get; set; }
 
+        public string? BillPhotoUrl { get; set; }
+
         [Required]
         public DateTime Date { get; set; }
 
