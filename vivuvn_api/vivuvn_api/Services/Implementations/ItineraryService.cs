@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -37,38 +36,55 @@ namespace vivuvn_api.Services.Implementations
             });
         }
 
-        public async Task<PaginatedResponseDto<SearchItineraryDto>> GetAllPublicItinerariesAsync(GetAllPublicItinerariesRequestDto request)
+        public async Task<PaginatedResponseDto<SearchItineraryDto>> GetAllPublicItinerariesAsync(GetAllPublicItinerariesRequestDto request, int? currentUserId = null)
         {
-            // build filter expression
-            Expression<Func<Itinerary, bool>>? filter = i => i.IsPublic
-                && !i.DeleteFlag
-                && i.StartDate > DateTime.UtcNow;
-            if (request.ProvinceId is not null)
+            var query = _unitOfWork.Itineraries
+                .GetQueryable()
+                .Where(i => i.IsPublic && !i.DeleteFlag && i.StartDate > DateTime.UtcNow);
+
+            if (request.ProvinceId.HasValue)
             {
-                filter = i => i.IsPublic && !i.DeleteFlag
-                    && i.StartDate > DateTime.UtcNow &&
-                    (i.StartProvinceId == request.ProvinceId
-                    || i.DestinationProvinceId == request.ProvinceId);
+                query = query.Where(i => i.StartProvinceId == request.ProvinceId
+                                       || i.DestinationProvinceId == request.ProvinceId);
             }
 
-            // build orderBy function
-            Func<IQueryable<Itinerary>, IOrderedQueryable<Itinerary>>? orderBy = (request.SortByDate ?? true)
-                ? (request.IsDescending ?? false
-                    ? q => q.OrderByDescending(i => i.StartDate)
-                    : q => q.OrderBy(i => i.StartDate))
-                : null;
+            if (request.SortByDate ?? true)
+            {
+                query = (request.IsDescending ?? false)
+                    ? query.OrderByDescending(i => i.StartDate)
+                    : query.OrderBy(i => i.StartDate);
+            }
 
-            var (items, totalCount) = await _unitOfWork.Itineraries
-                .GetPagedAsync(filter: filter,
-                orderBy: orderBy,
-                includeProperties: "StartProvince,DestinationProvince,User,Members",
-                pageNumber: request.Page ?? 1,
-                pageSize: request.PageSize ?? Constants.DefaultPageSize);
+            var totalCount = await query.CountAsync();
 
-            var itineraryDtos = _mapper.Map<IEnumerable<SearchItineraryDto>>(items);
+            var itineraryDtos = await query
+                .Skip(((request.Page ?? 1) - 1) * (request.PageSize ?? Constants.DefaultPageSize))
+                .Take(request.PageSize ?? Constants.DefaultPageSize)
+                .Select(i => new SearchItineraryDto
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    StartProvinceName = i.StartProvince.Name,
+                    DestinationProvinceName = i.DestinationProvince.Name,
+                    StartDate = i.StartDate,
+                    EndDate = i.EndDate,
+                    ImageUrl = i.DestinationProvince.ImageUrl,
+                    GroupSize = i.GroupSize,
+                    CurrentMemberCount = i.Members.Count(m => !m.DeleteFlag),
+                    IsMember = currentUserId.HasValue &&
+                               i.Members.Any(m => m.UserId == currentUserId.Value && !m.DeleteFlag),
+                    Owner = new UserDto
+                    {
+                        Id = i.User.Id,
+                        Username = i.User.Username,
+                        Email = i.User.Email,
+                        UserPhoto = i.User.UserPhoto
+                    }
+                })
+                .AsNoTracking()
+                .ToListAsync();
 
-
-            var paginatedResponse = new PaginatedResponseDto<SearchItineraryDto>
+            return new PaginatedResponseDto<SearchItineraryDto>
             {
                 Data = itineraryDtos,
                 PageNumber = request.Page ?? 1,
@@ -78,8 +94,6 @@ namespace vivuvn_api.Services.Implementations
                 HasPreviousPage = (request.Page ?? 1) > 1,
                 HasNextPage = (request.Page ?? 1) < (int)Math.Ceiling(totalCount / (double)(request.PageSize ?? Constants.DefaultPageSize))
             };
-
-            return paginatedResponse;
         }
 
         public async Task<int> CopyPublicItineraryAsync(int userId, CopyPublicItineraryRequestDto request)

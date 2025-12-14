@@ -33,7 +33,8 @@ namespace vivuvn_api.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllPublicItineraries([FromQuery] GetAllPublicItinerariesRequestDto request)
         {
-            var response = await _itineraryService.GetAllPublicItinerariesAsync(request);
+            var userId = GetCurrentUserId();
+            var response = await _itineraryService.GetAllPublicItinerariesAsync(request, userId);
             return Ok(response);
         }
 
