@@ -526,20 +526,13 @@ namespace vivuvn_api.Services.Implementations
             // Save the generated itinerary to database
             var savedItinerary = await SaveTravelItineraryToDatabaseAsync(itinerary, aiResponse.Itinerary, request.GroupSize, request.Budget!.Value);
 
-            var warnings = new List<string>();
-            if (savedItinerary.Budget.TotalBudget > savedItinerary.Budget.EstimatedBudget)
-            {
-                warnings.Add($"Tổng ngân sách ước tính ({savedItinerary.Budget.TotalBudget} VNĐ) vượt quá ngân sách dự kiến ban đầu ({savedItinerary.Budget.EstimatedBudget} VNĐ). Bạn có thể điều chỉnh lịch trình hoặc tăng ngân sách.");
-            }
-
-            warnings.AddRange(aiResponse.Itinerary.Warnings);
             return new AutoGenerateItineraryResponseDto
             {
                 Status = aiResponse.Itinerary.ScheduleUnavailable
                     ? Constants.ResponseStatus_Warning
                     : Constants.ResponseStatus_Success,
                 ItineraryId = savedItinerary.Id,
-                Warnings = warnings.ToArray(),
+                Warnings = aiResponse.Itinerary.Warnings,
                 Message = "Lịch trình đã được tạo thành công."
             };
         }
