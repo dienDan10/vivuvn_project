@@ -19,6 +19,8 @@ class AutomaticallyGenerateByAiState {
   final String? convertedVnd;
   // Transportation mode selection (optional)
   final String? transportationMode;
+  // Warnings from AI generation response
+  final List<String> warnings;
 
   AutomaticallyGenerateByAiState({
     this.isLoading = false,
@@ -35,6 +37,7 @@ class AutomaticallyGenerateByAiState {
     this.currency = 'VND',
     this.convertedVnd,
     this.transportationMode,
+    this.warnings = const [],
   });
 
   AutomaticallyGenerateByAiState copyWith({
@@ -53,6 +56,8 @@ class AutomaticallyGenerateByAiState {
     final bool clearConvertedVnd =
         false, // Add flag to explicitly clear convertedVnd
     final String? transportationMode,
+    final List<String>? warnings,
+    final bool clearWarnings = false,
   }) {
     return AutomaticallyGenerateByAiState(
       isLoading: isLoading ?? this.isLoading,
@@ -70,6 +75,7 @@ class AutomaticallyGenerateByAiState {
           ? null
           : (convertedVnd ?? this.convertedVnd),
       transportationMode: transportationMode ?? this.transportationMode,
+      warnings: clearWarnings ? const [] : (warnings ?? this.warnings),
     );
   }
 }
