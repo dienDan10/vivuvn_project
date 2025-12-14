@@ -85,5 +85,26 @@ class PublicItineraryController extends StateNotifier<PublicItineraryState> {
       state = state.copyWith(isJoining: false);
     }
   }
+
+  Future<int> copyItinerary() async {
+    if (_itineraryId == null) {
+      throw Exception('Itinerary ID is null');
+    }
+    state = state.copyWith(isCopying: true, error: null);
+    try {
+      final service = _ref.read(publicItineraryServiceProvider);
+      final newItineraryId = await service.copyPublicItinerary(_itineraryId!);
+      return newItineraryId;
+    } on DioException catch (e) {
+      final message = DioExceptionHandler.handleException(e);
+      state = state.copyWith(isCopying: false, error: message);
+      throw Exception(message);
+    } on Exception catch (e) {
+      state = state.copyWith(isCopying: false, error: e.toString());
+      throw Exception(e.toString());
+    } finally {
+      state = state.copyWith(isCopying: false);
+    }
+  }
 }
 
