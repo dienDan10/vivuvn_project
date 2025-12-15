@@ -119,40 +119,24 @@ class HomeController extends StateNotifier<HomeState> {
 
     // Fetch detail first to get accurate isMember status
     try {
-      // final detailService = ref.read(itineraryDetailServiceProvider);
-      // final detail = await detailService.getItineraryDetail(itineraryId);
-
-      // // Check isMember from detail response
-      // if (detail.isOwner || detail.isMember) {
-      //   // Pre-set the itinerary data in controller to avoid duplicate fetch
-      //   final controller = ref.read(itineraryDetailControllerProvider.notifier);
-      //   controller.setItineraryData(detail);
-
-      //   // Wait a bit to ensure state is updated before navigation
-      //   await Future.delayed(const Duration(milliseconds: 50));
-
-      //   if (context.mounted) {
-      //     context.push(createItineraryDetailRoute(itineraryId));
-      //   }
-      // } else {
-      //   // If not a member, navigate to public itinerary view
-      //   if (context.mounted) {
-      //     context.push(createPublicItineraryViewRoute(itinerary.id));
-      //   }
-      // }
-
       if (itinerary.isMember && context.mounted) {
         context.push(createItineraryDetailRoute(itineraryId));
         return;
       }
 
       if (context.mounted) {
-        context.push(createPublicItineraryViewRoute(itinerary.id));
+        context.push(
+          createPublicItineraryViewRoute(itinerary.id),
+          extra: itinerary.currentMemberCount,
+        );
       }
     } catch (e) {
       // If fetch fails, navigate to public view as fallback
       if (context.mounted) {
-        context.push(createPublicItineraryViewRoute(itinerary.id));
+        context.push(
+          createPublicItineraryViewRoute(itinerary.id),
+          extra: itinerary.currentMemberCount,
+        );
       }
     }
   }

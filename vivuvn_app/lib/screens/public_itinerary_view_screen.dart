@@ -6,9 +6,11 @@ import '../features/public_itinerary/ui/public_itinerary_layout.dart';
 
 class PublicItineraryViewScreen extends ConsumerStatefulWidget {
   final String itineraryId;
+  final int? prefetchedMemberCount;
 
   const PublicItineraryViewScreen({
     required this.itineraryId,
+    this.prefetchedMemberCount,
     super.key,
   });
 
@@ -23,6 +25,11 @@ class _PublicItineraryViewScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.prefetchedMemberCount != null) {
+        ref
+            .read(publicItineraryControllerProvider.notifier)
+            .setPrefetchedMemberCount(widget.prefetchedMemberCount!);
+      }
       ref.read(publicItineraryControllerProvider.notifier)
         ..setItineraryId(widget.itineraryId)
         ..loadItineraryDetail();

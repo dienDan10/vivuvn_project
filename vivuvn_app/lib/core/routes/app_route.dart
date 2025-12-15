@@ -100,7 +100,11 @@ final goRouterProvider = Provider<GoRouter>((final ref) {
         path: publicItineraryViewRoute,
         builder: (final context, final state) {
           final itineraryId = state.pathParameters['id']!;
-          return PublicItineraryViewScreen(itineraryId: itineraryId);
+          final prefetchedCount = state.extra as int?;
+          return PublicItineraryViewScreen(
+            itineraryId: itineraryId,
+            prefetchedMemberCount: prefetchedCount,
+          );
         },
       ),
 
