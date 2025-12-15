@@ -57,8 +57,8 @@ services:
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
       - AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL}
       - ADMIN_PANEL_URL=${ADMIN_PANEL_URL}
-      - DB_SERVER=host.docker.internal  # Key change: use host machine
-      - DB_PORT=1433  # Your local SQL Server port
+      - DB_SERVER=host.docker.internal
+      - DB_PORT=1433
     ports:
       - "5277:80"
     depends_on:
@@ -67,12 +67,15 @@ services:
     networks:
       - vivuvn-network
     extra_hosts:
-      - "host.docker.internal:host-gateway"  # Enable host access
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
 volumes:
   model-cache:
     name: vivuvn-model-cache
+    driver: local
+  sqlserver_data:
+    name: vivuvn-sqlserver-data
     driver: local
 
 networks:

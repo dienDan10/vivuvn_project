@@ -1,46 +1,69 @@
 version: '3.8'
 
 services:
-  sqlserver:
-    environment:
-      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_ProductionDB_2024!@#}
-    volumes:
-      - sqlserver_data:/var/opt/mssql
-    # Remove sql-scripts volume - not needed for production
+  # AI Service (Production Configuration - Flexible for 2GB RAM VPS)
+  vivuvn-ai-service:
     restart: always
-    # Production tuning
     deploy:
       resources:
-        limits:
-          cpus: '2.0'
-          memory: 4G
         reservations:
-          cpus: '1.0'
-          memory: 2G
+          cpus: '0.25'
+          memory: 512M
+
+  # SQL Server Database (Production Only - Flexible for 2GB RAM VPS)
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: vivuvn-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Express
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - vivuvn-network
+    restart: always
+    healthcheck:
+      test: ["/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SA_PASSWORD}", "-Q", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 512M
 
   vivuvn-api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      # Add production-specific environment variables
-      - SA_PASSWORD=${SA_PASSWORD:-VivuVN_ProductionDB_2024!@#}
+      - SA_PASSWORD=${SA_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
       - BREVO_API_KEY=${BREVO_API_KEY}
       - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - GOOGLE_MAPS_ROUTE_URL=${GOOGLE_MAPS_ROUTE_URL}
+      - GOOGLE_MAPS_PLACE_URL=${GOOGLE_MAPS_PLACE_URL}
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL}
+      - ADMIN_PANEL_URL=${ADMIN_PANEL_URL}
+      - DB_SERVER=sqlserver
+      - DB_PORT=1433
+    depends_on:
+      sqlserver:
+        condition: service_healthy
     restart: always
-    # Production tuning
     deploy:
       resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
         reservations:
-          cpus: '0.5'
-          memory: 512M
-    # Remove volumes mapping for production (security)
-    # volumes: []  # This removes the ./images:/app/images mapping
+          cpus: '0.25'
+          memory: 256M
     
     # Production health checks
     healthcheck:

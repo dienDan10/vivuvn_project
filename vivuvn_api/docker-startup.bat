@@ -21,6 +21,14 @@ echo.
 echo ? Application started successfully!
 echo.
 echo ?? API is available at: http://localhost:5277
-echo ???  Using local SQL Server on host machine
+echo ???  Using local SQL Server on host machine (localhost:1433)
+echo ?? Health Check: http://localhost:5277/health
+echo.
+echo ?? To view logs:
+echo    docker-compose logs -f vivuvn-api
+echo    docker-compose logs -f vivuvn-ai-service
+echo.
+echo ?? To stop:
+echo    docker-compose down
 echo.
 pause
