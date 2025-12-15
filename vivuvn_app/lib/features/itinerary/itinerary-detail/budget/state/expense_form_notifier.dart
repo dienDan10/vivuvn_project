@@ -65,7 +65,6 @@ class ExpenseFormNotifier extends StateNotifier<ExpenseFormState> {
   void setPayer(final int? memberId, [final String? memberName]) {
     // Debug log before update
     // ignore: avoid_print
-    print('[ExpenseForm] setPayer -> id: $memberId, name: ${memberName ?? 'null'}');
 
     state = state.copyWith(
       payerMemberId: memberId,
@@ -74,7 +73,6 @@ class ExpenseFormNotifier extends StateNotifier<ExpenseFormState> {
 
     // Debug log after update
     // ignore: avoid_print
-    print('[ExpenseForm] updated -> payerMemberId: ${state.payerMemberId?.toString() ?? 'null'}, payerMemberName: ${state.payerMemberName ?? 'null'}');
   }
 
   /// Update details (optional)

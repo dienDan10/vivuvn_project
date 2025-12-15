@@ -66,7 +66,7 @@ class PublicItineraryLayout extends ConsumerWidget {
                     children: [
                       Icon(Icons.bookmark_add, size: 20),
                       SizedBox(width: 12),
-                      Text('Lưu lịch trình tài khoản'),
+                      Text('Lưu lịch trình'),
                     ],
                   ),
                 ),

@@ -41,8 +41,10 @@ class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
     if (!isOwner) {
       return const SizedBox.shrink();
     }
+    debugPrint('[ButtonScheduleOptions] build; mounted=$mounted');
 
-    return HeroMode(
+    return 
+    HeroMode(
       enabled: false,
       child: ExpandableFab(
         key: _fabKey,

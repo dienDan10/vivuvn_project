@@ -7,7 +7,6 @@ class ItineraryDto {
   final String imageUrl;
   final DateTime startDate;
   final DateTime endDate;
-  final int participantCount;
   final int currentMemberCount;
   final int groupSize;
   final int durationDays;
@@ -25,7 +24,6 @@ class ItineraryDto {
     required this.imageUrl,
     required this.startDate,
     required this.endDate,
-    required this.participantCount,
     required this.currentMemberCount,
     required this.groupSize,
     required this.durationDays,
@@ -135,7 +133,6 @@ class ItineraryDto {
     }
     
     final currentMemberCount = json['currentMemberCount'] as int? ??
-        json['participantCount'] as int? ??
         json['memberCount'] as int? ??
         json['participants'] as int? ??
         0;
@@ -143,11 +140,6 @@ class ItineraryDto {
     final groupSize = json['groupSize'] as int? ??
         json['maxGroupSize'] as int? ??
         json['capacity'] as int? ??
-        currentMemberCount;
-
-    final participantCount = json['participantCount'] as int? ??
-        json['memberCount'] as int? ??
-        json['participants'] as int? ??
         currentMemberCount;
 
     return ItineraryDto(
@@ -161,7 +153,6 @@ class ItineraryDto {
                 json['image']?.toString() ?? '',
       startDate: startDate,
       endDate: endDate,
-      participantCount: participantCount,
       currentMemberCount: currentMemberCount,
       groupSize: groupSize,
       durationDays: durationDays,
@@ -182,7 +173,6 @@ class ItineraryDto {
       'imageUrl': imageUrl,
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
-      'participantCount': participantCount,
       'currentMemberCount': currentMemberCount,
       'groupSize': groupSize,
       'durationDays': durationDays,

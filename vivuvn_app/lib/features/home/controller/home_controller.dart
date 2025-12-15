@@ -3,8 +3,13 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../core/routes/routes.dart';
+import '../../itinerary/itinerary-detail/detail/controller/itinerary_detail_controller.dart';
+import '../../itinerary/itinerary-detail/detail/service/itinerary_detail_service.dart';
+import '../data/dto/itinerary_dto.dart';
 import '../service/home_service.dart';
 import '../service/home_service_impl.dart';
 import '../state/home_state.dart';
@@ -84,6 +89,49 @@ class HomeController extends StateNotifier<HomeState> {
         );
       }
       // If we have data, keep showing it even if refresh fails
+    }
+  }
+
+  /// Handle tap on itinerary card - fetch detail and navigate based on isMember
+  Future<void> handleItineraryTap(
+    final BuildContext context,
+    final WidgetRef ref,
+    final ItineraryDto itinerary,
+  ) async {
+    final itineraryId = int.tryParse(itinerary.id);
+    
+    if (itineraryId == null) {
+      return;
+    }
+
+    // Fetch detail first to get accurate isMember status
+    try {
+      final detailService = ref.read(itineraryDetailServiceProvider);
+      final detail = await detailService.getItineraryDetail(itineraryId);
+      
+      // Check isMember from detail response
+      if (detail.isOwner || detail.isMember) {
+        // Pre-set the itinerary data in controller to avoid duplicate fetch
+        final controller = ref.read(itineraryDetailControllerProvider.notifier);
+        controller.setItineraryData(detail);
+        
+        // Wait a bit to ensure state is updated before navigation
+        await Future.delayed(const Duration(milliseconds: 50));
+        
+        if (context.mounted) {
+          context.push(createItineraryDetailRoute(itineraryId));
+        }
+      } else {
+        // If not a member, navigate to public itinerary view
+        if (context.mounted) {
+          context.push(createPublicItineraryViewRoute(itinerary.id));
+        }
+      }
+    } catch (e) {
+      // If fetch fails, navigate to public view as fallback
+      if (context.mounted) {
+        context.push(createPublicItineraryViewRoute(itinerary.id));
+      }
     }
   }
 }

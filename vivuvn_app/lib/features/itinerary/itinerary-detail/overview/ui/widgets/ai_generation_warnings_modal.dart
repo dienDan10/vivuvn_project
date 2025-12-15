@@ -19,22 +19,22 @@ class _AiGenerationWarningsModalState
 
     return PopScope(
       canPop: true,
-      onPopInvoked: (final didPop) {
+      onPopInvokedWithResult: (final didPop, final result) {
+        // Clear warnings when modal is dismissed (swipe down or back button)
         if (didPop) {
-          // Clear warnings when modal is dismissed (swipe down or back button)
           ref.read(aiGenerationWarningsProvider.notifier).state = [];
         }
       },
       child: Container(
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,12 +70,8 @@ class _AiGenerationWarningsModalState
           const Divider(),
           const SizedBox(height: 16),
           // Warnings list
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: warnings.length,
-              itemBuilder: (final context, final index) {
-                return Padding(
+          if (warnings.isNotEmpty)
+            ...warnings.map((final warning) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +84,7 @@ class _AiGenerationWarningsModalState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          warnings[index],
+                          warning,
                           style: const TextStyle(
                             fontSize: 14,
                             height: 1.5,
@@ -97,10 +93,7 @@ class _AiGenerationWarningsModalState
                       ),
                     ],
                   ),
-                );
-              },
-            ),
-          ),
+                )),
           const SizedBox(height: 16),
           // Close button
           SizedBox(
@@ -124,13 +117,12 @@ class _AiGenerationWarningsModalState
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
                 ),
               ),
             ),
           ),
         ],
-      ),
+        ),
       ),
     );
   }

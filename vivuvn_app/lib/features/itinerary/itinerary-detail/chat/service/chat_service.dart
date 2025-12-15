@@ -154,7 +154,6 @@ class ChatService implements IChatService {
     } catch (e) {
       // Handle error (e.g., log it)
       // For now, we just print the error
-      // print('Error while polling for new messages: $e');
     }
   }
 

@@ -123,7 +123,7 @@ class ChatController extends AutoDisposeFamilyNotifier<ChatState, int> {
         _chatService.updateLastMessageId(uniqueMessages.first.id);
       },
       onError: (final error) {
-        print('⚠️ Stream error: $error');
+        // Error handled silently
       },
     );
   }
