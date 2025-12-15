@@ -21,6 +21,7 @@ class Itinerary {
   final String transportationVehicle;
   final bool isPublic;
   final String? inviteCode;
+  final int currentMemberCount;
 
   Itinerary({
     required this.id,
@@ -40,6 +41,7 @@ class Itinerary {
     required this.transportationVehicle,
     required this.isPublic,
     this.inviteCode,
+    this.currentMemberCount = 0,
   });
 
   Itinerary copyWith({
@@ -60,6 +62,7 @@ class Itinerary {
     final String? transportationVehicle,
     final bool? isPublic,
     final String? inviteCode,
+    final int? currentMemberCount,
   }) {
     return Itinerary(
       id: id ?? this.id,
@@ -82,6 +85,7 @@ class Itinerary {
           transportationVehicle ?? this.transportationVehicle,
       isPublic: isPublic ?? this.isPublic,
       inviteCode: inviteCode ?? this.inviteCode,
+      currentMemberCount: currentMemberCount ?? this.currentMemberCount,
     );
   }
 
@@ -104,6 +108,7 @@ class Itinerary {
       'transportationVehicle': transportationVehicle,
       'isPublic': isPublic,
       'inviteCode': inviteCode,
+      'currentMemberCount': currentMemberCount,
     };
   }
 
@@ -170,6 +175,9 @@ class Itinerary {
       transportationVehicle: map['transportationVehicle']?.toString() ?? '',
       isPublic: map['isPublic'] as bool? ?? false,
       inviteCode: map['inviteCode']?.toString(),
+      currentMemberCount: map['currentMemberCount'] as int? ??
+          map['currentMember'] as int? ??
+          0,
     );
   }
 

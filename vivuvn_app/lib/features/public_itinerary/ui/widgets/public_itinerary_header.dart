@@ -114,7 +114,7 @@ class PublicItineraryHeader extends ConsumerWidget {
                               ? itinerary.transportationVehicle
                               : 'Chưa cập nhật',
                           tertiaryIcon: Icons.group,
-                          tertiaryLabel: '${state.members.length}/${itinerary.groupSize} người',
+                          tertiaryLabel: '${itinerary.currentMemberCount}/${itinerary.groupSize} người',
                           theme: theme,
                         ),
                       ),

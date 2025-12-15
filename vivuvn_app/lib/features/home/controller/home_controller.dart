@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/data/remote/exception/dio_exception_handler.dart';
+import '../../../core/routes/routes.dart';
+import '../data/dto/itinerary_dto.dart';
 import '../service/home_service.dart';
 import '../service/home_service_impl.dart';
 import '../state/home_state.dart';
@@ -12,6 +15,9 @@ import '../state/home_state.dart';
 // State notifier for home data
 class HomeController extends StateNotifier<HomeState> {
   final HomeService _service;
+  static const Duration _minRefreshInterval = Duration(seconds: 10);
+  DateTime? _lastFetchAt;
+  bool _refreshQueued = false;
 
   HomeController(this._service) : super(const HomeState());
 
@@ -29,12 +35,10 @@ class HomeController extends StateNotifier<HomeState> {
         destinations: destinations,
         itineraries: itineraries,
       );
+      _lastFetchAt = DateTime.now();
     } on DioException catch (e) {
       final message = DioExceptionHandler.handleException(e);
-      state = state.copyWith(
-        status: HomeStatus.error,
-        errorMessage: message,
-      );
+      state = state.copyWith(status: HomeStatus.error, errorMessage: message);
     } catch (e) {
       state = state.copyWith(
         status: HomeStatus.error,
@@ -53,7 +57,7 @@ class HomeController extends StateNotifier<HomeState> {
   Future<void> refreshHomeDataSilently() async {
     // Don't refresh if already loading
     if (state.isLoading) return;
-    
+
     // Keep current data and status, just refresh in background
     try {
       final destinations = await _service.getPopularDestinations();
@@ -65,14 +69,12 @@ class HomeController extends StateNotifier<HomeState> {
         itineraries: itineraries,
         errorMessage: null, // Clear any previous errors
       );
+      _lastFetchAt = DateTime.now();
     } on DioException catch (e) {
       final message = DioExceptionHandler.handleException(e);
       // Only update error if we have data, otherwise keep showing data
       if (state.isEmpty) {
-        state = state.copyWith(
-          status: HomeStatus.error,
-          errorMessage: message,
-        );
+        state = state.copyWith(status: HomeStatus.error, errorMessage: message);
       }
       // If we have data, keep showing it even if refresh fails
     } catch (e) {
@@ -84,6 +86,58 @@ class HomeController extends StateNotifier<HomeState> {
         );
       }
       // If we have data, keep showing it even if refresh fails
+    }
+  }
+
+  /// Refresh only if đủ thời gian cách lần gần nhất để tránh spam API.
+  Future<void> refreshIfStale() async {
+    if (_refreshQueued) return;
+    final now = DateTime.now();
+    if (_lastFetchAt != null && now.difference(_lastFetchAt!) < _minRefreshInterval) {
+      return;
+    }
+
+    _refreshQueued = true;
+    try {
+      await refreshHomeDataSilently();
+    } finally {
+      _refreshQueued = false;
+    }
+  }
+
+  /// Handle tap on itinerary card - fetch detail and navigate based on isMember
+  Future<void> handleItineraryTap(
+    final BuildContext context,
+    final WidgetRef ref,
+    final ItineraryDto itinerary,
+  ) async {
+    final itineraryId = int.tryParse(itinerary.id);
+
+    if (itineraryId == null) {
+      return;
+    }
+
+    // Fetch detail first to get accurate isMember status
+    try {
+      if (itinerary.isMember && context.mounted) {
+        context.push(createItineraryDetailRoute(itineraryId));
+        return;
+      }
+
+      if (context.mounted) {
+        context.push(
+          createPublicItineraryViewRoute(itinerary.id),
+          extra: itinerary.currentMemberCount,
+        );
+      }
+    } catch (e) {
+      // If fetch fails, navigate to public view as fallback
+      if (context.mounted) {
+        context.push(
+          createPublicItineraryViewRoute(itinerary.id),
+          extra: itinerary.currentMemberCount,
+        );
+      }
     }
   }
 }
@@ -108,4 +162,3 @@ final itineraryPageControllerProvider = Provider.autoDispose<PageController>((
 
   return controller;
 });
-

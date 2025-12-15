@@ -17,16 +17,8 @@ final hotelsControllerProvider =
 class HotelsController extends AutoDisposeNotifier<HotelsState> {
   @override
   HotelsState build() {
-    // Auto-load hotels when controller is first created and itineraryId is available
-    final itineraryId = ref.watch(
-      itineraryDetailControllerProvider.select((final s) => s.itineraryId),
-    );
-
-    if (itineraryId != null) {
-      // Schedule load for next microtask to avoid modifying state during build
-      Future.microtask(() => loadHotels(itineraryId));
-    }
-
+    // Don't auto-load here - let overview_tab_layout.dart handle it via listener
+    // to avoid duplicate requests
     return HotelsState();
   }
 

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../../../core/routes/routes.dart';
-import '../../../../../itinerary/itinerary-detail/detail/service/itinerary_detail_service.dart';
+import '../../../../controller/home_controller.dart';
 import '../../../../controller/search_itineraries_controller.dart';
 import '../../../../data/dto/itinerary_dto.dart';
 
@@ -12,55 +10,10 @@ class ItineraryResultCard extends ConsumerWidget {
 
   const ItineraryResultCard({required this.itinerary, super.key});
 
-  Future<void> _handleTap(
+  void _handleTap(
     final BuildContext context,
     final WidgetRef ref,
-  ) async {
-    final itineraryId = int.tryParse(itinerary.id);
-
-    final isAllowedToViewDetail = itinerary.isMember || itinerary.isOwner;
-
-    if (isAllowedToViewDetail && itineraryId != null) {
-      // Clear search data
-      ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
-
-      // Close modal if we're in a modal context
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
-
-      if (context.mounted) {
-        context.push(createItineraryDetailRoute(itineraryId));
-      }
-      return;
-    }
-
-    // Fallback: nếu list item không có isMember/isOwner đúng, gọi detail để kiểm tra lại
-    if (itineraryId != null) {
-      try {
-        final detailService = ref.read(itineraryDetailServiceProvider);
-        final detail = await detailService.getItineraryDetail(itineraryId);
-        final allowFromDetail = detail.isMember || detail.isOwner;
-
-        if (allowFromDetail) {
-          // Clear search data
-          ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
-
-          // Close modal if we're in a modal context
-          if (context.mounted && Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-
-          if (context.mounted) {
-            context.push(createItineraryDetailRoute(itineraryId));
-          }
-          return;
-        }
-      } catch (e) {
-        // Error handled silently
-      }
-    }
-
+  ) {
     // Clear search data
     ref.read(searchItinerariesControllerProvider.notifier).clearSearch();
 
@@ -69,9 +22,12 @@ class ItineraryResultCard extends ConsumerWidget {
       Navigator.pop(context);
     }
 
-    if (context.mounted) {
-      context.push(createPublicItineraryViewRoute(itinerary.id));
-    }
+    // Handle navigation via controller
+    ref.read(homeControllerProvider.notifier).handleItineraryTap(
+      context,
+      ref,
+      itinerary,
+    );
   }
 
   @override

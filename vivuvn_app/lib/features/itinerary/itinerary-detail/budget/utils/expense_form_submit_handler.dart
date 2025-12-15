@@ -180,7 +180,6 @@ class ExpenseFormSubmitHandler {
       details: detailsController.text.trim(),
     );
     // ignore: avoid_print
-    print('[Budget] Update payload: ${updateRequest.toMap()}');
     return await controller.updateBudgetItem(updateRequest);
   }
 
@@ -203,7 +202,6 @@ class ExpenseFormSubmitHandler {
       details: detailsController.text.trim(),
     );
     // ignore: avoid_print
-    print('[Budget] Add payload: ${addRequest.toMap()}');
     return await controller.addBudgetItem(addRequest);
   }
 

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../../core/routes/routes.dart';
-import '../../../itinerary/itinerary-detail/detail/service/itinerary_detail_service.dart';
+import '../../controller/home_controller.dart';
 import '../../data/dto/itinerary_dto.dart';
 
 class ItineraryCard extends ConsumerWidget {
@@ -11,38 +9,15 @@ class ItineraryCard extends ConsumerWidget {
 
   const ItineraryCard({required this.itinerary, super.key});
 
-  Future<void> _handleTap(
+  void _handleTap(
     final BuildContext context,
     final WidgetRef ref,
-  ) async {
-    final itineraryId = int.tryParse(itinerary.id);
-
-    final isAllowedToViewDetail = itinerary.isMember || itinerary.isOwner;
-
-    if (isAllowedToViewDetail && itineraryId != null) {
-      context.push(createItineraryDetailRoute(itineraryId));
-      return;
-    }
-
-    // Fallback: nếu list item không có isMember/isOwner đúng, gọi detail để kiểm tra lại
-    if (itineraryId != null) {
-      try {
-        final detailService = ref.read(itineraryDetailServiceProvider);
-        final detail = await detailService.getItineraryDetail(itineraryId);
-        final allowFromDetail = detail.isMember || detail.isOwner;
-
-        if (allowFromDetail) {
-          if (context.mounted) {
-            context.push(createItineraryDetailRoute(itineraryId));
-          }
-          return;
-        }
-      } catch (e) {
-        // Error handled silently
-      }
-    }
-
-    context.push(createPublicItineraryViewRoute(itinerary.id));
+  ) {
+    ref.read(homeControllerProvider.notifier).handleItineraryTap(
+      context,
+      ref,
+      itinerary,
+    );
   }
 
   @override

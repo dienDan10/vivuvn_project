@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/data/remote/network/network_service.dart';
 import '../dto/generate_itinerary_by_ai_request.dart';
+import '../dto/generate_itinerary_by_ai_response.dart';
 
 final automaticallyGenerateByAiProvider =
     Provider.autoDispose<AutomaticallyGenerateByAi>((final ref) {
@@ -15,7 +16,7 @@ class AutomaticallyGenerateByAi {
   AutomaticallyGenerateByAi(this._dio);
 
   /// POST /api/v1/itineraries/{itineraryId}/days/auto-generate
-  Future<Response> generateItineraryByAi({
+  Future<GenerateItineraryByAiResponse> generateItineraryByAi({
     required final GenerateItineraryByAiRequest request,
   }) async {
     final resp = await _dio.post(
@@ -26,6 +27,6 @@ class AutomaticallyGenerateByAi {
       //   // sendTimeout: const Duration(minutes: 1),
       // ),
     );
-    return resp;
+    return GenerateItineraryByAiResponse.fromJson(resp.data as Map<String, dynamic>);
   }
 }

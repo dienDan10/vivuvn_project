@@ -1,7 +1,8 @@
 import '../data/dto/generate_itinerary_by_ai_request.dart';
+import '../data/dto/generate_itinerary_by_ai_response.dart';
 
 abstract class IGenerateItineraryByAiService {
-  Future<void> generateItineraryByAi(
+  Future<GenerateItineraryByAiResponse> generateItineraryByAi(
     final GenerateItineraryByAiRequest request,
   );
 }

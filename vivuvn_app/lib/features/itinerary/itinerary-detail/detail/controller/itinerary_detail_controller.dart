@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../../home/controller/home_controller.dart';
 import '../../../update-itinerary/controller/update_itinerary_controller.dart';
 import '../../../view-itinerary-list/controller/itinerary_controller.dart';
+import '../../../view-itinerary-list/models/itinerary.dart';
 import '../../schedule/model/transportation_mode.dart';
 import '../service/itinerary_detail_service.dart';
 import '../service/qr_code_save_service.dart';
@@ -35,28 +38,94 @@ class ItineraryDetailController
 
   /// Lưu ID và fetch detail
   void setItineraryId(final int id) async {
+    // If setting the same ID and itinerary is already loaded, skip
+    if (state.itineraryId == id && 
+        state.itinerary != null && 
+        state.itinerary!.id == id) {
+      return;
+    }
+    
+    // If itinerary is already set and matches the ID, just update itineraryId without clearing itinerary
+    if (state.itinerary != null && state.itinerary!.id == id) {
+      state = state.copyWith(itineraryId: id);
+      return;
+    }
+    
+    // Just set itineraryId, don't clear existing itinerary data
+    // The listener will check if itinerary matches the ID before fetching
     state = state.copyWith(itineraryId: id);
   }
 
+  /// Set itinerary data directly (used when data is already fetched, e.g., from ItineraryCard)
+  void setItineraryData(final Itinerary itinerary) {
+    // Set both itineraryId and itinerary data to avoid duplicate fetch
+    state = state.copyWith(
+      itineraryId: itinerary.id,
+      itinerary: itinerary,
+      inviteCode: itinerary.inviteCode ?? state.inviteCode,
+      isLoading: false,
+    );
+  }
+
+  // Track the ongoing fetch Future to prevent duplicate calls
+  Future<void>? _ongoingFetch;
+  // Track the itineraryId that is currently being fetched
+  int? _fetchingItineraryId;
+
   /// Fetch itinerary detail by ID
   Future<void> fetchItineraryDetail() async {
+    // If itinerary is already loaded and matches current ID, skip fetch
+    if (state.itinerary != null && 
+        state.itinerary!.id == state.itineraryId) {
+      return;
+    }
+    
+    final currentItineraryId = state.itineraryId;
+    if (currentItineraryId == null) {
+      return;
+    }
+    
+    // If we're already fetching this specific itineraryId, return the ongoing fetch
+    if (_fetchingItineraryId == currentItineraryId && _ongoingFetch != null) {
+      return _ongoingFetch!;
+    }
+    
+    // Prevent duplicate fetches if already loading
+    if (state.isLoading) {
+      return;
+    }
+    // Create and store the fetch Future immediately to prevent race conditions
+    // Use a Completer to ensure we can return the same Future for concurrent calls
+    final completer = Completer<void>();
+    _fetchingItineraryId = currentItineraryId;
+    _ongoingFetch = completer.future;
     state = state.copyWith(isLoading: true, error: null);
+    
+    // Perform the actual fetch
     try {
       final data = await ref
           .read(itineraryDetailServiceProvider)
-          .getItineraryDetail(state.itineraryId!);
+          .getItineraryDetail(currentItineraryId);
       // Sync inviteCode từ itinerary object vào state nếu có
       state = state.copyWith(
         itinerary: data,
         inviteCode: data.inviteCode ?? state.inviteCode,
+        isLoading: false,
       );
+      completer.complete();
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(error: errorMsg, isLoading: false);
+      completer.completeError(e);
     } catch (e) {
-      state = state.copyWith(error: 'unknown error');
+      state = state.copyWith(error: 'unknown error', isLoading: false);
+      completer.completeError(e);
     } finally {
-      state = state.copyWith(isLoading: false);
+      // Clear the ongoing fetch only if it's still the current one
+      if (_fetchingItineraryId == currentItineraryId) {
+        _ongoingFetch = null;
+        _fetchingItineraryId = null;
+      }
     }
   }
 
