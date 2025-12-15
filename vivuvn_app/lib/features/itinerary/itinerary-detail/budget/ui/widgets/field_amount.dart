@@ -55,13 +55,14 @@ class _FieldAmountState extends State<FieldAmount> {
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.attach_money),
             labelText: 'Số tiền',
-            border: InputBorder.none,
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey, width: 0.5),
+        border: const OutlineInputBorder(),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey, width: 0.8),
             ),
-            focusedBorder: const UnderlineInputBorder(
+        focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.blue, width: 1.5),
             ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
             suffixIcon: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: InkWell(
@@ -73,7 +74,7 @@ class _FieldAmountState extends State<FieldAmount> {
                   });
                   widget.onCurrencyChanged(isUSD); // Use new value after toggle
                 },
-                borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

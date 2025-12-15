@@ -128,13 +128,23 @@ class FieldTypePicker extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final isSelected = selectedType != 'Chưa chọn';
+    final displayText = isSelected ? selectedType : 'Chọn loại chi phí';
+    final theme = Theme.of(context);
 
     return InkWell(
       onTap: () => _pickType(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
+      borderRadius: BorderRadius.circular(8),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Loại chi phí',
+          border: const OutlineInputBorder(),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey, width: 0.8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         ),
         child: Row(
           children: [
@@ -143,20 +153,20 @@ class FieldTypePicker extends StatelessWidget {
                   ? BudgetTypeIcons.getIconForType(selectedType)
                   : Icons.category_outlined,
               color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.grey,
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                selectedType,
+                displayText,
                 style: TextStyle(
                   fontSize: 16,
-                  color: isSelected ? Colors.black87 : Colors.grey,
+                  color: isSelected ? theme.colorScheme.onSurface : theme.hintColor,
                 ),
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Colors.grey),
+            Icon(Icons.arrow_drop_down, color: theme.colorScheme.outline),
           ],
         ),
       ),
