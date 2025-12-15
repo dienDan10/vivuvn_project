@@ -37,7 +37,7 @@ class PublicItineraryLayout extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          if (state.isJoining)
+          if (state.isJoining || state.isCopying)
             const Padding(
               padding: EdgeInsets.only(right: 16),
               child: SizedBox(
@@ -55,9 +55,21 @@ class PublicItineraryLayout extends ConsumerWidget {
               onSelected: (final String value) {
                 if (value == 'join') {
                   _joinItinerary(context, ref);
+                } else if (value == 'copy') {
+                  _copyItinerary(context, ref);
                 }
               },
               itemBuilder: (final BuildContext context) => const <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'copy',
+                  child: Row(
+                    children: [
+                      Icon(Icons.bookmark_add, size: 20),
+                      SizedBox(width: 12),
+                      Text('Lưu lịch trình'),
+                    ],
+                  ),
+                ),
                 PopupMenuItem<String>(
                   value: 'join',
                   child: Row(
@@ -116,6 +128,35 @@ Future<void> _joinItinerary(final BuildContext context, final WidgetRef ref) asy
         message: 'Tham gia lịch trình thành công',
       );
       // Chuyển về tab Lịch trình
+      context.go(itineraryRoute);
+    }
+  } catch (e) {
+    if (context.mounted) {
+      GlobalToast.showErrorToast(
+        context,
+        message: e.toString(),
+      );
+    }
+  }
+}
+
+Future<void> _copyItinerary(final BuildContext context, final WidgetRef ref) async {
+  final controller = ref.read(publicItineraryControllerProvider.notifier);
+  final currentState = ref.read(publicItineraryControllerProvider);
+  if (currentState.isCopying) return;
+
+  try {
+    await controller.copyItinerary();
+    // Refresh private itinerary list
+    await ref.read(itineraryControllerProvider.notifier).fetchItineraries();
+    // Refresh home data
+    await ref.read(homeControllerProvider.notifier).refreshHomeData();
+    if (context.mounted) {
+      GlobalToast.showSuccessToast(
+        context,
+        message: 'Lưu lịch trình thành công',
+      );
+      // Navigate back to itinerary list screen
       context.go(itineraryRoute);
     }
   } catch (e) {

@@ -17,16 +17,8 @@ final restaurantsControllerProvider =
 class RestaurantsController extends AutoDisposeNotifier<RestaurantsState> {
   @override
   RestaurantsState build() {
-    // Auto-load restaurants when controller is first created and itineraryId is available
-    final itineraryId = ref.watch(
-      itineraryDetailControllerProvider.select((final s) => s.itineraryId),
-    );
-
-    if (itineraryId != null) {
-      // Schedule load for next microtask to avoid modifying state during build
-      Future.microtask(() => loadRestaurants(itineraryId));
-    }
-
+    // Don't auto-load here - let overview_tab_layout.dart handle it via listener
+    // to avoid duplicate requests
     return RestaurantsState();
   }
 

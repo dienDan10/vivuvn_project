@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sliver_snap/sliver_snap.dart';
 
@@ -28,6 +29,8 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
   late TabController _tabController;
 
   late ProviderSubscription<ItineraryDetailState> _itineraryListener;
+  // Track the last itineraryId that triggered a fetch to prevent duplicate triggers
+  int? _lastFetchedItineraryId;
 
   @override
   void initState() {
@@ -62,12 +65,34 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     _itineraryListener = ref.listenManual<ItineraryDetailState>(
       itineraryDetailControllerProvider,
       (final previous, final next) {
-        if (previous?.itineraryId != next.itineraryId &&
-            next.itineraryId != null) {
-          ref
-              .read(itineraryDetailControllerProvider.notifier)
-              .fetchItineraryDetail();
+        // If itineraryId didn't change, skip
+        if (previous?.itineraryId == next.itineraryId) {
+          return;
         }
+
+        // If itineraryId is null, skip
+        if (next.itineraryId == null) {
+          return;
+        }
+
+        // If itinerary is already loaded and matches the ID, skip fetch
+        // Check this BEFORE checking _lastFetchedItineraryId to handle the case
+        // where setItineraryData was called before setItineraryId
+        if (next.itinerary != null && next.itinerary!.id == next.itineraryId) {
+          _lastFetchedItineraryId = next.itineraryId;
+          return;
+        }
+
+        // If we've already triggered a fetch for this ID, skip
+        if (next.itineraryId == _lastFetchedItineraryId) {
+          return;
+        }
+
+        // Otherwise, trigger fetch
+        _lastFetchedItineraryId = next.itineraryId;
+        ref
+            .read(itineraryDetailControllerProvider.notifier)
+            .fetchItineraryDetail();
       },
     );
   }
@@ -109,7 +134,10 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     return AnimatedBuilder(
       animation: _tabController,
       builder: (final context, final child) {
-        return Scaffold(body: _buildBody());
+        return Scaffold(
+          body: _buildBody(),
+          floatingActionButtonLocation: ExpandableFab.location,
+        );
       },
     );
   }

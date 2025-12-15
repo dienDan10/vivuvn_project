@@ -17,6 +17,10 @@ import 'validate_and_submit_result.dart';
 // listen to this provider and perform the animateTo call.
 final aiTabSwitchProvider = StateProvider<int?>((final ref) => null);
 
+// Provider to store warnings from AI generation response
+// This allows overview tab to access and display warnings
+final aiGenerationWarningsProvider = StateProvider<List<String>>((final ref) => []);
+
 final automicallyGenerateByAiControllerProvider =
     AutoDisposeNotifierProvider<
       AutomaticallyGenerateByAiController,
@@ -181,8 +185,16 @@ class AutomaticallyGenerateByAiController
         specialRequirements: state.specialRequirements,
         transportationMode: state.transportationMode,
       );
-      await api.generateItineraryByAi(request: request);
-      state = state.copyWith(isGenerated: true);
+      final response = await api.generateItineraryByAi(request: request);
+      state = state.copyWith(
+        isGenerated: true,
+        warnings: response.warnings,
+        itineraryId: response.itineraryId, // Update itineraryId from response
+      );
+      // Store warnings in a provider for easy access from overview
+      if (response.warnings.isNotEmpty) {
+        ref.read(aiGenerationWarningsProvider.notifier).state = response.warnings;
+      }
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
     } on ValidationException catch (e) {
@@ -246,7 +258,10 @@ class AutomaticallyGenerateByAiController
       if (state.isGenerated) {
         // Request UI to switch to overview tab (index 0)
         ref.read(aiTabSwitchProvider.notifier).state = 0;
-        return ValidateAndSubmitResult.submittedSuccess();
+        return ValidateAndSubmitResult.submittedSuccess(
+          state.warnings,
+          state.itineraryId,
+        );
       }
       return ValidateAndSubmitResult.submittedError(
         state.error ?? 'Không thể tạo lịch trình',

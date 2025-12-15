@@ -62,8 +62,7 @@ namespace vivuvn_api.Services.Implementations
             var device = await _unitOfWork.UserDevices.GetOneAsync(d => d.FcmToken == fcmToken);
             if (device != null)
             {
-                device.IsActive = false;
-                _unitOfWork.UserDevices.Update(device);
+                _unitOfWork.UserDevices.Remove(device);
                 await _unitOfWork.SaveChangesAsync();
             }
         }

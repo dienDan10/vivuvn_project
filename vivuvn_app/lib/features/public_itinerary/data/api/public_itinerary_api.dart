@@ -98,5 +98,18 @@ class PublicItineraryApi {
   Future<void> joinPublicItinerary(final String itineraryId) async {
     await _dio.post('/api/v1/itineraries/$itineraryId/public/join');
   }
+
+  /// POST: Copy a public itinerary to user's account
+  /// Endpoint: /api/v1/itineraries/public/copy
+  /// Body: { "itineraryId": string }
+  /// Returns: { "itineraryId": int }
+  Future<int> copyPublicItinerary(final String itineraryId) async {
+    final response = await _dio.post(
+      '/api/v1/itineraries/public/copy',
+      data: {'itineraryId': itineraryId},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return data['itineraryId'] as int;
+  }
 }
 

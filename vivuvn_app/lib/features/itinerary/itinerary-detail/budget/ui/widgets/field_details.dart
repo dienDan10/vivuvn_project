@@ -15,13 +15,14 @@ class FieldDetails extends StatelessWidget {
       maxLines: 3,
       decoration: const InputDecoration(
         labelText: 'Ghi chú',
-        border: InputBorder.none,
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey, width: 0.5),
+        border: OutlineInputBorder(),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey, width: 0.8),
         ),
-        focusedBorder: UnderlineInputBorder(
+        focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.blue, width: 1.5),
         ),
+        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       ),
     );
   }

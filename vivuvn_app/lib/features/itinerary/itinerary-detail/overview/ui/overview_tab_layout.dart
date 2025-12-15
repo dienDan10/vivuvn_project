@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../detail/controller/itinerary_detail_controller.dart';
+import '../../schedule/controller/automically_generate_by_ai_controller.dart';
 import '../controller/favourite_places_controller.dart';
 import '../controller/hotels_controller.dart';
 import '../controller/restaurants_controller.dart';
+import 'widgets/ai_generation_warnings_modal.dart';
 import 'widgets/favourite_place/place_list_item.dart';
 import 'widgets/groupSize/group_size_card.dart';
 import 'widgets/hotel/hotel_list_item.dart';
@@ -27,6 +29,7 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
 
   bool _itineraryListenerRegistered = false;
   bool _initialDataLoaded = false;
+  bool _warningsModalShown = false;
 
   late AnimationController _hotelsAnimationController;
   late AnimationController _restaurantsAnimationController;
@@ -184,6 +187,8 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
             ref
                 .read(restaurantsControllerProvider.notifier)
                 .loadRestaurants(id);
+            // Reset warnings modal flag when itinerary changes
+            _warningsModalShown = false;
           }
         } catch (_) {
           // ignore
@@ -191,6 +196,39 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
       });
       _itineraryListenerRegistered = true;
     }
+
+    // Listen to warnings and show modal if there are any
+    ref.listen(aiGenerationWarningsProvider, (final previous, final next) {
+      // Only show modal if:
+      // 1. There are warnings
+      // 2. Warnings changed (new warnings appeared)
+      // 3. Modal hasn't been shown yet for these warnings
+      // 4. Widget is still mounted
+      if (next.isNotEmpty && 
+          previous != next && 
+          !_warningsModalShown && 
+          mounted) {
+        _warningsModalShown = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && next.isNotEmpty) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (final context) => const AiGenerationWarningsModal(),
+            ).then((_) {
+              // Reset flag when modal is closed
+              _warningsModalShown = false;
+            });
+          }
+        });
+      } else if (next.isEmpty) {
+        // Reset flag when warnings are cleared
+        _warningsModalShown = false;
+      }
+    });
 
     // Show loading on first load
     if (placesLoading && places.isEmpty) {

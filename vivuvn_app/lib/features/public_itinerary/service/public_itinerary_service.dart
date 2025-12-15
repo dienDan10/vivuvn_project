@@ -49,5 +49,9 @@ class PublicItineraryService {
   Future<void> joinPublicItinerary(final String itineraryId) async {
     await _api.joinPublicItinerary(itineraryId);
   }
+
+  Future<int> copyPublicItinerary(final String itineraryId) async {
+    return await _api.copyPublicItinerary(itineraryId);
+  }
 }
 

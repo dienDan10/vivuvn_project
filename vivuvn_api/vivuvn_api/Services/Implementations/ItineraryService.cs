@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -12,7 +11,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient, IGoogleMapRouteService _routeService) : IItineraryService
+    public class ItineraryService(IUnitOfWork _unitOfWork, IMapper _mapper, IAiClientService _aiClient, IGoogleMapRouteService _routeService, IItineraryMemberService _memberService) : IItineraryService
     {
         #region Itinerary Service Methods
 
@@ -37,38 +36,55 @@ namespace vivuvn_api.Services.Implementations
             });
         }
 
-        public async Task<PaginatedResponseDto<SearchItineraryDto>> GetAllPublicItinerariesAsync(GetAllPublicItinerariesRequestDto request)
+        public async Task<PaginatedResponseDto<SearchItineraryDto>> GetAllPublicItinerariesAsync(GetAllPublicItinerariesRequestDto request, int? currentUserId = null)
         {
-            // build filter expression
-            Expression<Func<Itinerary, bool>>? filter = i => i.IsPublic
-                && !i.DeleteFlag
-                && i.StartDate > DateTime.UtcNow;
-            if (request.ProvinceId is not null)
+            var query = _unitOfWork.Itineraries
+                .GetQueryable()
+                .Where(i => i.IsPublic && !i.DeleteFlag && i.StartDate > DateTime.UtcNow);
+
+            if (request.ProvinceId.HasValue)
             {
-                filter = i => i.IsPublic && !i.DeleteFlag
-                    && i.StartDate > DateTime.UtcNow &&
-                    (i.StartProvinceId == request.ProvinceId
-                    || i.DestinationProvinceId == request.ProvinceId);
+                query = query.Where(i => i.StartProvinceId == request.ProvinceId
+                                       || i.DestinationProvinceId == request.ProvinceId);
             }
 
-            // build orderBy function
-            Func<IQueryable<Itinerary>, IOrderedQueryable<Itinerary>>? orderBy = (request.SortByDate ?? true)
-                ? (request.IsDescending ?? false
-                    ? q => q.OrderByDescending(i => i.StartDate)
-                    : q => q.OrderBy(i => i.StartDate))
-                : null;
+            if (request.SortByDate ?? true)
+            {
+                query = (request.IsDescending ?? false)
+                    ? query.OrderByDescending(i => i.StartDate)
+                    : query.OrderBy(i => i.StartDate);
+            }
 
-            var (items, totalCount) = await _unitOfWork.Itineraries
-                .GetPagedAsync(filter: filter,
-                orderBy: orderBy,
-                includeProperties: "StartProvince,DestinationProvince,User,Members",
-                pageNumber: request.Page ?? 1,
-                pageSize: request.PageSize ?? Constants.DefaultPageSize);
+            var totalCount = await query.CountAsync();
 
-            var itineraryDtos = _mapper.Map<IEnumerable<SearchItineraryDto>>(items);
+            var itineraryDtos = await query
+                .Skip(((request.Page ?? 1) - 1) * (request.PageSize ?? Constants.DefaultPageSize))
+                .Take(request.PageSize ?? Constants.DefaultPageSize)
+                .Select(i => new SearchItineraryDto
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    StartProvinceName = i.StartProvince.Name,
+                    DestinationProvinceName = i.DestinationProvince.Name,
+                    StartDate = i.StartDate,
+                    EndDate = i.EndDate,
+                    ImageUrl = i.DestinationProvince.ImageUrl,
+                    GroupSize = i.GroupSize,
+                    CurrentMemberCount = i.Members.Count(m => !m.DeleteFlag),
+                    IsMember = currentUserId.HasValue &&
+                               i.Members.Any(m => m.UserId == currentUserId.Value && !m.DeleteFlag),
+                    Owner = new UserDto
+                    {
+                        Id = i.User.Id,
+                        Username = i.User.Username,
+                        Email = i.User.Email,
+                        UserPhoto = i.User.UserPhoto
+                    }
+                })
+                .AsNoTracking()
+                .ToListAsync();
 
-
-            var paginatedResponse = new PaginatedResponseDto<SearchItineraryDto>
+            return new PaginatedResponseDto<SearchItineraryDto>
             {
                 Data = itineraryDtos,
                 PageNumber = request.Page ?? 1,
@@ -78,10 +94,119 @@ namespace vivuvn_api.Services.Implementations
                 HasPreviousPage = (request.Page ?? 1) > 1,
                 HasNextPage = (request.Page ?? 1) < (int)Math.Ceiling(totalCount / (double)(request.PageSize ?? Constants.DefaultPageSize))
             };
-
-            return paginatedResponse;
         }
 
+        public async Task<int> CopyPublicItineraryAsync(int userId, CopyPublicItineraryRequestDto request)
+        {
+            // member cannot copy itinerary
+            var isMember = await _memberService.IsMemberAsync(request.ItineraryId, userId);
+            if (isMember) throw new BadHttpRequestException("Bạn không thể sao chép lịch trình nếu bạn là thành viên");
+
+            var publicItinerary = await _unitOfWork.Itineraries
+                .GetQueryable()
+                .Where(i => i.Id == request.ItineraryId && i.IsPublic && !i.DeleteFlag)
+                .Include(i => i.Days)
+                    .ThenInclude(d => d.Items)
+                .Include(i => i.FavoritePlaces)
+                .Include(i => i.Restaurants)
+                .Include(i => i.Hotels)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (publicItinerary == null)
+            {
+                throw new KeyNotFoundException($"Không tìm thấy lịch trình công khai có ID {request.ItineraryId}.");
+            }
+
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                // Create new itinerary
+                var newItinerary = new Itinerary
+                {
+                    UserId = userId,
+                    StartProvinceId = publicItinerary.StartProvinceId,
+                    DestinationProvinceId = publicItinerary.DestinationProvinceId,
+                    Name = publicItinerary.Name,
+                    StartDate = publicItinerary.StartDate,
+                    EndDate = publicItinerary.EndDate,
+                    DaysCount = (publicItinerary.EndDate - publicItinerary.StartDate).Days + 1,
+                    TransportationVehicle = publicItinerary.TransportationVehicle,
+                    GroupSize = 1,
+                    IsPublic = false,
+                    DeleteFlag = false,
+                    Days = publicItinerary.Days
+                        .OrderBy(d => d.DayNumber)
+                        .Select(day => new ItineraryDay
+                        {
+                            DayNumber = day.DayNumber,
+                            Date = publicItinerary.StartDate.AddDays(day.DayNumber - 1),
+                            Items = day.Items.Select(item => new ItineraryItem
+                            {
+                                LocationId = item.LocationId,
+                                OrderIndex = item.OrderIndex,
+                                Note = item.Note,
+                                EstimateDuration = item.EstimateDuration,
+                                StartTime = item.StartTime,
+                                EndTime = item.EndTime,
+                                TransportationVehicle = item.TransportationVehicle,
+                                TransportationDuration = item.TransportationDuration,
+                                TransportationDistance = item.TransportationDistance
+                            }).ToList()
+                        }).ToList(),
+                    FavoritePlaces = publicItinerary.FavoritePlaces
+                        .Select(fp => new FavoritePlace
+                        {
+                            LocationId = fp.LocationId
+                        }).ToList(),
+                    Hotels = publicItinerary.Hotels
+                        .Select(h => new ItineraryHotel
+                        {
+                            HotelId = h.HotelId,
+                            CheckIn = h.CheckIn,
+                            CheckOut = h.CheckOut,
+                            Notes = h.Notes,
+                        }).ToList(),
+                    Restaurants = publicItinerary.Restaurants
+                        .Select(r => new ItineraryRestaurant
+                        {
+                            RestaurantId = r.RestaurantId,
+                            Date = r.Date,
+                            Time = r.Time,
+                            Notes = r.Notes,
+                        }).ToList(),
+                    Budget = new Budget
+                    {
+                        EstimatedBudget = 0,
+                        TotalBudget = 0
+                    },
+                    Members = new List<ItineraryMember>
+                    {
+                        new ItineraryMember
+                        {
+                            UserId = userId,
+                            JoinedAt = DateTime.UtcNow,
+                            Role = Constants.ItineraryRole_Owner
+                        }
+                    }
+                };
+
+                await _unitOfWork.Itineraries.AddAsync(newItinerary);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                await _unitOfWork.CommitTransactionAsync();
+
+                return newItinerary.Id;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+        }
         public async Task<ItineraryDto> GetItineraryByIdAsync(int id, int userId)
         {
             var result = await _unitOfWork.Itineraries

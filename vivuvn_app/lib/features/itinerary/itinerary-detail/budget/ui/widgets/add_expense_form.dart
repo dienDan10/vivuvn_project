@@ -7,6 +7,7 @@ import '../../data/models/budget_items.dart';
 import '../../state/expense_form_notifier.dart';
 import '../../utils/budget_constants.dart';
 import '../../utils/expense_form_submit_handler.dart';
+import 'bill_attachment_section.dart';
 import 'field_amount.dart';
 import 'field_date.dart';
 import 'field_details.dart';
@@ -112,12 +113,18 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
   Widget build(final BuildContext context) {
     final formState = ref.watch(expenseFormProvider);
     final formNotifier = ref.read(expenseFormProvider.notifier);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scale = (screenWidth / 400).clamp(0.85, 1.15);
+    final double baseSpacing = (15 * scale).clamp(11, 20).toDouble();
+    final double smallSpacing = (baseSpacing * 0.6).clamp(7, 13).toDouble();
+    final double mediumSpacing = (baseSpacing * 0.9).clamp(9, 16).toDouble();
 
     return SafeArea(
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
           left: 8,
           right: 8,
+          top: smallSpacing,
           bottom: 12 + MediaQuery.of(context).viewInsets.bottom,
         ),
         child: Form(
@@ -126,11 +133,11 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               FieldName(controller: nameController),
-              const SizedBox(height: 12),
+              SizedBox(height: baseSpacing),
 
               // Payer picker
               const FieldPayerPicker(),
-              const SizedBox(height: 12),
+              SizedBox(height: baseSpacing),
 
               FieldAmount(
                 controller: amountController,
@@ -138,7 +145,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                   formNotifier.setCurrency(isUSDSelected);
                 },
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: baseSpacing),
 
               Consumer(
                 builder: (final context, final ref, final child) {
@@ -158,7 +165,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                   );
                 },
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: mediumSpacing),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,10 +181,14 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                   FieldErrorText(errorMessage: formState.dateError),
                 ],
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: mediumSpacing),
 
               // Optional details field
               FieldDetails(controller: detailsController),
+              SizedBox(height: baseSpacing),
+
+              // Phần upload + preview ảnh bill/hóa đơn
+              const BillAttachmentSection(),
             ],
           ),
         ),

@@ -38,9 +38,7 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
 
   @override
   Widget build(final BuildContext context) {
-    return HeroMode(
-      enabled: false,
-      child: ExpandableFab(
+    return ExpandableFab(
       key: _key,
       overlayStyle: ExpandableFabOverlayStyle(
         color: Colors.black.withValues(alpha: 0.7),
@@ -74,7 +72,7 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
             ),
             const SizedBox(width: 20),
             FloatingActionButton(
-              heroTag: 'list_fab_create',
+              heroTag: null,
               backgroundColor: Theme.of(context).colorScheme.onPrimary,
               foregroundColor: Theme.of(context).colorScheme.primary,
               shape: RoundedRectangleBorder(
@@ -103,7 +101,7 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
             ),
             const SizedBox(width: 20),
             FloatingActionButton(
-              heroTag: 'list_fab_join',
+              heroTag: null,
               backgroundColor: Theme.of(context).colorScheme.onPrimary,
               foregroundColor: Theme.of(context).colorScheme.primary,
               shape: RoundedRectangleBorder(
@@ -121,7 +119,6 @@ class _ButtonAddItineraryState extends State<ButtonAddItinerary> {
           ],
         ),
       ],
-      ),
     );
   }
 }

@@ -20,7 +20,6 @@ class SearchItinerariesController
       clearSelectedProvince: true,
       hasSearched: false,
     );
-    // TODO: Implement search by province
   }
 
   void selectProvince(final Province province) {
@@ -33,7 +32,6 @@ class SearchItinerariesController
       page: 1,
       hasSearched: false,
     );
-    // TODO: Trigger search by selected province
   }
 
   void clearSearch() {
