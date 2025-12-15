@@ -15,6 +15,9 @@ import '../state/home_state.dart';
 // State notifier for home data
 class HomeController extends StateNotifier<HomeState> {
   final HomeService _service;
+  static const Duration _minRefreshInterval = Duration(seconds: 10);
+  DateTime? _lastFetchAt;
+  bool _refreshQueued = false;
 
   HomeController(this._service) : super(const HomeState());
 
@@ -32,6 +35,7 @@ class HomeController extends StateNotifier<HomeState> {
         destinations: destinations,
         itineraries: itineraries,
       );
+      _lastFetchAt = DateTime.now();
     } on DioException catch (e) {
       final message = DioExceptionHandler.handleException(e);
       state = state.copyWith(status: HomeStatus.error, errorMessage: message);
@@ -65,6 +69,7 @@ class HomeController extends StateNotifier<HomeState> {
         itineraries: itineraries,
         errorMessage: null, // Clear any previous errors
       );
+      _lastFetchAt = DateTime.now();
     } on DioException catch (e) {
       final message = DioExceptionHandler.handleException(e);
       // Only update error if we have data, otherwise keep showing data
@@ -81,6 +86,22 @@ class HomeController extends StateNotifier<HomeState> {
         );
       }
       // If we have data, keep showing it even if refresh fails
+    }
+  }
+
+  /// Refresh only if đủ thời gian cách lần gần nhất để tránh spam API.
+  Future<void> refreshIfStale() async {
+    if (_refreshQueued) return;
+    final now = DateTime.now();
+    if (_lastFetchAt != null && now.difference(_lastFetchAt!) < _minRefreshInterval) {
+      return;
+    }
+
+    _refreshQueued = true;
+    try {
+      await refreshHomeDataSilently();
+    } finally {
+      _refreshQueued = false;
     }
   }
 
