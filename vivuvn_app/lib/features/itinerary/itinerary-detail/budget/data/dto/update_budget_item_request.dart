@@ -22,6 +22,7 @@ class UpdateBudgetItemRequest {
   final DateTime? date;
   final int? payerMemberId;
   final String? details;
+  final String? billPhotoUrl;
 
   const UpdateBudgetItemRequest({
     required this.itineraryId,
@@ -33,6 +34,7 @@ class UpdateBudgetItemRequest {
     this.date,
     this.payerMemberId,
     this.details,
+    this.billPhotoUrl,
   });
 
   /// Convert to Map, only include non-null fields
@@ -47,9 +49,10 @@ class UpdateBudgetItemRequest {
       else if (budgetType != null)
         'budgetType': budgetType,
       if (date != null) 'date': date!.toIso8601String(),
-      // Always include memberId; explicit null signals clearing the payer
-      'memberId': payerMemberId,
+      // Chỉ include memberId khi khác null để tránh vô tình reset người trả tiền
+      if (payerMemberId != null) 'memberId': payerMemberId,
       if (details != null) 'details': details,
+      if (billPhotoUrl != null) 'billPhotoUrl': billPhotoUrl,
     };
 
     if (map.isEmpty) {

@@ -14,7 +14,8 @@ abstract interface class IBudgetService {
   Future<List<BudgetItem>> getBudgetItems(final int itineraryId);
 
   /// Add a budget item.
-  Future<void> addBudgetItem(final AddBudgetItemRequest request);
+  /// Returns: BudgetItem vừa được tạo từ server.
+  Future<BudgetItem> addBudgetItem(final AddBudgetItemRequest request);
 
   /// Update a budget item.
   Future<void> updateBudgetItem(final UpdateBudgetItemRequest request);

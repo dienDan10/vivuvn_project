@@ -61,11 +61,17 @@ class BudgetApi {
   /// Tạo budget item mới
   ///
   /// POST /api/v1/itineraries/{id}/budget/items
-  Future<void> addBudgetItem(final AddBudgetItemRequest request) async {
-    await _dio.post(
+  /// Returns: BudgetItem vừa được tạo (từ response).
+  Future<BudgetItem> addBudgetItem(final AddBudgetItemRequest request) async {
+    final response = await _dio.post(
       '/api/v1/itineraries/${request.itineraryId}/budget/items',
       data: request.toJson(),
     );
+
+    final Map<String, dynamic> json = Map<String, dynamic>.from(
+      response.data as Map,
+    );
+    return BudgetItem.fromMap(json);
   }
 
   /// Cập nhật budget item
