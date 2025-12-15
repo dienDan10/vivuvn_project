@@ -38,66 +38,59 @@ class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
       ),
     );
 
-    if (!isOwner) {
-      return const SizedBox.shrink();
-    }
-    debugPrint('[ButtonScheduleOptions] build; mounted=$mounted');
-
-    return 
-    HeroMode(
-      enabled: false,
-      child: ExpandableFab(
-        key: _fabKey,
-        overlayStyle: ExpandableFabOverlayStyle(
-          color: Colors.black.withValues(alpha: 0.7),
-        ),
-        distance: 70,
-        childrenAnimation: ExpandableFabAnimation.none,
-        openButtonBuilder: RotateFloatingActionButtonBuilder(
-          child: const Icon(Icons.menu, size: 26),
-          fabSize: ExpandableFabSize.regular,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          shape: const CircleBorder(),
-        ),
-        closeButtonBuilder: RotateFloatingActionButtonBuilder(
-          child: const Icon(Icons.close, size: 26),
-          fabSize: ExpandableFabSize.regular,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          shape: const CircleBorder(),
-        ),
-        children: [
-          // View on Map option
-          Row(
-            children: [
-              const Text(
-                'Xem lịch trình trên Map',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+    return ExpandableFab(
+      key: _fabKey,
+      overlayStyle: ExpandableFabOverlayStyle(
+        color: Colors.black.withValues(alpha: 0.7),
+      ),
+      distance: 70,
+      childrenAnimation: ExpandableFabAnimation.none,
+      openButtonBuilder: RotateFloatingActionButtonBuilder(
+        child: const Icon(Icons.menu, size: 26),
+        fabSize: ExpandableFabSize.regular,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        shape: const CircleBorder(),
+      ),
+      closeButtonBuilder: RotateFloatingActionButtonBuilder(
+        child: const Icon(Icons.close, size: 26),
+        fabSize: ExpandableFabSize.regular,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        shape: const CircleBorder(),
+      ),
+      children: [
+        // View on Map option
+        Row(
+          children: [
+            const Text(
+              'Xem lịch trình trên Map',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
-              const SizedBox(width: 20),
-              FloatingActionButton(
-                heroTag: 'detail_fab_map',
-                backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                foregroundColor: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                onPressed: () {
-                  // Close the expandable FAB
-                  final state = _fabKey.currentState;
-                  state?.toggle();
-                  context.push(mapLocationRoute);
-                },
-                child: const Icon(Icons.map),
+            ),
+            const SizedBox(width: 20),
+            FloatingActionButton(
+              heroTag: null,
+              backgroundColor: Theme.of(context).colorScheme.onPrimary,
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
               ),
-            ],
-          ),
-          // AI Generate option
+              onPressed: () {
+                // Close the expandable FAB
+                final state = _fabKey.currentState;
+                state?.toggle();
+                context.push(mapLocationRoute);
+              },
+              child: const Icon(Icons.map),
+            ),
+          ],
+        ),
+        // AI Generate option
+        if (isOwner)
           Row(
             children: [
               const Text(
@@ -110,7 +103,7 @@ class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
               ),
               const SizedBox(width: 20),
               FloatingActionButton(
-                heroTag: 'detail_fab_ai',
+                heroTag: null,
                 backgroundColor: Theme.of(context).colorScheme.onPrimary,
                 foregroundColor: Theme.of(context).colorScheme.primary,
                 shape: RoundedRectangleBorder(
@@ -127,8 +120,7 @@ class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
               ),
             ],
           ),
-        ],
-      ),
+      ],
     );
   }
 }
