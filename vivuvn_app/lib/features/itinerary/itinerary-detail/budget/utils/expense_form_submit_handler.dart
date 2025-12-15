@@ -30,6 +30,11 @@ class ExpenseFormSubmitHandler {
     final formNotifier = ref.read(expenseFormProvider.notifier);
     final formState = ref.read(expenseFormProvider);
 
+    // Kiểm tra xem người dùng có thay đổi ảnh bill (chỉ tính ảnh local, không tính URL preview)
+    final initialBillState = ref.read(expenseBillControllerProvider);
+    final bool hasLocalBillChanges = initialBillState.localImagePaths
+        .any((final path) => !path.startsWith('http'));
+
     // Check if editing mode and nothing changed
     if (initialItem != null) {
       final hasChanges = _hasChanges(
@@ -41,8 +46,8 @@ class ExpenseFormSubmitHandler {
         exchangeRate: exchangeRate,
       );
 
-      // If nothing changed, just close the form
-      if (!hasChanges) {
+      // Nếu không có thay đổi data và cũng không có thay đổi ảnh, thì chỉ đóng form, không gọi API
+      if (!hasChanges && !hasLocalBillChanges) {
         return true; // Signal to close form
       }
     }
@@ -226,18 +231,22 @@ class ExpenseFormSubmitHandler {
         ? (formState.isUSD ? currentAmount * exchangeRate : currentAmount)
         : null;
 
+    // Nếu user chưa chọn lại người trả tiền, coi như giữ nguyên người trả cũ
+    final int? effectivePayerId =
+        formState.payerMemberId ?? initialItem.paidByMember?.memberId;
+
     // Check if nothing changed
     final bool nothingChanged =
         currentName == initialItem.name &&
-        currentAmountInVND != null &&
-        (currentAmountInVND - initialItem.cost).abs() < 0.01 &&
-        formState.selectedTypeId ==
-            (initialItem.budgetTypeObj?.budgetTypeId ?? 0) &&
-        formState.selectedDate?.year == initialItem.date.year &&
-        formState.selectedDate?.month == initialItem.date.month &&
-        formState.selectedDate?.day == initialItem.date.day &&
-        (formState.payerMemberId == (initialItem.paidByMember?.memberId)) &&
-        ((detailsController.text.trim()) == (initialItem.details ?? ''));
+            currentAmountInVND != null &&
+            (currentAmountInVND - initialItem.cost).abs() < 0.01 &&
+            // So sánh theo tên loại chi tiêu để tránh lệch khi budgetTypeObj null
+            formState.selectedType == initialItem.budgetType &&
+            formState.selectedDate?.year == initialItem.date.year &&
+            formState.selectedDate?.month == initialItem.date.month &&
+            formState.selectedDate?.day == initialItem.date.day &&
+            effectivePayerId == initialItem.paidByMember?.memberId &&
+            (detailsController.text.trim() == (initialItem.details ?? ''));
 
     return !nothingChanged;
   }
@@ -252,6 +261,10 @@ class ExpenseFormSubmitHandler {
     required final double amountInVND,
     required final dynamic formState,
   }) async {
+    // Nếu user không chọn lại người trả, dùng luôn payer của item ban đầu
+    final int? effectivePayerId =
+        formState.payerMemberId ?? initialItem.paidByMember?.memberId;
+
     final updateRequest = UpdateBudgetItemRequest(
       itineraryId: state.itineraryId!,
       itemId: initialItem.id!,
@@ -259,7 +272,7 @@ class ExpenseFormSubmitHandler {
       cost: amountInVND,
       budgetTypeId: formState.selectedTypeId,
       date: formState.selectedDate!,
-      payerMemberId: formState.payerMemberId,
+      payerMemberId: effectivePayerId,
       details: detailsController.text.trim(),
     );
     // ignore: avoid_print
