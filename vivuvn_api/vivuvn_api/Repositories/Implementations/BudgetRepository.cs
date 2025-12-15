@@ -87,6 +87,7 @@ namespace vivuvn_api.Repositories.Implementations
             existingItem.BudgetTypeId = item.BudgetTypeId;
             existingItem.PaidByMemberId = item.PaidByMemberId;
             existingItem.Details = item.Details;
+            existingItem.BillPhotoUrl = item.BillPhotoUrl;
 
             _context.BudgetItems.Update(existingItem);
             _context.Budgets.Update(budget);
