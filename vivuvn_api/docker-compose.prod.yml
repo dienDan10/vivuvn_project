@@ -38,6 +38,8 @@ services:
           memory: 512M
 
   vivuvn-api:
+    env_file:
+      - .env.prod
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80

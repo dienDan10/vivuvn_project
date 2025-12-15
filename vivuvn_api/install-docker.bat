@@ -1,125 +1,64 @@
 @echo off
 echo ==========================================
-echo VivuVN API Docker Setup
+echo VivuVN Docker Installation
 echo ==========================================
 
 REM Check if Docker is installed
 docker --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ? Docker is not installed. Please install Docker Desktop first.
-    echo    Download from: https://www.docker.com/products/docker-desktop
+    echo ? Docker is NOT installed
+    echo.
+    echo Please install Docker Desktop for Windows:
+    echo 1. Download from: https://www.docker.com/products/docker-desktop
+    echo 2. Run the installer
+    echo 3. Restart your computer
+    echo 4. Start Docker Desktop
+    echo 5. Run this script again
+    echo.
     pause
     exit /b 1
 )
 
-REM Check if Docker Compose is installed
+REM Check if Docker Compose is installed (comes with Docker Desktop)
 docker-compose --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ? Docker Compose is not installed. Please install Docker Compose first.
+    echo ? Docker Compose is not available
+    echo Docker Desktop should include docker-compose by default.
+    echo Please reinstall Docker Desktop.
     pause
     exit /b 1
 )
 
 echo ? Docker and Docker Compose are installed
+docker --version
+docker-compose --version
 
 REM Check if Docker is running
 docker info >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ? Docker is not running. Please start Docker Desktop and try again.
+    echo ? Docker is not running
+    echo Please start Docker Desktop and wait for it to be ready
+    echo Then run this script again
     pause
     exit /b 1
 )
 
 echo ? Docker is running
-
-REM Check if local SQL Server is running
-echo ?? Checking local SQL Server...
-sqlcmd -S localhost,1433 -U sa -Q "SELECT 1" >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ??  WARNING: Cannot connect to local SQL Server on localhost:1433
-    echo    Please ensure:
-    echo    1. SQL Server is installed and running
-    echo    2. TCP/IP is enabled in SQL Server Configuration Manager
-    echo    3. SQL Server is configured to accept remote connections
-    echo    4. Port 1433 is open in Windows Firewall
-    echo    5. SQL Server Authentication is enabled
-    echo.
-    set /p continue="Do you want to continue anyway? (Y/N): "
-    if /i not "%continue%"=="Y" (
-        echo Setup cancelled.
-        pause
-        exit /b 1
-    )
-) else (
-    echo ??  Local SQL Server is accessible
-)
-
-REM Copy environment template if .env doesn't exist
-if not exist ".env" (
-    if exist ".env.template" (
-        echo ?? Creating .env file from template...
-        copy .env.template .env >nul
-        echo ??  Please edit the .env file and update the API keys and passwords before running the application.
-    ) else (
-        echo ??  No .env.template found. Using default configuration.
-    )
-)
-
-REM Check if AI service .env.docker exists
-if not exist "..\vivuvn_ai_service\.env.docker" (
-    echo ??  AI service .env.docker not found. Please ensure the AI service is properly configured.
-    echo    Path: ..\vivuvn_ai_service\.env.docker
-)
-
-REM Stop any existing containers
-echo ?? Stopping existing containers...
-docker-compose down -v
-
-REM Pull required images
-echo ?? Pulling required Docker images...
-docker pull mcr.microsoft.com/dotnet/sdk:8.0
-docker pull mcr.microsoft.com/dotnet/aspnet:8.0
-docker pull minhdang1163/vivuvn-ai-service:latest
-
-REM Build and start containers
-echo ?? Building and starting containers...
-docker-compose up --build -d
-
-REM Wait for AI Service to be ready
-echo ? Waiting for AI Service to be ready...
-echo    This may take 60-120 seconds (downloading ML models)...
-timeout /t 60 /nobreak >nul
-
-REM Wait a bit more for the API to fully start
-echo ? Waiting for API to start...
-timeout /t 10 /nobreak >nul
-
-REM Check container status
-echo ?? Container Status:
-docker-compose ps
-
 echo.
 echo ==========================================
-echo ?? Setup Complete!
+echo ?? Installation Complete!
 echo ==========================================
 echo.
-echo ?? Services:
-echo    ?? API: http://localhost:5277
-echo    ?? Swagger: http://localhost:5277/swagger
-echo    ?? AI Service: http://localhost:8000 (if exposed)
-echo    ???  Local SQL Server: localhost:1433
-echo       Username: sa
-echo       Password: [Your local SQL Server password]
+echo ? Docker Desktop is installed and running
+echo ? docker-compose is available
+echo.
+echo ?? Next Steps:
+echo    1. For local development: Run docker-startup.bat
+echo    2. For production: Use deploy-production.sh on Linux server
 echo.
 echo ?? Useful Commands:
-echo    View API logs:        docker-compose logs -f vivuvn-api
-echo    View AI Service logs: docker-compose logs -f vivuvn-ai-service
-echo    Stop services:        docker-compose down
-echo    Restart services:     docker-compose restart
+echo    Check version:    docker --version
+echo    Check compose:    docker-compose --version
+echo    Test Docker:      docker run hello-world
 echo.
-echo ??  IMPORTANT: Make sure your local SQL Server is running and accessible
-echo    The API will connect to host.docker.internal:1433
-echo.
-echo ???  For troubleshooting, check the README-Docker.md file
-
 pause

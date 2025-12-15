@@ -1,109 +1,119 @@
 #!/bin/bash
 
-# VivuVN Docker Setup Script
+# VivuVN Docker Installation Script for Linux
 echo "=========================================="
-echo "VivuVN API Docker Setup"
+echo "VivuVN Docker Installation"
 echo "=========================================="
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo "? Docker is not installed. Please install Docker Desktop first."
-    echo "   Download from: https://www.docker.com/products/docker-desktop"
-    exit 1
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+print_status() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠  $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}✗ $1${NC}"
+}
+
+# Check if running as root
+if [[ $EUID -ne 0 ]]; then
+   print_error "This script must be run as root (use sudo)"
+   exit 1
 fi
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
-    echo "? Docker Compose is not installed. Please install Docker Compose first."
-    exit 1
-fi
+print_status "Starting Docker installation..."
 
-echo "? Docker and Docker Compose are installed"
-
-# Check if Docker is running
-if ! docker info &> /dev/null; then
-    echo "? Docker is not running. Please start Docker Desktop and try again."
-    exit 1
-fi
-
-echo "? Docker is running"
-
-# Create images directory
-echo "?? Creating images directory..."
-mkdir -p ./images
-
-# Copy environment template if .env doesn't exist
-if [ ! -f .env ]; then
-    if [ -f .env.template ]; then
-        echo "?? Creating .env file from template..."
-        cp .env.template .env
-        echo "??  Please edit the .env file and update the API keys and passwords before running the application."
-    else
-        echo "??  No .env.template found. Using default configuration."
-    fi
-fi
-
-# Stop any existing containers
-echo "?? Stopping existing containers..."
-docker-compose down -v
-
-# Pull required images
-echo "?? Pulling required Docker images..."
-docker pull mcr.microsoft.com/dotnet/sdk:8.0
-docker pull mcr.microsoft.com/dotnet/aspnet:8.0
-docker pull mcr.microsoft.com/mssql/server:2022-latest
-
-# Build and start containers
-echo "?? Building and starting containers..."
-docker-compose up --build -d
-
-# Wait for SQL Server to be ready
-echo "? Waiting for SQL Server to be ready..."
-echo "   This may take 30-60 seconds..."
-
-# Check if SQL Server is ready
-for i in {1..12}; do
-    sleep 5
-    if docker-compose exec -T sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P VivuVN@123456 -Q "SELECT 1" &>/dev/null; then
-        echo "? SQL Server is ready!"
-        break
-    fi
-    echo "   Still waiting... ($((i*5))s)"
-done
-
-# Wait a bit more for the API to fully start
-echo "? Waiting for API to start..."
-sleep 10
-
-# Check container status
-echo "?? Container Status:"
-docker-compose ps
-
-# Test API health
-echo ""
-echo "?? Testing API health..."
-if curl -f http://localhost:5277/health &>/dev/null; then
-    echo "? API is healthy and responding!"
+# Check if Docker is already installed
+if command -v docker &> /dev/null; then
+    print_warning "Docker is already installed"
+    docker --version
 else
-    echo "??  API might still be starting up. Check logs with: docker-compose logs -f vivuvn-api"
+    echo "📦 Installing Docker..."
+    
+    # Update package index
+    apt-get update
+    
+    # Install prerequisites
+    apt-get install -y ca-certificates curl gnupg lsb-release
+    
+    # Add Docker's official GPG key
+    mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    
+    # Set up the repository
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    # Install Docker Engine
+    apt-get update
+    apt-get install -y docker-ce docker-ce-cli containerd.io
+    
+    print_status "Docker installed successfully"
+    docker --version
 fi
+
+# Check if Docker Compose is already installed
+if command -v docker-compose &> /dev/null; then
+    print_warning "Docker Compose is already installed"
+    docker-compose --version
+else
+    echo "📦 Installing Docker Compose..."
+    
+    # Install Docker Compose V1 (standalone)
+    DOCKER_COMPOSE_VERSION="1.29.2"
+    curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+    
+    print_status "Docker Compose installed successfully"
+    docker-compose --version
+fi
+
+# Add current user to docker group (if not root)
+if [ -n "$SUDO_USER" ]; then
+    usermod -aG docker $SUDO_USER
+    print_status "Added $SUDO_USER to docker group"
+    print_warning "Please log out and back in for group changes to take effect"
+fi
+
+print_status "Docker and Docker Compose installation complete!"
+
+# Start Docker service
+echo "🔄 Starting Docker service..."
+systemctl start docker
+systemctl enable docker
+
+# Verify Docker is running
+if ! docker info &> /dev/null; then
+    print_error "Docker failed to start. Please check logs: journalctl -u docker"
+    exit 1
+fi
+
+print_status "Docker is running"
 
 echo ""
 echo "=========================================="
-echo "?? Setup Complete!"
+echo "✅ Installation Complete!"
 echo "=========================================="
 echo ""
-echo "?? Services:"
-echo "   ?? API: http://localhost:5277"
-echo "   ?? Swagger: http://localhost:5277/swagger"
-echo "   ???  SQL Server: localhost:1434"
-echo "      Username: sa"
-echo "      Password: [Check your .env file]"
+echo "📝 Next Steps:"
+echo "   1. Log out and back in (for group permissions)"
+echo "   2. Run: docker --version"
+echo "   3. Run: docker-compose --version"
+echo "   4. Test: docker run hello-world"
+echo "   5. Deploy your application with: ./deploy-production.sh"
 echo ""
-echo "?? Useful Commands:"
-echo "   View API logs:    docker-compose logs -f vivuvn-api"
-echo "   View SQL logs:    docker-compose logs -f sqlserver"
-echo "   Stop services:    docker-compose down"
-echo "   Restart services: docker-compose restart"
+echo "📚 Useful Commands:"
+echo "   Check status:     systemctl status docker"
+echo "   View logs:        journalctl -u docker"
+echo "   Restart Docker:   systemctl restart docker"
 echo ""
-echo "???  For troubleshooting, check the README-Docker.md file"
+print_status "Docker installation complete!"
