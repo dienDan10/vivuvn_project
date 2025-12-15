@@ -119,7 +119,7 @@ namespace vivuvn_api.Services.Implementations
 
             if (request.BudgetTypeId is not null) item.BudgetTypeId = request.BudgetTypeId.Value;
 
-            item.PaidByMemberId = request.MemberId;
+            if (request.MemberId is not null) item.PaidByMemberId = request.MemberId;
 
             if (request.Details is not null) item.Details = request.Details;
 
