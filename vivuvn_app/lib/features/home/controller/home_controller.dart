@@ -7,8 +7,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../core/routes/routes.dart';
-import '../../itinerary/itinerary-detail/detail/controller/itinerary_detail_controller.dart';
-import '../../itinerary/itinerary-detail/detail/service/itinerary_detail_service.dart';
 import '../data/dto/itinerary_dto.dart';
 import '../service/home_service.dart';
 import '../service/home_service_impl.dart';
@@ -36,10 +34,7 @@ class HomeController extends StateNotifier<HomeState> {
       );
     } on DioException catch (e) {
       final message = DioExceptionHandler.handleException(e);
-      state = state.copyWith(
-        status: HomeStatus.error,
-        errorMessage: message,
-      );
+      state = state.copyWith(status: HomeStatus.error, errorMessage: message);
     } catch (e) {
       state = state.copyWith(
         status: HomeStatus.error,
@@ -58,7 +53,7 @@ class HomeController extends StateNotifier<HomeState> {
   Future<void> refreshHomeDataSilently() async {
     // Don't refresh if already loading
     if (state.isLoading) return;
-    
+
     // Keep current data and status, just refresh in background
     try {
       final destinations = await _service.getPopularDestinations();
@@ -74,10 +69,7 @@ class HomeController extends StateNotifier<HomeState> {
       final message = DioExceptionHandler.handleException(e);
       // Only update error if we have data, otherwise keep showing data
       if (state.isEmpty) {
-        state = state.copyWith(
-          status: HomeStatus.error,
-          errorMessage: message,
-        );
+        state = state.copyWith(status: HomeStatus.error, errorMessage: message);
       }
       // If we have data, keep showing it even if refresh fails
     } catch (e) {
@@ -99,33 +91,42 @@ class HomeController extends StateNotifier<HomeState> {
     final ItineraryDto itinerary,
   ) async {
     final itineraryId = int.tryParse(itinerary.id);
-    
+
     if (itineraryId == null) {
       return;
     }
 
     // Fetch detail first to get accurate isMember status
     try {
-      final detailService = ref.read(itineraryDetailServiceProvider);
-      final detail = await detailService.getItineraryDetail(itineraryId);
-      
-      // Check isMember from detail response
-      if (detail.isOwner || detail.isMember) {
-        // Pre-set the itinerary data in controller to avoid duplicate fetch
-        final controller = ref.read(itineraryDetailControllerProvider.notifier);
-        controller.setItineraryData(detail);
-        
-        // Wait a bit to ensure state is updated before navigation
-        await Future.delayed(const Duration(milliseconds: 50));
-        
-        if (context.mounted) {
-          context.push(createItineraryDetailRoute(itineraryId));
-        }
-      } else {
-        // If not a member, navigate to public itinerary view
-        if (context.mounted) {
-          context.push(createPublicItineraryViewRoute(itinerary.id));
-        }
+      // final detailService = ref.read(itineraryDetailServiceProvider);
+      // final detail = await detailService.getItineraryDetail(itineraryId);
+
+      // // Check isMember from detail response
+      // if (detail.isOwner || detail.isMember) {
+      //   // Pre-set the itinerary data in controller to avoid duplicate fetch
+      //   final controller = ref.read(itineraryDetailControllerProvider.notifier);
+      //   controller.setItineraryData(detail);
+
+      //   // Wait a bit to ensure state is updated before navigation
+      //   await Future.delayed(const Duration(milliseconds: 50));
+
+      //   if (context.mounted) {
+      //     context.push(createItineraryDetailRoute(itineraryId));
+      //   }
+      // } else {
+      //   // If not a member, navigate to public itinerary view
+      //   if (context.mounted) {
+      //     context.push(createPublicItineraryViewRoute(itinerary.id));
+      //   }
+      // }
+
+      if (itinerary.isMember && context.mounted) {
+        context.push(createItineraryDetailRoute(itineraryId));
+        return;
+      }
+
+      if (context.mounted) {
+        context.push(createPublicItineraryViewRoute(itinerary.id));
       }
     } catch (e) {
       // If fetch fails, navigate to public view as fallback
@@ -156,4 +157,3 @@ final itineraryPageControllerProvider = Provider.autoDispose<PageController>((
 
   return controller;
 });
-

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.Response;
 using vivuvn_api.DTOs.ValueObjects;
@@ -29,43 +29,65 @@ namespace vivuvn_api.Services.Implementations
 
         public async Task<PaginatedResponseDto<LocationDto>> GetAllLocationsAsync(GetAllLocationsRequestDto requestDto)
         {
-            // Build filter expression
-            Expression<Func<Location, bool>>? filter = null;
+            var normalizedName = !string.IsNullOrEmpty(requestDto.Name)
+                ? TextHelper.ToSearchFriendly(requestDto.Name)
+                : null;
 
-            if (!string.IsNullOrEmpty(requestDto.Name) || requestDto.ProvinceId.HasValue)
+            var query = _unitOfWork.Locations
+                .GetQueryable()
+                .AsNoTracking();
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(normalizedName))
             {
-                filter = l =>
-                    (string.IsNullOrEmpty(requestDto.Name) || l.NameNormalized.Contains(TextHelper.ToSearchFriendly(requestDto.Name))) &&
-                    (!requestDto.ProvinceId.HasValue || l.ProvinceId == requestDto.ProvinceId.Value);
+                query = query.Where(l => l.NameNormalized.Contains(normalizedName));
             }
 
-
-            // Build order by expression
-            Func<IQueryable<Location>, IOrderedQueryable<Location>>? orderBy = null;
-            if (!string.IsNullOrEmpty(requestDto.SortBy))
+            if (requestDto.ProvinceId.HasValue)
             {
-                orderBy = requestDto.SortBy.ToLower() switch
+                query = query.Where(l => l.ProvinceId == requestDto.ProvinceId.Value);
+            }
+
+            // Apply sorting
+            query = (requestDto.SortBy?.ToLower()) switch
+            {
+                "name" => requestDto.IsDescending
+                    ? query.OrderByDescending(l => l.NameNormalized)
+                    : query.OrderBy(l => l.NameNormalized),
+                "rating" => requestDto.IsDescending
+                    ? query.OrderByDescending(l => l.Rating)
+                    : query.OrderBy(l => l.Rating),
+                _ => query.OrderBy(l => l.NameNormalized)
+            };
+
+            var totalCount = await query.CountAsync();
+
+            var locationDtos = await query
+                .Skip((requestDto.PageNumber - 1) * requestDto.PageSize)
+                .Take(requestDto.PageSize)
+                .Select(l => new LocationDto
                 {
-                    "name" => q => requestDto.IsDescending ? q.OrderByDescending(l => l.NameNormalized) : q.OrderBy(l => l.NameNormalized),
-                    "rating" => q => requestDto.IsDescending ? q.OrderByDescending(l => l.Rating) : q.OrderBy(l => l.Rating),
-                    _ => q => q.OrderBy(l => l.NameNormalized)
-                };
-            }
-            else
-            {
-                orderBy = q => q.OrderBy(l => l.NameNormalized);
-            }
+                    Id = l.Id,
+                    Name = l.Name,
+                    ProvinceName = l.Province.Name,
+                    Description = l.Description,
+                    Latitude = l.Latitude,
+                    Longitude = l.Longitude,
+                    Address = l.Address,
+                    Rating = l.Rating,
+                    RatingCount = l.RatingCount,
+                    GooglePlaceId = l.GooglePlaceId,
+                    PlaceUri = l.PlaceUri,
+                    DirectionsUri = l.DirectionsUri,
+                    ReviewUri = l.ReviewUri,
+                    WebsiteUri = l.WebsiteUri,
+                    DeleteFlag = l.DeleteFlag,
+                    Photos = l.Photos
+                        .Select(p => p.PhotoUrl)
+                        .ToList()
+                })
+                .ToListAsync();
 
-            // Get paginated data
-            var (items, totalCount) = await _unitOfWork.Locations.GetPagedAsync(
-                filter: filter,
-                orderBy: orderBy,
-                pageNumber: requestDto.PageNumber,
-                pageSize: requestDto.PageSize,
-                includeProperties: "Photos,Province"
-            );
-
-            var locationDtos = _mapper.Map<IEnumerable<LocationDto>>(items);
             return new PaginatedResponseDto<LocationDto>
             {
                 Data = locationDtos,
