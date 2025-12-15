@@ -119,7 +119,10 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
         body: Center(
           child: Text(
             'Lỗi: ${detailState.error}',
-            style: const TextStyle(color: Colors.red),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.error),
           ),
         ),
       );

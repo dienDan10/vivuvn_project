@@ -246,7 +246,10 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                   child: Container(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .scrim
+                        .withValues(alpha: 0.25),
                     child: const Center(
                       child: CircularProgressIndicator(),
                     ),

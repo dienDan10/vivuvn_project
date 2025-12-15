@@ -69,10 +69,13 @@ class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
           : Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(widget.item.note ?? ''),
+              child: Text(
+                widget.item.note ?? '',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             );
     }
 
@@ -87,10 +90,13 @@ class _PlaceCardNoteState extends ConsumerState<PlaceCardNote> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(widget.item.note ?? ''),
+              child: Text(
+                widget.item.note ?? '',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ),
           );
   }

@@ -7,17 +7,18 @@ class LocationDescription extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Giới thiệu',
-            style: TextStyle(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 10),
@@ -25,10 +26,10 @@ class LocationDescription extends StatelessWidget {
             description.isEmpty
                 ? 'Không có mô tả chi tiết cho địa điểm này.'
                 : description,
-            style: const TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: 16,
               height: 1.6,
-              color: Colors.black87,
+              color: theme.colorScheme.onSurface,
             ),
             textAlign: TextAlign.justify,
           ),

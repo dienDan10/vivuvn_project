@@ -27,9 +27,9 @@ class _AiGenerationWarningsModalState
       },
       child: Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -43,13 +43,13 @@ class _AiGenerationWarningsModalState
                 children: [
                   Icon(
                     Icons.warning_amber_rounded,
-                    color: Colors.orange.shade700,
+                    color: Theme.of(context).colorScheme.tertiary,
                     size: 28,
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'Cảnh báo',
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -79,16 +79,16 @@ class _AiGenerationWarningsModalState
                       Icon(
                         Icons.info_outline,
                         size: 20,
-                        color: Colors.orange.shade700,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           warning,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontSize: 14,
+                                height: 1.5,
+                              ),
                         ),
                       ),
                     ],
@@ -107,7 +107,7 @@ class _AiGenerationWarningsModalState
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

@@ -48,6 +48,7 @@ class _NotificationItemState extends ConsumerState<NotificationItem> {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return Slidable(
       key: Key('notification_${widget.notification.id}'),
       endActionPane: ActionPane(
@@ -78,9 +79,14 @@ class _NotificationItemState extends ConsumerState<NotificationItem> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: widget.notification.isRead ? Colors.white : Colors.blue[50],
+            color: widget.notification.isRead
+                ? theme.colorScheme.surface
+                : theme.colorScheme.secondaryContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!, width: 1),
+            border: Border.all(
+              color: theme.dividerColor,
+              width: 1,
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,11 +104,12 @@ class _NotificationItemState extends ConsumerState<NotificationItem> {
                     // Title
                     Text(
                       widget.notification.title,
-                      style: TextStyle(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontSize: 16,
                         fontWeight: widget.notification.isRead
                             ? FontWeight.normal
                             : FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
 
@@ -111,7 +118,10 @@ class _NotificationItemState extends ConsumerState<NotificationItem> {
                     // Message
                     Text(
                       widget.notification.message,
-                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: 14,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -124,26 +134,32 @@ class _NotificationItemState extends ConsumerState<NotificationItem> {
                         Icon(
                           Icons.access_time,
                           size: 14,
-                          color: Colors.grey[500],
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formatTime(widget.notification.createdAt),
-                          style: TextStyle(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: theme.textTheme.bodySmall?.color
+                                ?.withValues(alpha: 0.7),
                           ),
                         ),
                         if (widget.notification.itineraryName != null) ...[
                           const SizedBox(width: 8),
-                          Icon(Icons.map, size: 14, color: Colors.grey[500]),
+                          Icon(
+                            Icons.map,
+                            size: 14,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               widget.notification.itineraryName!,
-                              style: TextStyle(
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: theme.textTheme.bodySmall?.color
+                                    ?.withValues(alpha: 0.7),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),

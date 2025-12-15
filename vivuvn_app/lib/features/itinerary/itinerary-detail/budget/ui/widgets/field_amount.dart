@@ -37,6 +37,7 @@ class _FieldAmountState extends State<FieldAmount> {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     final amount = double.tryParse(
       widget.controller.text.replaceAll(',', '').trim(),
     );
@@ -55,12 +56,18 @@ class _FieldAmountState extends State<FieldAmount> {
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.attach_money),
             labelText: 'Số tiền',
-        border: const OutlineInputBorder(),
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey, width: 0.8),
+            border: const OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: theme.colorScheme.outline,
+                width: 0.8,
+              ),
             ),
-        focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.blue, width: 1.5),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 1.5,
+              ),
             ),
         contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
             suffixIcon: Padding(
@@ -85,17 +92,18 @@ class _FieldAmountState extends State<FieldAmount> {
                     children: [
                       Text(
                         isUSD ? 'USD' : 'VNĐ',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(
+                      Icon(
                         Icons.swap_horiz,
                         size: 16,
-                        color: Colors.grey,
+                        color: theme.iconTheme.color ??
+                            theme.colorScheme.onSurfaceVariant,
                       ),
                     ],
                   ),
@@ -113,16 +121,21 @@ class _FieldAmountState extends State<FieldAmount> {
               children: [
                 Text(
                   'Tỷ giá: 1 USD = ${_formatNumber(BudgetConstants.exchangeRate)} đ',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey,
+                    color: theme.textTheme.bodySmall?.color
+                        ?.withValues(alpha: 0.7),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '•',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                  style: TextStyle(
+                    color:
+                        theme.colorScheme.outline.withValues(alpha: 0.8),
+                    fontSize: 11,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(

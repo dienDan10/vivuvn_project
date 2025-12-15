@@ -6,13 +6,18 @@ class GroupSizeIcon extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFF5B7FFF).withValues(alpha: 0.1),
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const Icon(Icons.group, size: 24, color: Color(0xFF5B7FFF)),
+      child: Icon(
+        Icons.group,
+        size: 24,
+        color: theme.colorScheme.onPrimaryContainer,
+      ),
     );
   }
 }

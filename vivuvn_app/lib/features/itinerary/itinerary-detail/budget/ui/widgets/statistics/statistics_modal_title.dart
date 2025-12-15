@@ -9,10 +9,10 @@ class StatisticsModalTitle extends StatelessWidget {
     return Text(
       'Thống kê chi tiêu',
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        color: Colors.black87,
-        fontWeight: FontWeight.bold,
-        fontSize: 22,
-      ),
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
     );
   }
 }

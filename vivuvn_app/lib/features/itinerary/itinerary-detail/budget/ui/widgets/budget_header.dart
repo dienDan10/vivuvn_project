@@ -17,9 +17,12 @@ class BudgetHeader extends ConsumerWidget {
 
   /// Mở statistics modal
   void _openStatisticsModal(final BuildContext context) {
+    final theme = Theme.of(context);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      barrierColor: theme.colorScheme.scrim.withValues(alpha: 0.4),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

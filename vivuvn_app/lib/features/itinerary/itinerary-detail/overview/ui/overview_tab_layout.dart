@@ -214,6 +214,11 @@ class _OverviewTabLayoutState extends ConsumerState<OverviewTabLayout>
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              barrierColor: Theme.of(context)
+                  .colorScheme
+                  .scrim
+                  .withValues(alpha: 0.4),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),

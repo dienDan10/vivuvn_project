@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:path/path.dart' as p;
 
 import '../../../../../../core/data/remote/network/network_service.dart';
 
@@ -41,18 +39,9 @@ class ExpenseBillApi {
     // Backend hiện tại chỉ nhận 1 file BillPhoto, nên chọn file đầu tiên.
     final String firstPath = filePaths.first;
 
-    final extension = p.extension(firstPath).toLowerCase();
-    // Mặc định dùng jpeg, backend thường chấp nhận cho cả jpg/jpeg.
-    String subType = 'jpeg';
-    if (extension == '.png') {
-      subType = 'png';
-    }
-
-    final multipartFile = await MultipartFile.fromFile(
-      firstPath,
-      filename: p.basename(firstPath),
-      contentType: MediaType('image', subType),
-    );
+    // Làm tương tự như upload avatar ở module profile:
+    // chỉ cần dùng MultipartFile.fromFile, để Dio tự suy đoán content-type.
+    final multipartFile = await MultipartFile.fromFile(firstPath);
 
     final formData = FormData.fromMap({
       'budgetItemId': budgetItemId,

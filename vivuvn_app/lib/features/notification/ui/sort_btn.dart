@@ -13,6 +13,7 @@ class SortButton extends ConsumerWidget {
       notificationControllerProvider.select((final state) => state.currentSort),
     );
 
+    final theme = Theme.of(context);
     return IconButton(
       icon: const Icon(Icons.sort, size: 24),
       tooltip: 'Sort by',
@@ -23,54 +24,77 @@ class SortButton extends ConsumerWidget {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
-          builder: (final context) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text(
-                    'Sắp xếp theo',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+          barrierColor:
+              theme.colorScheme.scrim.withValues(alpha: 0.4),
+          builder: (final context) {
+            final sheetTheme = Theme.of(context);
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Text(
+                      'Sắp xếp theo',
+                      style: sheetTheme.textTheme.titleMedium?.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: sheetTheme.colorScheme.onSurface,
+                      ),
+                    ),
                   ),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: Icon(
-                    Icons.arrow_downward,
-                    color: currentSort == NotificationSort.newest
-                        ? Theme.of(context).primaryColor
-                        : null,
+                  const Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.arrow_downward,
+                      color: currentSort == NotificationSort.newest
+                          ? sheetTheme.colorScheme.primary
+                          : sheetTheme.colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(
+                      'Mới nhất',
+                      style: sheetTheme.textTheme.bodyMedium?.copyWith(
+                        color: sheetTheme.colorScheme.onSurface,
+                      ),
+                    ),
+                    selected: currentSort == NotificationSort.newest,
+                    onTap: () {
+                      ref
+                          .read(notificationControllerProvider.notifier)
+                          .setSort(NotificationSort.newest);
+                      Navigator.pop(context);
+                    },
                   ),
-                  title: const Text('Mới nhất'),
-                  selected: currentSort == NotificationSort.newest,
-                  onTap: () {
-                    ref
-                        .read(notificationControllerProvider.notifier)
-                        .setSort(NotificationSort.newest);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.arrow_upward,
-                    color: currentSort == NotificationSort.oldest
-                        ? Theme.of(context).primaryColor
-                        : null,
+                  ListTile(
+                    leading: Icon(
+                      Icons.arrow_upward,
+                      color: currentSort == NotificationSort.oldest
+                          ? sheetTheme.colorScheme.primary
+                          : sheetTheme.colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(
+                      'Cũ nhất',
+                      style: sheetTheme.textTheme.bodyMedium?.copyWith(
+                        color: sheetTheme.colorScheme.onSurface,
+                      ),
+                    ),
+                    selected: currentSort == NotificationSort.oldest,
+                    onTap: () {
+                      ref
+                          .read(notificationControllerProvider.notifier)
+                          .setSort(NotificationSort.oldest);
+                      Navigator.pop(context);
+                    },
                   ),
-                  title: const Text('Cũ nhất'),
-                  selected: currentSort == NotificationSort.oldest,
-                  onTap: () {
-                    ref
-                        .read(notificationControllerProvider.notifier)
-                        .setSort(NotificationSort.oldest);
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
