@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../common/toast/global_toast.dart';
 import '../controller/budget_controller.dart';
+import '../controller/expense_bill_controller.dart';
+import '../data/api/expense_bill_api.dart';
 import '../data/dto/add_budget_item_request.dart';
 import '../data/dto/update_budget_item_request.dart';
 import '../data/models/budget_items.dart';
@@ -28,6 +30,11 @@ class ExpenseFormSubmitHandler {
     final formNotifier = ref.read(expenseFormProvider.notifier);
     final formState = ref.read(expenseFormProvider);
 
+    // Kiểm tra xem người dùng có thay đổi ảnh bill (chỉ tính ảnh local, không tính URL preview)
+    final initialBillState = ref.read(expenseBillControllerProvider);
+    final bool hasLocalBillChanges = initialBillState.localImagePaths
+        .any((final path) => !path.startsWith('http'));
+
     // Check if editing mode and nothing changed
     if (initialItem != null) {
       final hasChanges = _hasChanges(
@@ -39,8 +46,8 @@ class ExpenseFormSubmitHandler {
         exchangeRate: exchangeRate,
       );
 
-      // If nothing changed, just close the form
-      if (!hasChanges) {
+      // Nếu không có thay đổi data và cũng không có thay đổi ảnh, thì chỉ đóng form, không gọi API
+      if (!hasChanges && !hasLocalBillChanges) {
         return true; // Signal to close form
       }
     }
@@ -58,9 +65,9 @@ class ExpenseFormSubmitHandler {
     }
 
     final controller = ref.read(budgetControllerProvider.notifier);
-    final state = ref.read(budgetControllerProvider);
+    final budgetState = ref.read(budgetControllerProvider);
 
-    if (state.itineraryId == null) {
+    if (budgetState.itineraryId == null) {
       if (context.mounted) {
         GlobalToast.showErrorToast(
           context,
@@ -89,12 +96,13 @@ class ExpenseFormSubmitHandler {
 
     // Check if editing or adding
     final bool isEditing = initialItem != null;
-    bool success;
+    bool dataSuccess;
+    BudgetItem? createdItem;
 
     if (isEditing) {
-      success = await _updateBudgetItem(
+      dataSuccess = await _updateBudgetItem(
         controller: controller,
-        state: state,
+        state: budgetState,
         initialItem: initialItem,
         nameController: nameController,
         detailsController: detailsController,
@@ -102,26 +110,106 @@ class ExpenseFormSubmitHandler {
         formState: formState,
       );
     } else {
-      success = await _addBudgetItem(
+      createdItem = await _addBudgetItem(
         controller: controller,
-        state: state,
+        state: budgetState,
         nameController: nameController,
         detailsController: detailsController,
         amountInVND: amountInVND,
         formState: formState,
       );
+      dataSuccess = createdItem != null;
+    }
+
+    // Sau khi gọi API data xong, luôn đọc lại budgetState mới nhất
+    final latestBudgetState = ref.read(budgetControllerProvider);
+
+    String? uploadError;
+
+    // Chỉ upload ảnh nếu lưu data thành công
+    if (dataSuccess && latestBudgetState.itineraryId != null) {
+      final billState = ref.read(expenseBillControllerProvider);
+      // Chỉ upload các file local (bỏ qua ảnh URL đã có sẵn trên server).
+      final localFiles = billState.localImagePaths
+          .where((final path) => !path.startsWith('http'))
+          .toList();
+
+      if (localFiles.isNotEmpty) {
+        try {
+          final expenseBillApi = ref.read(expenseBillApiProvider);
+
+          // Xác định budgetItemId:
+          // - Nếu chỉnh sửa: dùng luôn id của item hiện tại
+          // - Nếu thêm mới: dùng id từ item vừa tạo
+          final int? budgetItemId =
+              isEditing ? initialItem.id : createdItem?.id;
+
+          if (budgetItemId != null) {
+            final imageUrl = await expenseBillApi.uploadBillsForBudgetItem(
+              itineraryId: latestBudgetState.itineraryId!,
+              budgetItemId: budgetItemId,
+              filePaths: localFiles,
+            );
+
+            // Nếu upload thành công và có imageUrl, gọi API update để lưu vào billPhotoUrl
+            if (imageUrl != null) {
+              // Lấy lại payer hiện tại từ budgetState để không làm mất thông tin người trả tiền
+              final latestItem = latestBudgetState.items
+                  .where((final item) => item.id == budgetItemId)
+                  .cast<BudgetItem?>()
+                  .firstOrNull;
+              final int? currentPayerId =
+                  latestItem?.paidByMember?.memberId ??
+                      (isEditing
+                          ? initialItem.paidByMember?.memberId
+                          : createdItem?.paidByMember?.memberId);
+
+              final photoUpdateReq = UpdateBudgetItemRequest(
+                itineraryId: latestBudgetState.itineraryId!,
+                itemId: budgetItemId,
+                payerMemberId: currentPayerId,
+                billPhotoUrl: imageUrl,
+              );
+              await controller.updateBudgetItem(
+                photoUpdateReq,
+                reloadBudget: false,
+              );
+            }
+
+            // Clear ảnh local sau khi upload thành công
+            ref.read(expenseBillControllerProvider.notifier).clearBills();
+          }
+        } catch (_) {
+          uploadError = 'Upload ảnh hóa đơn không thành công';
+        }
+      }
+    }
+
+    // Sau khi hoàn thành cả data + (có thể) upload ảnh, chỉ reload budget một lần
+    if (dataSuccess && budgetState.itineraryId != null) {
+      await controller.loadBudget(budgetState.itineraryId);
     }
 
     if (context.mounted) {
       _showResultToast(
         context: context,
-        success: success,
+        success: dataSuccess,
         isEditing: isEditing,
         errorMsg: ref.read(budgetControllerProvider).error,
       );
+
+      // Nếu upload ảnh thất bại nhưng data đã lưu thành công,
+      // vẫn giữ data và chỉ thông báo lỗi upload.
+      if (dataSuccess && uploadError != null) {
+        GlobalToast.showErrorToast(
+          context,
+          title: 'Thông báo',
+          message: uploadError,
+        );
+      }
     }
 
-    return success;
+    return dataSuccess;
   }
 
   /// Check if form has any changes compared to initial item
@@ -143,18 +231,22 @@ class ExpenseFormSubmitHandler {
         ? (formState.isUSD ? currentAmount * exchangeRate : currentAmount)
         : null;
 
+    // Nếu user chưa chọn lại người trả tiền, coi như giữ nguyên người trả cũ
+    final int? effectivePayerId =
+        formState.payerMemberId ?? initialItem.paidByMember?.memberId;
+
     // Check if nothing changed
     final bool nothingChanged =
         currentName == initialItem.name &&
-        currentAmountInVND != null &&
-        (currentAmountInVND - initialItem.cost).abs() < 0.01 &&
-        formState.selectedTypeId ==
-            (initialItem.budgetTypeObj?.budgetTypeId ?? 0) &&
-        formState.selectedDate?.year == initialItem.date.year &&
-        formState.selectedDate?.month == initialItem.date.month &&
-        formState.selectedDate?.day == initialItem.date.day &&
-        (formState.payerMemberId == (initialItem.paidByMember?.memberId)) &&
-        ((detailsController.text.trim()) == (initialItem.details ?? ''));
+            currentAmountInVND != null &&
+            (currentAmountInVND - initialItem.cost).abs() < 0.01 &&
+            // So sánh theo tên loại chi tiêu để tránh lệch khi budgetTypeObj null
+            formState.selectedType == initialItem.budgetType &&
+            formState.selectedDate?.year == initialItem.date.year &&
+            formState.selectedDate?.month == initialItem.date.month &&
+            formState.selectedDate?.day == initialItem.date.day &&
+            effectivePayerId == initialItem.paidByMember?.memberId &&
+            (detailsController.text.trim() == (initialItem.details ?? ''));
 
     return !nothingChanged;
   }
@@ -169,6 +261,10 @@ class ExpenseFormSubmitHandler {
     required final double amountInVND,
     required final dynamic formState,
   }) async {
+    // Nếu user không chọn lại người trả, dùng luôn payer của item ban đầu
+    final int? effectivePayerId =
+        formState.payerMemberId ?? initialItem.paidByMember?.memberId;
+
     final updateRequest = UpdateBudgetItemRequest(
       itineraryId: state.itineraryId!,
       itemId: initialItem.id!,
@@ -176,15 +272,18 @@ class ExpenseFormSubmitHandler {
       cost: amountInVND,
       budgetTypeId: formState.selectedTypeId,
       date: formState.selectedDate!,
-      payerMemberId: formState.payerMemberId,
+      payerMemberId: effectivePayerId,
       details: detailsController.text.trim(),
     );
     // ignore: avoid_print
-    return await controller.updateBudgetItem(updateRequest);
+    return await controller.updateBudgetItem(
+      updateRequest,
+      reloadBudget: false,
+    );
   }
 
   /// Add new budget item
-  static Future<bool> _addBudgetItem({
+  static Future<BudgetItem?> _addBudgetItem({
     required final dynamic controller,
     required final dynamic state,
     required final TextEditingController nameController,
@@ -202,7 +301,11 @@ class ExpenseFormSubmitHandler {
       details: detailsController.text.trim(),
     );
     // ignore: avoid_print
-    return await controller.addBudgetItem(addRequest);
+    final created = await controller.addBudgetItem(
+      addRequest,
+      reloadBudget: false,
+    );
+    return created as BudgetItem?;
   }
 
   /// Show success or error toast
@@ -224,7 +327,11 @@ class ExpenseFormSubmitHandler {
       GlobalToast.showErrorToast(
         context,
         title: 'Lỗi',
-        message: errorMsg ?? 'Có lỗi xảy ra',
+        // Nếu lỗi từ API data, coi như thêm/chỉnh sửa chi phí thất bại
+        message: errorMsg ??
+            (isEditing
+                ? 'Chỉnh sửa chi phí thất bại'
+                : 'Thêm chi phí thất bại'),
       );
     }
   }

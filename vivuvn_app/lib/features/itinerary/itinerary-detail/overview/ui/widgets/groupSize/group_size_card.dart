@@ -31,11 +31,12 @@ class GroupSizeCard extends ConsumerWidget {
 
     final isOwner = itinerary.isOwner;
 
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -64,7 +65,8 @@ class GroupSizeCard extends ConsumerWidget {
               icon: Icon(
                 Icons.edit_outlined,
                 size: 20,
-                color: Colors.grey.shade600,
+                color:
+                    theme.iconTheme.color ?? theme.colorScheme.onSurfaceVariant,
               ),
               onPressed: () => ref
                   .read(itineraryDetailControllerProvider.notifier)

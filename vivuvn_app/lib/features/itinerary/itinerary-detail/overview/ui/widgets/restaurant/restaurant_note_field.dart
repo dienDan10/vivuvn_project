@@ -79,6 +79,7 @@ class _RestaurantNoteFieldState extends ConsumerState<RestaurantNoteField> {
       ),
     );
 
+    final theme = Theme.of(context);
     return TextFormField(
       controller: _controller,
       focusNode: _focusNode,
@@ -88,10 +89,12 @@ class _RestaurantNoteFieldState extends ConsumerState<RestaurantNoteField> {
       decoration: InputDecoration(
         hintText: 'Ghi chú',
         filled: true,
-        fillColor: Colors.white,
+        fillColor: theme.colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: theme.colorScheme.outline,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,

@@ -35,7 +35,7 @@ class BudgetService implements IBudgetService {
   }
 
   @override
-  Future<void> addBudgetItem(final AddBudgetItemRequest request) async {
+  Future<BudgetItem> addBudgetItem(final AddBudgetItemRequest request) async {
     return await _budgetApi.addBudgetItem(request);
   }
 

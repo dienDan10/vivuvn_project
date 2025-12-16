@@ -15,6 +15,7 @@ class TransportationCard extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final theme = Theme.of(context);
     final itinerary = ref.watch(
       itineraryDetailControllerProvider.select((final state) => state.itinerary),
     );
@@ -52,7 +53,7 @@ class TransportationCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -66,10 +67,14 @@ class TransportationCard extends ConsumerWidget {
               bottom: 6,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF8A5B).withValues(alpha: 0.1),
+              color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 24, color: const Color(0xFFFF8A5B)),
+            child: Icon(
+              icon,
+              size: 24,
+              color: theme.colorScheme.onSecondaryContainer,
+            ),
           ),
           const SizedBox(width: 16),
           // Info
@@ -81,7 +86,8 @@ class TransportationCard extends ConsumerWidget {
                   'Phương tiện di chuyển',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: theme.textTheme.bodySmall?.color
+                        ?.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -92,8 +98,9 @@ class TransportationCard extends ConsumerWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: activeVehicle == null
-                        ? Colors.grey.shade500
-                        : Colors.black87,
+                        ? theme.textTheme.bodyMedium?.color
+                            ?.withValues(alpha: 0.6)
+                        : theme.colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

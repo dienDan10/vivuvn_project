@@ -9,23 +9,31 @@ class FieldName extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return TextFormField(
       onTapOutside: (final event) {
         FocusScope.of(context).unfocus();
       },
       controller: controller,
       autofocus: true,
-      decoration: const InputDecoration(
-        prefixIcon: Icon(Icons.shopping_cart_outlined),
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.shopping_cart_outlined),
         labelText: 'Tên chi phí',
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey, width: 0.8),
+          borderSide: BorderSide(
+            color: theme.colorScheme.outline,
+            width: 0.8,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue, width: 1.5),
+          borderSide: BorderSide(
+            color: theme.colorScheme.primary,
+            width: 1.5,
+          ),
         ),
-        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       ),
       validator: (final value) {
         // Check empty

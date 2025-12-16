@@ -28,6 +28,12 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      backgroundColor:
+          Theme.of(context).colorScheme.surfaceContainerHighest,
+      barrierColor: Theme.of(context)
+          .colorScheme
+          .scrim
+          .withValues(alpha: 0.4),
       builder: (final ctx) {
         final theme = Theme.of(ctx);
         final state = ref.watch(memberControllerProvider);

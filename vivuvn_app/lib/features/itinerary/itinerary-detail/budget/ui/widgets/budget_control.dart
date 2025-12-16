@@ -22,10 +22,11 @@ class _BudgetControlState extends ConsumerState<BudgetControl> {
       budgetControllerProvider.select((final state) => state.currentSort),
     );
 
+    final theme = Theme.of(context);
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
         ),
@@ -34,9 +35,13 @@ class _BudgetControlState extends ConsumerState<BudgetControl> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             'Các chi phí',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: 20,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
           InkWell(
             onTap: () => _showSortOptions(context),
@@ -45,18 +50,25 @@ class _BudgetControlState extends ConsumerState<BudgetControl> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
-                  Icon(currentSort.icon, size: 16, color: Colors.grey[700]),
+                  Icon(
+                    currentSort.icon,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     currentSort.label,
-                    style: TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
-                      color: Colors.grey[700],
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(width: 2),
-                  Icon(Icons.arrow_drop_down, color: Colors.grey[700]),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ],
               ),
             ),
@@ -76,7 +88,14 @@ class _BudgetControlState extends ConsumerState<BudgetControl> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      backgroundColor:
+          Theme.of(context).colorScheme.surfaceContainerHighest,
+      barrierColor: Theme.of(context)
+          .colorScheme
+          .scrim
+          .withValues(alpha: 0.4),
       builder: (final context) {
+        final theme = Theme.of(context);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -85,16 +104,21 @@ class _BudgetControlState extends ConsumerState<BudgetControl> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color:
+                    theme.colorScheme.outline.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Sắp xếp theo',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -104,24 +128,24 @@ class _BudgetControlState extends ConsumerState<BudgetControl> {
                 leading: Icon(
                   option.icon,
                   color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey[700],
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
                 title: Text(
                   option.label,
-                  style: TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: isSelected
                         ? FontWeight.w600
                         : FontWeight.normal,
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.black,
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface,
                   ),
                 ),
                 trailing: isSelected
                     ? Icon(
                         Icons.check,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: theme.colorScheme.primary,
                       )
                     : null,
                 onTap: () {

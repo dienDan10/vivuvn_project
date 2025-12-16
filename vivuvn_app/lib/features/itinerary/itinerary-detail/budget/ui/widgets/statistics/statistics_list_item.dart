@@ -12,6 +12,7 @@ class StatisticsListItem extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final theme = Theme.of(context);
     final data = ref.watch(
       statisticsProvider.select((final s) => s.chartData[index]),
     );
@@ -28,11 +29,13 @@ class StatisticsListItem extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF5B7FFF).withValues(alpha: 0.1)
-              : Colors.grey.shade50,
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.6)
+              : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF5B7FFF) : Colors.grey.shade200,
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.dividerColor,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -44,21 +47,27 @@ class StatisticsListItem extends ConsumerWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFF5B7FFF)
-                    : const Color(0xFFB3C5FF),
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.secondary,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
+              child: Icon(
+                icon,
+                color: theme.colorScheme.onPrimary,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 16),
             // Category name
             Expanded(
               child: Text(
                 data.category,
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 15,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? const Color(0xFF5B7FFF) : Colors.black87,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
                 ),
               ),
             ),
@@ -66,10 +75,12 @@ class StatisticsListItem extends ConsumerWidget {
             Text(
               NumberFormat.currency(locale: 'vi_VN', symbol: '₫')
                   .format(data.value),
-              style: TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? const Color(0xFF5B7FFF) : Colors.black87,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
               ),
             ),
           ],

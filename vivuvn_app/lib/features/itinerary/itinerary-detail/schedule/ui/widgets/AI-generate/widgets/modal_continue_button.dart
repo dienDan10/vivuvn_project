@@ -81,7 +81,6 @@ class ModalContinueButton extends ConsumerWidget {
           message: res.message ?? 'Dữ liệu không hợp lệ',
         );
       }
-      if (context.mounted) Navigator.of(context).pop();
       return;
     }
 

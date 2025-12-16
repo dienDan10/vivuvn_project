@@ -33,6 +33,7 @@ class StatisticsToggleButton extends ConsumerWidget {
       }),
     );
     final controller = ref.read(statisticsProvider.notifier);
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () {
@@ -51,12 +52,12 @@ class StatisticsToggleButton extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected ? theme.colorScheme.surface : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: theme.colorScheme.shadow.withValues(alpha: 0.25),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -66,8 +67,11 @@ class StatisticsToggleButton extends ConsumerWidget {
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: isSelected ? Colors.black87 : Colors.grey.shade600,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: isSelected
+                ? theme.colorScheme.onSurface
+                : theme.textTheme.bodyMedium?.color
+                    ?.withValues(alpha: 0.7),
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),

@@ -73,6 +73,12 @@ class ExpenseBillController extends StateNotifier<ExpenseBillState> {
     state = const ExpenseBillState();
   }
 
+  /// Set preview từ URL (ảnh đã có sẵn trên server) khi vào màn chỉnh sửa.
+  void setInitialBillFromNetwork(final String url) {
+    if (url.isEmpty) return;
+    state = state.copyWith(localImagePaths: [url], error: null);
+  }
+
   /// Lưu ảnh bill hiện tại về thư viện (gallery).
   Future<void> savePreviewToGallery(
     final BuildContext context,

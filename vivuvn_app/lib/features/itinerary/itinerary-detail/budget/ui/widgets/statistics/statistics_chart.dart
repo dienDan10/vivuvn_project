@@ -13,6 +13,7 @@ class StatisticsChart extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final theme = Theme.of(context);
     final state = ref.watch(statisticsProvider);
     final chartData = state.chartData;
     final selectedKey = state.selectedKey;
@@ -23,10 +24,10 @@ class StatisticsChart extends ConsumerWidget {
       primaryXAxis: CategoryAxis(
         majorGridLines: const MajorGridLines(width: 0),
         axisLine: const AxisLine(width: 0),
-        labelStyle: const TextStyle(
+        labelStyle: theme.textTheme.bodySmall?.copyWith(
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: theme.colorScheme.onSurface,
         ),
         // Custom label với icon
         axisLabelFormatter: (final AxisLabelRenderDetails details) {
@@ -45,9 +46,16 @@ class StatisticsChart extends ConsumerWidget {
         },
       ),
       primaryYAxis: NumericAxis(
-        majorGridLines: MajorGridLines(width: 1, color: Colors.grey.shade200),
+        majorGridLines: MajorGridLines(
+          width: 1,
+          color: theme.dividerColor,
+        ),
         axisLine: const AxisLine(width: 0),
-        labelStyle: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+        labelStyle: theme.textTheme.bodySmall?.copyWith(
+          fontSize: 10,
+          color: theme.textTheme.bodySmall?.color
+              ?.withValues(alpha: 0.7),
+        ),
         numberFormat: NumberFormat('#,###', 'vi_VN'),
         labelFormat: '{value} ₫',
       ),
@@ -58,8 +66,8 @@ class StatisticsChart extends ConsumerWidget {
           yValueMapper: (final data, final _) => data.value,
           pointColorMapper: (final data, final _) {
             return selectedKey == data.category
-                ? const Color(0xFF5B7FFF)
-                : const Color(0xFFB3C5FF);
+                ? theme.colorScheme.primary
+                : theme.colorScheme.secondary;
           },
           borderRadius: BorderRadius.circular(4),
           spacing: 0.2,

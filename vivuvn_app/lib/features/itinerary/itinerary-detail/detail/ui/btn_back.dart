@@ -9,6 +9,7 @@ class ButtonBack extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap ?? () => context.pop(),
       child: Container(
@@ -17,15 +18,15 @@ class ButtonBack extends StatelessWidget {
         padding: const EdgeInsets.only(right: 2),
         decoration: BoxDecoration(
           color: !onAppbar
-              ? Theme.of(context).colorScheme.primary
-              : Colors.white,
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(50),
         ),
         child: Icon(
           Icons.arrow_back_ios_new_sharp,
           color: !onAppbar
-              ? Colors.white
-              : Theme.of(context).colorScheme.primary,
+              ? theme.colorScheme.onPrimary
+              : theme.colorScheme.primary,
         ),
       ),
     );

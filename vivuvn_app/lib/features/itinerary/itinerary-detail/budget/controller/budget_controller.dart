@@ -89,45 +89,55 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
   /// Thêm budget item mới
   ///
   /// Validate request trước khi gọi API.
-  /// Reload budget sau khi thêm thành công.
+  /// Reload budget sau khi thêm thành công (có thể tắt bằng reloadBudget = false).
   ///
-  /// Returns: true nếu thành công, false nếu có lỗi
-  Future<bool> addBudgetItem(final AddBudgetItemRequest request) async {
+  /// Returns: BudgetItem vừa được tạo nếu thành công, null nếu có lỗi
+  Future<BudgetItem?> addBudgetItem(
+    final AddBudgetItemRequest request, {
+    final bool reloadBudget = true,
+  }) async {
     try {
       final service = ref.read(budgetServiceProvider);
 
       _validateBudgetItemForAdd(request);
 
-      await service.addBudgetItem(request);
-      await loadBudget(state.itineraryId);
-      return true;
+      final created = await service.addBudgetItem(request);
+      if (reloadBudget) {
+        await loadBudget(state.itineraryId);
+      }
+      return created;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
       state = state.copyWith(error: errorMsg);
-      return false;
+      return null;
     } on ValidationException catch (e) {
       state = state.copyWith(error: e.toString());
-      return false;
+      return null;
     } catch (e) {
       state = state.copyWith(error: 'Unknown error');
-      return false;
+      return null;
     }
   }
 
   /// Update budget item
   ///
   /// Validate request và ít nhất 1 field phải được update.
-  /// Reload budget sau khi update thành công.
+  /// Reload budget sau khi update thành công (có thể tắt bằng reloadBudget = false).
   ///
   /// Returns: true nếu thành công, false nếu có lỗi
-  Future<bool> updateBudgetItem(final UpdateBudgetItemRequest request) async {
+  Future<bool> updateBudgetItem(
+    final UpdateBudgetItemRequest request, {
+    final bool reloadBudget = true,
+  }) async {
     try {
       _validateUpdateRequest(request);
 
       final service = ref.read(budgetServiceProvider);
       await service.updateBudgetItem(request);
 
-      await loadBudget(state.itineraryId);
+      if (reloadBudget) {
+        await loadBudget(state.itineraryId);
+      }
       return true;
     } on ValidationException catch (e) {
       // validation error
@@ -249,7 +259,8 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
         request.cost == null &&
         request.budgetTypeId == null &&
         request.budgetType == null &&
-        request.date == null) {
+        request.date == null &&
+        request.billPhotoUrl == null) {
       throw ValidationException(
         'Phải cung cấp ít nhất một trường để cập nhật (tên, chi phí, loại ngân sách, ngày)',
       );

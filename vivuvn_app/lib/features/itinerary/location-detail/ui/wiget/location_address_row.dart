@@ -7,23 +7,24 @@ class LocationAddressRow extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.location_on_outlined,
-            color: Colors.redAccent,
+            color: theme.colorScheme.primary,
             size: 22,
           ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               address,
-              style: const TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 15.5,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
                 height: 1.4,
               ),
             ),

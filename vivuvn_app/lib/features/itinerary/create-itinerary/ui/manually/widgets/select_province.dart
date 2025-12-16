@@ -85,9 +85,9 @@ class _SelectProvinceState extends ConsumerState<SelectProvince> {
             },
             decorationBuilder: (final context, final child) {
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                 ),
                 child: child,
               );

@@ -97,6 +97,7 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
       ),
     );
 
+    final theme = Theme.of(context);
     return TextFormField(
       controller: _controller,
       focusNode: _focusNode,
@@ -110,10 +111,12 @@ class _HotelCostFieldState extends ConsumerState<HotelCostField> {
         hintText: 'Chi phí',
         prefixIcon: const Icon(Icons.attach_money),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: theme.colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,

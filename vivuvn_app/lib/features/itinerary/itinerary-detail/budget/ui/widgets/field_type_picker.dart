@@ -30,6 +30,12 @@ class FieldTypePicker extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor:
+          Theme.of(context).colorScheme.surfaceContainerHighest,
+      barrierColor: Theme.of(context)
+          .colorScheme
+          .scrim
+          .withValues(alpha: 0.4),
       builder: (final modalContext) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -138,13 +144,20 @@ class FieldTypePicker extends StatelessWidget {
         decoration: InputDecoration(
           labelText: 'Loại chi phí',
           border: const OutlineInputBorder(),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey, width: 0.8),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: theme.colorScheme.outline,
+              width: 0.8,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+            borderSide: BorderSide(
+              color: theme.colorScheme.primary,
+              width: 1.5,
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         ),
         child: Row(
           children: [

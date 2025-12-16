@@ -66,6 +66,7 @@ class _StatisticsBarItem extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -79,11 +80,15 @@ class _StatisticsBarItem extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFF5B7FFF)
-                    : const Color(0xFFB3C5FF),
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.secondary,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: Colors.white, size: 20),
+              child: Icon(
+                icon,
+                color: theme.colorScheme.onPrimary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             // Category name
@@ -91,10 +96,12 @@ class _StatisticsBarItem extends StatelessWidget {
               width: 100,
               child: Text(
                 category,
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? const Color(0xFF5B7FFF) : Colors.black87,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -108,7 +115,7 @@ class _StatisticsBarItem extends StatelessWidget {
                   Container(
                     height: 32,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
@@ -121,21 +128,20 @@ class _StatisticsBarItem extends StatelessWidget {
                         gradient: LinearGradient(
                           colors: isSelected
                               ? [
-                                  const Color(0xFF5B7FFF),
-                                  const Color(0xFF4A6FEE),
+                                  theme.colorScheme.primary,
+                                  theme.colorScheme.primaryContainer,
                                 ]
                               : [
-                                  const Color(0xFFB3C5FF),
-                                  const Color(0xFF9AB5FF),
+                                  theme.colorScheme.secondary,
+                                  theme.colorScheme.secondaryContainer,
                                 ],
                         ),
                         borderRadius: BorderRadius.circular(6),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: const Color(
-                                    0xFF5B7FFF,
-                                  ).withValues(alpha: 0.3),
+                                  color: theme.colorScheme.primary
+                                      .withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -146,10 +152,10 @@ class _StatisticsBarItem extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 8),
                       child: Text(
                         NumberFormat.compact(locale: 'vi_VN').format(value),
-                        style: TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: isSelected ? Colors.white : Colors.white,
+                          color: theme.colorScheme.onPrimary,
                         ),
                       ),
                     ),
@@ -164,10 +170,12 @@ class _StatisticsBarItem extends StatelessWidget {
               child: Text(
                 NumberFormat.compact(locale: 'vi_VN').format(value),
                 textAlign: TextAlign.right,
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isSelected ? const Color(0xFF5B7FFF) : Colors.black87,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
                 ),
               ),
             ),
