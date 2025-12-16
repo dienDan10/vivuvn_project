@@ -47,7 +47,7 @@ services:
     volumes:
       - ./vivuvn_api/Secrets:/app/Secrets  
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
       - SA_PASSWORD=${SA_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
