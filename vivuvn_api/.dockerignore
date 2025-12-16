@@ -8,6 +8,7 @@
 **/appsettings.Local.json
 **/appsettings.*.json
 !**/appsettings.Docker.json
+!**/appsettings.Production.json
 
 # Visual Studio files
 .vs/
