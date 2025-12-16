@@ -8,7 +8,9 @@ services:
       resources:
         reservations:
           cpus: '0.25'
-          memory: 512M
+          memory: 1024M
+        limits:
+          memory: 2048M
 
   # SQL Server Database (Production Only - Flexible for 2GB RAM VPS)
   sqlserver:
@@ -26,7 +28,7 @@ services:
       - vivuvn-network
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $${SA_PASSWORD} -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -C -Q 'SELECT 1' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -35,11 +37,15 @@ services:
       resources:
         reservations:
           cpus: '0.25'
-          memory: 512M
+          memory: 2048M
+        limits:
+          memory: 4096M
 
   vivuvn-api:
     env_file:
       - .env.prod
+    volumes:
+      - ./vivuvn_api/Secrets:/app/Secrets  
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
@@ -65,7 +71,9 @@ services:
       resources:
         reservations:
           cpus: '0.25'
-          memory: 256M
+          memory: 512M
+        limits:
+          memory: 1024M
     
     # Production health checks
     healthcheck:

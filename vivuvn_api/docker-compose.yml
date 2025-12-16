@@ -41,7 +41,7 @@ services:
       dockerfile: Dockerfile
     container_name: vivuvn-api
     env_file:
-      - .env
+      - .env.prod
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
