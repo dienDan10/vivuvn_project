@@ -78,6 +78,7 @@ class _HotelNoteFieldState extends ConsumerState<HotelNoteField> {
       ),
     );
 
+    final theme = Theme.of(context);
     return TextFormField(
       controller: _controller,
       focusNode: _focusNode,
@@ -87,10 +88,12 @@ class _HotelNoteFieldState extends ConsumerState<HotelNoteField> {
       decoration: InputDecoration(
         hintText: 'Ghi chú',
         filled: true,
-        fillColor: Colors.white,
+        fillColor: theme.colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,

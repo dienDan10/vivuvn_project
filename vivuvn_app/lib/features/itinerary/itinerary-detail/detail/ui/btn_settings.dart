@@ -40,6 +40,7 @@ class ButtonSettings extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () => _showSettingsModal(context),
       child: Container(
@@ -47,15 +48,15 @@ class ButtonSettings extends StatelessWidget {
         width: 40,
         decoration: BoxDecoration(
           color: !onAppbar
-              ? Theme.of(context).colorScheme.primary
-              : Colors.white,
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(50),
         ),
         child: Icon(
           Icons.settings,
           color: !onAppbar
-              ? Colors.white
-              : Theme.of(context).colorScheme.primary,
+              ? theme.colorScheme.onPrimary
+              : theme.colorScheme.primary,
         ),
       ),
     );

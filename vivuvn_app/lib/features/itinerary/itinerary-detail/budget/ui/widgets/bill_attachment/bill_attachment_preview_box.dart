@@ -44,10 +44,9 @@ class BillAttachmentPreviewBox extends ConsumerWidget {
                 minimumSize: Size(sizes.closeButtonSize, sizes.closeButtonSize),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 padding: EdgeInsets.zero,
-                backgroundColor: Theme.of(context)
-                    .colorScheme
-                    .error
-                    .withOpacity(0.18),
+                backgroundColor: Theme.of(context).colorScheme.error.withValues(
+                      alpha: 0.18,
+                    ),
               ),
               onPressed:
                   billState.isSavingToGallery ? null : () => controller.removeBillAt(0),

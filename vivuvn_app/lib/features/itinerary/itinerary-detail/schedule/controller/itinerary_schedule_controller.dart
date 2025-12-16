@@ -90,8 +90,9 @@ class ItineraryScheduleController
   }
 
   // === Xóa item ===
-  Future<void> deleteItem(final int itemId) async {
-    if (itineraryId == null) return;
+  /// Trả về `true` nếu xóa thành công, `false` nếu có lỗi.
+  Future<bool> deleteItem(final int itemId) async {
+    if (itineraryId == null) return false;
     // get day id
     final dayId = state.days[state.selectedIndex].id;
     try {
@@ -116,8 +117,10 @@ class ItineraryScheduleController
       }).toList();
 
       state = state.copyWith(days: updatedDays);
+      return true;
     } catch (e) {
       state = state.copyWith(error: e.toString());
+      return false;
     }
   }
 

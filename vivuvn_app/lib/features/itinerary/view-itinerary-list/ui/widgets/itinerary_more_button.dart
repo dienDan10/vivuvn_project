@@ -13,6 +13,12 @@ class ItineraryMoreButton extends ConsumerWidget {
       context: context,
       showDragHandle: true,
       useRootNavigator: true,
+      backgroundColor:
+          Theme.of(context).colorScheme.surfaceContainerHighest,
+      barrierColor: Theme.of(context)
+          .colorScheme
+          .scrim
+          .withValues(alpha: 0.4),
       builder: (final BuildContext ctx) {
         return EditItineraryModal(itinerary: itinerary);
       },

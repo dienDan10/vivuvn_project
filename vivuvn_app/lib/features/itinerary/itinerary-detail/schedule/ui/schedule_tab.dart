@@ -55,7 +55,7 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
     }
 
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: Stack(
         children: [
           ListView(

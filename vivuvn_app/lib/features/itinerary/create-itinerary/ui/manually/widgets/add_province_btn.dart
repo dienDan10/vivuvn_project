@@ -13,22 +13,33 @@ class AddProvinceButton extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onClick,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          color: theme.colorScheme.surfaceContainerLow,
           borderRadius: const BorderRadius.all(Radius.circular(10)),
-          border: BoxBorder.all(color: Colors.black26, width: 0.6),
+          border: BoxBorder.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.6),
+            width: 0.6,
+          ),
         ),
         child: Row(
           spacing: 20.0,
           children: [
-            Icon(icon),
+            Icon(
+              icon,
+              color: theme.iconTheme.color ?? theme.colorScheme.onSurface,
+            ),
             Text(
               text,
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                color: theme.textTheme.bodyMedium?.color
+                    ?.withValues(alpha: 0.7),
+              ),
             ),
           ],
         ),

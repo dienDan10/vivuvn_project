@@ -41,7 +41,7 @@ class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
     return ExpandableFab(
       key: _fabKey,
       overlayStyle: ExpandableFabOverlayStyle(
-        color: Colors.black.withValues(alpha: 0.7),
+        color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.7),
       ),
       distance: 70,
       childrenAnimation: ExpandableFabAnimation.none,
@@ -63,12 +63,12 @@ class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
         // View on Map option
         Row(
           children: [
-            const Text(
+            Text(
               'Xem lịch trình trên Map',
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
             const SizedBox(width: 20),
@@ -93,12 +93,12 @@ class ButtonScheduleOptionsState extends ConsumerState<ButtonScheduleOptions> {
         if (isOwner)
           Row(
             children: [
-              const Text(
+              Text(
                 'Tạo lịch trình thông minh',
-                style: TextStyle(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
               const SizedBox(width: 20),

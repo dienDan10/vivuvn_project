@@ -22,8 +22,9 @@ class CollapsedAppbar extends ConsumerWidget {
       ),
     );
 
+    final theme = Theme.of(context);
     return Container(
-      color: Theme.of(context).colorScheme.onPrimary,
+      color: theme.colorScheme.surface,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top,
         left: 12,
@@ -38,8 +39,8 @@ class CollapsedAppbar extends ConsumerWidget {
                 ? const CollapsedNameInput()
                 : Text(
                     itinerary.name,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),

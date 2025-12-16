@@ -11,24 +11,25 @@ class GroupSizeInfo extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Số người trong đoàn',
-          style: TextStyle(
+          style: theme.textTheme.bodySmall?.copyWith(
             fontSize: 13,
-            color: Colors.grey.shade600,
+            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
             fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           '$groupSize người',
-          style: const TextStyle(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
       ],

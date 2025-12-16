@@ -33,12 +33,12 @@ class BillAttachmentUploadTile extends ConsumerWidget {
           child: Row(
             children: [
               Container(
-                width: sizes.iconBox,
-                height: sizes.iconBox,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(sizes.iconRadius),
-                ),
+              width: sizes.iconBox,
+              height: sizes.iconBox,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(sizes.iconRadius),
+              ),
                 child: Icon(
                   Icons.receipt_long_outlined,
                   color: theme.colorScheme.primary,

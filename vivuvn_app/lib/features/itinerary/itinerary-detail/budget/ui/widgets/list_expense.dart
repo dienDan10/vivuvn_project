@@ -24,7 +24,7 @@ class ExpenseList extends ConsumerWidget {
     // Loading state
     if (isLoading) {
       return Container(
-        color: Theme.of(context).colorScheme.onPrimary,
+        color: Theme.of(context).colorScheme.surface,
         child: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -42,7 +42,7 @@ class ExpenseList extends ConsumerWidget {
     );
 
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(
@@ -76,14 +76,18 @@ class _EmptyExpenseState extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
-      child: const Center(
+      color: theme.colorScheme.surface,
+      child: Center(
         child: Padding(
-          padding: EdgeInsets.all(BudgetConstants.sectionSpacing),
+          padding: const EdgeInsets.all(BudgetConstants.sectionSpacing),
           child: Text(
             'Chưa có khoản chi tiêu nào',
-            style: TextStyle(color: Colors.grey),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color
+                  ?.withValues(alpha: 0.7),
+            ),
           ),
         ),
       ),

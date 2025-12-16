@@ -44,12 +44,14 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
       lastDate: todayDate.add(const Duration(days: 365)),
     );
 
+    final theme = Theme.of(context);
     final result = await showCalendarDatePicker2Dialog(
       context: context,
       value: [_start, _end],
       config: config,
       dialogSize: const Size(340, 400),
       borderRadius: BorderRadius.circular(12),
+      dialogBackgroundColor: theme.colorScheme.surfaceContainerHighest,
       // builder default provides modal barrier dim; dialog will be centered
     );
 
@@ -77,12 +79,15 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: _openPicker,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.6),
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -90,10 +95,10 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
             Expanded(
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_today,
                     size: 18,
-                    color: Colors.black54,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
                   Column(
@@ -101,15 +106,19 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
                     children: [
                       Text(
                         widget.startLabel,
-                        style: const TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 12,
-                          color: Colors.black54,
+                          color: theme.textTheme.bodySmall?.color
+                              ?.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _formatDate(_start),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),
@@ -117,13 +126,20 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
               ),
             ),
             Container(height: 48, width: 1, color: Colors.grey.shade200),
+            // Divider
+            // ignore: use_decorated_box
+            Container(
+              height: 48,
+              width: 1,
+              color: theme.dividerColor,
+            ),
             Expanded(
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_today,
                     size: 18,
-                    color: Colors.black54,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
                   Column(
@@ -131,15 +147,19 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
                     children: [
                       Text(
                         widget.endLabel,
-                        style: const TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 12,
-                          color: Colors.black54,
+                          color: theme.textTheme.bodySmall?.color
+                              ?.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _formatDate(_end),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),

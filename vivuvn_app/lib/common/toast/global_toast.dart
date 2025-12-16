@@ -8,9 +8,27 @@ class GlobalToast {
     final String? message,
     final String? title,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor =
+        isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
     CherryToast.error(
-      title: title != null ? Text(title) : null,
-      description: Text(message ?? 'An error occurred'),
+      backgroundColor: backgroundColor,
+      title: title != null
+          ? Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: textColor,
+              ),
+            )
+          : null,
+      description: Text(
+        message ?? 'An error occurred',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: textColor,
+        ),
+      ),
       animationDuration: const Duration(milliseconds: 300),
       animationType: AnimationType.fromTop,
       displayCloseButton: true,
@@ -23,9 +41,29 @@ class GlobalToast {
     final String? message,
     final String? title,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor =
+        isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
     CherryToast.success(
-      title: title != null ? Text(title) : null,
-      description: message != null ? Text(message) : null,
+      backgroundColor: backgroundColor,
+      title: title != null
+          ? Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: textColor,
+              ),
+            )
+          : null,
+      description: message != null
+          ? Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: textColor,
+              ),
+            )
+          : null,
       animationDuration: const Duration(milliseconds: 300),
       animationType: AnimationType.fromTop,
       toastPosition: Position.top,

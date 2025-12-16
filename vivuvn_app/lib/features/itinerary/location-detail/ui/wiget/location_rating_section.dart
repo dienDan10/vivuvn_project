@@ -12,6 +12,7 @@ class LocationRatingSection extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -32,26 +33,35 @@ class LocationRatingSection extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             rating.toStringAsFixed(1),
-            style: const TextStyle(
+            style: theme.textTheme.bodyLarge?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(width: 4),
-          const Text('/5', style: TextStyle(color: Colors.grey)),
+          Text(
+            '/5',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.textTheme.bodySmall?.color
+                  ?.withValues(alpha: 0.7),
+            ),
+          ),
           const SizedBox(width: 10),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.people_alt_outlined,
                 size: 16,
-                color: Colors.grey,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 3),
               Text(
                 '$ratingCount',
-                style: const TextStyle(fontSize: 13, color: Colors.black),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 13,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
             ],
           ),

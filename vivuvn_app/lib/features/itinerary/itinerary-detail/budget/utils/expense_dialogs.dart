@@ -18,9 +18,13 @@ class ExpenseDialogs {
       isScrollControlled: true,
       enableDrag: false,
       constraints: const BoxConstraints.expand(),
-      backgroundColor: Colors.transparent,
-      builder: (final context) =>
-          AddExpenseLayout(title: 'Chỉnh sửa chi phí', initialItem: item),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      barrierColor:
+          Theme.of(context).colorScheme.scrim.withValues(alpha: 0.4),
+      builder: (final context) => AddExpenseLayout(
+        title: 'Chỉnh sửa chi phí',
+        initialItem: item,
+      ),
     );
   }
 

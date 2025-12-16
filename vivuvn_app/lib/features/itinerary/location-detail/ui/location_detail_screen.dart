@@ -54,7 +54,7 @@ class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
     final photos = location.photos;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
