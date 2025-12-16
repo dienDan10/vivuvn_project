@@ -9,6 +9,7 @@ import '../data/api/automically_generate_by_ai_api.dart';
 import '../data/dto/generate_itinerary_by_ai_request.dart';
 import '../model/interested_category.dart';
 import '../state/automically_generate_by_ai_state.dart';
+import 'itinerary_schedule_controller.dart';
 import 'validate_and_submit_result.dart';
 
 // Provider used to request a tab switch from the AI modal flow. When the
@@ -195,6 +196,12 @@ class AutomaticallyGenerateByAiController
       if (response.warnings.isNotEmpty) {
         ref.read(aiGenerationWarningsProvider.notifier).state = response.warnings;
       }
+
+      // Refresh schedule days so the new generated itinerary content is loaded
+      await ref.read(itineraryScheduleControllerProvider.notifier).fetchDays();
+
+      // Optionally request a tab switch (0 = Overview, 1 = Schedule) so UI reacts
+      ref.read(aiTabSwitchProvider.notifier).state = 1;
     } on DioException catch (e) {
       state = state.copyWith(error: DioExceptionHandler.handleException(e));
     } on ValidationException catch (e) {

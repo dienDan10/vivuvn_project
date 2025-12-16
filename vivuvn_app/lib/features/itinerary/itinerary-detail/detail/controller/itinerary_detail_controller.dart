@@ -72,10 +72,17 @@ class ItineraryDetailController
   // Track the itineraryId that is currently being fetched
   int? _fetchingItineraryId;
 
-  /// Fetch itinerary detail by ID
-  Future<void> fetchItineraryDetail() async {
-    // If itinerary is already loaded and matches current ID, skip fetch
-    if (state.itinerary != null && 
+  /// Fetch itinerary detail by ID.
+  ///
+  /// - [force]: bỏ qua cache nếu `true`, luôn gọi API.
+  /// - [showLoading]: nếu `false` sẽ refresh ngầm, không bật trạng thái loading toàn màn.
+  Future<void> fetchItineraryDetail({
+    final bool force = false,
+    final bool showLoading = true,
+  }) async {
+    // If itinerary is already loaded and matches current ID, skip fetch unless forced
+    if (!force &&
+        state.itinerary != null && 
         state.itinerary!.id == state.itineraryId) {
       return;
     }
@@ -99,7 +106,10 @@ class ItineraryDetailController
     final completer = Completer<void>();
     _fetchingItineraryId = currentItineraryId;
     _ongoingFetch = completer.future;
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(
+      isLoading: showLoading ? true : state.isLoading,
+      error: null,
+    );
     
     // Perform the actual fetch
     try {
@@ -110,15 +120,21 @@ class ItineraryDetailController
       state = state.copyWith(
         itinerary: data,
         inviteCode: data.inviteCode ?? state.inviteCode,
-        isLoading: false,
+        isLoading: showLoading ? false : state.isLoading,
       );
       completer.complete();
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg, isLoading: false);
+      state = state.copyWith(
+        error: errorMsg,
+        isLoading: showLoading ? false : state.isLoading,
+      );
       completer.completeError(e);
     } catch (e) {
-      state = state.copyWith(error: 'unknown error', isLoading: false);
+      state = state.copyWith(
+        error: 'unknown error',
+        isLoading: showLoading ? false : state.isLoading,
+      );
       completer.completeError(e);
     } finally {
       // Clear the ongoing fetch only if it's still the current one

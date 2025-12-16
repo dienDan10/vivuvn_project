@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../../../../../common/toast/global_toast.dart';
 import '../../../detail/controller/itinerary_detail_controller.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import '../../model/itinerary_item.dart';
@@ -19,13 +20,16 @@ class SlidablePlaceItem extends ConsumerStatefulWidget {
 
 class _SlidablePlaceItemState extends ConsumerState<SlidablePlaceItem> {
   void _deleteItineraryItem() async {
-    await ref
+    final success = await ref
         .read(itineraryScheduleControllerProvider.notifier)
         .deleteItem(widget.item.itineraryItemId);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã xóa ${widget.item.location.name}')),
-      );
+
+    // Không thông báo nếu xóa thành công; chỉ thông báo khi có lỗi
+    if (!success && mounted) {
+      final error =
+          ref.read(itineraryScheduleControllerProvider).error ??
+          'Không thể xóa địa điểm khỏi lịch trình';
+      GlobalToast.showErrorToast(context, message: error);
     }
   }
 
