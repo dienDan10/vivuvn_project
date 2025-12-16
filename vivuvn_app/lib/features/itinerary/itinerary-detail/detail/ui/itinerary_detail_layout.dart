@@ -39,24 +39,30 @@ class _ItineraryDetailLayoutState extends ConsumerState<ItineraryDetailLayout>
     //_registerScrollListener();
     _setupItineraryListener();
     _setupAiTabSwitchListener();
+    _setupOverviewRefreshListener();
   }
 
   void _setupAiTabSwitchListener() {
     // Listen for tab switch requests from AI generation flow.
-    // When controller sets aiTabSwitchProvider to 0, animate to PlaceList tab
-    // and reload itinerary data.
+    // When controller sets aiTabSwitchProvider to 0 or 1, animate to target tab
+    // and optionally reload itinerary data if needed.
     ref.listenManual<int?>(aiTabSwitchProvider, (final previous, final next) {
       if (next != null) {
-        // Animate to requested tab (0 = PlaceList)
+        // Animate to requested tab (0 = Overview, 1 = Schedule, ...)
         _tabController.animateTo(next);
-
-        // Reload itinerary detail to fetch updated data after generation
-        ref
-            .read(itineraryDetailControllerProvider.notifier)
-            .fetchItineraryDetail();
-
         // Clear the request so future requests can be issued
         ref.read(aiTabSwitchProvider.notifier).state = null;
+      }
+    });
+  }
+
+  void _setupOverviewRefreshListener() {
+    _tabController.addListener(() {
+      // Only trigger when tab has settled on index 0 (Overview)
+      if (!_tabController.indexIsChanging && _tabController.index == 0) {
+        ref
+            .read(itineraryDetailControllerProvider.notifier)
+            .fetchItineraryDetail(force: true, showLoading: false);
       }
     });
   }
