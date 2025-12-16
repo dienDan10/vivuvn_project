@@ -10,7 +10,7 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IJsonService _jsonService, IImageService _imageService, IAiClientService _aiService) : ILocationService
+    public class LocationService(IMapper _mapper, IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IImageService _imageService, IAiClientService _aiService) : ILocationService
     {
         public async Task<IEnumerable<SearchLocationDto>> SearchLocationAsync(string? searchQuery,
             int? limit = Constants.DefaultPageSize)
@@ -146,9 +146,6 @@ namespace vivuvn_api.Services.Implementations
 
             await _unitOfWork.SaveChangesAsync();
 
-            // save restaurant to json file
-            await _jsonService.SaveRestaurantsToJsonFile(location.GooglePlaceId ?? "", newRestaurants);
-
             return _mapper.Map<IEnumerable<RestaurantDto>>(newRestaurants);
         }
 
@@ -185,9 +182,6 @@ namespace vivuvn_api.Services.Implementations
             location.NearbyHotels = [.. newHotels];
 
             await _unitOfWork.SaveChangesAsync();
-
-            // save hotel to json file
-            await _jsonService.SaveHotelsToJsonFile(location.GooglePlaceId ?? "", newHotels);
 
             return _mapper.Map<IEnumerable<HotelDto>>(newHotels);
         }

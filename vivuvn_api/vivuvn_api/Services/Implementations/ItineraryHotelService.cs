@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Helpers;
@@ -8,13 +9,42 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryHotelService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper, IJsonService _jsonService) : IitineraryHotelService
+    public class ItineraryHotelService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper) : IitineraryHotelService
     {
         public async Task<IEnumerable<ItineraryHotelDto>> GetHotelsInItineraryAsync(int itineraryId)
         {
-            var itineraryHotels = await _unitOfWork.ItineraryHotels.GetAllAsync(ir => ir.ItineraryId == itineraryId, includeProperties: "Hotel,BudgetItem,Hotel.Photos");
-            var itineraryHotelDtos = _mapper.Map<IEnumerable<ItineraryHotelDto>>(itineraryHotels);
-            return itineraryHotelDtos;
+            return await _unitOfWork.ItineraryHotels
+                .GetQueryable()
+                .Where(ih => ih.ItineraryId == itineraryId)
+                .OrderBy(ih => ih.CheckIn)
+                .Select(ih => new ItineraryHotelDto
+                {
+                    Id = ih.Id,
+                    HotelId = ih.HotelId,
+                    Cost = ih.BudgetItem != null ? ih.BudgetItem.Cost : 0,
+                    CheckIn = ih.CheckIn ?? default,
+                    CheckOut = ih.CheckOut ?? default,
+                    Notes = ih.Notes,
+                    Hotel = ih.Hotel != null ? new HotelDto
+                    {
+                        Id = ih.Hotel.Id,
+                        GooglePlaceId = ih.Hotel.GooglePlaceId,
+                        Name = ih.Hotel.Name,
+                        Address = ih.Hotel.Address,
+                        Rating = ih.Hotel.Rating,
+                        UserRatingCount = ih.Hotel.UserRatingCount,
+                        Latitude = ih.Hotel.Latitude,
+                        Longitude = ih.Hotel.Longitude,
+                        GoogleMapsUri = ih.Hotel.GoogleMapsUri,
+                        PriceLevel = ih.Hotel.PriceLevel,
+                        DeleteFlag = ih.Hotel.DeleteFlag,
+                        Photos = ih.Hotel.Photos
+                            .Select(p => p.PhotoUrl)
+                            .ToList()
+                    } : null
+                })
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task AddHotelToItineraryFromSuggestionAsync(int itineraryId, AddHotelToItineraryFromSuggestionDto request)
@@ -73,9 +103,6 @@ namespace vivuvn_api.Services.Implementations
             };
             await _unitOfWork.ItineraryHotels.AddAsync(itineraryHotel);
             await _unitOfWork.SaveChangesAsync();
-
-            // save hotel data to json file for caching
-            await _jsonService.SaveSingleHotelToJsonFile(newHotel);
         }
 
         public async Task UpdateNotesAsync(int itineraryId, int itineraryHotelId, string notes)

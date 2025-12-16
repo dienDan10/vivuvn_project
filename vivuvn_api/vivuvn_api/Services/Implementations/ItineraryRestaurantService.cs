@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using vivuvn_api.DTOs.Request;
 using vivuvn_api.DTOs.ValueObjects;
 using vivuvn_api.Helpers;
@@ -8,13 +9,43 @@ using vivuvn_api.Services.Interfaces;
 
 namespace vivuvn_api.Services.Implementations
 {
-    public class ItineraryRestaurantService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper, IJsonService _jsonService) : IitineraryRestaurantService
+    public class ItineraryRestaurantService(IUnitOfWork _unitOfWork, IGoogleMapPlaceService _placeService, IMapper _mapper) : IitineraryRestaurantService
     {
         public async Task<IEnumerable<ItineraryRestaurantDto>> GetRestaurantsInItineraryAsync(int itineraryId)
         {
-            var itineraryRestaurants = await _unitOfWork.ItineraryRestaurants.GetAllAsync(ir => ir.ItineraryId == itineraryId, includeProperties: "Restaurant,BudgetItem,Restaurant.Photos");
-            var itineraryRestaurantDtos = _mapper.Map<IEnumerable<ItineraryRestaurantDto>>(itineraryRestaurants);
-            return itineraryRestaurantDtos;
+            return await _unitOfWork.ItineraryRestaurants
+                 .GetQueryable()
+                 .Where(ir => ir.ItineraryId == itineraryId)
+                 .OrderBy(ir => ir.Date)
+                     .ThenBy(ir => ir.Time)
+                 .Select(ir => new ItineraryRestaurantDto
+                 {
+                     Id = ir.Id,
+                     RestaurantId = ir.RestaurantId,
+                     Cost = ir.BudgetItem != null ? ir.BudgetItem.Cost : 0,
+                     Date = ir.Date ?? default,
+                     Time = ir.Time ?? default,
+                     Notes = ir.Notes,
+                     Restaurant = ir.Restaurant != null ? new RestaurantDto
+                     {
+                         Id = ir.Restaurant.Id,
+                         GooglePlaceId = ir.Restaurant.GooglePlaceId,
+                         Name = ir.Restaurant.Name,
+                         Address = ir.Restaurant.Address,
+                         Rating = ir.Restaurant.Rating,
+                         UserRatingCount = ir.Restaurant.UserRatingCount,
+                         Latitude = ir.Restaurant.Latitude,
+                         Longitude = ir.Restaurant.Longitude,
+                         GoogleMapsUri = ir.Restaurant.GoogleMapsUri,
+                         PriceLevel = ir.Restaurant.PriceLevel,
+                         DeleteFlag = ir.Restaurant.DeleteFlag,
+                         Photos = ir.Restaurant.Photos
+                             .Select(p => p.PhotoUrl)
+                             .ToList()
+                     } : null
+                 })
+                 .AsNoTracking()
+                 .ToListAsync();
         }
 
         public async Task AddRestaurantToItineraryFromSuggestionAsync(int itineraryId, AddRestaurantToItineraryFromSuggestionDto request)
@@ -73,9 +104,6 @@ namespace vivuvn_api.Services.Implementations
             };
             await _unitOfWork.ItineraryRestaurants.AddAsync(itineraryRestaurant);
             await _unitOfWork.SaveChangesAsync();
-
-            // save restaurant data to json file for caching
-            await _jsonService.SaveSingleRestaurantToJsonFile(newRestaurant);
         }
 
         public async Task UpdateNotesAsync(int itineraryId, int itineraryRestaurantId, string notes)
