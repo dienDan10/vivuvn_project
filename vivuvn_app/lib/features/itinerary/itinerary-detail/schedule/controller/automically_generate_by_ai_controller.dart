@@ -256,8 +256,6 @@ class AutomaticallyGenerateByAiController
       await submitGenerate();
 
       if (state.isGenerated) {
-        // Request UI to switch to overview tab (index 0)
-        ref.read(aiTabSwitchProvider.notifier).state = 0;
         return ValidateAndSubmitResult.submittedSuccess(
           state.warnings,
           state.itineraryId,
