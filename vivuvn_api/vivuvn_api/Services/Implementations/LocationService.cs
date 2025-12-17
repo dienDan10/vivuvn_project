@@ -235,11 +235,13 @@ namespace vivuvn_api.Services.Implementations
 
             var province = await _unitOfWork.Provinces.GetOneAsync(p => p.Id == requestDto.ProvinceId);
 
-            var placeData = string.IsNullOrEmpty(location.Address) ? await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name) : await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name, location.Address);
+            var placeData = string.IsNullOrEmpty(location.Address)
+                ? await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name)
+                : await _placeService.FetchPlaceDetailsByTextAsync(location.Name, province.Name, location.Address);
 
             var addressSplited = placeData.FormattedAddress.Split(',');
 
-            var provinceNameFromPlace = addressSplited[addressSplited.Length - 2];
+            var provinceNameFromPlace = addressSplited[addressSplited.Length - 2].Trim();
 
             if (provinceNameFromPlace != province.Name)
                 throw new BadHttpRequestException("Địa điểm không thuộc tỉnh/thành phố đã chọn.");
@@ -316,7 +318,7 @@ namespace vivuvn_api.Services.Implementations
 
             var addressSplited = placeData.FormattedAddress.Split(',');
 
-            var provinceNameFromPlace = addressSplited[addressSplited.Length - 2];
+            var provinceNameFromPlace = addressSplited[addressSplited.Length - 2].Trim();
 
             if (provinceNameFromPlace != province.Name)
                 throw new BadHttpRequestException("Địa điểm không thuộc tỉnh/thành phố đã chọn.");
