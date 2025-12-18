@@ -6,9 +6,10 @@ import '../service/public_itinerary_service.dart';
 import '../state/public_itinerary_state.dart';
 
 final publicItineraryControllerProvider =
-    StateNotifierProvider.autoDispose<PublicItineraryController, PublicItineraryState>(
-  (final ref) => PublicItineraryController(ref),
-);
+    StateNotifierProvider.autoDispose<
+      PublicItineraryController,
+      PublicItineraryState
+    >((final ref) => PublicItineraryController(ref));
 
 class PublicItineraryController extends StateNotifier<PublicItineraryState> {
   final Ref _ref;
@@ -54,11 +55,11 @@ class PublicItineraryController extends StateNotifier<PublicItineraryState> {
         isLoading: false,
         selectedDayIndex: days.isNotEmpty ? 0 : -1,
       );
+    } on DioException catch (e) {
+      final message = DioExceptionHandler.handleException(e);
+      state = state.copyWith(isLoading: false, error: message);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -107,4 +108,3 @@ class PublicItineraryController extends StateNotifier<PublicItineraryState> {
     }
   }
 }
-
