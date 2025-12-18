@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -24,6 +25,9 @@ class _MapLocationState extends ConsumerState<MapLocation> {
     super.initState();
     // load route
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref
+          .read(mapLocationControllerProvider.notifier)
+          .loadHotelsAndRestaurants();
       await _initializeMap();
     });
   }
@@ -137,11 +141,22 @@ class _MapLocationState extends ConsumerState<MapLocation> {
       },
     );
 
+    final customInfoWindowController = ref
+        .read(mapLocationControllerProvider.notifier)
+        .customInfoWindowController;
+
     return Stack(
       children: [
         GoogleMap(
           onMapCreated: (final GoogleMapController controller) {
             _controller.complete(controller);
+            customInfoWindowController.googleMapController = controller;
+          },
+          onCameraMove: (final position) {
+            customInfoWindowController.onCameraMove!();
+          },
+          onTap: (final position) {
+            customInfoWindowController.hideInfoWindow!();
           },
           initialCameraPosition: ref
               .read(mapLocationControllerProvider.notifier)
@@ -150,6 +165,12 @@ class _MapLocationState extends ConsumerState<MapLocation> {
           polylines: polylines,
           myLocationButtonEnabled: false,
           zoomControlsEnabled: false,
+        ),
+        CustomInfoWindow(
+          controller: customInfoWindowController,
+          height: 210,
+          width: 240,
+          offset: 45,
         ),
       ],
     );

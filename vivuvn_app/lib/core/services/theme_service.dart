@@ -1,22 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ThemeService extends StateNotifier<ThemeMode> {
-  ThemeService() : super(ThemeMode.system);
+import '../data/local/secure_storage/secure_storage_provider.dart';
 
-  void setThemeMode(final ThemeMode mode) {
-    state = mode;
+class ThemeService extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() {
+    return ThemeMode.system;
   }
 
-  void toggleTheme({final bool? isCurrentlyDark}) {
+  Future<void> initializeThemeMode() async {
+    final secureStorage = ref.read(secureStorageProvider);
+    final themeMode = await secureStorage.read(key: 'theme_mode');
+
+    if (themeMode == 'light') {
+      state = ThemeMode.light;
+    } else if (themeMode == 'dark') {
+      state = ThemeMode.dark;
+    } else {
+      state = ThemeMode.light;
+      // save to storage
+      await secureStorage.write(key: 'theme_mode', value: 'light');
+    }
+  }
+
+  void toggleTheme() {
     if (state == ThemeMode.light) {
       state = ThemeMode.dark;
-    } else if (state == ThemeMode.dark) {
-      state = ThemeMode.light;
+      ref.read(secureStorageProvider).write(key: 'theme_mode', value: 'dark');
     } else {
-      // If system mode, toggle based on current brightness
-      // If currently dark, switch to light; otherwise switch to dark
-      state = (isCurrentlyDark ?? false) ? ThemeMode.light : ThemeMode.dark;
+      state = ThemeMode.light;
+      ref.read(secureStorageProvider).write(key: 'theme_mode', value: 'light');
     }
   }
 
@@ -28,7 +42,6 @@ class ThemeService extends StateNotifier<ThemeMode> {
   }
 }
 
-final themeServiceProvider = StateNotifierProvider<ThemeService, ThemeMode>((final ref) {
-  return ThemeService();
-});
-
+final themeServiceProvider = NotifierProvider<ThemeService, ThemeMode>(
+  () => ThemeService(),
+);

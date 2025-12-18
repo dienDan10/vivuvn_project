@@ -11,28 +11,26 @@ class ProfileLayout extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final themeMode = ref.watch(themeServiceProvider);
     final themeService = ref.read(themeServiceProvider.notifier);
 
     return Scaffold(
-      backgroundColor: isDark 
-          ? const Color(0xFF1E1E1E) 
-          : const Color(0xFFF5F5F5),
+      // backgroundColor:
+      //     ? const Color(0xFF1E1E1E)
+      //     : const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
             icon: Icon(
-              themeMode == ThemeMode.dark || 
-              (themeMode == ThemeMode.system && isDark)
-                ? Icons.light_mode_outlined
-                : Icons.dark_mode_outlined,
+              themeMode == ThemeMode.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
             ),
             onPressed: () {
-              themeService.toggleTheme(isCurrentlyDark: isDark);
+              themeService.toggleTheme();
             },
             tooltip: 'Chuyển giao diện',
           ),

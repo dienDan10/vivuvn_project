@@ -8,6 +8,8 @@ class RestaurantItemResponse {
   final double? cost;
   final String? placeUri;
   final String? directionsUri;
+  final double? latitude;
+  final double? longitude;
 
   RestaurantItemResponse({
     required this.id,
@@ -19,6 +21,8 @@ class RestaurantItemResponse {
     this.cost,
     this.placeUri,
     this.directionsUri,
+    this.latitude,
+    this.longitude,
   });
 
   factory RestaurantItemResponse.fromJson(final Map<String, dynamic> json) {
@@ -75,8 +79,11 @@ class RestaurantItemResponse {
       note: (json['notes'] as String?) ?? (nested['notes'] as String?),
       cost: ((json['cost'] as num?) ?? (nested['cost'] as num?))?.toDouble(),
       placeUri: (nested['placeUri'] ?? json['placeUri'])?.toString(),
-      directionsUri:
-          (nested['directionsUri'] ?? json['directionsUri'])?.toString(),
+      directionsUri: (nested['directionsUri'] ?? json['directionsUri'])
+          ?.toString(),
+      latitude: ((nested['latitude'] ?? json['latitude']) as num?)?.toDouble(),
+      longitude: ((nested['longitude'] ?? json['longitude']) as num?)
+          ?.toDouble(),
     );
   }
 }
