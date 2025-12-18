@@ -77,14 +77,6 @@ class TravelRequest(BaseModel):
             raise ValueError("End date must be after start date")
         return v
 
-    @field_validator("start_date")
-    @classmethod
-    def validate_start_date_not_past(cls, v):
-        """Validate that start date is not in the past."""
-        if v < date.today():
-            raise ValueError("Start date cannot be in the past")
-        return v
-
     @field_validator("preferences")
     @classmethod
     def validate_preferences(cls, v):
