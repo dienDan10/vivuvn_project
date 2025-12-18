@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../../common/helper/number_format_helper.dart';
+import '../../../../../../common/toast/global_toast.dart';
 import '../../controller/budget_controller.dart';
 import '../../data/dto/update_budget_request.dart';
 import 'budget_input_field.dart';
@@ -68,6 +69,17 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
     double vndAmount = amount;
     if (_selectedCurrency == 'USD') {
       vndAmount = amount * _fixedExchangeRate;
+    }
+
+    // Validate max 500 million VND
+    if (vndAmount > 500000000) {
+      if (mounted) {
+        GlobalToast.showErrorToast(
+          context,
+          message: 'Ngân sách dự kiến không được vượt quá 500 triệu VNĐ',
+        );
+      }
+      return;
     }
 
     final controller = ref.read(budgetControllerProvider.notifier);

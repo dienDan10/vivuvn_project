@@ -56,8 +56,21 @@ class Validator {
     final sanitized = value.replaceAll(',', '').trim();
     final amount = double.tryParse(sanitized);
     if (amount == null || amount <= 0) return 'Ngân sách phải là một số dương';
-    // Optional: enforce minimum reasonable amount (e.g., 1)
-    if (currency == 'USD' && amount < 1) return 'Ngân sách phải ít nhất 1 USD';
+
+    // Check maximum budget limit (500 million VND)
+    if (currency == 'VND' && amount > 500000000) {
+      return 'Ngân sách không được vượt quá 500 triệu VNĐ';
+    }
+    if (currency == 'USD') {
+      // Convert USD to VND (1 USD = 24000 VND) and check limit
+      final vndAmount = amount * 24000;
+      if (vndAmount > 500000000) {
+        return 'Ngân sách không được vượt quá 500 triệu VNĐ (~${(500000000 / 24000).toStringAsFixed(0)} USD)';
+      }
+      if (amount < 1) return 'Ngân sách phải ít nhất 1 USD';
+    }
+
+    // Optional: enforce minimum reasonable amount
     if (currency == 'VND' && amount < 1000) {
       return 'Ngân sách phải ít nhất 1,000 VND';
     }
