@@ -4,8 +4,9 @@ import '../../../../../../common/validator/validator.dart';
 
 class FieldName extends StatelessWidget {
   final TextEditingController controller;
+  final bool enabled;
 
-  const FieldName({super.key, required this.controller});
+  const FieldName({super.key, required this.controller, this.enabled = true});
 
   @override
   Widget build(final BuildContext context) {
@@ -15,25 +16,22 @@ class FieldName extends StatelessWidget {
         FocusScope.of(context).unfocus();
       },
       controller: controller,
+      enabled: enabled,
       autofocus: true,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.shopping_cart_outlined),
         labelText: 'Tên chi phí',
         border: const OutlineInputBorder(),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: theme.colorScheme.outline,
-            width: 0.8,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.outline, width: 0.8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: theme.colorScheme.primary,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 12,
+        ),
       ),
       validator: (final value) {
         // Check empty

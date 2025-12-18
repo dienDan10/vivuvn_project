@@ -65,7 +65,7 @@ class BudgetItemTile extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          onTap: isOwner ? onTap : null,
+          onTap: onTap,
           contentPadding: const EdgeInsets.only(left: 0, right: 8),
           leading: BudgetItemAvatar(item: item),
           title: BudgetItemTitle(item: item),
@@ -76,5 +76,4 @@ class BudgetItemTile extends ConsumerWidget {
       ],
     );
   }
-
 }

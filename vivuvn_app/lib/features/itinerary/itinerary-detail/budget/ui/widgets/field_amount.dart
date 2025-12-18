@@ -8,11 +8,13 @@ import '../../utils/budget_constants.dart';
 class FieldAmount extends StatefulWidget {
   final TextEditingController controller;
   final Function(bool isUSD) onCurrencyChanged;
+  final bool enabled;
 
   const FieldAmount({
     super.key,
     required this.controller,
     required this.onCurrencyChanged,
+    this.enabled = true,
   });
 
   @override
@@ -51,6 +53,7 @@ class _FieldAmountState extends State<FieldAmount> {
             FocusScope.of(context).unfocus();
           },
           controller: widget.controller,
+          enabled: widget.enabled,
           keyboardType: TextInputType.number,
           inputFormatters: [ThousandsSeparatorInputFormatter()],
           decoration: InputDecoration(
@@ -69,19 +72,26 @@ class _FieldAmountState extends State<FieldAmount> {
                 width: 1.5,
               ),
             ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 12,
+            ),
             suffixIcon: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: InkWell(
-                onTap: () {
-                  // Dismiss keyboard before changing currency
-                  FocusScope.of(context).unfocus();
-                  setState(() {
-                    isUSD = !isUSD;
-                  });
-                  widget.onCurrencyChanged(isUSD); // Use new value after toggle
-                },
-            borderRadius: BorderRadius.circular(8),
+                onTap: !widget.enabled
+                    ? null
+                    : () {
+                        // Dismiss keyboard before changing currency
+                        FocusScope.of(context).unfocus();
+                        setState(() {
+                          isUSD = !isUSD;
+                        });
+                        widget.onCurrencyChanged(
+                          isUSD,
+                        ); // Use new value after toggle
+                      },
+                borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -102,7 +112,8 @@ class _FieldAmountState extends State<FieldAmount> {
                       Icon(
                         Icons.swap_horiz,
                         size: 16,
-                        color: theme.iconTheme.color ??
+                        color:
+                            theme.iconTheme.color ??
                             theme.colorScheme.onSurfaceVariant,
                       ),
                     ],
@@ -123,8 +134,9 @@ class _FieldAmountState extends State<FieldAmount> {
                   'Tỷ giá: 1 USD = ${_formatNumber(BudgetConstants.exchangeRate)} đ',
                   style: TextStyle(
                     fontSize: 11,
-                    color: theme.textTheme.bodySmall?.color
-                        ?.withValues(alpha: 0.7),
+                    color: theme.textTheme.bodySmall?.color?.withValues(
+                      alpha: 0.7,
+                    ),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -132,8 +144,7 @@ class _FieldAmountState extends State<FieldAmount> {
                 Text(
                   '•',
                   style: TextStyle(
-                    color:
-                        theme.colorScheme.outline.withValues(alpha: 0.8),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.8),
                     fontSize: 11,
                   ),
                 ),

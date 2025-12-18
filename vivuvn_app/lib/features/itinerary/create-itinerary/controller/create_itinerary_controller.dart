@@ -76,7 +76,9 @@ class CreateItineraryController
       throw ValidationException('Bạn cần chọn điểm đến.');
     }
     if (state.startProvince!.id == state.destinationProvince!.id) {
-      throw ValidationException('Điểm bắt đầu và điểm đến không được trùng nhau.');
+      throw ValidationException(
+        'Điểm bắt đầu và điểm đến không được trùng nhau.',
+      );
     }
     if (state.startDate == null || state.endDate == null) {
       throw ValidationException(
@@ -99,13 +101,17 @@ class CreateItineraryController
     if (start.isBefore(todayDate) || end.isBefore(todayDate)) {
       throw ValidationException('Không thể tạo lịch trình trong quá khứ.');
     }
-    // Range within 7 days from start (inclusive): end <= start + 7
-    final maxEndFromStart = start.add(const Duration(days: 7));
+    // Range within 10 days from start (inclusive): end <= start + 10
+    final maxEndFromStart = start.add(const Duration(days: 10));
     if (end.isAfter(maxEndFromStart)) {
-      throw ValidationException('Ngày kết thúc phải trong vòng 7 ngày tính từ ngày bắt đầu.');
+      throw ValidationException(
+        'Ngày kết thúc phải trong vòng 10 ngày tính từ ngày bắt đầu.',
+      );
     }
     if (end.isBefore(start)) {
-      throw ValidationException('Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.');
+      throw ValidationException(
+        'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+      );
     }
   }
 }

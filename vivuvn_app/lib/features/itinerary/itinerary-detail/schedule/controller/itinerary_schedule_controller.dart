@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../common/validator/validation_exception.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../../home/controller/home_controller.dart';
 import '../../detail/controller/itinerary_detail_controller.dart';
@@ -77,14 +78,19 @@ class ItineraryScheduleController
   // === Thêm item vào ngày ===
   Future<bool> addItemToDay(final int dayId, final int locationId) async {
     if (itineraryId == null) return false;
+
+    state = state.copyWith(isAddingLocation: true);
+
     try {
       await ref
           .read(itineraryScheduleServiceProvider)
           .addItemToDay(itineraryId!, dayId, locationId);
       await fetchItemsByDay(dayId);
+
+      state = state.copyWith(isAddingLocation: false);
       return true;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(isAddingLocation: false, error: e.toString());
       return false;
     }
   }
@@ -131,13 +137,17 @@ class ItineraryScheduleController
     final selectedDayId = state.selectedDayId;
 
     if (selectedDayId == null) {
-      return AddLocationResult.failure('Vui lòng chọn ngày trước khi thêm địa điểm.');
+      return AddLocationResult.failure(
+        'Vui lòng chọn ngày trước khi thêm địa điểm.',
+      );
     }
 
     final success = await addItemToDay(selectedDayId, locationId);
 
     if (success) {
-      return AddLocationResult.success('Đã thêm "$locationName" vào lịch trình.');
+      return AddLocationResult.success(
+        'Đã thêm "$locationName" vào lịch trình.',
+      );
     }
 
     return AddLocationResult.failure('Không thể thêm địa điểm vào lịch trình.');
@@ -199,6 +209,24 @@ class ItineraryScheduleController
 
   Future<void> updateDates(final DateTime start, final DateTime end) async {
     if (itineraryId == null) return;
+
+    // Validate date range
+    final startDate = DateTime(start.year, start.month, start.day);
+    final endDate = DateTime(end.year, end.month, end.day);
+
+    if (endDate.isBefore(startDate)) {
+      throw ValidationException(
+        'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+      );
+    }
+
+    final maxEndFromStart = startDate.add(const Duration(days: 10));
+    if (endDate.isAfter(maxEndFromStart)) {
+      throw ValidationException(
+        'Ngày kết thúc phải trong vòng 10 ngày tính từ ngày bắt đầu.',
+      );
+    }
+
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -212,13 +240,15 @@ class ItineraryScheduleController
 
       // load lại days
       await fetchDays();
-      
+
       // Refresh itinerary detail to update dates in detail screen
-      ref.read(itineraryDetailControllerProvider.notifier).fetchItineraryDetail();
-      
+      ref
+          .read(itineraryDetailControllerProvider.notifier)
+          .fetchItineraryDetail();
+
       // Refresh home data to update "recent itineraries" section
       ref.read(homeControllerProvider.notifier).refreshHomeDataSilently();
-      
+
       state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
@@ -230,7 +260,8 @@ class ItineraryScheduleController
     final bool forceRefresh = false,
   }) async {
     final itineraryState = ref.read(itineraryDetailControllerProvider);
-    final int? targetProvinceId = provinceId ??
+    final int? targetProvinceId =
+        provinceId ??
         itineraryState.itinerary?.destinationProvinceId ??
         itineraryState.itinerary?.startProvinceId;
 

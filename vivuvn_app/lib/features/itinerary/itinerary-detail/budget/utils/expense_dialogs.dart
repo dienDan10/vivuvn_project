@@ -12,18 +12,22 @@ class ExpenseDialogs {
   const ExpenseDialogs._();
 
   /// Show edit expense form in modal bottom sheet
-  static void showEditForm(final BuildContext context, final BudgetItem item) {
+  static void showEditForm(
+    final BuildContext context,
+    final BudgetItem item, {
+    required final bool isOwner,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       enableDrag: false,
       constraints: const BoxConstraints.expand(),
       backgroundColor: Theme.of(context).colorScheme.surface,
-      barrierColor:
-          Theme.of(context).colorScheme.scrim.withValues(alpha: 0.4),
+      barrierColor: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.4),
       builder: (final context) => AddExpenseLayout(
-        title: 'Chỉnh sửa chi phí',
+        title: isOwner ? 'Chỉnh sửa chi phí' : 'Chi tiết chi phí',
         initialItem: item,
+        isReadOnly: !isOwner,
       ),
     );
   }

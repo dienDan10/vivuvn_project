@@ -10,9 +10,11 @@ class BillAttachmentUploadTile extends ConsumerWidget {
   const BillAttachmentUploadTile({
     super.key,
     required this.sizes,
+    this.enabled = true,
   });
 
   final BillAttachmentSizes sizes;
+  final bool enabled;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -25,7 +27,7 @@ class BillAttachmentUploadTile extends ConsumerWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(sizes.cardRadius),
-        onTap: billState.isPicking
+        onTap: (!enabled || billState.isPicking)
             ? null
             : () => controller.pickBillsFromGallery(context),
         child: Padding(
@@ -33,12 +35,12 @@ class BillAttachmentUploadTile extends ConsumerWidget {
           child: Row(
             children: [
               Container(
-              width: sizes.iconBox,
-              height: sizes.iconBox,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(sizes.iconRadius),
-              ),
+                width: sizes.iconBox,
+                height: sizes.iconBox,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(sizes.iconRadius),
+                ),
                 child: Icon(
                   Icons.receipt_long_outlined,
                   color: theme.colorScheme.primary,
@@ -76,5 +78,3 @@ class BillAttachmentUploadTile extends ConsumerWidget {
     );
   }
 }
-
-

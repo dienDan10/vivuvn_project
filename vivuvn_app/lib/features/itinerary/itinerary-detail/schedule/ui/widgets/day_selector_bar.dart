@@ -2,6 +2,7 @@ import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../common/toast/global_toast.dart';
 import '../../controller/itinerary_schedule_controller.dart';
 import 'day_selector_button.dart';
 
@@ -65,9 +66,15 @@ class DaySelectorBar extends ConsumerWidget {
 
         if (start != null && end != null) {
           // Gọi controller để update startDate / endDate
-          ref
-              .read(itineraryScheduleControllerProvider.notifier)
-              .updateDates(start, end);
+          try {
+            await ref
+                .read(itineraryScheduleControllerProvider.notifier)
+                .updateDates(start, end);
+          } catch (e) {
+            if (context.mounted) {
+              GlobalToast.showErrorToast(context, message: e.toString());
+            }
+          }
         }
       }
     }

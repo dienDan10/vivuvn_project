@@ -6,7 +6,9 @@ import '../../../member/data/model/member.dart';
 import '../../state/expense_form_notifier.dart';
 
 class FieldPayerPicker extends ConsumerStatefulWidget {
-  const FieldPayerPicker({super.key});
+  final bool enabled;
+
+  const FieldPayerPicker({super.key, this.enabled = true});
 
   @override
   ConsumerState<FieldPayerPicker> createState() => _FieldPayerPickerState();
@@ -28,12 +30,8 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      backgroundColor:
-          Theme.of(context).colorScheme.surfaceContainerHighest,
-      barrierColor: Theme.of(context)
-          .colorScheme
-          .scrim
-          .withValues(alpha: 0.4),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      barrierColor: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.4),
       builder: (final ctx) {
         final theme = Theme.of(ctx);
         final state = ref.watch(memberControllerProvider);
@@ -53,7 +51,10 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
                   margin: const EdgeInsets.only(bottom: 8),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Text(
@@ -81,11 +82,15 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
                       children: [
                         Text(
                           state.loadingMembersError!,
-                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         FilledButton.tonal(
-                          onPressed: () => ref.read(memberControllerProvider.notifier).loadMembers(),
+                          onPressed: () => ref
+                              .read(memberControllerProvider.notifier)
+                              .loadMembers(),
                           child: const Text('Thử lại'),
                         ),
                       ],
@@ -96,34 +101,45 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: state.members.length + 1,
-                      separatorBuilder: (final _, final __) => const Divider(height: 1),
+                      separatorBuilder: (final _, final __) =>
+                          const Divider(height: 1),
                       itemBuilder: (final context, final index) {
                         final formState = ref.watch(expenseFormProvider);
                         if (index == 0) {
-                          final bool isSelectedNone = formState.payerMemberId == null;
+                          final bool isSelectedNone =
+                              formState.payerMemberId == null;
                           return ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainerHighest,
                               child: const Icon(Icons.person_off),
                             ),
                             title: const Text('Không ai trả'),
                             trailing: isSelectedNone
-                                ? Icon(Icons.check, color: theme.colorScheme.primary)
+                                ? Icon(
+                                    Icons.check,
+                                    color: theme.colorScheme.primary,
+                                  )
                                 : null,
                             selected: isSelectedNone,
                             onTap: () {
-                              ref.read(expenseFormProvider.notifier).setPayer(null, null);
+                              ref
+                                  .read(expenseFormProvider.notifier)
+                                  .setPayer(null, null);
                               Navigator.of(context).pop();
                             },
                           );
                         }
 
                         final m = state.members[index - 1];
-                        final isSelected = formState.payerMemberId == m.memberId;
+                        final isSelected =
+                            formState.payerMemberId == m.memberId;
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                            backgroundImage: (m.photo != null && m.photo!.isNotEmpty)
+                            backgroundColor:
+                                theme.colorScheme.surfaceContainerHighest,
+                            backgroundImage:
+                                (m.photo != null && m.photo!.isNotEmpty)
                                 ? NetworkImage(m.photo!)
                                 : null,
                             child: (m.photo == null || m.photo!.isEmpty)
@@ -132,10 +148,14 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
                           ),
                           title: Text(m.username),
                           trailing: isSelected
-                              ? Icon(Icons.check, color: theme.colorScheme.primary)
+                              ? Icon(
+                                  Icons.check,
+                                  color: theme.colorScheme.primary,
+                                )
                               : null,
                           selected: isSelected,
-                          onTap: () => Navigator.of(context).pop<int>(m.memberId),
+                          onTap: () =>
+                              Navigator.of(context).pop<int>(m.memberId),
                         );
                       },
                     ),
@@ -148,13 +168,19 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
     );
 
     if (selectedId != null) {
-      final chosen = ref.read(memberControllerProvider).members.firstWhere(
-            (final m) => m.memberId == selectedId,
-            orElse: () => null as dynamic,
-          ) as Member?;
+      final chosen =
+          ref
+                  .read(memberControllerProvider)
+                  .members
+                  .firstWhere(
+                    (final m) => m.memberId == selectedId,
+                    orElse: () => null as dynamic,
+                  )
+              as Member?;
       formNotifier.setPayer(selectedId, chosen?.username);
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -183,7 +209,9 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
     }
 
     return InkWell(
-      onTap: membersState.isLoadingMembers ? null : () => _openPayerBottomSheet(context),
+      onTap: (!widget.enabled || membersState.isLoadingMembers)
+          ? null
+          : () => _openPayerBottomSheet(context),
       borderRadius: BorderRadius.circular(4),
       child: InputDecorator(
         decoration: const InputDecoration(
@@ -201,8 +229,11 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
                     children: [
                       CircleAvatar(
                         radius: 12,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        backgroundImage: (member.photo != null && member.photo!.isNotEmpty)
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        backgroundImage:
+                            (member.photo != null && member.photo!.isNotEmpty)
                             ? NetworkImage(member.photo!)
                             : null,
                         child: (member.photo == null || member.photo!.isEmpty)
@@ -218,12 +249,17 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
               child: Text(
                 formState.payerMemberId == null
                     ? 'Không ai trả'
-                    : (selectedMember?.username ?? formState.payerMemberName ?? 'Nhấn để chọn'),
+                    : (selectedMember?.username ??
+                          formState.payerMemberName ??
+                          'Nhấn để chọn'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: (selectedMember == null && formState.payerMemberId != null && formState.payerMemberName == null)
-                          ? Theme.of(context).hintColor
-                          : null,
-                    ),
+                  color:
+                      (selectedMember == null &&
+                          formState.payerMemberId != null &&
+                          formState.payerMemberName == null)
+                      ? Theme.of(context).hintColor
+                      : null,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -234,5 +270,3 @@ class _FieldPayerPickerState extends ConsumerState<FieldPayerPicker> {
     );
   }
 }
-
-

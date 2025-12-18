@@ -182,6 +182,8 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
   ///
   /// Returns: true nếu thành công, false nếu có lỗi
   Future<bool> updateBudget(final UpdateBudgetRequest request) async {
+    state = state.copyWith(isLoading: true);
+
     try {
       _validateEstimatedBudget(request.estimatedBudget);
 
@@ -190,16 +192,17 @@ class BudgetController extends AutoDisposeNotifier<BudgetState> {
 
       await loadBudget(state.itineraryId);
 
+      state = state.copyWith(isLoading: false);
       return true;
     } on ValidationException catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     } on DioException catch (e) {
       final errorMsg = DioExceptionHandler.handleException(e);
-      state = state.copyWith(error: errorMsg);
+      state = state.copyWith(isLoading: false, error: errorMsg);
       return false;
     } catch (e) {
-      state = state.copyWith(error: 'Unknown error');
+      state = state.copyWith(isLoading: false, error: 'Unknown error');
       return false;
     }
   }
