@@ -8,7 +8,9 @@ import 'bill_attachment/bill_attachment_upload_tile.dart';
 
 /// Hiển thị khung upload ảnh hóa đơn + grid preview.
 class FieldBillAttachment extends ConsumerWidget {
-  const FieldBillAttachment({super.key});
+  final bool enabled;
+
+  const FieldBillAttachment({super.key, this.enabled = true});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -16,7 +18,7 @@ class FieldBillAttachment extends ConsumerWidget {
 
     return BillAttachmentCard(
       sizes: sizes,
-      leading: BillAttachmentUploadTile(sizes: sizes),
+      leading: BillAttachmentUploadTile(sizes: sizes, enabled: enabled),
       preview: BillAttachmentPreviewBox(sizes: sizes),
     );
   }

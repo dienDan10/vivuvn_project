@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 
 class FieldDetails extends StatelessWidget {
   final TextEditingController controller;
+  final bool enabled;
 
-  const FieldDetails({super.key, required this.controller});
+  const FieldDetails({
+    super.key,
+    required this.controller,
+    this.enabled = true,
+  });
 
   @override
   Widget build(final BuildContext context) {
@@ -12,6 +17,7 @@ class FieldDetails extends StatelessWidget {
         FocusScope.of(context).unfocus();
       },
       controller: controller,
+      enabled: enabled,
       maxLines: 3,
       decoration: const InputDecoration(
         labelText: 'Ghi chú',
@@ -27,5 +33,3 @@ class FieldDetails extends StatelessWidget {
     );
   }
 }
-
-

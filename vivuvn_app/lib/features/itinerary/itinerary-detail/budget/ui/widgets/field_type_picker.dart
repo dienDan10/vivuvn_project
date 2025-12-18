@@ -8,12 +8,14 @@ class FieldTypePicker extends StatelessWidget {
   final String selectedType;
   final List<BudgetType> budgetTypes;
   final void Function(int? typeId, String typeName) onSelected;
+  final bool enabled;
 
   const FieldTypePicker({
     super.key,
     required this.selectedType,
     required this.budgetTypes,
     required this.onSelected,
+    this.enabled = true,
   });
 
   Future<void> _pickType(final BuildContext context) async {
@@ -30,12 +32,8 @@ class FieldTypePicker extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor:
-          Theme.of(context).colorScheme.surfaceContainerHighest,
-      barrierColor: Theme.of(context)
-          .colorScheme
-          .scrim
-          .withValues(alpha: 0.4),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      barrierColor: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.4),
       builder: (final modalContext) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -138,7 +136,7 @@ class FieldTypePicker extends StatelessWidget {
     final theme = Theme.of(context);
 
     return InkWell(
-      onTap: () => _pickType(context),
+      onTap: enabled ? () => _pickType(context) : null,
       borderRadius: BorderRadius.circular(8),
       child: InputDecorator(
         decoration: InputDecoration(
@@ -156,8 +154,10 @@ class FieldTypePicker extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 12,
+          ),
         ),
         child: Row(
           children: [
@@ -175,7 +175,9 @@ class FieldTypePicker extends StatelessWidget {
                 displayText,
                 style: TextStyle(
                   fontSize: 16,
-                  color: isSelected ? theme.colorScheme.onSurface : theme.hintColor,
+                  color: isSelected
+                      ? theme.colorScheme.onSurface
+                      : theme.hintColor,
                 ),
               ),
             ),

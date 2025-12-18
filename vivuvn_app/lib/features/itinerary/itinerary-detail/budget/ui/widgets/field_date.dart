@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class FieldDate extends StatelessWidget {
   final DateTime? selectedDate;
   final ValueChanged<DateTime?> onSelected;
+  final bool enabled;
 
   const FieldDate({
     super.key,
     required this.selectedDate,
     required this.onSelected,
+    this.enabled = true,
   });
 
   Future<void> _pickDate(final BuildContext context) async {
@@ -24,7 +26,7 @@ class FieldDate extends StatelessWidget {
   Widget build(final BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      onTap: () => _pickDate(context),
+      onTap: enabled ? () => _pickDate(context) : null,
       borderRadius: BorderRadius.circular(8),
       child: InputDecorator(
         decoration: InputDecoration(
@@ -34,13 +36,22 @@ class FieldDate extends StatelessWidget {
             borderSide: BorderSide(color: Colors.grey, width: 0.8),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+            borderSide: BorderSide(
+              color: theme.colorScheme.primary,
+              width: 1.5,
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 12,
+          ),
         ),
         child: Row(
           children: [
-            Icon(Icons.calendar_month_outlined, color: theme.colorScheme.outline),
+            Icon(
+              Icons.calendar_month_outlined,
+              color: theme.colorScheme.outline,
+            ),
             const SizedBox(width: 12),
             Text(
               selectedDate == null

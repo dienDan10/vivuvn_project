@@ -10,7 +10,9 @@ import 'field_bill_attachment.dart';
 /// - Dùng `ExpenseBillController` để quản lý danh sách ảnh.
 /// - Chỉ xử lý chọn ảnh và hiển thị preview, chưa gửi API.
 class BillAttachmentSection extends ConsumerWidget {
-  const BillAttachmentSection({super.key});
+  final bool enabled;
+
+  const BillAttachmentSection({super.key, this.enabled = true});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -19,19 +21,17 @@ class BillAttachmentSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const FieldBillAttachment(),
+        FieldBillAttachment(enabled: enabled),
         if (billState.error != null) ...[
           const SizedBox(height: 8),
           Text(
             billState.error!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
+              color: Theme.of(context).colorScheme.error,
+            ),
           ),
         ],
       ],
     );
   }
 }
-
-

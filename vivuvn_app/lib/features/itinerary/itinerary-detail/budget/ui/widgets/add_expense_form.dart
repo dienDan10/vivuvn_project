@@ -22,11 +22,13 @@ import 'field_type_picker.dart';
 class AddExpenseForm extends ConsumerStatefulWidget {
   final Function(VoidCallback)? onRegisterSaveCallback;
   final BudgetItem? initialItem; // For edit mode
+  final bool isReadOnly;
 
   const AddExpenseForm({
     super.key,
     this.onRegisterSaveCallback,
     this.initialItem,
+    this.isReadOnly = false,
   });
 
   @override
@@ -118,7 +120,8 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
       if (widget.initialItem != null &&
           widget.initialItem!.budgetTypeObj == null) {
         final formState = ref.read(expenseFormProvider);
-        if (formState.selectedTypeId == 0 && formState.selectedType.isNotEmpty) {
+        if (formState.selectedTypeId == 0 &&
+            formState.selectedType.isNotEmpty) {
           final typeId = controller.getBudgetTypeIdByName(
             formState.selectedType,
           );
@@ -151,9 +154,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
         formState.selectedType.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final controller = ref.read(budgetControllerProvider.notifier);
-        final typeId = controller.getBudgetTypeIdByName(
-          formState.selectedType,
-        );
+        final typeId = controller.getBudgetTypeIdByName(formState.selectedType);
         if (typeId != null) {
           ref
               .read(expenseFormProvider.notifier)
@@ -177,15 +178,19 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  FieldName(controller: nameController),
+                  FieldName(
+                    controller: nameController,
+                    enabled: !widget.isReadOnly,
+                  ),
                   SizedBox(height: baseSpacing),
 
                   // Payer picker
-                  const FieldPayerPicker(),
+                  FieldPayerPicker(enabled: !widget.isReadOnly),
                   SizedBox(height: baseSpacing),
 
                   FieldAmount(
                     controller: amountController,
+                    enabled: !widget.isReadOnly,
                     onCurrencyChanged: (final isUSDSelected) {
                       formNotifier.setCurrency(isUSDSelected);
                     },
@@ -201,6 +206,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                           FieldTypePicker(
                             selectedType: formState.selectedType,
                             budgetTypes: types,
+                            enabled: !widget.isReadOnly,
                             onSelected: (final typeId, final typeName) {
                               formNotifier.setType(typeId!, typeName);
                             },
@@ -217,6 +223,7 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                     children: [
                       FieldDate(
                         selectedDate: formState.selectedDate,
+                        enabled: !widget.isReadOnly,
                         onSelected: (final date) {
                           if (date != null) {
                             formNotifier.setDate(date);
@@ -229,11 +236,14 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                   SizedBox(height: mediumSpacing),
 
                   // Optional details field
-                  FieldDetails(controller: detailsController),
+                  FieldDetails(
+                    controller: detailsController,
+                    enabled: !widget.isReadOnly,
+                  ),
                   SizedBox(height: baseSpacing),
 
                   // Phần upload + preview ảnh bill/hóa đơn
-                  const BillAttachmentSection(),
+                  BillAttachmentSection(enabled: !widget.isReadOnly),
                   SizedBox(height: baseSpacing),
                 ],
               ),
@@ -246,13 +256,10 @@ class _AddExpenseFormState extends ConsumerState<AddExpenseForm> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                   child: Container(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .scrim
-                        .withValues(alpha: 0.25),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.25),
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),
               ),

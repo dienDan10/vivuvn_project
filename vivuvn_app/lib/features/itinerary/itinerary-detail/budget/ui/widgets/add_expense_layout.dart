@@ -8,11 +8,13 @@ import 'add_expense_form.dart';
 class AddExpenseLayout extends StatefulWidget {
   final String title;
   final BudgetItem? initialItem;
+  final bool isReadOnly;
 
   const AddExpenseLayout({
     super.key,
     this.title = 'Thêm chi phí',
     this.initialItem,
+    this.isReadOnly = false,
   });
 
   @override
@@ -70,13 +72,16 @@ class _AddExpenseLayoutState extends State<AddExpenseLayout> {
           widget.title,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
-        TextButton(
-          onPressed: _handleSave,
-          child: const Text(
-            'Lưu',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
+        if (!widget.isReadOnly)
+          TextButton(
+            onPressed: _handleSave,
+            child: const Text(
+              'Lưu',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          )
+        else
+          const SizedBox(width: 48),
       ],
     );
   }
@@ -87,6 +92,7 @@ class _AddExpenseLayoutState extends State<AddExpenseLayout> {
       child: AddExpenseForm(
         onRegisterSaveCallback: _registerSaveCallback,
         initialItem: widget.initialItem,
+        isReadOnly: widget.isReadOnly,
       ),
     );
   }

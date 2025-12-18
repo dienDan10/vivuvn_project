@@ -53,15 +53,14 @@ class ExpenseList extends ConsumerWidget {
           final expense = expenses[index];
           return BudgetItemTile(
             item: expense,
-            onTap: isOwner
-                ? () => ExpenseDialogs.showEditForm(context, expense)
-                : null,
+            onTap: () =>
+                ExpenseDialogs.showEditForm(context, expense, isOwner: isOwner),
             onDelete: isOwner
                 ? () => ExpenseDialogs.showDeleteConfirmation(
-                      context,
-                      ref,
-                      expense,
-                    )
+                    context,
+                    ref,
+                    expense,
+                  )
                 : null,
           );
         },
@@ -85,8 +84,7 @@ class _EmptyExpenseState extends StatelessWidget {
           child: Text(
             'Chưa có khoản chi tiêu nào',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.textTheme.bodyMedium?.color
-                  ?.withValues(alpha: 0.7),
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
           ),
         ),
