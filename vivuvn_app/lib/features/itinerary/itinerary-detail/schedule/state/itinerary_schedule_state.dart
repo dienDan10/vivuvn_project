@@ -7,6 +7,7 @@ class ItineraryScheduleState {
   final bool isLoading;
   final bool isLoadingUpdateTransportation;
   final bool isLoadingSuggestedLocations;
+  final bool isAddingLocation;
   final String? error;
   final String? updateTransportationError;
   final String? suggestedLocationsError;
@@ -21,6 +22,7 @@ class ItineraryScheduleState {
     this.isLoading = false,
     this.isLoadingUpdateTransportation = false,
     this.isLoadingSuggestedLocations = false,
+    this.isAddingLocation = false,
     this.error,
     this.updateTransportationError,
     this.suggestedLocationsError,
@@ -36,6 +38,7 @@ class ItineraryScheduleState {
     final bool? isLoading,
     final bool? isLoadingUpdateTransportation,
     final bool? isLoadingSuggestedLocations,
+    final bool? isAddingLocation,
     final String? error,
     final String? updateTransportationError,
     final String? suggestedLocationsError,
@@ -53,6 +56,7 @@ class ItineraryScheduleState {
           isLoadingUpdateTransportation ?? this.isLoadingUpdateTransportation,
       isLoadingSuggestedLocations:
           isLoadingSuggestedLocations ?? this.isLoadingSuggestedLocations,
+      isAddingLocation: isAddingLocation ?? this.isAddingLocation,
       error: error,
       updateTransportationError: updateTransportationError,
       suggestedLocationsError: suggestedLocationsError,

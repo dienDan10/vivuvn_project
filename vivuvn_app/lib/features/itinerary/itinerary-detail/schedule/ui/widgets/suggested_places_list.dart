@@ -28,40 +28,60 @@ class SuggestedPlacesList extends ConsumerWidget {
       ),
     );
 
-    return SizedBox(
-      height: 200,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        itemCount: suggestions.length,
-        separatorBuilder: (_, final __) => const SizedBox(width: 16),
-        itemBuilder: (final context, final index) {
-          final location = suggestions[index];
-          final firstPhoto = _firstPhoto(location);
-
-          return SuggestedPlaceItem(
-            key: ValueKey(location.id),
-            locationId: location.id,
-            title: location.name,
-            imageUrl: firstPhoto,
-            onTap: () async {
-              final controller = ref.read(
-                itineraryScheduleControllerProvider.notifier,
-              );
-
-              final result = await controller.addLocationToSelectedDay(
-                locationId: location.id,
-                locationName: location.name,
-              );
-
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(result.message)));
-            },
-          );
-        },
+    final isAddingLocation = ref.watch(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.isAddingLocation,
       ),
+    );
+
+    return Stack(
+      children: [
+        SizedBox(
+          height: 200,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            itemCount: suggestions.length,
+            separatorBuilder: (_, final __) => const SizedBox(width: 16),
+            itemBuilder: (final context, final index) {
+              final location = suggestions[index];
+              final firstPhoto = _firstPhoto(location);
+
+              return SuggestedPlaceItem(
+                key: ValueKey(location.id),
+                locationId: location.id,
+                title: location.name,
+                imageUrl: firstPhoto,
+                onTap: isAddingLocation
+                    ? null
+                    : () async {
+                        final controller = ref.read(
+                          itineraryScheduleControllerProvider.notifier,
+                        );
+
+                        final result = await controller
+                            .addLocationToSelectedDay(
+                              locationId: location.id,
+                              locationName: location.name,
+                            );
+
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(result.message)));
+                      },
+              );
+            },
+          ),
+        ),
+        if (isAddingLocation)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.5),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+      ],
     );
   }
 

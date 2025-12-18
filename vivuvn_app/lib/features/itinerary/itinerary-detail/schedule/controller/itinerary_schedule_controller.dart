@@ -78,14 +78,19 @@ class ItineraryScheduleController
   // === Thêm item vào ngày ===
   Future<bool> addItemToDay(final int dayId, final int locationId) async {
     if (itineraryId == null) return false;
+
+    state = state.copyWith(isAddingLocation: true);
+
     try {
       await ref
           .read(itineraryScheduleServiceProvider)
           .addItemToDay(itineraryId!, dayId, locationId);
       await fetchItemsByDay(dayId);
+
+      state = state.copyWith(isAddingLocation: false);
       return true;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(isAddingLocation: false, error: e.toString());
       return false;
     }
   }

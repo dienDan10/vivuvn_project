@@ -23,6 +23,7 @@ class SuggestedPlaceItem extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.5;
     final colorScheme = Theme.of(context).colorScheme;
+    final isDisabled = onTap == null;
 
     return GestureDetector(
       onTap: () => {context.push(createLocationDetailRoute(locationId))},
@@ -67,24 +68,27 @@ class SuggestedPlaceItem extends StatelessWidget {
                 right: 8,
                 child: GestureDetector(
                   onTap: onTap,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.shadow.withValues(alpha: 0.15),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.add_circle,
-                      size: 24,
-                      color: colorScheme.primary,
+                  child: Opacity(
+                    opacity: isDisabled ? 0.5 : 1.0,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withValues(alpha: 0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.add_circle,
+                        size: 24,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -99,18 +103,18 @@ class SuggestedPlaceItem extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: Colors.white,
-                        height: 1.3,
-                        shadows: const [
-                          Shadow(
-                            color: Colors.black45,
-                            blurRadius: 4,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
+                    height: 1.3,
+                    shadows: const [
+                      Shadow(
+                        color: Colors.black45,
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
                       ),
+                    ],
+                  ),
                 ),
               ),
             ],
