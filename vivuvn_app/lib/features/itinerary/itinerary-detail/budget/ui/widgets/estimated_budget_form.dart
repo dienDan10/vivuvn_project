@@ -49,7 +49,9 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
 
   double? get _vndEquivalent {
     if (_selectedCurrency != 'USD') return null;
-    final amount = double.tryParse(_amountController.text.replaceAll(',', '').trim());
+    final amount = double.tryParse(
+      _amountController.text.replaceAll(',', '').trim(),
+    );
     if (amount == null) return null;
     return amount * _fixedExchangeRate;
   }
@@ -58,7 +60,9 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
     if (!_formKey.currentState!.validate()) return;
 
     // If empty, treat as 0
-    final amount = double.tryParse(_amountController.text.replaceAll(',', '').trim()) ?? 0.0;
+    final amount =
+        double.tryParse(_amountController.text.replaceAll(',', '').trim()) ??
+        0.0;
 
     // Convert to VND if USD selected
     double vndAmount = amount;
@@ -100,95 +104,120 @@ class _EstimatedBudgetFormState extends ConsumerState<EstimatedBudgetForm> {
   @override
   Widget build(final BuildContext context) {
     final formatter = NumberFormat('#,###', 'vi_VN');
+    final isLoading = ref.watch(
+      budgetControllerProvider.select((final state) => state.isLoading),
+    );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
-              child: Text(
-                'Nhập ngân sách dự kiến',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Currency toggle
-            Row(
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Center(child: Text('VND')),
-                    selected: _selectedCurrency == 'VND',
-                    onSelected: (final selected) {
-                      if (selected) {
-                        setState(() => _selectedCurrency = 'VND');
-                      }
-                    },
+                const Center(
+                  child: Text(
+                    'Nhập ngân sách dự kiến',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Center(child: Text('USD')),
-                    selected: _selectedCurrency == 'USD',
-                    onSelected: (final selected) {
-                      if (selected) {
-                        setState(() => _selectedCurrency = 'USD');
+                const SizedBox(height: 16),
+
+                // Currency toggle
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('VND')),
+                        selected: _selectedCurrency == 'VND',
+                        onSelected: isLoading
+                            ? null
+                            : (final selected) {
+                                if (selected) {
+                                  setState(() => _selectedCurrency = 'VND');
+                                }
+                              },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('USD')),
+                        selected: _selectedCurrency == 'USD',
+                        onSelected: isLoading
+                            ? null
+                            : (final selected) {
+                                if (selected) {
+                                  setState(() => _selectedCurrency = 'USD');
+                                }
+                              },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Amount input
+                BudgetInputField(
+                  controller: _amountController,
+                  focusNode: _focusNode,
+                  onChanged: (_) => setState(() {}),
+                ),
+
+                // USD conversion section - show fixed exchange rate
+                if (_selectedCurrency == 'USD') ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'Tỉ giá cố định: 1 USD = ${NumberFormat('#,###', 'vi_VN').format(_fixedExchangeRate)} VND',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Builder(
+                    builder: (final context) {
+                      final vnd = _vndEquivalent;
+                      if (vnd != null) {
+                        return Text(
+                          'Tương đương: ${formatter.format(vnd.round())} VND',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        );
                       }
+                      return const SizedBox.shrink();
                     },
                   ),
+                ],
+
+                const SizedBox(height: 20),
+                SubmitButton(
+                  text: 'Lưu',
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          _onSubmit();
+                        },
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-
-            // Amount input
-            BudgetInputField(
-              controller: _amountController,
-              focusNode: _focusNode,
-              onChanged: (_) => setState(() {}),
-            ),
-
-            // USD conversion section - show fixed exchange rate
-            if (_selectedCurrency == 'USD') ...[
-              const SizedBox(height: 12),
-              Text(
-                'Tỉ giá cố định: 1 USD = ${NumberFormat('#,###', 'vi_VN').format(_fixedExchangeRate)} VND',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Builder(
-                builder: (final context) {
-                  final vnd = _vndEquivalent;
-                  if (vnd != null) {
-                    return Text(
-                      'Tương đương: ${formatter.format(vnd.round())} VND',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
-
-            const SizedBox(height: 20),
-            SubmitButton(text: 'Lưu', onPressed: _onSubmit),
-          ],
+          ),
         ),
-      ),
+        if (isLoading)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.5),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+      ],
     );
   }
 }
