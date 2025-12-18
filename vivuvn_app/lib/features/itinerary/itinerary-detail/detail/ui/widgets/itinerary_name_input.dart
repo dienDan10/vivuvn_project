@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../common/toast/global_toast.dart';
 import '../../controller/itinerary_detail_controller.dart';
 
 class ItineraryNameInput extends ConsumerStatefulWidget {
@@ -20,7 +21,15 @@ class _ItineraryNameInputState extends ConsumerState<ItineraryNameInput> {
   }
 
   Future<void> _save() async {
-    await ref.read(itineraryDetailControllerProvider.notifier).saveName(context);
+    await ref
+        .read(itineraryDetailControllerProvider.notifier)
+        .saveName(context);
+  }
+
+  double _calculateFontSize(final String text) {
+    if (text.length <= 20) return 26;
+    if (text.length <= 35) return 22;
+    return 18;
   }
 
   @override
@@ -39,6 +48,8 @@ class _ItineraryNameInputState extends ConsumerState<ItineraryNameInput> {
       );
     }
 
+    final fontSize = _calculateFontSize(_controller.text);
+
     return Focus(
       onFocusChange: (final hasFocus) {
         if (!hasFocus) _save();
@@ -46,11 +57,13 @@ class _ItineraryNameInputState extends ConsumerState<ItineraryNameInput> {
       child: TextField(
         controller: _controller,
         autofocus: true,
-        maxLength: 60,
-        style: const TextStyle(
+        maxLength: 50,
+        maxLines: 2,
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 26,
+          fontSize: fontSize,
           fontWeight: FontWeight.bold,
+          height: 1.2,
         ),
         decoration: const InputDecoration(
           counterText: '',
@@ -58,12 +71,21 @@ class _ItineraryNameInputState extends ConsumerState<ItineraryNameInput> {
           fillColor: Colors.transparent,
           border: InputBorder.none,
           isDense: true,
+          contentPadding: EdgeInsets.zero,
         ),
         cursorColor: Colors.white,
         textInputAction: TextInputAction.done,
-        onChanged: (final v) => ref
-            .read(itineraryDetailControllerProvider.notifier)
-            .updateNameDraft(v),
+        onChanged: (final v) {
+          if (v.length >= 50) {
+            GlobalToast.showErrorToast(
+              context,
+              message: 'Tên lịch trình đã đạt giới hạn 50 ký tự',
+            );
+          }
+          ref
+              .read(itineraryDetailControllerProvider.notifier)
+              .updateNameDraft(v);
+        },
         onSubmitted: (_) => _save(),
         onEditingComplete: _save,
         onTapOutside: (final _) {
@@ -74,5 +96,3 @@ class _ItineraryNameInputState extends ConsumerState<ItineraryNameInput> {
     );
   }
 }
-
-

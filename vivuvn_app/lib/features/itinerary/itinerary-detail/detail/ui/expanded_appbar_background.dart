@@ -18,18 +18,18 @@ class ExpandedAppbarBackground extends StatelessWidget {
         ItineraryBackgroundImage(),
         ItineraryAppbarButtons(),
         Positioned(
-          top: appbarExpandedHeight * 0.4,
+          top: appbarExpandedHeight * 0.35,
           left: 20,
           right: 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ItineraryNameEditor(),
-                SizedBox(height: 8),
-                ItineraryDateRange(),
-                ItineraryProvinces(),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ItineraryNameEditor(),
+              SizedBox(height: 6),
+              ItineraryDateRange(),
+              ItineraryProvinces(),
+            ],
+          ),
         ),
       ],
     );
