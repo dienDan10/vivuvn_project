@@ -259,6 +259,7 @@ namespace vivuvn_api.Services.Implementations
             location.PlaceUri = placeData.GoogleMapsUri;
 
             PlaceUpsertRequestDto placeUpsert = _mapper.Map<PlaceUpsertRequestDto>(location);
+            placeUpsert.Province = province.Name;
 
             await _aiService.InsertPlaceAsync(placeUpsert);
             await _unitOfWork.Locations.AddAsync(location);
@@ -331,9 +332,9 @@ namespace vivuvn_api.Services.Implementations
             location.GooglePlaceId = placeData.Id;
             location.Latitude = placeData.Location.Latitude;
             location.Longitude = placeData.Location.Longitude;
-            location.ReviewUri = placeData.GoogleMapsLinks.ReviewsUri;
-            location.Rating = placeData.Rating;
-            location.RatingCount = placeData.UserRatingCount;
+            location.ReviewUri = placeData.GoogleMapsLinks == null ? null : placeData.GoogleMapsLinks.ReviewsUri;
+            location.Rating = placeData.GoogleMapsLinks == null ? null : placeData.Rating;
+            location.RatingCount = placeData.GoogleMapsLinks == null ? null :placeData.UserRatingCount;
             location.PlaceUri = placeData.GoogleMapsUri;
 
             PlaceUpsertRequestDto placeUpsert = _mapper.Map<PlaceUpsertRequestDto>(location);

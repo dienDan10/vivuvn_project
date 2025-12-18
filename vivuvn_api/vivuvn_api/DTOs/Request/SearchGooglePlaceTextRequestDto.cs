@@ -12,5 +12,9 @@ namespace vivuvn_api.DTOs.Request
 
         [JsonPropertyName("maxResultCount")]
         public int MaxResultCount { get; set; } = 20;
-    }
+
+		[JsonPropertyName("languageCode")]
+		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+		public string? LanguageCode { get; set; } = "vi";
+	}
 }
