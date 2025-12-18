@@ -29,10 +29,10 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
     final formState = ref.watch(restaurantsControllerProvider);
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.5,
-      minChildSize: 0.5,
+      initialChildSize: 0.65,
+      minChildSize: 0.65,
       maxChildSize: 0.95,
-      expand: false,
+      expand: true,
       builder: (final context, final scrollController) => Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -48,10 +48,7 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
                 const Expanded(
                   child: Text(
                     'Thêm nhà hàng',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
@@ -120,12 +117,10 @@ class _AddRestaurantModalState extends ConsumerState<AddRestaurantModal> {
 
   Future<void> _selectMealTime(final BuildContext context) async {
     final now = TimeOfDay.now();
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: now,
-    );
+    final picked = await showTimePicker(context: context, initialTime: now);
     if (picked != null) {
-      final timeStr = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
+      final timeStr =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
       ref.read(restaurantsControllerProvider.notifier).setFormMealTime(timeStr);
     }
   }
