@@ -5,48 +5,48 @@ class DioExceptionHandler {
   static String handleException(final DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
-        return 'Connection timeout with API server';
+        return 'Hết thời gian chờ kết nối đến máy chủ API';
       case DioExceptionType.sendTimeout:
-        return 'Send timeout in connection with API server';
+        return 'Hết thời gian chờ gửi dữ liệu đến máy chủ API';
       case DioExceptionType.receiveTimeout:
-        return 'Receive timeout in connection with API server';
+        return 'Hết thời gian chờ nhận dữ liệu từ máy chủ API';
       case DioExceptionType.badResponse:
         return _handleResponse(e.response);
       case DioExceptionType.cancel:
-        return 'Request to API server was cancelled';
+        return 'Yêu cầu đến máy chủ API đã bị hủy';
       case DioExceptionType.connectionError:
-        return 'Connection error with API server';
+        return 'Lỗi kết nối với máy chủ API';
       case DioExceptionType.badCertificate:
-        return 'Bad certificate from API server';
+        return 'Chứng chỉ từ máy chủ API không hợp lệ';
       case DioExceptionType.unknown:
-        return 'Unexpected error occurred';
+        return 'Lỗi không xác định';
     }
   }
 
   static String _handleResponse(final Response? response) {
     if (response == null) {
-      return 'No response from server';
+      return 'Không có phản hồi từ máy chủ';
     }
 
     switch (response.statusCode) {
       case 400:
-        return response.data['detail'] ?? 'Bad request';
+        return response.data['detail'] ?? 'Yêu cầu không hợp lệ';
       case 401:
-        return 'Unauthorized request';
+        return 'Yêu cầu không được phép';
       case 403:
-        return 'Forbidden request';
+        return 'Yêu cầu bị cấm';
       case 404:
-        return 'Request not found';
+        return 'Không tìm thấy yêu cầu';
       case 500:
-        return 'Internal server error';
+        return 'Lỗi máy chủ nội bộ';
       case 502:
         return 'Bad gateway';
       case 503:
-        return 'Service unavailable';
+        return 'Dịch vụ không khả dụng';
       case 504:
-        return 'Gateway timeout';
+        return 'Hết thời gian chờ cổng';
       default:
-        return 'Error ${response.statusCode}: ${response.statusMessage}';
+        return 'Lỗi ${response.statusCode}: ${response.statusMessage}';
     }
   }
 }

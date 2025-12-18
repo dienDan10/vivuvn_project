@@ -20,7 +20,9 @@ final aiTabSwitchProvider = StateProvider<int?>((final ref) => null);
 
 // Provider to store warnings from AI generation response
 // This allows overview tab to access and display warnings
-final aiGenerationWarningsProvider = StateProvider<List<String>>((final ref) => []);
+final aiGenerationWarningsProvider = StateProvider<List<String>>(
+  (final ref) => [],
+);
 
 final automicallyGenerateByAiControllerProvider =
     AutoDisposeNotifierProvider<
@@ -180,7 +182,9 @@ class AutomaticallyGenerateByAiController
 
       final request = GenerateItineraryByAiRequest(
         itineraryId: itineraryId,
-        preferences: state.selectedInterests.map((final e) => e.vNameseName).toList(),
+        preferences: state.selectedInterests
+            .map((final e) => e.vNameseName)
+            .toList(),
         groupSize: state.groupSize,
         budget: budgetToSend,
         specialRequirements: state.specialRequirements,
@@ -194,7 +198,8 @@ class AutomaticallyGenerateByAiController
       );
       // Store warnings in a provider for easy access from overview
       if (response.warnings.isNotEmpty) {
-        ref.read(aiGenerationWarningsProvider.notifier).state = response.warnings;
+        ref.read(aiGenerationWarningsProvider.notifier).state =
+            response.warnings;
       }
 
       // Refresh schedule days so the new generated itinerary content is loaded
@@ -202,14 +207,15 @@ class AutomaticallyGenerateByAiController
 
       // Optionally request a tab switch (0 = Overview, 1 = Schedule) so UI reacts
       ref.read(aiTabSwitchProvider.notifier).state = 1;
-    } on DioException catch (e) {
-      state = state.copyWith(error: DioExceptionHandler.handleException(e));
-    } on ValidationException catch (e) {
-      state = state.copyWith(error: e.toString());
-    } on Exception catch (e) {
-      state = state.copyWith(error: e.toString());
-    } finally {
+
       state = state.copyWith(isLoading: false);
+    } on DioException catch (e) {
+      final errorMsg = DioExceptionHandler.handleException(e);
+      state = state.copyWith(isLoading: false, error: errorMsg);
+    } on ValidationException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    } on Exception catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -248,9 +254,13 @@ class AutomaticallyGenerateByAiController
     // Step 1: budget and transportation mode validation
     if (step == 1) {
       final budgetErr = validateBudget();
-      if (budgetErr != null) return ValidateAndSubmitResult.validationError(budgetErr);
+      if (budgetErr != null) {
+        return ValidateAndSubmitResult.validationError(budgetErr);
+      }
       final transportErr = validateTransportationMode();
-      if (transportErr != null) return ValidateAndSubmitResult.validationError(transportErr);
+      if (transportErr != null) {
+        return ValidateAndSubmitResult.validationError(transportErr);
+      }
       return ValidateAndSubmitResult.advance();
     }
 
@@ -268,6 +278,7 @@ class AutomaticallyGenerateByAiController
           state.itineraryId,
         );
       }
+
       return ValidateAndSubmitResult.submittedError(
         state.error ?? 'Không thể tạo lịch trình',
       );
