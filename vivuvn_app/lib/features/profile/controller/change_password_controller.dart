@@ -1,14 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/validator/validation_exception.dart';
 import '../../../common/validator/validator.dart';
+import '../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../service/profile_service.dart';
 import '../state/change_password_state.dart';
 
 final changePasswordControllerProvider =
     AutoDisposeNotifierProvider<ChangePasswordController, ChangePasswordState>(
-  () => ChangePasswordController(),
-);
+      () => ChangePasswordController(),
+    );
 
 class ChangePasswordController
     extends AutoDisposeNotifier<ChangePasswordState> {
@@ -25,10 +27,7 @@ class ChangePasswordController
   }
 
   void setNewPassword(final String password) {
-    state = state.copyWith(
-      newPassword: password,
-      newPasswordError: null,
-    );
+    state = state.copyWith(newPassword: password, newPasswordError: null);
   }
 
   void toggleCurrentPasswordVisibility() {
@@ -38,9 +37,7 @@ class ChangePasswordController
   }
 
   void toggleNewPasswordVisibility() {
-    state = state.copyWith(
-      obscureNewPassword: !state.obscureNewPassword,
-    );
+    state = state.copyWith(obscureNewPassword: !state.obscureNewPassword);
   }
 
   void reset() {
@@ -72,7 +69,9 @@ class ChangePasswordController
   }
 
   bool _validate() {
-    final currentPasswordError = _validateCurrentPassword(state.currentPassword);
+    final currentPasswordError = _validateCurrentPassword(
+      state.currentPassword,
+    );
     final newPasswordError = _validateNewPassword(state.newPassword);
 
     state = state.copyWith(
@@ -99,13 +98,16 @@ class ChangePasswordController
 
       state = state.copyWith(isLoading: false);
       return message;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+    } on DioException catch (e) {
+      final errorMessage = DioExceptionHandler.handleException(e);
+      state = state.copyWith(isLoading: false, error: errorMessage);
+      throw Exception(errorMessage);
+    } on ValidationException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    } on Exception catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }
 }
-
