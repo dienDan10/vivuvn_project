@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../common/helper/image_util.dart';
-import '../../detail/controller/itinerary_detail_controller.dart';
 import '../data/model/message.dart';
 import 'delete_message_modal.dart';
 import 'user_info_modal.dart';
@@ -88,9 +87,7 @@ class MessageBubble extends ConsumerWidget {
   }
 
   void _onMessageLongPress(final BuildContext context, final WidgetRef ref) {
-    final isOwner =
-        ref.read(itineraryDetailControllerProvider).itinerary?.isOwner ?? false;
-    final canDelete = message.isOwnMessage || isOwner;
+    final canDelete = message.isOwnMessage;
 
     if (!canDelete) return;
 
