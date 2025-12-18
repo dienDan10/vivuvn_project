@@ -201,6 +201,9 @@ namespace vivuvn_api.Services.Implementations
             var user = await _unitOfWork.Users.GetOneAsync(u => u.Id == userId)
                 ?? throw new BadHttpRequestException("Không tìm thấy người dùng");
 
+            if (user.GoogleIdToken is not null)
+                throw new BadHttpRequestException("Người dùng đăng ký bằng Google không thể đổi mật khẩu.");
+
             var passwordHasher = new PasswordHasher<User>();
 
             var passwordVerificationResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
