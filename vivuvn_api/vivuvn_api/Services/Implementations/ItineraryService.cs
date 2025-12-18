@@ -544,7 +544,15 @@ namespace vivuvn_api.Services.Implementations
                 await _unitOfWork.BeginTransactionAsync();
 
                 // Update itinerary group size
-                itinerary.GroupSize = groupSize;
+                int memberCount = await _unitOfWork.ItineraryMembers
+                    .GetQueryable()
+                    .Where(m => m.ItineraryId == itinerary.Id && !m.DeleteFlag)
+                    .CountAsync();
+
+                if (groupSize >= memberCount)
+                {
+                    itinerary.GroupSize = groupSize;
+                }
 
                 // Update transportation vehicle
                 itinerary.TransportationVehicle = travelItinerary.TransportationSuggestions
