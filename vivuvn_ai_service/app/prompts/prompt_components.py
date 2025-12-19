@@ -231,13 +231,41 @@ Note: Both activity cost_estimate and transportation estimated_cost are TOTAL fo
 - Nhóm địa điểm gần nhau cùng ngày
 - Sắp xếp theo tọa độ tránh đi lại
 - 0.01° ≈ 1.1km, di chuyển 15-20 phút/5km
-- Buffer 30-45 phút giữa activities >5km (KHÔNG tính trong duration)
+- Buffer di chuyển KHÔNG tính trong duration_hours
 
-**Thời gian:**
-Đền/Chùa: 0.5-1.5h | Bảo tàng: 1.5-2.5h | Di tích: 1.5-3h | Biển: 2-4h | Núi: 2-5h
+**Chọn địa điểm theo rating:**
+- Ưu tiên rating ≥4.5/5.0 (đánh giá tích cực)
+- Tối thiểu 70-80% activities có rating ≥4.0
+- Địa điểm rating <4.0: Chỉ chọn nếu độc đáo/khớp preferences hoặc không có lựa chọn tốt hơn
+- Địa điểm N/A rating: Chấp nhận nếu nổi bật hoặc thiếu dữ liệu
+- KHÔNG loại trừ hoàn toàn rating thấp - cân bằng chất lượng & độc đáo
+
+**Thời gian hoạt động:**
+- Activities/ngày: 3-5 (khuyến nghị 4)
+- Giờ hoạt động: 08:00-18:00 (max 10h effective)
+- Duration theo loại (duration_hours = thời gian TẠI địa điểm):
+  * Đền/Chùa/Công viên: 0.5-1.5h (TB: 1h)
+  * Bảo tàng/Triển lãm: 1.5-2.5h (TB: 2h)
+  * Di tích/Thành phố cổ: 1.5-3h (TB: 2h)
+  * Bãi biển/Hồ: 2-4h (sáng: 2-3h, cả ngày: 3-4h)
+  * Núi/Trekking: 2-5h (cáp treo: 2-3h, leo bộ: 4-5h)
+  * Chợ/Mua sắm: 1-2h
+
+**Buffer thời gian (KHÔNG thêm vào activities):**
+- Di chuyển <5km: 15-20 phút
+- Di chuyển >5km: 30-45 phút
+- Ăn trưa: 12:00-13:30 (buffer tự động)
+- Ăn tối: 18:30-19:30 (sau activities cuối)
+
+**Validation tổng thời gian:**
+- Tổng duration + buffer di chuyển ≤ 9-10h/ngày
+- Nếu vượt: Giảm số activities hoặc giảm duration
 
 **Lịch mẫu:**
-09:00-10:30 Điểm 1 → 11:00-12:30 Điểm 2 → [Trưa] → 13:30-15:30 Điểm 3 → 16:00-18:00 Điểm 4"""
+- 3 acts: 09:00-11:00 → [Trưa] → 13:30-15:30 → 16:00-18:00
+- 4 acts: 08:30-10:00 → 10:30-12:00 → [Trưa] → 13:30-15:00 → 15:30-17:30
+- 5 acts: 08:00-09:30 → 10:00-11:00 → 11:30-12:30 → [Trưa] → 14:00-15:30 → 16:00-17:30
+- Full-day: 08:00-17:00 (Núi/Phiêu lưu, duration 8-9h)"""
 
     VALIDATION_AND_FALLBACK = """## VALIDATION & FALLBACK
 
