@@ -18,7 +18,7 @@ class RestaurantInfoWindow extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.15),
+            color: theme.shadowColor.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -172,8 +172,8 @@ class RestaurantInfoWindow extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer.withOpacity(
-                          0.5,
+                        color: theme.colorScheme.secondaryContainer.withValues(
+                          alpha: 0.5,
                         ),
                         borderRadius: BorderRadius.circular(5),
                       ),

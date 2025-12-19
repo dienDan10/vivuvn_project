@@ -17,7 +17,7 @@ class HotelInfoWindow extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.15),
+            color: theme.shadowColor.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
