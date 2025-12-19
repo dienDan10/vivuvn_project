@@ -19,15 +19,22 @@ class RestaurantDateTimePicker extends ConsumerWidget {
   final DateTime? mealDate;
   final bool isOwner;
 
-  Future<void> _pickDate(final BuildContext context, final WidgetRef ref) async {
+  Future<void> _pickDate(
+    final BuildContext context,
+    final WidgetRef ref,
+  ) async {
     final config = CalendarDatePicker2WithActionButtonsConfig(
       calendarType: CalendarDatePicker2Type.single,
       firstDayOfWeek: 1,
     );
 
+    final initialDate = (mealDate != null && mealDate!.year > 2000)
+        ? mealDate!
+        : DateTime.now();
+
     final result = await showCalendarDatePicker2Dialog(
       context: context,
-      value: [mealDate ?? DateTime.now()],
+      value: [initialDate],
       config: config,
       dialogSize: const Size(340, 400),
       borderRadius: BorderRadius.circular(12),
@@ -55,7 +62,10 @@ class RestaurantDateTimePicker extends ConsumerWidget {
     }
   }
 
-  Future<void> _pickTime(final BuildContext context, final WidgetRef ref) async {
+  Future<void> _pickTime(
+    final BuildContext context,
+    final WidgetRef ref,
+  ) async {
     final currentTime = TimeOfDay.fromDateTime(mealDate ?? DateTime.now());
 
     final picked = await showTimePicker(
@@ -65,7 +75,8 @@ class RestaurantDateTimePicker extends ConsumerWidget {
 
     if (picked == null) return;
 
-    final timeStr = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
+    final timeStr =
+        '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
 
     final success = await ref
         .read(restaurantsControllerProvider.notifier)
@@ -83,12 +94,14 @@ class RestaurantDateTimePicker extends ConsumerWidget {
     final timeFormatter = DateFormat('HH:mm');
     final isSavingDate = ref.watch(
       restaurantsControllerProvider.select(
-        (final state) => state.isSaving(restaurantId, RestaurantSavingType.date),
+        (final state) =>
+            state.isSaving(restaurantId, RestaurantSavingType.date),
       ),
     );
     final isSavingTime = ref.watch(
       restaurantsControllerProvider.select(
-        (final state) => state.isSaving(restaurantId, RestaurantSavingType.time),
+        (final state) =>
+            state.isSaving(restaurantId, RestaurantSavingType.time),
       ),
     );
 
@@ -100,10 +113,7 @@ class RestaurantDateTimePicker extends ConsumerWidget {
             children: [
               const Text(
                 'NGÀY',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 6),
               InkWell(
@@ -122,18 +132,16 @@ class RestaurantDateTimePicker extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          mealDate != null
-                              ? dateFormatter.format(mealDate!)
-                              : '--/--/----',
+                          mealDate!.year <= 2000
+                              ? 'Chưa đặt ngày'
+                              : dateFormatter.format(mealDate!),
                         ),
                       ),
                       if (isSavingDate)
                         const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                     ],
                   ),
@@ -149,10 +157,7 @@ class RestaurantDateTimePicker extends ConsumerWidget {
             children: [
               const Text(
                 'GIỜ',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 6),
               InkWell(
@@ -181,9 +186,7 @@ class RestaurantDateTimePicker extends ConsumerWidget {
                         const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                     ],
                   ),

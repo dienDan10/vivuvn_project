@@ -51,21 +51,24 @@ class RestaurantCardHeader extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     address,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (mealDate != null) ...[
+                  if (mealDate!.year > 2000) ...[
                     const SizedBox(height: 6),
                     Text(
                       'Thời gian: ${dateFormatter.format(mealDate!)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (mealDate!.year <= 2000) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Chưa đặt thời gian',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -79,10 +82,7 @@ class RestaurantCardHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            PlaceCardImage(
-              imageUrl: imageUrl,
-              size: 80,
-            ),
+            PlaceCardImage(imageUrl: imageUrl, size: 80),
           ],
         ),
       ),

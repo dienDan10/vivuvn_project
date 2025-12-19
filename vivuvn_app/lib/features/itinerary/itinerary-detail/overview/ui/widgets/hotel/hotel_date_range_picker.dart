@@ -23,15 +23,25 @@ class HotelDateRangePicker extends ConsumerWidget {
 
   DateTime _toDateOnly(final DateTime d) => DateTime(d.year, d.month, d.day);
 
-  Future<void> _pickDateRange(final BuildContext context, final WidgetRef ref) async {
+  Future<void> _pickDateRange(
+    final BuildContext context,
+    final WidgetRef ref,
+  ) async {
     final config = CalendarDatePicker2WithActionButtonsConfig(
       calendarType: CalendarDatePicker2Type.range,
       firstDayOfWeek: 1,
     );
 
+    final startInitial = (checkInDate != null && checkInDate!.year > 2000)
+        ? checkInDate!
+        : DateTime.now();
+    final endInitial = (checkOutDate != null && checkOutDate!.year > 2000)
+        ? checkOutDate!
+        : startInitial.add(const Duration(days: 1));
+
     final result = await showCalendarDatePicker2Dialog(
       context: context,
-      value: [checkInDate, checkOutDate],
+      value: [startInitial, endInitial],
       config: config,
       dialogSize: const Size(340, 400),
       borderRadius: BorderRadius.circular(12),
@@ -82,13 +92,11 @@ class HotelDateRangePicker extends ConsumerWidget {
               Text(
                 'NHẬN PHÒNG',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 12,
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.color
-                          ?.withValues(alpha: 0.7),
-                    ),
+                  fontSize: 12,
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                ),
               ),
               const SizedBox(height: 6),
               InkWell(
@@ -103,28 +111,25 @@ class HotelDateRangePicker extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.7),
                     ),
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          checkInDate != null
-                              ? dateFormatter.format(checkInDate!)
-                              : '--/--',
+                          checkInDate!.year <= 2000
+                              ? 'Chưa đặt ngày'
+                              : dateFormatter.format(checkInDate!),
                         ),
                       ),
                       if (isSaving)
                         const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                     ],
                   ),
@@ -141,13 +146,11 @@ class HotelDateRangePicker extends ConsumerWidget {
               Text(
                 'TRẢ PHÒNG',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 12,
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.color
-                          ?.withValues(alpha: 0.7),
-                    ),
+                  fontSize: 12,
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                ),
               ),
               const SizedBox(height: 6),
               InkWell(
@@ -162,19 +165,18 @@ class HotelDateRangePicker extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.7),
                     ),
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          checkOutDate != null
-                              ? dateFormatter.format(checkOutDate!)
-                              : '--/--',
+                          checkOutDate!.year <= 2000
+                              ? 'Chưa đặt ngày'
+                              : dateFormatter.format(checkOutDate!),
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -182,9 +184,7 @@ class HotelDateRangePicker extends ConsumerWidget {
                         const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                     ],
                   ),

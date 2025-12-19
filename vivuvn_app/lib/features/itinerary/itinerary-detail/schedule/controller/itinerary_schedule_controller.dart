@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../common/toast/global_toast.dart';
 import '../../../../../common/validator/validation_exception.dart';
 import '../../../../../core/data/remote/exception/dio_exception_handler.dart';
 import '../../../../home/controller/home_controller.dart';
@@ -76,7 +77,11 @@ class ItineraryScheduleController
   }
 
   // === Thêm item vào ngày ===
-  Future<bool> addItemToDay(final int dayId, final int locationId) async {
+  Future<bool> addItemToDay(
+    final int dayId,
+    final int locationId,
+    final BuildContext? context,
+  ) async {
     if (itineraryId == null) return false;
 
     state = state.copyWith(isAddingLocation: true);
@@ -88,9 +93,25 @@ class ItineraryScheduleController
       await fetchItemsByDay(dayId);
 
       state = state.copyWith(isAddingLocation: false);
+
+      if (context != null && context.mounted) {
+        GlobalToast.showSuccessToast(
+          context,
+          message: 'Đã thêm địa điểm vào lịch trình',
+        );
+      }
+
       return true;
     } catch (e) {
       state = state.copyWith(isAddingLocation: false, error: e.toString());
+
+      if (context != null && context.mounted) {
+        GlobalToast.showErrorToast(
+          context,
+          message: 'Không thể thêm địa điểm vào lịch trình',
+        );
+      }
+
       return false;
     }
   }
@@ -133,6 +154,7 @@ class ItineraryScheduleController
   Future<AddLocationResult> addLocationToSelectedDay({
     required final int locationId,
     required final String locationName,
+    final BuildContext? context,
   }) async {
     final selectedDayId = state.selectedDayId;
 
@@ -142,7 +164,7 @@ class ItineraryScheduleController
       );
     }
 
-    final success = await addItemToDay(selectedDayId, locationId);
+    final success = await addItemToDay(selectedDayId, locationId, context);
 
     if (success) {
       return AddLocationResult.success(
