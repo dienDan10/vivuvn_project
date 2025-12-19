@@ -54,6 +54,12 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
       );
     }
 
+    final isAddingLocation = ref.watch(
+      itineraryScheduleControllerProvider.select(
+        (final state) => state.isAddingLocation,
+      ),
+    );
+
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: Stack(
@@ -71,6 +77,13 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
             ],
           ),
           const Positioned(child: ButtonScheduleOptions()),
+          if (isAddingLocation)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.5),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ),
         ],
       ),
     );

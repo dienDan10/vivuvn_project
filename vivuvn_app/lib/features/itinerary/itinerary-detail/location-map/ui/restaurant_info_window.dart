@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../overview/data/dto/restaurant_item_response.dart';
 
@@ -112,95 +111,6 @@ class RestaurantInfoWindow extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                // Meal date and cost
-                if (restaurant.mealDate != null || restaurant.cost != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Row(
-                      children: [
-                        if (restaurant.mealDate != null) ...[
-                          Icon(
-                            Icons.access_time,
-                            size: 12,
-                            color: theme.colorScheme.outline,
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            DateFormat(
-                              'MMM dd, HH:mm',
-                            ).format(restaurant.mealDate!),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                        if (restaurant.mealDate != null &&
-                            restaurant.cost != null)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: Container(
-                              width: 1,
-                              height: 10,
-                              color: theme.colorScheme.outlineVariant,
-                            ),
-                          ),
-                        if (restaurant.cost != null) ...[
-                          Icon(
-                            Icons.attach_money,
-                            size: 12,
-                            color: theme.colorScheme.outline,
-                          ),
-                          Text(
-                            restaurant.cost!.toStringAsFixed(0),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-
-                // Note
-                if (restaurant.note != null && restaurant.note!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer.withValues(
-                          alpha: 0.5,
-                        ),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.note,
-                            size: 12,
-                            color: theme.colorScheme.secondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              restaurant.note!,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: theme.colorScheme.onSecondaryContainer,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),

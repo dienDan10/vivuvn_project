@@ -59,16 +59,11 @@ class SuggestedPlacesList extends ConsumerWidget {
                           itineraryScheduleControllerProvider.notifier,
                         );
 
-                        final result = await controller
-                            .addLocationToSelectedDay(
-                              locationId: location.id,
-                              locationName: location.name,
-                            );
-
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(result.message)));
+                        await controller.addLocationToSelectedDay(
+                          locationId: location.id,
+                          locationName: location.name,
+                          context: context,
+                        );
                       },
               );
             },
