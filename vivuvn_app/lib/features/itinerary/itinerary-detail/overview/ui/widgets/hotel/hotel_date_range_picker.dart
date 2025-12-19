@@ -32,9 +32,16 @@ class HotelDateRangePicker extends ConsumerWidget {
       firstDayOfWeek: 1,
     );
 
+    final startInitial = (checkInDate != null && checkInDate!.year > 2000)
+        ? checkInDate!
+        : DateTime.now();
+    final endInitial = (checkOutDate != null && checkOutDate!.year > 2000)
+        ? checkOutDate!
+        : startInitial.add(const Duration(days: 1));
+
     final result = await showCalendarDatePicker2Dialog(
       context: context,
-      value: [checkInDate, checkOutDate],
+      value: [startInitial, endInitial],
       config: config,
       dialogSize: const Size(340, 400),
       borderRadius: BorderRadius.circular(12),
@@ -114,7 +121,7 @@ class HotelDateRangePicker extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           checkInDate!.year <= 2000
-                              ? '--/--'
+                              ? 'Chưa đặt ngày'
                               : dateFormatter.format(checkInDate!),
                         ),
                       ),

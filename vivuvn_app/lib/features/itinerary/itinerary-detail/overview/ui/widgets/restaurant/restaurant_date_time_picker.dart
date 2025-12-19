@@ -28,9 +28,13 @@ class RestaurantDateTimePicker extends ConsumerWidget {
       firstDayOfWeek: 1,
     );
 
+    final initialDate = (mealDate != null && mealDate!.year > 2000)
+        ? mealDate!
+        : DateTime.now();
+
     final result = await showCalendarDatePicker2Dialog(
       context: context,
-      value: [mealDate ?? DateTime.now()],
+      value: [initialDate],
       config: config,
       dialogSize: const Size(340, 400),
       borderRadius: BorderRadius.circular(12),

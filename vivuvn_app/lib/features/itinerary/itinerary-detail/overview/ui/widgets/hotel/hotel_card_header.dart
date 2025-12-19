@@ -53,20 +53,14 @@ class HotelCardHeader extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     address,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Nhận phòng: ${checkInDate != null ? dateFormatter.format(checkInDate!) : '--/--'} - Trả phòng: ${checkOutDate != null ? dateFormatter.format(checkOutDate!) : '--/--'}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    'Nhận phòng: ${checkInDate!.year > 2000 ? dateFormatter.format(checkInDate!) : 'Chưa đặt'} - Trả phòng: ${checkOutDate!.year > 2000 ? dateFormatter.format(checkOutDate!) : 'Chưa đặt'}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -79,10 +73,7 @@ class HotelCardHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            PlaceCardImage(
-              imageUrl: imageUrl,
-              size: 80,
-            ),
+            PlaceCardImage(imageUrl: imageUrl, size: 80),
           ],
         ),
       ),
