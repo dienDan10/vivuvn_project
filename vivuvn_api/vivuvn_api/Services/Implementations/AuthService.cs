@@ -40,6 +40,18 @@ namespace vivuvn_api.Services.Implementations
         }
 
 
+        /// <summary>
+        /// xxxxx
+        /// Hệ thống Authentication với Google OAuth và JWT
+        /// Phải verify token từ Google một cách an toàn
+        /// Xử lý flow "find or create user" - tự động tạo user nếu chưa tồn tại
+        /// Kết hợp với JWT để tạo access/refresh tokens của hệ thống
+        /// Cần xử lý nhiều edge cases: email verification, account locking, role assignment
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="BadHttpRequestException"></exception>
         public async Task<TokenResponseDto> GoogleLoginAsync([FromBody] GoogleLoginRequestDto request)
         {
             try

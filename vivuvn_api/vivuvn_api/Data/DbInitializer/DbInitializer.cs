@@ -6,6 +6,17 @@ using vivuvn_api.Models;
 
 namespace vivuvn_api.Data.DbInitializer
 {
+    /// <summary>
+    ///  xxxxx
+    /// Database Initialization với JSON Seeding
+    /// Tự động migrate database và seed data khi khởi động
+    /// Parse JSON với nhiều nested objects
+    /// Idempotent seeding - check trước khi insert
+    /// Xử lý nhiều loại data: locations, provinces, restaurants, hotels
+    /// Production-ready với error handling
+    /// </summary>
+    /// <param name="_context"></param>
+    /// <param name="_env"></param>
     public class DbInitializer(AppDbContext _context, IWebHostEnvironment _env) : IDbInitializer
     {
         public void Initialize()

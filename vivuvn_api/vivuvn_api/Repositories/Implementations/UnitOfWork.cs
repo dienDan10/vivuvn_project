@@ -4,6 +4,13 @@ using vivuvn_api.Repositories.Interfaces;
 
 namespace vivuvn_api.Repositories.Implementations
 {
+    /// <summary>
+    /// xxxxx
+    /// Kiến trúc Clean Architecture với Repository Pattern và Unit of Work
+    /// Implement Transaction Management để đảm bảo tính toàn vẹn dữ liệu
+    /// Áp dụng Unit of Work Pattern để quản lý nhiều repositories trong một transaction
+    /// Xử lý rollback tự động khi có lỗi
+    /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
